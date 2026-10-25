@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Calendar, User, DollarSign, FileText, PlusCircle, CheckCircle, RotateCcw, AlertTriangle, Layers } from 'lucide-react';
 import employeesList from '../data/employees.json';
 
-export default function TransactionForm({ onAddTransaction, budgets = [], selectedYear = '2026' }) {
+export default function TransactionForm({ onAddTransaction, budgets = [], transactions = [], selectedYear = '2026' }) {
   const getTodayString = () => new Date().toISOString().split('T')[0];
 
   const getDefaultDate = () => {
@@ -22,19 +22,53 @@ export default function TransactionForm({ onAddTransaction, budgets = [], select
   const [errors, setErrors] = useState({});
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
+  // Auto-sync date when selectedYear changes
+  useEffect(() => {
+    if (selectedYear && selectedYear !== 'ALL') {
+      const today = getTodayString();
+      if (today.startsWith(selectedYear)) {
+        setDate(today);
+      } else {
+        setDate(`${selectedYear}-01-01`);
+      }
+    }
+  }, [selectedYear]);
+
+  // Compute live actual spent per account for this year's transactions
+  const liveActualsByCode = useMemo(() => {
+    const map = {};
+    transactions.forEach((t) => {
+      if (t.accountCode) {
+        map[t.accountCode] = (map[t.accountCode] || 0) + (Number(t.amount) || 0);
+      }
+    });
+    return map;
+  }, [transactions]);
+
+  // Helper to get approved budget for any budget item in the selected year
+  const getItemApproved = (b) => {
+    if (!b) return 0;
+    if (b.yearlyApproved && selectedYear !== 'ALL' && b.yearlyApproved[selectedYear] !== undefined) {
+      return Number(b.yearlyApproved[selectedYear]);
+    }
+    return Number(b.approvedAmount) || Number(b.approved) || 0;
+  };
+
   // Selected budget item details for selected year
   const selectedBudget = useMemo(() => {
     const found = budgets.find((b) => b.code === accountCode);
     if (!found) return null;
-    const yearApproved =
-      found.yearlyApproved && selectedYear !== 'ALL' && found.yearlyApproved[selectedYear] !== undefined
-        ? Number(found.yearlyApproved[selectedYear])
-        : Number(found.approvedAmount) || 0;
+    const yearApproved = getItemApproved(found);
+    const spent = liveActualsByCode[accountCode] || 0;
+    const remaining = yearApproved - spent;
+
     return {
       ...found,
       approvedAmount: yearApproved,
+      spentAmount: spent,
+      remainingAmount: remaining,
     };
-  }, [budgets, accountCode, selectedYear]);
+  }, [budgets, accountCode, selectedYear, liveActualsByCode]);
 
   // Suggested employees: take real employees from Excel
   const suggestedEmployees = useMemo(() => {
@@ -180,16 +214,20 @@ export default function TransactionForm({ onAddTransaction, budgets = [], select
             onChange={(e) => setAccountCode(e.target.value)}
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs sm:text-sm text-slate-800 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer font-medium"
           >
-            {budgets.map((b) => (
-              <option key={b.code} value={b.code}>
-                [{b.code}] {b.name} (Hạn mức: {formatVND(b.approvedAmount)})
-              </option>
-            ))}
+            {budgets.map((b) => {
+              const itemApproved = getItemApproved(b);
+              return (
+                <option key={b.code} value={b.code}>
+                  [{b.code}] {b.name} (Hạn mức: {formatVND(itemApproved)})
+                </option>
+              );
+            })}
           </select>
           {selectedBudget && (
-            <div className="mt-1.5 p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 text-[11px] text-slate-600 flex items-center justify-between">
+            <div className="mt-1.5 p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 text-[11px] text-slate-600 flex flex-wrap items-center justify-between gap-2">
               <span>Nhóm: <strong className="text-slate-800">{selectedBudget.group}</strong></span>
-              <span>Được duyệt: <strong className="text-slate-800">{formatVND(selectedBudget.approvedAmount)}</strong></span>
+              <span>Được duyệt {selectedYear !== 'ALL' ? `(${selectedYear})` : ''}: <strong className="text-slate-800">{formatVND(selectedBudget.approvedAmount)}</strong></span>
+              <span>Đã chi: <strong className="text-slate-800">{formatVND(selectedBudget.spentAmount)}</strong></span>
             </div>
           )}
         </div>

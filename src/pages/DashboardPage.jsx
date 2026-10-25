@@ -349,6 +349,7 @@ export default function DashboardPage({ user }) {
             <TransactionForm
               onAddTransaction={handleAddTransaction}
               budgets={budgets}
+              transactions={yearTransactions}
               selectedYear={selectedYear}
             />
           </div>
