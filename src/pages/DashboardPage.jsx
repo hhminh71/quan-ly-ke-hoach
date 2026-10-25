@@ -3,9 +3,17 @@ import StatCards from '../components/StatCards';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
 import BudgetOverview from '../components/BudgetOverview';
-import { Calendar, Download, RefreshCw, LayoutDashboard, ListOrdered, FileSpreadsheet, PlusCircle } from 'lucide-react';
+import SyncModal from '../components/SyncModal';
+import { Calendar, Download, RefreshCw, LayoutDashboard, ListOrdered, FileSpreadsheet, Cloud, CheckCircle2, Settings } from 'lucide-react';
 import initialBudgets from '../data/budgets.json';
 import initialTransactions from '../data/transactions.json';
+import {
+  getSavedWebhookUrl,
+  fetchFromGoogleSheet,
+  addTransactionToGoogleSheet,
+  deleteTransactionFromGoogleSheet,
+  getLastSyncTime,
+} from '../services/googleSheetService';
 
 export default function DashboardPage({ user }) {
   // Load saved transactions from localStorage or default to imported real data
@@ -19,8 +27,14 @@ export default function DashboardPage({ user }) {
     return initialTransactions;
   });
 
-  const [budgets] = useState(initialBudgets);
-  const [activeTab, setActiveTab] = useState('ALL'); // 'ALL' (Form + List), 'BUDGETS' (76 Items), 'TRANSACTIONS' (Full List)
+  const [budgets, setBudgets] = useState(initialBudgets);
+  const [activeTab, setActiveTab] = useState('ALL'); // 'ALL', 'BUDGETS', 'TRANSACTIONS'
+
+  // Google Sheets sync states
+  const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [hasWebhook, setHasWebhook] = useState(() => Boolean(getSavedWebhookUrl()));
+  const [lastSyncTime, setLastSyncTimeState] = useState(() => getLastSyncTime());
 
   // Sync to localStorage
   useEffect(() => {
@@ -31,12 +45,65 @@ export default function DashboardPage({ user }) {
     }
   }, [transactions]);
 
+  // Initial auto-sync from Google Sheet if URL exists
+  useEffect(() => {
+    const webhookUrl = getSavedWebhookUrl();
+    if (webhookUrl) {
+      handleSyncNow(webhookUrl, false);
+    }
+  }, []);
+
+  const handleSyncNow = async (specificUrl, showAlert = true) => {
+    const url = specificUrl || getSavedWebhookUrl();
+    if (!url) {
+      setIsSyncModalOpen(true);
+      return;
+    }
+
+    setIsSyncing(true);
+    try {
+      const data = await fetchFromGoogleSheet(url);
+      if (data && data.transactions && data.transactions.length > 0) {
+        setTransactions(data.transactions);
+      }
+      if (data && data.budgets && data.budgets.length > 0) {
+        setBudgets(data.budgets);
+      }
+      setHasWebhook(true);
+      setLastSyncTimeState(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }));
+      if (showAlert) {
+        alert(`Đồng bộ thành công! Đã nạp ${data.transactions?.length || 0} phiếu từ Google Sheet.`);
+      }
+    } catch (err) {
+      console.error('Sync error', err);
+      if (showAlert) {
+        alert(`Lỗi đồng bộ: ${err.message}. Đang sử dụng dữ liệu cục bộ.`);
+      }
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   const handleAddTransaction = (newRecord) => {
+    // 1. Cập nhật state cục bộ ngay lập tức
     setTransactions((prev) => [newRecord, ...prev]);
+
+    // 2. Gửi ngầm lên Google Sheet nếu đã kết nối
+    const webhookUrl = getSavedWebhookUrl();
+    if (webhookUrl) {
+      addTransactionToGoogleSheet(webhookUrl, newRecord);
+    }
   };
 
   const handleDeleteTransaction = (id) => {
+    // 1. Xóa cục bộ
     setTransactions((prev) => prev.filter((item) => item.id !== id));
+
+    // 2. Xóa trên Google Sheet
+    const webhookUrl = getSavedWebhookUrl();
+    if (webhookUrl) {
+      deleteTransactionFromGoogleSheet(webhookUrl, id);
+    }
   };
 
   const handleResetData = () => {
@@ -89,11 +156,54 @@ export default function DashboardPage({ user }) {
             Hệ Thống Quản Lý Kế Hoạch & Chi Phí Doanh Nghiệp
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Dữ liệu đồng bộ trực tiếp từ bảng tính: <span className="font-semibold text-slate-700">76 Khoản mục ngân sách</span> • <span className="font-semibold text-slate-700">{transactions.length.toLocaleString('vi-VN')} Phiếu chi thực tế</span>
+            <span className="font-semibold text-slate-700">76 Khoản mục ngân sách</span> •{' '}
+            <span className="font-semibold text-slate-700">{transactions.length.toLocaleString('vi-VN')} Phiếu chi thực tế</span>
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Sync Status & Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Google Sheets Sync Pill */}
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white border border-slate-200 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => handleSyncNow()}
+              disabled={isSyncing}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                hasWebhook
+                  ? 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100'
+                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+              }`}
+              title={hasWebhook ? 'Đồng bộ lại từ Google Sheet' : 'Bấm để cấu hình kết nối Google Sheet'}
+            >
+              {isSyncing ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin text-emerald-600" />
+                  <span>Đang đồng bộ...</span>
+                </>
+              ) : hasWebhook ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="hidden sm:inline">Google Sheet: Online</span>
+                </>
+              ) : (
+                <>
+                  <Cloud className="w-3.5 h-3.5 text-slate-400" />
+                  <span className="hidden sm:inline">Nối Google Sheet</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsSyncModalOpen(true)}
+              className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              title="Cài đặt kết nối Google Sheet"
+            >
+              <Settings className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
           <button
             type="button"
             onClick={handleResetData}
@@ -188,6 +298,17 @@ export default function DashboardPage({ user }) {
           onDeleteTransaction={handleDeleteTransaction}
         />
       )}
+
+      {/* Google Sheets Sync Settings Modal */}
+      <SyncModal
+        isOpen={isSyncModalOpen}
+        onClose={() => setIsSyncModalOpen(false)}
+        onSyncSuccess={(data) => {
+          if (data?.transactions) setTransactions(data.transactions);
+          if (data?.budgets) setBudgets(data.budgets);
+          setHasWebhook(true);
+        }}
+      />
     </div>
   );
 }
