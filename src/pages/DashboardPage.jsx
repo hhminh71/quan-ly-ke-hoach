@@ -365,6 +365,7 @@ export default function DashboardPage({ user }) {
           <div className="lg:col-span-7 xl:col-span-8">
             <TransactionList
               transactions={yearTransactions}
+              budgets={budgets}
               onDeleteTransaction={handleDeleteTransaction}
               selectedYear={selectedYear}
             />
@@ -389,6 +390,7 @@ export default function DashboardPage({ user }) {
       {activeTab === 'TRANSACTIONS' && (
         <TransactionList
           transactions={yearTransactions}
+          budgets={budgets}
           onDeleteTransaction={handleDeleteTransaction}
           selectedYear={selectedYear}
         />

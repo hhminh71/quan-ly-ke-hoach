@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Trash2, Calendar, ArrowUpDown, Filter, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
+import { Search, Trash2, Calendar, ArrowUpDown, Filter, ChevronLeft, ChevronRight, Layers, DollarSign, Wallet, CheckCircle2, ShieldAlert } from 'lucide-react';
 
-export default function TransactionList({ transactions, onDeleteTransaction, selectedYear = '2026' }) {
+export default function TransactionList({ transactions = [], budgets = [], onDeleteTransaction, selectedYear = '2026' }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [sortOrder, setSortOrder] = useState('newest'); // 'newest', 'oldest', 'highest', 'lowest'
@@ -77,6 +77,41 @@ export default function TransactionList({ transactions, onDeleteTransaction, sel
     return sorted.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   }, [sorted]);
 
+  // Calculation for: Tổng được duyệt, Tổng phát sinh (số tiền và %), Tổng còn lại (số tiền và %)
+  const budgetStats = useMemo(() => {
+    let approved = 0;
+    if (selectedCategory === 'ALL') {
+      approved = budgets.reduce((sum, b) => {
+        const val =
+          b.yearlyApproved && selectedYear !== 'ALL' && b.yearlyApproved[selectedYear] !== undefined
+            ? Number(b.yearlyApproved[selectedYear])
+            : Number(b.approvedAmount) || Number(b.approved) || 0;
+        return sum + val;
+      }, 0);
+    } else {
+      const found = budgets.find((b) => b.code === selectedCategory || b.name === selectedCategory);
+      if (found) {
+        approved =
+          found.yearlyApproved && selectedYear !== 'ALL' && found.yearlyApproved[selectedYear] !== undefined
+            ? Number(found.yearlyApproved[selectedYear])
+            : Number(found.approvedAmount) || Number(found.approved) || 0;
+      }
+    }
+
+    const spent = totalFilteredAmount;
+    const spentPercent = approved > 0 ? (spent / approved) * 100 : 0;
+    const remaining = approved - spent;
+    const remainingPercent = approved > 0 ? (remaining / approved) * 100 : 0;
+
+    return {
+      approved,
+      spent,
+      spentPercent,
+      remaining,
+      remainingPercent,
+    };
+  }, [budgets, selectedCategory, selectedYear, totalFilteredAmount]);
+
   // Pagination calculation
   const totalPages = Math.ceil(sorted.length / pageSize) || 1;
   const paginatedItems = useMemo(() => {
@@ -94,7 +129,7 @@ export default function TransactionList({ transactions, onDeleteTransaction, sel
     <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
       {/* Header & Controls */}
       <div className="p-5 sm:p-6 border-b border-slate-100 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100"></span>
@@ -108,16 +143,105 @@ export default function TransactionList({ transactions, onDeleteTransaction, sel
             <p className="text-xs text-slate-500 mt-1">
               Hiển thị {sorted.length.toLocaleString('vi-VN')} giao dịch phát sinh trong{' '}
               {selectedYear === 'ALL' ? 'toàn bộ lịch sử' : `năm tài chính ${selectedYear}`}
+              {selectedCategory !== 'ALL' && (
+                <span className="font-semibold text-blue-600 ml-1">
+                  • Lọc theo khoản mục [{selectedCategory}]
+                </span>
+              )}
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-slate-500">Tổng phát sinh lọc:</span>
-            <span className="text-sm font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">
-              {formatVND(totalFilteredAmount)}
-            </span>
+          {/* 3 KPI Summary Cards: Được duyệt, Phát sinh (tiền & %), Còn lại (tiền & %) */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 bg-slate-50/90 p-2 sm:p-2.5 rounded-2xl border border-slate-200/80 shadow-2xs">
+            {/* 1. Tổng được duyệt */}
+            <div className="px-3 py-2 rounded-xl bg-white border border-slate-200/70 shadow-2xs text-left">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">
+                  Tổng được duyệt
+                </span>
+                <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded-md">
+                  100%
+                </span>
+              </div>
+              <div className="text-xs sm:text-sm font-extrabold text-slate-800 font-mono mt-0.5 truncate">
+                {formatVND(budgetStats.approved)}
+              </div>
+              <div className="text-[10px] text-slate-400 font-medium">Hạn mức ngân sách</div>
+            </div>
+
+            {/* 2. Tổng phát sinh (số tiền và %) */}
+            <div className="px-3 py-2 rounded-xl bg-blue-50/80 border border-blue-200 shadow-2xs text-left">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-semibold text-blue-700 uppercase tracking-wide">
+                  Tổng phát sinh
+                </span>
+                <span className="text-[10px] font-bold bg-blue-600 text-white px-1.5 py-0.2 rounded-md">
+                  {budgetStats.spentPercent.toFixed(1)}%
+                </span>
+              </div>
+              <div className="text-xs sm:text-sm font-extrabold text-blue-900 font-mono mt-0.5 truncate">
+                {formatVND(budgetStats.spent)}
+              </div>
+              <div className="text-[10px] text-blue-600 font-medium">Đã thực hiện</div>
+            </div>
+
+            {/* 3. Tổng còn lại (số tiền và %) */}
+            <div
+              className={`px-3 py-2 rounded-xl border shadow-2xs text-left ${
+                budgetStats.remaining >= 0
+                  ? 'bg-emerald-50/80 border-emerald-200'
+                  : 'bg-rose-50/80 border-rose-200'
+              }`}
+            >
+              <div className="flex items-center justify-between">
+                <span
+                  className={`text-[10px] font-semibold uppercase tracking-wide ${
+                    budgetStats.remaining >= 0 ? 'text-emerald-700' : 'text-rose-700'
+                  }`}
+                >
+                  {budgetStats.remaining >= 0 ? 'Tổng còn lại' : 'Vượt định mức'}
+                </span>
+                <span
+                  className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md text-white ${
+                    budgetStats.remaining >= 0 ? 'bg-emerald-600' : 'bg-rose-600'
+                  }`}
+                >
+                  {budgetStats.remainingPercent.toFixed(1)}%
+                </span>
+              </div>
+              <div
+                className={`text-xs sm:text-sm font-extrabold font-mono mt-0.5 truncate ${
+                  budgetStats.remaining >= 0 ? 'text-emerald-900' : 'text-rose-700'
+                }`}
+              >
+                {formatVND(budgetStats.remaining)}
+              </div>
+              <div
+                className={`text-[10px] font-medium ${
+                  budgetStats.remaining >= 0 ? 'text-emerald-600' : 'text-rose-500'
+                }`}
+              >
+                {budgetStats.remaining >= 0 ? 'Dự trữ khả dụng' : 'Cảnh báo vượt mức'}
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Thanh tiến độ trực quan */}
+        {budgetStats.approved > 0 && (
+          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+            <div
+              className={`h-full transition-all duration-500 rounded-full ${
+                budgetStats.spentPercent > 100
+                  ? 'bg-rose-500'
+                  : budgetStats.spentPercent > 80
+                  ? 'bg-amber-500'
+                  : 'bg-emerald-500'
+              }`}
+              style={{ width: `${Math.min(budgetStats.spentPercent, 100)}%` }}
+            ></div>
+          </div>
+        )}
 
         {/* Search, Filter & Sort Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2">
