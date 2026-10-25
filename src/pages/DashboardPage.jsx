@@ -23,6 +23,7 @@ import {
   getSavedWebhookUrl,
   fetchFromGoogleSheet,
   addTransactionToGoogleSheet,
+  updateTransactionInGoogleSheet,
   deleteTransactionFromGoogleSheet,
   getLastSyncTime,
 } from '../services/googleSheetService';
@@ -157,6 +158,19 @@ export default function DashboardPage({ user }) {
     const webhookUrl = getSavedWebhookUrl();
     if (webhookUrl) {
       deleteTransactionFromGoogleSheet(webhookUrl, id);
+    }
+  };
+
+  const handleUpdateTransaction = (updatedRecord) => {
+    // 1. Cập nhật state cục bộ ngay lập tức
+    setTransactions((prev) =>
+      prev.map((item) => (item.id === updatedRecord.id ? updatedRecord : item))
+    );
+
+    // 2. Gửi ngầm cập nhật trực tiếp lên Google Sheet qua webhook
+    const webhookUrl = getSavedWebhookUrl();
+    if (webhookUrl) {
+      updateTransactionInGoogleSheet(webhookUrl, updatedRecord);
     }
   };
 
@@ -366,6 +380,7 @@ export default function DashboardPage({ user }) {
             <TransactionList
               transactions={yearTransactions}
               budgets={budgets}
+              onUpdateTransaction={handleUpdateTransaction}
               onDeleteTransaction={handleDeleteTransaction}
               selectedYear={selectedYear}
             />
@@ -391,6 +406,7 @@ export default function DashboardPage({ user }) {
         <TransactionList
           transactions={yearTransactions}
           budgets={budgets}
+          onUpdateTransaction={handleUpdateTransaction}
           onDeleteTransaction={handleDeleteTransaction}
           selectedYear={selectedYear}
         />

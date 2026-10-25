@@ -120,6 +120,45 @@ function doPost(e) {
       });
     }
 
+    // 3. Cập nhật nội dung 1 phiếu theo ID (Đồng bộ tức thì)
+    if (action === 'updateTransaction') {
+      const t = data.transaction;
+      if (!t || !t.id) throw new Error('Không có thông tin phiếu cần cập nhật');
+
+      const idToUpdate = String(t.id);
+      const sheet = ss.getSheetByName(SHEET_TRANSACTIONS);
+      const rows = sheet.getDataRange().getValues();
+      let updated = false;
+
+      for (let i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]) === idToUpdate) {
+          const rowIdx = i + 1;
+          const dateStr = t.date || String(rows[i][2]);
+          const year = dateStr.length >= 4 ? dateStr.substring(0, 4) : '';
+
+          sheet.getRange(rowIdx, 2, 1, 9).setValues([[
+            year,
+            dateStr,
+            t.accountCode || '',
+            t.category || '',
+            t.group || '',
+            t.employeeName || '',
+            Number(t.amount) || 0,
+            t.notes || '',
+            t.createdAt || rows[i][9] || '09:00'
+          ]]);
+          updated = true;
+          break;
+        }
+      }
+
+      return createJsonResponse({
+        status: 'success',
+        message: updated ? 'Đã cập nhật phiếu trên Google Sheet thành công' : 'Không tìm thấy ID',
+        id: t.id
+      });
+    }
+
     return createJsonResponse({ status: 'error', message: 'Hành động POST không hợp lệ' });
   } catch (err) {
     return createJsonResponse({ status: 'error', message: err.toString() });

@@ -152,3 +152,29 @@ export const deleteTransactionFromGoogleSheet = async (webhookUrl, transactionId
     return null;
   }
 };
+
+/**
+ * Cập nhật trực tiếp nội dung 1 phiếu chi trên Google Sheet (Đồng bộ tức thì)
+ */
+export const updateTransactionInGoogleSheet = async (webhookUrl, transaction) => {
+  const url = webhookUrl || getSavedWebhookUrl();
+  if (!url) return null;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify({
+        action: 'updateTransaction',
+        transaction: transaction,
+      }),
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error('Không thể cập nhật phiếu trên Google Sheet:', error);
+    return null;
+  }
+};
