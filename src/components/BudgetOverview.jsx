@@ -12,13 +12,20 @@ import {
   X,
   TableProperties,
   BarChart3,
+  Info,
+  ChevronRight,
+  ArrowUpRight,
 } from 'lucide-react';
+import AccountLedgerModal from './AccountLedgerModal';
 
 export default function BudgetOverview({
   budgets = [],
   transactions = [],
   selectedYear = '2026',
   onUpdateBudgets,
+  onUpdateTransaction,
+  onDeleteTransaction,
+  onNavigateToLedger,
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGroup, setSelectedGroup] = useState('ALL');
@@ -26,6 +33,9 @@ export default function BudgetOverview({
   
   // View mode: 'PROGRESS' (Tiến độ giải ngân 1 năm) or 'MATRIX' (Ma trận các cột năm 2024, 2025, 2026, 2027...)
   const [viewMode, setViewMode] = useState('PROGRESS');
+
+  // Drill-down Detail Modal State (Click row to see ledger)
+  const [selectedDetailCode, setSelectedDetailCode] = useState(null);
 
   // Matrix Editing state
   const [isEditingMatrix, setIsEditingMatrix] = useState(false);
@@ -66,6 +76,17 @@ export default function BudgetOverview({
     return map;
   }, [transactions]);
 
+  // Group transactions list by accountCode
+  const transactionsByCode = useMemo(() => {
+    const map = {};
+    transactions.forEach((t) => {
+      const code = t.accountCode || '';
+      if (!map[code]) map[code] = [];
+      map[code].push(t);
+    });
+    return map;
+  }, [transactions]);
+
   // Unique groups
   const groups = useMemo(() => {
     const set = new Set(editedBudgets.map((b) => b.group).filter(Boolean));
@@ -100,6 +121,12 @@ export default function BudgetOverview({
       };
     });
   }, [editedBudgets, liveActualsByCode, selectedYear]);
+
+  // Selected detail account for drilldown modal
+  const selectedDetailAccount = useMemo(() => {
+    if (!selectedDetailCode) return null;
+    return enhancedBudgets.find((b) => b.code === selectedDetailCode) || null;
+  }, [selectedDetailCode, enhancedBudgets]);
 
   // Filtered
   const filtered = useMemo(() => {
@@ -352,114 +379,148 @@ export default function BudgetOverview({
 
       {/* VIEW 1: PROGRESS VIEW (Tiến độ giải ngân 1 năm) */}
       {viewMode === 'PROGRESS' && (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                <th className="py-3 px-4 sm:px-6">Mã KH</th>
-                <th className="py-3 px-4">Tên Hạng Mục / Khoản Mục</th>
-                <th className="py-3 px-4 text-right">Được Duyệt ({selectedYear})</th>
-                <th className="py-3 px-4 text-right">Đã Chi ({selectedYear})</th>
-                <th className="py-3 px-4 text-right">Còn Lại</th>
-                <th className="py-3 px-4 min-w-[140px]">Tiến Độ Giải Ngân</th>
-                <th className="py-3 px-4 text-center">Trạng Thái</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-sm">
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="text-center py-10 text-slate-400 text-xs">
-                    Không tìm thấy khoản mục kế hoạch phù hợp
-                  </td>
+        <>
+          {/* Hint banner */}
+          <div className="px-5 py-2.5 bg-blue-50/70 border-b border-blue-100 flex items-center justify-between text-xs text-blue-800">
+            <div className="flex items-center gap-2">
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+              </span>
+              <span>
+                💡 <strong>Mẹo:</strong> Click vào bất kỳ dòng nào bên dưới để mở ngay <strong>Sổ Cái Chi Tiết</strong> các phiếu chi tương ứng (sort theo mã khoản mục, xem phát sinh, sửa/xóa trực tiếp).
+              </span>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-4 sm:px-6">Mã KH</th>
+                  <th className="py-3 px-4">Tên Hạng Mục / Khoản Mục</th>
+                  <th className="py-3 px-4 text-right">Được Duyệt ({selectedYear})</th>
+                  <th className="py-3 px-4 text-right">Đã Chi ({selectedYear})</th>
+                  <th className="py-3 px-4 text-right">Còn Lại</th>
+                  <th className="py-3 px-4 min-w-[140px]">Tiến Độ Giải Ngân</th>
+                  <th className="py-3 px-4 text-center">Trạng Thái</th>
                 </tr>
-              ) : (
-                filtered.map((item) => {
-                  const percentClamped = Math.min(Math.max(item.livePercent, 0), 100);
-                  return (
-                    <tr key={item.code} className="hover:bg-slate-50/70 transition-colors">
-                      {/* Mã */}
-                      <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
-                        <span className="font-mono text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">
-                          {item.code}
-                        </span>
-                      </td>
-
-                      {/* Tên & Nhóm */}
-                      <td className="py-3.5 px-4 max-w-xs sm:max-w-md">
-                        <div className="font-semibold text-slate-800 text-xs sm:text-sm">
-                          {item.name}
-                        </div>
-                        <div className="text-[11px] text-slate-400 mt-0.5 truncate" title={item.scope || item.group}>
-                          {item.scope ? item.scope : item.group}
-                        </div>
-                      </td>
-
-                      {/* Được duyệt của năm đang chọn */}
-                      <td className="py-3.5 px-4 text-right whitespace-nowrap font-mono text-xs text-slate-700 font-semibold">
-                        {formatVND(item.selectedYearApproved)}
-                      </td>
-
-                      {/* Đã chi trong năm đang chọn */}
-                      <td className="py-3.5 px-4 text-right whitespace-nowrap font-mono text-xs text-blue-600 font-bold">
-                        {formatVND(item.liveActual)}
-                      </td>
-
-                      {/* Còn lại */}
-                      <td
-                        className={`py-3.5 px-4 text-right whitespace-nowrap font-mono text-xs font-bold ${
-                          item.liveRemaining < 0 ? 'text-rose-600' : 'text-emerald-700'
-                        }`}
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-sm">
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="text-center py-10 text-slate-400 text-xs">
+                      Không tìm thấy khoản mục kế hoạch phù hợp
+                    </td>
+                  </tr>
+                ) : (
+                  filtered.map((item) => {
+                    const percentClamped = Math.min(Math.max(item.livePercent, 0), 100);
+                    const count = (transactionsByCode[item.code] || []).length;
+                    return (
+                      <tr
+                        key={item.code}
+                        onClick={() => setSelectedDetailCode(item.code)}
+                        className="hover:bg-blue-50/80 cursor-pointer transition-colors group"
+                        title={`Click để mở sổ cái chi tiết của [${item.code}] ${item.name}`}
                       >
-                        {formatVND(item.liveRemaining)}
-                      </td>
-
-                      {/* Progress Bar */}
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-2">
-                          <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
-                            <div
-                              className={`h-full rounded-full transition-all duration-300 ${
-                                item.livePercent >= 100
-                                  ? 'bg-rose-500'
-                                  : item.livePercent >= 80
-                                  ? 'bg-amber-500'
-                                  : 'bg-emerald-500'
-                              }`}
-                              style={{ width: `${percentClamped}%` }}
-                            ></div>
+                        {/* Mã */}
+                        <td className="py-3.5 px-4 sm:px-6 whitespace-nowrap">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-mono text-xs font-bold text-blue-700 bg-blue-50 group-hover:bg-blue-600 group-hover:text-white px-2.5 py-1 rounded-md border border-blue-200 group-hover:border-blue-600 transition-colors shadow-2xs">
+                              {item.code}
+                            </span>
+                            {count > 0 && (
+                              <span
+                                className="text-[10px] font-bold text-blue-700 bg-blue-100/80 group-hover:bg-white group-hover:text-blue-700 px-1.5 py-0.5 rounded-full border border-blue-200 transition-colors"
+                                title={`${count} phiếu chi phát sinh trong năm ${selectedYear}`}
+                              >
+                                {count}
+                              </span>
+                            )}
                           </div>
-                          <span className="text-[11px] font-mono font-bold text-slate-600 shrink-0 w-12 text-right">
-                            {item.livePercent.toFixed(1)}%
-                          </span>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Status Badge */}
-                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                        {item.status === 'OVER' ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
-                            <AlertTriangle className="w-3 h-3 text-rose-500" />
-                            <span>Vượt định mức</span>
-                          </span>
-                        ) : item.status === 'WARNING' ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                            <TrendingUp className="w-3 h-3 text-amber-500" />
-                            <span>Gần hết</span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                            <span>An toàn</span>
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                        {/* Tên & Nhóm */}
+                        <td className="py-3.5 px-4 max-w-xs sm:max-w-md">
+                          <div className="font-semibold text-slate-800 text-xs sm:text-sm group-hover:text-blue-700 transition-colors flex items-center justify-between gap-1">
+                            <span>{item.name}</span>
+                            <span className="text-[11px] text-blue-600 font-semibold opacity-0 group-hover:opacity-100 transition-opacity flex items-center shrink-0">
+                              Xem sổ cái →
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-400 mt-0.5 truncate" title={item.scope || item.group}>
+                            {item.scope ? item.scope : item.group}
+                          </div>
+                        </td>
+
+                        {/* Được duyệt của năm đang chọn */}
+                        <td className="py-3.5 px-4 text-right whitespace-nowrap font-mono text-xs text-slate-700 font-semibold">
+                          {formatVND(item.selectedYearApproved)}
+                        </td>
+
+                        {/* Đã chi trong năm đang chọn */}
+                        <td className="py-3.5 px-4 text-right whitespace-nowrap font-mono text-xs text-blue-600 font-bold">
+                          {formatVND(item.liveActual)}
+                        </td>
+
+                        {/* Còn lại */}
+                        <td
+                          className={`py-3.5 px-4 text-right whitespace-nowrap font-mono text-xs font-bold ${
+                            item.liveRemaining < 0 ? 'text-rose-600' : 'text-emerald-700'
+                          }`}
+                        >
+                          {formatVND(item.liveRemaining)}
+                        </td>
+
+                        {/* Progress Bar */}
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center gap-2">
+                            <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all duration-300 ${
+                                  item.livePercent >= 100
+                                    ? 'bg-rose-500'
+                                    : item.livePercent >= 80
+                                    ? 'bg-amber-500'
+                                    : 'bg-emerald-500'
+                                }`}
+                                style={{ width: `${percentClamped}%` }}
+                              ></div>
+                            </div>
+                            <span className="text-[11px] font-mono font-bold text-slate-600 shrink-0 w-12 text-right">
+                              {item.livePercent.toFixed(1)}%
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* Status Badge */}
+                        <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                          {item.status === 'OVER' ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
+                              <AlertTriangle className="w-3 h-3 text-rose-500" />
+                              <span>Vượt định mức</span>
+                            </span>
+                          ) : item.status === 'WARNING' ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                              <TrendingUp className="w-3 h-3 text-amber-500" />
+                              <span>Gần hết</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-500" />
+                              <span>An toàn</span>
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {/* VIEW 2: MULTI-YEAR MATRIX VIEW (Bảng Ma Trận Các Cột Năm 2024, 2025, 2026, 2027...) */}
@@ -492,7 +553,12 @@ export default function BudgetOverview({
             </thead>
             <tbody className="divide-y divide-slate-100 text-sm">
               {filtered.map((item) => (
-                <tr key={item.code} className="hover:bg-slate-50/70 transition-colors">
+                <tr
+                  key={item.code}
+                  onClick={() => !isEditingMatrix && setSelectedDetailCode(item.code)}
+                  className={`hover:bg-blue-50/70 transition-colors group ${!isEditingMatrix ? 'cursor-pointer' : ''}`}
+                  title={!isEditingMatrix ? `Click để mở sổ cái chi tiết của [${item.code}] ${item.name}` : ''}
+                >
                   {/* Mã */}
                   <td className="py-3 px-4 sm:px-6 whitespace-nowrap sticky left-0 bg-white group-hover:bg-slate-50 z-10">
                     <span className="font-mono text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
@@ -541,6 +607,19 @@ export default function BudgetOverview({
           </table>
         </div>
       )}
+
+      {/* DETAIL DRILLDOWN MODAL: Sổ Cái Chi Tiết Các Phiếu Chi Theo Mã Khoản Mục */}
+      <AccountLedgerModal
+        isOpen={Boolean(selectedDetailAccount)}
+        account={selectedDetailAccount}
+        transactions={transactions}
+        budgets={budgets}
+        selectedYear={selectedYear}
+        onClose={() => setSelectedDetailCode(null)}
+        onUpdateTransaction={onUpdateTransaction}
+        onDeleteTransaction={onDeleteTransaction}
+        onNavigateToLedger={onNavigateToLedger}
+      />
 
       {/* Modal: Thêm Cột Năm Mới */}
       {showAddYearModal && (

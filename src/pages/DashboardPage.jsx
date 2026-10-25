@@ -54,6 +54,9 @@ export default function DashboardPage({ user }) {
   // Fiscal Year Selection
   const [selectedYear, setSelectedYear] = useState('2026');
 
+  // Active Account Filter for Ledger (synchronized across tabs)
+  const [selectedLedgerAccount, setSelectedLedgerAccount] = useState('ALL');
+
   // Google Sheets sync states
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -383,6 +386,8 @@ export default function DashboardPage({ user }) {
               onUpdateTransaction={handleUpdateTransaction}
               onDeleteTransaction={handleDeleteTransaction}
               selectedYear={selectedYear}
+              selectedCategory={selectedLedgerAccount}
+              onSelectCategory={setSelectedLedgerAccount}
             />
           </div>
         </div>
@@ -398,6 +403,12 @@ export default function DashboardPage({ user }) {
             setBudgets(newBudgets);
             localStorage.setItem('app_budgets_v2', JSON.stringify(newBudgets));
           }}
+          onUpdateTransaction={handleUpdateTransaction}
+          onDeleteTransaction={handleDeleteTransaction}
+          onNavigateToLedger={(accountCode) => {
+            setSelectedLedgerAccount(accountCode);
+            setActiveTab('TRANSACTIONS');
+          }}
         />
       )}
 
@@ -409,6 +420,8 @@ export default function DashboardPage({ user }) {
           onUpdateTransaction={handleUpdateTransaction}
           onDeleteTransaction={handleDeleteTransaction}
           selectedYear={selectedYear}
+          selectedCategory={selectedLedgerAccount}
+          onSelectCategory={setSelectedLedgerAccount}
         />
       )}
 

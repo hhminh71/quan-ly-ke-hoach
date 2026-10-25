@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Search,
   Trash2,
@@ -20,7 +20,7 @@ import {
   Clock,
   Sparkles,
 } from 'lucide-react';
-import employeesList from '../data/employees.json';
+import EditTransactionModal from './EditTransactionModal';
 
 export default function TransactionList({
   transactions = [],
@@ -28,25 +28,26 @@ export default function TransactionList({
   onUpdateTransaction,
   onDeleteTransaction,
   selectedYear = '2026',
+  selectedCategory: selectedCategoryProp,
+  onSelectCategory,
 }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('ALL');
-  const [sortOrder, setSortOrder] = useState('newest'); // 'newest', 'oldest', 'highest', 'lowest'
+  const [selectedCategory, setSelectedCategory] = useState(selectedCategoryProp || 'ALL');
+  const [sortOrder, setSortOrder] = useState('newest'); // 'newest', 'oldest', 'account_asc', 'account_desc', 'highest', 'lowest'
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 25;
 
   // Edit Modal State
   const [editingItem, setEditingItem] = useState(null);
-  const [editForm, setEditForm] = useState({
-    date: '',
-    accountCode: '',
-    category: '',
-    group: '',
-    employeeName: '',
-    amount: '',
-    notes: '',
-  });
   const [showEditToast, setShowEditToast] = useState(false);
+
+  // Sync selectedCategory when prop changes
+  useEffect(() => {
+    if (selectedCategoryProp !== undefined) {
+      setSelectedCategory(selectedCategoryProp);
+      setCurrentPage(1);
+    }
+  }, [selectedCategoryProp]);
 
   const formatVND = (num) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num || 0);
@@ -64,51 +65,6 @@ export default function TransactionList({
   // Open Edit Modal
   const handleStartEdit = (item) => {
     setEditingItem(item);
-    setEditForm({
-      date: item.date || '',
-      accountCode: item.accountCode || (budgets[0]?.code || '62762101'),
-      category: item.category || '',
-      group: item.group || 'SỬA CHỮA THƯỜNG XUYÊN',
-      employeeName: item.employeeName || '',
-      amount: String(item.amount || 0),
-      notes: item.notes || '',
-    });
-  };
-
-  // When accountCode changes in Edit Modal, auto-update category & group
-  const handleEditAccountChange = (code) => {
-    const found = budgets.find((b) => b.code === code);
-    setEditForm((prev) => ({
-      ...prev,
-      accountCode: code,
-      category: found ? found.name : prev.category,
-      group: found ? found.group : prev.group,
-    }));
-  };
-
-  // Save Edit
-  const handleSaveEdit = (e) => {
-    e.preventDefault();
-    if (!editingItem) return;
-
-    const updated = {
-      ...editingItem,
-      date: editForm.date,
-      accountCode: editForm.accountCode,
-      category: editForm.category,
-      group: editForm.group,
-      employeeName: editForm.employeeName.trim(),
-      amount: Number(editForm.amount) || 0,
-      notes: editForm.notes.trim(),
-    };
-
-    if (onUpdateTransaction) {
-      onUpdateTransaction(updated);
-    }
-
-    setEditingItem(null);
-    setShowEditToast(true);
-    setTimeout(() => setShowEditToast(false), 3000);
   };
 
   // Unique categories
@@ -156,6 +112,18 @@ export default function TransactionList({
         const dateB = b.date || '';
         if (dateA !== dateB) return dateA.localeCompare(dateB);
         return a.id - b.id;
+      }
+      if (sortOrder === 'account_asc') {
+        const codeA = a.accountCode || '';
+        const codeB = b.accountCode || '';
+        if (codeA !== codeB) return codeA.localeCompare(codeB);
+        return (b.date || '').localeCompare(a.date || '');
+      }
+      if (sortOrder === 'account_desc') {
+        const codeA = a.accountCode || '';
+        const codeB = b.accountCode || '';
+        if (codeA !== codeB) return codeB.localeCompare(codeA);
+        return (b.date || '').localeCompare(a.date || '');
       }
       if (sortOrder === 'highest') return (b.amount || 0) - (a.amount || 0);
       if (sortOrder === 'lowest') return (a.amount || 0) - (b.amount || 0);
@@ -364,7 +332,9 @@ export default function TransactionList({
             <select
               value={selectedCategory}
               onChange={(e) => {
-                setSelectedCategory(e.target.value);
+                const val = e.target.value;
+                setSelectedCategory(val);
+                if (onSelectCategory) onSelectCategory(val);
                 setCurrentPage(1);
               }}
               className="w-full pl-8 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer truncate"
@@ -384,10 +354,12 @@ export default function TransactionList({
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
-              className="w-full pl-8 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer"
+              className="w-full pl-8 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer font-medium"
             >
               <option value="newest">Mới nhất trước</option>
               <option value="oldest">Cũ nhất trước</option>
+              <option value="account_asc">Mã khoản mục (627... tăng dần)</option>
+              <option value="account_desc">Mã khoản mục (giảm dần)</option>
               <option value="highest">Số tiền cao nhất</option>
               <option value="lowest">Số tiền thấp nhất</option>
             </select>
@@ -408,10 +380,37 @@ export default function TransactionList({
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                <th className="py-3 px-4 sm:px-6">Ngày</th>
-                <th className="py-3 px-4">Khoản mục & Nhóm</th>
+                <th
+                  onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
+                  className="py-3 px-4 sm:px-6 cursor-pointer hover:text-blue-600 transition-colors select-none"
+                  title="Click để đổi thứ tự ngày"
+                >
+                  <div className="flex items-center gap-1">
+                    <span>Ngày</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
+                <th
+                  onClick={() => setSortOrder(sortOrder === 'account_asc' ? 'account_desc' : 'account_asc')}
+                  className="py-3 px-4 cursor-pointer hover:text-blue-600 transition-colors select-none"
+                  title="Click để sort theo Mã khoản mục"
+                >
+                  <div className="flex items-center gap-1">
+                    <span>Khoản mục & Nhóm</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
                 <th className="py-3 px-4">Người thực hiện</th>
-                <th className="py-3 px-4">Số tiền (VNĐ)</th>
+                <th
+                  onClick={() => setSortOrder(sortOrder === 'highest' ? 'lowest' : 'highest')}
+                  className="py-3 px-4 text-right cursor-pointer hover:text-blue-600 transition-colors select-none"
+                  title="Click để đổi thứ tự số tiền"
+                >
+                  <div className="flex items-center justify-end gap-1">
+                    <span>Số tiền (VNĐ)</span>
+                    <ArrowUpDown className="w-3 h-3 text-slate-400" />
+                  </div>
+                </th>
                 <th className="py-3 px-4">Nội dung diễn giải</th>
                 <th className="py-3 px-4 text-right">Thao tác</th>
               </tr>
@@ -552,146 +551,19 @@ export default function TransactionList({
 
       {/* EDIT MODAL: Chỉnh sửa trực tiếp & Đồng bộ tức thì */}
       {editingItem && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-            {/* Modal Header */}
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center">
-                  <Edit3 className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900">
-                    Chỉnh Sửa Phiếu Chi #{editingItem.id}
-                  </h3>
-                  <p className="text-[11px] text-slate-500">
-                    Sửa đổi sẽ tự động đồng bộ trực tiếp về Google Sheet
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setEditingItem(null)}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Modal Form */}
-            <form onSubmit={handleSaveEdit} className="p-5 space-y-4">
-              {/* Ngày */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Ngày Giao Dịch
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={editForm.date}
-                  onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 bg-white"
-                />
-              </div>
-
-              {/* Mã Khoản Mục */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Khoản Mục Ngân Sách
-                </label>
-                <select
-                  value={editForm.accountCode}
-                  onChange={(e) => handleEditAccountChange(e.target.value)}
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 bg-white cursor-pointer font-medium"
-                >
-                  {budgets.map((b) => (
-                    <option key={b.code} value={b.code}>
-                      [{b.code}] {b.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="mt-1 text-[10px] text-slate-500">
-                  Nhóm: <strong className="text-slate-700">{editForm.group}</strong>
-                </div>
-              </div>
-
-              {/* Người Thực Hiện */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Người Thực Hiện
-                </label>
-                <input
-                  type="text"
-                  required
-                  list="edit-employees-list"
-                  value={editForm.employeeName}
-                  onChange={(e) => setEditForm({ ...editForm, employeeName: e.target.value })}
-                  placeholder="Nhập tên người thực hiện..."
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 bg-white"
-                />
-                <datalist id="edit-employees-list">
-                  {Array.isArray(employeesList) &&
-                    employeesList
-                      .filter((e) => e && isNaN(e))
-                      .slice(0, 20)
-                      .map((emp) => <option key={emp} value={emp} />)}
-                </datalist>
-              </div>
-
-              {/* Số Tiền */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Số Tiền Thực Tế (VNĐ)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="any"
-                  required
-                  value={editForm.amount}
-                  onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })}
-                  className="w-full px-3 py-2 text-xs font-mono font-bold text-slate-900 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 bg-white"
-                />
-                <div className="mt-1 text-[11px] font-mono text-blue-700 font-semibold">
-                  {formatVND(editForm.amount)}
-                </div>
-              </div>
-
-              {/* Ghi Chú */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Nội Dung Diễn Giải / Ghi Chú
-                </label>
-                <textarea
-                  rows={2}
-                  required
-                  value={editForm.notes}
-                  onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
-                  placeholder="Chi tiết công việc..."
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 bg-white resize-none"
-                />
-              </div>
-
-              {/* Modal Buttons */}
-              <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setEditingItem(null)}
-                  className="px-4 py-2 text-xs font-semibold rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors"
-                >
-                  Hủy Bỏ
-                </button>
-                <button
-                  type="submit"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-colors"
-                >
-                  <Save className="w-3.5 h-3.5" />
-                  <span>Lưu & Đồng Bộ Ngay</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <EditTransactionModal
+          isOpen={Boolean(editingItem)}
+          transaction={editingItem}
+          budgets={budgets}
+          onClose={() => setEditingItem(null)}
+          onSave={(updated) => {
+            if (onUpdateTransaction) {
+              onUpdateTransaction(updated);
+            }
+            setShowEditToast(true);
+            setTimeout(() => setShowEditToast(false), 3000);
+          }}
+        />
       )}
     </div>
   );
