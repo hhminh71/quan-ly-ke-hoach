@@ -81,7 +81,7 @@ export default function DashboardPage({ user }) {
     return transactions.filter((t) => t.date && t.date.startsWith(selectedYear));
   }, [transactions, selectedYear]);
 
-  // Sync to localStorage
+  // Sync transactions to localStorage
   useEffect(() => {
     try {
       localStorage.setItem('app_transactions_v2', JSON.stringify(transactions));
@@ -89,6 +89,15 @@ export default function DashboardPage({ user }) {
       console.error('Storage full or error', e);
     }
   }, [transactions]);
+
+  // Sync budgets to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('app_budgets_v2', JSON.stringify(budgets));
+    } catch (e) {
+      console.error('Storage full or error', e);
+    }
+  }, [budgets]);
 
   // Initial auto-sync from Google Sheet if URL exists
   useEffect(() => {
