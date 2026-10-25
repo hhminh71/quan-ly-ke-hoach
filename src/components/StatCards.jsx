@@ -1,12 +1,18 @@
 import React from 'react';
-import { Wallet, FileSpreadsheet, TrendingUp, Users, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { Wallet, TrendingUp, Users, ShieldAlert, CheckCircle2 } from 'lucide-react';
 
-export default function StatCards({ transactions = [], budgets = [] }) {
+export default function StatCards({ transactions = [], budgets = [], selectedYear = '2026' }) {
   const totalAmount = transactions.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
   const totalCount = transactions.length;
 
-  // Total approved from budgets
-  const totalApproved = budgets.reduce((acc, b) => acc + (Number(b.approvedAmount) || 0), 0);
+  // Total approved from budgets for selected year
+  const totalApproved = budgets.reduce((acc, b) => {
+    const val =
+      b.yearlyApproved && selectedYear !== 'ALL' && b.yearlyApproved[selectedYear] !== undefined
+        ? Number(b.yearlyApproved[selectedYear])
+        : Number(b.approvedAmount) || 0;
+    return acc + val;
+  }, 0);
   const percentExecuted = totalApproved > 0 ? (totalAmount / totalApproved) * 100 : 0;
   const remainingBudget = totalApproved - totalAmount;
 
@@ -19,6 +25,8 @@ export default function StatCards({ transactions = [], budgets = [] }) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0);
   };
 
+  const yearLabel = selectedYear === 'ALL' ? 'Toàn bộ' : `Năm ${selectedYear}`;
+
   const stats = [
     {
       title: 'Tổng ngân sách duyệt',
@@ -26,14 +34,14 @@ export default function StatCards({ transactions = [], budgets = [] }) {
       description: `${budgets.length} danh mục kế hoạch`,
       icon: Wallet,
       color: 'blue',
-      badge: 'Định mức 2026',
+      badge: selectedYear === 'ALL' ? 'Tổng định mức' : `Định mức ${selectedYear}`,
       bgGradient: 'from-blue-500/10 to-indigo-500/5',
       iconBg: 'bg-blue-600 text-white',
     },
     {
-      title: 'Đã thực hiện thực tế',
+      title: `Đã chi (${yearLabel})`,
       value: formatCurrency(totalAmount),
-      description: `${totalCount.toLocaleString('vi-VN')} phiếu đã phát sinh`,
+      description: `${totalCount.toLocaleString('vi-VN')} phiếu chi phát sinh`,
       icon: TrendingUp,
       color: 'emerald',
       badge: `Đạt ${percentExecuted.toFixed(1)}% kế hoạch`,
@@ -43,7 +51,7 @@ export default function StatCards({ transactions = [], budgets = [] }) {
     {
       title: 'Ngân sách còn lại',
       value: formatCurrency(remainingBudget),
-      description: remainingBudget >= 0 ? 'Trong hạn mức an toàn' : 'Cảnh báo vượt định mức',
+      description: remainingBudget >= 0 ? `Hạn mức khả dụng ${yearLabel}` : 'Cảnh báo vượt định mức',
       icon: remainingBudget >= 0 ? CheckCircle2 : ShieldAlert,
       color: remainingBudget >= 0 ? 'amber' : 'rose',
       badge: `${(100 - percentExecuted).toFixed(1)}% dự trữ`,
@@ -53,10 +61,10 @@ export default function StatCards({ transactions = [], budgets = [] }) {
     {
       title: 'Nhân sự thực hiện',
       value: `${uniqueEmployees} cán bộ / kỹ sư`,
-      description: 'Phụ trách thi công & mua sắm',
+      description: `Phát sinh chi phí trong ${yearLabel}`,
       icon: Users,
       color: 'purple',
-      badge: 'Hoạt động liên tục',
+      badge: 'Đang hoạt động',
       bgGradient: 'from-purple-500/10 to-pink-500/5',
       iconBg: 'bg-purple-600 text-white',
     },

@@ -31,3 +31,8 @@ dist-ssr
 *.gtable
 *.gform
 
+# Temporary generated data
+clean_tx_rows.json
+make_code_gs.js
+make_code_gs.cjs
+

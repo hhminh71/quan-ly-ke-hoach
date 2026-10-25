@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Trash2, Calendar, ArrowUpDown, Filter, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 
-export default function TransactionList({ transactions, onDeleteTransaction }) {
+export default function TransactionList({ transactions, onDeleteTransaction, selectedYear = '2026' }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('ALL');
   const [sortOrder, setSortOrder] = useState('newest'); // 'newest', 'oldest', 'highest', 'lowest'
@@ -98,10 +98,16 @@ export default function TransactionList({ transactions, onDeleteTransaction }) {
           <div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100"></span>
-              <h2 className="text-lg font-bold text-slate-800">Sổ Cái Chi Tiết Các Phiếu Chi</h2>
+              <h2 className="text-lg font-bold text-slate-800">
+                Sổ Cái Chi Tiết Các Phiếu Chi{' '}
+                <span className="text-emerald-700 font-extrabold">
+                  ({selectedYear === 'ALL' ? 'Tất Cả Các Năm' : `Năm ${selectedYear}`})
+                </span>
+              </h2>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              Hiển thị {sorted.length.toLocaleString('vi-VN')} giao dịch đã thực hiện
+              Hiển thị {sorted.length.toLocaleString('vi-VN')} giao dịch phát sinh trong{' '}
+              {selectedYear === 'ALL' ? 'toàn bộ lịch sử' : `năm tài chính ${selectedYear}`}
             </p>
           </div>
 

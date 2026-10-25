@@ -1,10 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import StatCards from '../components/StatCards';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
 import BudgetOverview from '../components/BudgetOverview';
 import SyncModal from '../components/SyncModal';
-import { Calendar, Download, RefreshCw, LayoutDashboard, ListOrdered, FileSpreadsheet, Cloud, CheckCircle2, Settings } from 'lucide-react';
+import {
+  Calendar,
+  Download,
+  RefreshCw,
+  LayoutDashboard,
+  ListOrdered,
+  FileSpreadsheet,
+  Cloud,
+  CheckCircle2,
+  Settings,
+  CalendarDays,
+  Sparkles,
+} from 'lucide-react';
 import initialBudgets from '../data/budgets.json';
 import initialTransactions from '../data/transactions.json';
 import {
@@ -27,14 +39,47 @@ export default function DashboardPage({ user }) {
     return initialTransactions;
   });
 
-  const [budgets, setBudgets] = useState(initialBudgets);
+  const [budgets, setBudgets] = useState(() => {
+    try {
+      const saved = localStorage.getItem('app_budgets_v2');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error(e);
+    }
+    return initialBudgets;
+  });
   const [activeTab, setActiveTab] = useState('ALL'); // 'ALL', 'BUDGETS', 'TRANSACTIONS'
+
+  // Fiscal Year Selection
+  const [selectedYear, setSelectedYear] = useState('2026');
 
   // Google Sheets sync states
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [hasWebhook, setHasWebhook] = useState(() => Boolean(getSavedWebhookUrl()));
   const [lastSyncTime, setLastSyncTimeState] = useState(() => getLastSyncTime());
+
+  // Dynamically compute available years from existing transactions
+  const availableYears = useMemo(() => {
+    const yearSet = new Set();
+    transactions.forEach((t) => {
+      if (t.date && t.date.length >= 4) {
+        const y = t.date.substring(0, 4);
+        if (/^\d{4}$/.test(y)) yearSet.add(y);
+      }
+    });
+    // Add current and next year if not present
+    const currentY = String(new Date().getFullYear());
+    yearSet.add(currentY);
+    yearSet.add(String(new Date().getFullYear() + 1));
+    return Array.from(yearSet).sort((a, b) => b.localeCompare(a));
+  }, [transactions]);
+
+  // Filter transactions strictly for the selected fiscal year
+  const yearTransactions = useMemo(() => {
+    if (selectedYear === 'ALL') return transactions;
+    return transactions.filter((t) => t.date && t.date.startsWith(selectedYear));
+  }, [transactions, selectedYear]);
 
   // Sync to localStorage
   useEffect(() => {
@@ -107,29 +152,29 @@ export default function DashboardPage({ user }) {
   };
 
   const handleResetData = () => {
-    if (confirm('Khôi phục toàn bộ danh sách 1.216 giao dịch thực tế từ file Excel gốc?')) {
+    if (confirm('Khôi phục toàn bộ danh sách 1.216 giao dịch thực tế (2024, 2025, 2026) từ file gốc?')) {
       setTransactions(initialTransactions);
       localStorage.removeItem('app_transactions_v2');
     }
   };
 
   const handleExportCSV = () => {
-    if (transactions.length === 0) {
-      alert('Không có dữ liệu để xuất.');
+    if (yearTransactions.length === 0) {
+      alert(`Không có dữ liệu năm ${selectedYear} để xuất.`);
       return;
     }
-    const headers = 'ID,MaKhoanMuc,DanhMuc,Nhom,Ngay,NguoiThucHien,SoTien,GhiChu\n';
-    const rows = transactions
+    const headers = 'ID,Nam,MaKhoanMuc,DanhMuc,Nhom,Ngay,NguoiThucHien,SoTien,GhiChu\n';
+    const rows = yearTransactions
       .map(
         (t) =>
-          `"${t.id}","${t.accountCode || ''}","${(t.category || '').replace(/"/g, '""')}","${(t.group || '').replace(/"/g, '""')}","${t.date || ''}","${(t.employeeName || '').replace(/"/g, '""')}","${t.amount || 0}","${(t.notes || '').replace(/"/g, '""')}"`
+          `"${t.id}","${(t.date || '').substring(0, 4)}","${t.accountCode || ''}","${(t.category || '').replace(/"/g, '""')}","${(t.group || '').replace(/"/g, '""')}","${t.date || ''}","${(t.employeeName || '').replace(/"/g, '""')}","${t.amount || 0}","${(t.notes || '').replace(/"/g, '""')}"`
       )
       .join('\n');
     const blob = new Blob(['\uFEFF' + headers + rows], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `bao-cao-ke-hoach-chi-phi-${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `bao-cao-ke-hoach-chi-phi-nam-${selectedYear}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -146,7 +191,7 @@ export default function DashboardPage({ user }) {
   return (
     <div className="space-y-6">
       {/* Page Title & Action Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200/60">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-slate-200/60">
         <div>
           <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
             <Calendar className="w-3.5 h-3.5 text-blue-600" />
@@ -156,13 +201,37 @@ export default function DashboardPage({ user }) {
             Hệ Thống Quản Lý Kế Hoạch & Chi Phí Doanh Nghiệp
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            <span className="font-semibold text-slate-700">76 Khoản mục ngân sách</span> •{' '}
-            <span className="font-semibold text-slate-700">{transactions.length.toLocaleString('vi-VN')} Phiếu chi thực tế</span>
+            <span className="font-semibold text-slate-700">76 Khoản mục kế hoạch</span> •{' '}
+            <span className="font-semibold text-blue-600">
+              {selectedYear === 'ALL'
+                ? `Toàn bộ ${transactions.length.toLocaleString('vi-VN')} phiếu chi`
+                : `${yearTransactions.length.toLocaleString('vi-VN')} Phiếu chi năm ${selectedYear}`}
+            </span>
           </p>
         </div>
 
-        {/* Sync Status & Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2">
+        {/* Action Controls & Fiscal Year Selector */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* FISCAL YEAR SELECTOR BADGE */}
+          <div className="flex items-center gap-1.5 p-1 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 rounded-xl shadow-xs">
+            <div className="flex items-center gap-1 pl-2 text-blue-700 text-xs font-bold">
+              <CalendarDays className="w-4 h-4 text-blue-600" />
+              <span className="hidden sm:inline">Năm tài chính:</span>
+            </div>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className="px-2.5 py-1.5 rounded-lg bg-white border border-blue-200 text-xs font-bold text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all cursor-pointer shadow-2xs"
+            >
+              {availableYears.map((yr) => (
+                <option key={yr} value={yr}>
+                  Năm {yr} ({transactions.filter((t) => t.date && t.date.startsWith(yr)).length} phiếu)
+                </option>
+              ))}
+              <option value="ALL">Tất cả các năm ({transactions.length} phiếu)</option>
+            </select>
+          </div>
+
           {/* Google Sheets Sync Pill */}
           <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white border border-slate-200 shadow-2xs">
             <button
@@ -218,16 +287,16 @@ export default function DashboardPage({ user }) {
             type="button"
             onClick={handleExportCSV}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all"
-            title="Xuất toàn bộ danh sách ra file Excel / CSV"
+            title={`Xuất báo cáo năm ${selectedYear} ra file Excel / CSV`}
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Xuất Excel/CSV</span>
+            <span>Xuất CSV ({selectedYear})</span>
           </button>
         </div>
       </div>
 
-      {/* 4 Summary Stat Cards */}
-      <StatCards transactions={transactions} budgets={budgets} />
+      {/* 4 Summary Stat Cards (Strictly for the selected fiscal year) */}
+      <StatCards transactions={yearTransactions} budgets={budgets} selectedYear={selectedYear} />
 
       {/* View Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
@@ -267,7 +336,9 @@ export default function DashboardPage({ user }) {
           }`}
         >
           <ListOrdered className="w-4 h-4" />
-          <span>Sổ Cái Toàn Bộ ({transactions.length.toLocaleString('vi-VN')})</span>
+          <span>
+            Sổ Cái Năm {selectedYear} ({yearTransactions.length.toLocaleString('vi-VN')})
+          </span>
         </button>
       </div>
 
@@ -275,27 +346,41 @@ export default function DashboardPage({ user }) {
       {activeTab === 'ALL' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           <div className="lg:col-span-5 xl:col-span-4">
-            <TransactionForm onAddTransaction={handleAddTransaction} budgets={budgets} />
+            <TransactionForm
+              onAddTransaction={handleAddTransaction}
+              budgets={budgets}
+              selectedYear={selectedYear}
+            />
           </div>
           <div className="lg:col-span-7 xl:col-span-8">
             <TransactionList
-              transactions={transactions}
+              transactions={yearTransactions}
               onDeleteTransaction={handleDeleteTransaction}
+              selectedYear={selectedYear}
             />
           </div>
         </div>
       )}
 
-      {/* Tab 2: Master Budgets Table */}
+      {/* Tab 2: Master Budgets Table for this Fiscal Year */}
       {activeTab === 'BUDGETS' && (
-        <BudgetOverview budgets={budgets} transactions={transactions} />
+        <BudgetOverview
+          budgets={budgets}
+          transactions={yearTransactions}
+          selectedYear={selectedYear}
+          onUpdateBudgets={(newBudgets) => {
+            setBudgets(newBudgets);
+            localStorage.setItem('app_budgets_v2', JSON.stringify(newBudgets));
+          }}
+        />
       )}
 
       {/* Tab 3: Full Width Transactions List */}
       {activeTab === 'TRANSACTIONS' && (
         <TransactionList
-          transactions={transactions}
+          transactions={yearTransactions}
           onDeleteTransaction={handleDeleteTransaction}
+          selectedYear={selectedYear}
         />
       )}
 

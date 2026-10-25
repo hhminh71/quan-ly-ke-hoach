@@ -2,10 +2,18 @@ import React, { useState, useMemo } from 'react';
 import { Calendar, User, DollarSign, FileText, PlusCircle, CheckCircle, RotateCcw, AlertTriangle, Layers } from 'lucide-react';
 import employeesList from '../data/employees.json';
 
-export default function TransactionForm({ onAddTransaction, budgets = [] }) {
+export default function TransactionForm({ onAddTransaction, budgets = [], selectedYear = '2026' }) {
   const getTodayString = () => new Date().toISOString().split('T')[0];
 
-  const [date, setDate] = useState(getTodayString());
+  const getDefaultDate = () => {
+    const today = getTodayString();
+    if (selectedYear && selectedYear !== 'ALL' && !today.startsWith(selectedYear)) {
+      return `${selectedYear}-01-01`;
+    }
+    return today;
+  };
+
+  const [date, setDate] = useState(getDefaultDate);
   const [employeeName, setEmployeeName] = useState('');
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
@@ -14,10 +22,19 @@ export default function TransactionForm({ onAddTransaction, budgets = [] }) {
   const [errors, setErrors] = useState({});
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
-  // Selected budget item details
+  // Selected budget item details for selected year
   const selectedBudget = useMemo(() => {
-    return budgets.find((b) => b.code === accountCode) || null;
-  }, [budgets, accountCode]);
+    const found = budgets.find((b) => b.code === accountCode);
+    if (!found) return null;
+    const yearApproved =
+      found.yearlyApproved && selectedYear !== 'ALL' && found.yearlyApproved[selectedYear] !== undefined
+        ? Number(found.yearlyApproved[selectedYear])
+        : Number(found.approvedAmount) || 0;
+    return {
+      ...found,
+      approvedAmount: yearApproved,
+    };
+  }, [budgets, accountCode, selectedYear]);
 
   // Suggested employees: take real employees from Excel
   const suggestedEmployees = useMemo(() => {
@@ -103,7 +120,12 @@ export default function TransactionForm({ onAddTransaction, budgets = [] }) {
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-blue-600 ring-4 ring-blue-100"></span>
-            <h2 className="text-lg font-bold text-slate-800">Biểu Mẫu Nhập Liệu Thu Chi</h2>
+            <h2 className="text-lg font-bold text-slate-800">
+              Biểu Mẫu Nhập Liệu Thu Chi{' '}
+              <span className="text-blue-600 font-extrabold text-sm">
+                ({selectedYear === 'ALL' ? 'Mọi Năm' : `Năm ${selectedYear}`})
+              </span>
+            </h2>
           </div>
           <p className="text-xs text-slate-500 mt-1">
             Ghi nhận phiếu chi thực tế gắn với Mã kế hoạch ngân sách (627x, 641x)
