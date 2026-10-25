@@ -12,7 +12,7 @@ import {
 import EditTransactionModal from './EditTransactionModal';
 
 export default function AccountLedgerModal({
-  isOpen,
+  isOpen = true,
   account,
   transactions = [],
   budgets = [],
@@ -26,25 +26,9 @@ export default function AccountLedgerModal({
   const [sortOrder, setSortOrder] = useState('newest'); // 'newest', 'oldest', 'highest', 'lowest'
   const [editingItem, setEditingItem] = useState(null);
 
-  if (!isOpen || !account) return null;
-
-  const formatVND = (num) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(num) || 0);
-  };
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    const str = String(dateStr).trim();
-    const parts = str.split('-');
-    if (parts.length === 3) {
-      return `${parts[2]}/${parts[1]}/${parts[0]}`;
-    }
-    return str;
-  };
-
-  // Filter transactions belonging to this account defensively
+  // 1. ALL hooks MUST be declared at the top unconditionally (React Rules of Hooks)
   const accountTransactions = useMemo(() => {
-    if (!account) return [];
+    if (!isOpen || !account) return [];
     const accCode = String(account.code || '').trim();
     const accName = String(account.name || '').trim();
 
@@ -54,10 +38,10 @@ export default function AccountLedgerModal({
       const tCat = String(t.category || '').trim();
       return (tCode && tCode === accCode) || (!tCode && tCat === accName);
     });
-  }, [transactions, account]);
+  }, [isOpen, transactions, account]);
 
-  // Search filter
   const filteredTransactions = useMemo(() => {
+    if (!isOpen || !account) return [];
     const lower = String(searchTerm || '').toLowerCase().trim();
     return accountTransactions.filter((item) => {
       if (!lower) return true;
@@ -67,10 +51,10 @@ export default function AccountLedgerModal({
       const amt = String(item.amount || '');
       return emp.includes(lower) || notes.includes(lower) || date.includes(lower) || amt.includes(lower);
     });
-  }, [accountTransactions, searchTerm]);
+  }, [isOpen, account, accountTransactions, searchTerm]);
 
-  // Sort
   const sortedTransactions = useMemo(() => {
+    if (!isOpen || !account) return [];
     return [...filteredTransactions].sort((a, b) => {
       if (sortOrder === 'newest') {
         const dateA = String(a.date || '');
@@ -88,12 +72,29 @@ export default function AccountLedgerModal({
       if (sortOrder === 'lowest') return (Number(a.amount) || 0) - (Number(b.amount) || 0);
       return 0;
     });
-  }, [filteredTransactions, sortOrder]);
+  }, [isOpen, account, filteredTransactions, sortOrder]);
 
-  // Total amount of current filtered list
   const currentTotalAmount = useMemo(() => {
+    if (!isOpen || !account) return 0;
     return sortedTransactions.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-  }, [sortedTransactions]);
+  }, [isOpen, account, sortedTransactions]);
+
+  // 2. ONLY return early after ALL hooks have been executed
+  if (!isOpen || !account) return null;
+
+  const formatVND = (num) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(num) || 0);
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const str = String(dateStr).trim();
+    const parts = str.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return str;
+  };
 
   // Live account stats defensively
   const approved = Number(account.selectedYearApproved) || 0;
@@ -107,7 +108,7 @@ export default function AccountLedgerModal({
   return (
     <>
       <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
           {/* Header */}
           <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/70">
             <div className="flex items-start sm:items-center gap-3">

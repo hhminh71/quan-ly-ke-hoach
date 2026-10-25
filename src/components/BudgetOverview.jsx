@@ -618,17 +618,19 @@ export default function BudgetOverview({
       )}
 
       {/* DETAIL DRILLDOWN MODAL: Sổ Cái Chi Tiết Các Phiếu Chi Theo Mã Khoản Mục */}
-      <AccountLedgerModal
-        isOpen={Boolean(selectedDetailAccount)}
-        account={selectedDetailAccount}
-        transactions={transactions}
-        budgets={budgets}
-        selectedYear={selectedYear}
-        onClose={() => setSelectedDetailCode(null)}
-        onUpdateTransaction={onUpdateTransaction}
-        onDeleteTransaction={onDeleteTransaction}
-        onNavigateToLedger={onNavigateToLedger}
-      />
+      {selectedDetailAccount && (
+        <AccountLedgerModal
+          isOpen={true}
+          account={selectedDetailAccount}
+          transactions={transactions}
+          budgets={budgets}
+          selectedYear={selectedYear}
+          onClose={() => setSelectedDetailCode(null)}
+          onUpdateTransaction={onUpdateTransaction}
+          onDeleteTransaction={onDeleteTransaction}
+          onNavigateToLedger={onNavigateToLedger}
+        />
+      )}
 
       {/* Modal: Thêm Cột Năm Mới */}
       {showAddYearModal && (
