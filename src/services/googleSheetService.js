@@ -53,6 +53,48 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
     throw new Error(result.message || 'Lỗi khi đọc từ Google Sheet');
   }
 
+  // Chuẩn hóa dữ liệu nếu bản triển khai Apps Script cũ bị lệch cột do mới thêm cột Năm
+  if (Array.isArray(result.transactions)) {
+    result.transactions = result.transactions.map((t) => {
+      const isShifted =
+        /^\d{4}$/.test(String(t.date || '').trim()) &&
+        (String(t.accountCode || '').includes('GMT') ||
+          String(t.accountCode || '').includes(':') ||
+          (isNaN(t.accountCode) && String(t.accountCode).length > 10));
+
+      if (isShifted) {
+        let cleanDate = '';
+        try {
+          const d = new Date(t.accountCode);
+          if (!isNaN(d.getTime())) {
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            cleanDate = `${y}-${m}-${day}`;
+          } else {
+            cleanDate = String(t.accountCode).split('T')[0];
+          }
+        } catch (e) {
+          cleanDate = String(t.accountCode);
+        }
+
+        return {
+          id: t.id,
+          date: cleanDate,
+          accountCode: String(t.category || '').trim(),
+          category: String(t.group || '').trim(),
+          group: String(t.employeeName || '').trim(),
+          employeeName: t.employeeName && t.employeeName !== 'SỬA CHỮA THƯỜNG XUYÊN' ? t.employeeName : 'Cán bộ phụ trách',
+          amount: Number(t.notes) || 0,
+          notes: String(t.createdAt || ''),
+          createdAt: '09:00',
+          status: 'Đã thực hiện',
+        };
+      }
+      return t;
+    });
+  }
+
   setLastSyncTime();
   return result; // { budgets: [...], transactions: [...] }
 };
