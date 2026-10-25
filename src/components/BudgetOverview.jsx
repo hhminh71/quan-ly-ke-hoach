@@ -68,9 +68,10 @@ export default function BudgetOverview({
   // Compute live actual spent per account strictly from the passed year's transactions
   const liveActualsByCode = useMemo(() => {
     const map = {};
-    transactions.forEach((t) => {
-      if (t.accountCode) {
-        map[t.accountCode] = (map[t.accountCode] || 0) + (Number(t.amount) || 0);
+    (transactions || []).forEach((t) => {
+      if (t && t.accountCode) {
+        const code = String(t.accountCode).trim();
+        map[code] = (map[code] || 0) + (Number(t.amount) || 0);
       }
     });
     return map;
@@ -79,8 +80,9 @@ export default function BudgetOverview({
   // Group transactions list by accountCode
   const transactionsByCode = useMemo(() => {
     const map = {};
-    transactions.forEach((t) => {
-      const code = t.accountCode || '';
+    (transactions || []).forEach((t) => {
+      if (!t) return;
+      const code = String(t.accountCode || '').trim();
       if (!map[code]) map[code] = [];
       map[code].push(t);
     });
@@ -125,16 +127,23 @@ export default function BudgetOverview({
   // Selected detail account for drilldown modal
   const selectedDetailAccount = useMemo(() => {
     if (!selectedDetailCode) return null;
-    return enhancedBudgets.find((b) => b.code === selectedDetailCode) || null;
+    const targetCode = String(selectedDetailCode).trim();
+    return enhancedBudgets.find((b) => String(b.code || '').trim() === targetCode) || null;
   }, [selectedDetailCode, enhancedBudgets]);
 
   // Filtered
   const filtered = useMemo(() => {
+    const lowerSearch = String(searchTerm || '').toLowerCase().trim();
     return enhancedBudgets.filter((b) => {
+      const code = String(b.code || '').toLowerCase();
+      const name = String(b.name || '').toLowerCase();
+      const scope = String(b.scope || '').toLowerCase();
+
       const matchSearch =
-        b.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        b.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (b.scope && b.scope.toLowerCase().includes(searchTerm.toLowerCase()));
+        !lowerSearch ||
+        code.includes(lowerSearch) ||
+        name.includes(lowerSearch) ||
+        scope.includes(lowerSearch);
 
       const matchGroup = selectedGroup === 'ALL' || b.group === selectedGroup;
       const matchStatus = statusFilter === 'ALL' || b.status === statusFilter;

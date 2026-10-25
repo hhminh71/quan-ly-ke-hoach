@@ -6,14 +6,7 @@ import {
   ArrowUpDown,
   Trash2,
   Edit3,
-  ExternalLink,
-  DollarSign,
-  Wallet,
-  TrendingUp,
-  AlertTriangle,
-  CheckCircle2,
   FileSpreadsheet,
-  Layers,
   ArrowUpRight,
 } from 'lucide-react';
 import EditTransactionModal from './EditTransactionModal';
@@ -41,32 +34,38 @@ export default function AccountLedgerModal({
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
-    const parts = dateStr.split('-');
+    const str = String(dateStr).trim();
+    const parts = str.split('-');
     if (parts.length === 3) {
       return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
-    return dateStr;
+    return str;
   };
 
-  // Filter transactions belonging to this account
+  // Filter transactions belonging to this account defensively
   const accountTransactions = useMemo(() => {
-    return transactions.filter(
-      (t) =>
-        (t.accountCode && t.accountCode === account.code) ||
-        (!t.accountCode && t.category === account.name)
-    );
+    if (!account) return [];
+    const accCode = String(account.code || '').trim();
+    const accName = String(account.name || '').trim();
+
+    return (transactions || []).filter((t) => {
+      if (!t) return false;
+      const tCode = String(t.accountCode || '').trim();
+      const tCat = String(t.category || '').trim();
+      return (tCode && tCode === accCode) || (!tCode && tCat === accName);
+    });
   }, [transactions, account]);
 
   // Search filter
   const filteredTransactions = useMemo(() => {
+    const lower = String(searchTerm || '').toLowerCase().trim();
     return accountTransactions.filter((item) => {
-      const lower = searchTerm.toLowerCase();
-      const matchSearch =
-        (item.employeeName && item.employeeName.toLowerCase().includes(lower)) ||
-        (item.notes && item.notes.toLowerCase().includes(lower)) ||
-        (item.date && item.date.includes(lower)) ||
-        (item.amount && String(item.amount).includes(lower));
-      return matchSearch;
+      if (!lower) return true;
+      const emp = String(item.employeeName || '').toLowerCase();
+      const notes = String(item.notes || '').toLowerCase();
+      const date = String(item.date || '').toLowerCase();
+      const amt = String(item.amount || '');
+      return emp.includes(lower) || notes.includes(lower) || date.includes(lower) || amt.includes(lower);
     });
   }, [accountTransactions, searchTerm]);
 
@@ -74,16 +73,16 @@ export default function AccountLedgerModal({
   const sortedTransactions = useMemo(() => {
     return [...filteredTransactions].sort((a, b) => {
       if (sortOrder === 'newest') {
-        const dateA = a.date || '';
-        const dateB = b.date || '';
+        const dateA = String(a.date || '');
+        const dateB = String(b.date || '');
         if (dateB !== dateA) return dateB.localeCompare(dateA);
-        return b.id - a.id;
+        return (Number(b.id) || 0) - (Number(a.id) || 0);
       }
       if (sortOrder === 'oldest') {
-        const dateA = a.date || '';
-        const dateB = b.date || '';
+        const dateA = String(a.date || '');
+        const dateB = String(b.date || '');
         if (dateA !== dateB) return dateA.localeCompare(dateB);
-        return a.id - b.id;
+        return (Number(a.id) || 0) - (Number(b.id) || 0);
       }
       if (sortOrder === 'highest') return (Number(b.amount) || 0) - (Number(a.amount) || 0);
       if (sortOrder === 'lowest') return (Number(a.amount) || 0) - (Number(b.amount) || 0);
@@ -96,17 +95,19 @@ export default function AccountLedgerModal({
     return sortedTransactions.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   }, [sortedTransactions]);
 
-  // Live account stats
+  // Live account stats defensively
   const approved = Number(account.selectedYearApproved) || 0;
   const spent = Number(account.liveActual) || 0;
-  const remaining = Number(account.liveRemaining) !== undefined ? Number(account.liveRemaining) : (approved - spent);
+  const remaining = typeof account.liveRemaining === 'number' && !isNaN(account.liveRemaining)
+    ? account.liveRemaining
+    : (approved - spent);
   const spentPercent = approved > 0 ? (spent / approved) * 100 : 0;
   const remainingPercent = approved > 0 ? (remaining / approved) * 100 : 0;
 
   return (
     <>
-      <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-150">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+      <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden">
           {/* Header */}
           <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/70">
             <div className="flex items-start sm:items-center gap-3">
@@ -165,7 +166,7 @@ export default function AccountLedgerModal({
           <div className="p-4 sm:p-5 border-b border-slate-100 bg-gradient-to-b from-white to-slate-50/50 space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {/* 1. Tổng được duyệt */}
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 shadow-2xs">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 shadow-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">
                     Tổng Được Duyệt
@@ -183,7 +184,7 @@ export default function AccountLedgerModal({
               </div>
 
               {/* 2. Tổng phát sinh */}
-              <div className="p-3 rounded-xl bg-blue-50/80 border border-blue-200 shadow-2xs">
+              <div className="p-3 rounded-xl bg-blue-50/80 border border-blue-200 shadow-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wide">
                     Tổng Phát Sinh
@@ -202,7 +203,7 @@ export default function AccountLedgerModal({
 
               {/* 3. Tổng còn lại */}
               <div
-                className={`p-3 rounded-xl border shadow-2xs ${
+                className={`p-3 rounded-xl border shadow-sm ${
                   remaining >= 0 ? 'bg-emerald-50/80 border-emerald-200' : 'bg-rose-50/80 border-rose-200'
                 }`}
               >
@@ -304,7 +305,7 @@ export default function AccountLedgerModal({
               </div>
             ) : (
               <table className="w-full text-left border-collapse">
-                <thead className="sticky top-0 bg-slate-50 z-10 border-b border-slate-200 shadow-2xs">
+                <thead className="sticky top-0 bg-slate-50 z-10 border-b border-slate-200 shadow-sm">
                   <tr className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                     <th className="py-2.5 px-3 sm:px-5 w-12 text-center">#</th>
                     <th className="py-2.5 px-3 sm:px-4">Ngày</th>
@@ -337,7 +338,7 @@ export default function AccountLedgerModal({
                       <td className="py-3 px-3 sm:px-4 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold text-[10px] flex items-center justify-center shrink-0">
-                            {item.employeeName ? item.employeeName.charAt(0).toUpperCase() : 'U'}
+                            {String(item.employeeName || 'U').trim().charAt(0).toUpperCase() || 'U'}
                           </div>
                           <span className="font-medium text-slate-800">
                             {item.employeeName || 'Chưa ghi nhận'}

@@ -22,13 +22,13 @@ export default function EditTransactionModal({
   useEffect(() => {
     if (transaction) {
       setEditForm({
-        date: transaction.date || '',
-        accountCode: transaction.accountCode || (budgets[0]?.code || '62762101'),
-        category: transaction.category || '',
-        group: transaction.group || 'SỬA CHỮA THƯỜNG XUYÊN',
-        employeeName: transaction.employeeName || '',
+        date: String(transaction.date || '').trim(),
+        accountCode: String(transaction.accountCode || (budgets[0]?.code || '62762101')).trim(),
+        category: String(transaction.category || '').trim(),
+        group: String(transaction.group || 'SỬA CHỮA THƯỜNG XUYÊN').trim(),
+        employeeName: String(transaction.employeeName || '').trim(),
         amount: String(transaction.amount || 0),
-        notes: transaction.notes || '',
+        notes: String(transaction.notes || '').trim(),
       });
     }
   }, [transaction, budgets]);
@@ -40,7 +40,7 @@ export default function EditTransactionModal({
   };
 
   const handleEditAccountChange = (code) => {
-    const found = budgets.find((b) => b.code === code);
+    const found = budgets.find((b) => String(b.code || '').trim() === String(code).trim());
     setEditForm((prev) => ({
       ...prev,
       accountCode: code,
@@ -53,20 +53,20 @@ export default function EditTransactionModal({
     e.preventDefault();
     const updated = {
       ...transaction,
-      date: editForm.date,
-      accountCode: editForm.accountCode,
-      category: editForm.category,
-      group: editForm.group,
-      employeeName: editForm.employeeName.trim(),
+      date: String(editForm.date || '').trim(),
+      accountCode: String(editForm.accountCode || '').trim(),
+      category: String(editForm.category || '').trim(),
+      group: String(editForm.group || '').trim(),
+      employeeName: String(editForm.employeeName || '').trim(),
       amount: Number(editForm.amount) || 0,
-      notes: editForm.notes.trim(),
+      notes: String(editForm.notes || '').trim(),
     };
     onSave(updated);
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-150">
         {/* Modal Header */}
         <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">

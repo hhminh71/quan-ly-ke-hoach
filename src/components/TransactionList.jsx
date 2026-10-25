@@ -55,11 +55,12 @@ export default function TransactionList({
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
-    const parts = dateStr.split('-');
+    const str = String(dateStr).trim();
+    const parts = str.split('-');
     if (parts.length === 3) {
       return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
-    return dateStr;
+    return str;
   };
 
   // Open Edit Modal
@@ -70,29 +71,44 @@ export default function TransactionList({
   // Unique categories
   const categories = useMemo(() => {
     const map = new Map();
-    transactions.forEach((t) => {
-      const key = t.accountCode ? `[${t.accountCode}] ${t.category}` : t.category;
+    (transactions || []).forEach((t) => {
+      if (!t) return;
+      const codeStr = String(t.accountCode || '').trim();
+      const catStr = String(t.category || '').trim();
+      const key = codeStr ? `[${codeStr}] ${catStr}` : catStr;
       if (key && !map.has(key)) {
-        map.set(key, { code: t.accountCode, name: t.category, display: key });
+        map.set(key, { code: codeStr, name: catStr, display: key });
       }
     });
-    return Array.from(map.values()).sort((a, b) => (a.code || '').localeCompare(b.code || ''));
+    return Array.from(map.values()).sort((a, b) => String(a.code || '').localeCompare(String(b.code || '')));
   }, [transactions]);
 
   // Filter logic
   const filtered = useMemo(() => {
-    return transactions.filter((item) => {
-      const lowerSearch = searchTerm.toLowerCase();
+    const lowerSearch = String(searchTerm || '').toLowerCase().trim();
+    const catFilter = String(selectedCategory || 'ALL').trim();
+
+    return (transactions || []).filter((item) => {
+      if (!item) return false;
+      const emp = String(item.employeeName || '').toLowerCase();
+      const notes = String(item.notes || '').toLowerCase();
+      const acc = String(item.accountCode || '').toLowerCase();
+      const cat = String(item.category || '').toLowerCase();
+
       const matchesSearch =
-        (item.employeeName && item.employeeName.toLowerCase().includes(lowerSearch)) ||
-        (item.notes && item.notes.toLowerCase().includes(lowerSearch)) ||
-        (item.accountCode && item.accountCode.toLowerCase().includes(lowerSearch)) ||
-        (item.category && item.category.toLowerCase().includes(lowerSearch));
+        !lowerSearch ||
+        emp.includes(lowerSearch) ||
+        notes.includes(lowerSearch) ||
+        acc.includes(lowerSearch) ||
+        cat.includes(lowerSearch);
+
+      const itemAcc = String(item.accountCode || '').trim();
+      const itemCat = String(item.category || '').trim();
 
       const matchesCategory =
-        selectedCategory === 'ALL' ||
-        item.accountCode === selectedCategory ||
-        item.category === selectedCategory;
+        catFilter === 'ALL' ||
+        itemAcc === catFilter ||
+        itemCat === catFilter;
 
       return matchesSearch && matchesCategory;
     });
@@ -102,31 +118,31 @@ export default function TransactionList({
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
       if (sortOrder === 'newest') {
-        const dateA = a.date || '';
-        const dateB = b.date || '';
+        const dateA = String(a.date || '');
+        const dateB = String(b.date || '');
         if (dateB !== dateA) return dateB.localeCompare(dateA);
-        return b.id - a.id;
+        return (Number(b.id) || 0) - (Number(a.id) || 0);
       }
       if (sortOrder === 'oldest') {
-        const dateA = a.date || '';
-        const dateB = b.date || '';
+        const dateA = String(a.date || '');
+        const dateB = String(b.date || '');
         if (dateA !== dateB) return dateA.localeCompare(dateB);
-        return a.id - b.id;
+        return (Number(a.id) || 0) - (Number(b.id) || 0);
       }
       if (sortOrder === 'account_asc') {
-        const codeA = a.accountCode || '';
-        const codeB = b.accountCode || '';
+        const codeA = String(a.accountCode || '');
+        const codeB = String(b.accountCode || '');
         if (codeA !== codeB) return codeA.localeCompare(codeB);
-        return (b.date || '').localeCompare(a.date || '');
+        return String(b.date || '').localeCompare(String(a.date || ''));
       }
       if (sortOrder === 'account_desc') {
-        const codeA = a.accountCode || '';
-        const codeB = b.accountCode || '';
+        const codeA = String(a.accountCode || '');
+        const codeB = String(b.accountCode || '');
         if (codeA !== codeB) return codeB.localeCompare(codeA);
-        return (b.date || '').localeCompare(a.date || '');
+        return String(b.date || '').localeCompare(String(a.date || ''));
       }
-      if (sortOrder === 'highest') return (b.amount || 0) - (a.amount || 0);
-      if (sortOrder === 'lowest') return (a.amount || 0) - (b.amount || 0);
+      if (sortOrder === 'highest') return (Number(b.amount) || 0) - (Number(a.amount) || 0);
+      if (sortOrder === 'lowest') return (Number(a.amount) || 0) - (Number(b.amount) || 0);
       return 0;
     });
   }, [filtered, sortOrder]);
@@ -447,10 +463,10 @@ export default function TransactionList({
                   <td className="py-3.5 px-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-bold text-[11px] flex items-center justify-center shrink-0">
-                        {item.employeeName ? item.employeeName.charAt(0) : 'U'}
+                        {String(item.employeeName || 'U').trim().charAt(0).toUpperCase() || 'U'}
                       </div>
                       <span className="font-medium text-slate-700 text-xs">
-                        {item.employeeName}
+                        {item.employeeName || 'Chưa ghi nhận'}
                       </span>
                     </div>
                   </td>

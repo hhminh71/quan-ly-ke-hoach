@@ -53,15 +53,16 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
     throw new Error(result.message || 'Lỗi khi đọc từ Google Sheet');
   }
 
-  // Chuẩn hóa dữ liệu nếu bản triển khai Apps Script cũ bị lệch cột do mới thêm cột Năm
+  // Chuẩn hóa và làm sạch toàn bộ dữ liệu giao dịch từ Google Sheet
   if (Array.isArray(result.transactions)) {
-    result.transactions = result.transactions.map((t) => {
+    result.transactions = result.transactions.map((t, idx) => {
       const isShifted =
         /^\d{4}$/.test(String(t.date || '').trim()) &&
         (String(t.accountCode || '').includes('GMT') ||
           String(t.accountCode || '').includes(':') ||
           (isNaN(t.accountCode) && String(t.accountCode).length > 10));
 
+      let rec = t;
       if (isShifted) {
         let cleanDate = '';
         try {
@@ -78,20 +79,33 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
           cleanDate = String(t.accountCode);
         }
 
-        return {
-          id: t.id,
+        rec = {
+          id: t.id || idx + 1,
           date: cleanDate,
           accountCode: String(t.category || '').trim(),
           category: String(t.group || '').trim(),
           group: String(t.employeeName || '').trim(),
-          employeeName: t.employeeName && t.employeeName !== 'SỬA CHỮA THƯỜNG XUYÊN' ? t.employeeName : 'Cán bộ phụ trách',
+          employeeName: t.employeeName && t.employeeName !== 'SỬA CHỮA THƯỜNG XUYÊN' ? String(t.employeeName) : 'Cán bộ phụ trách',
           amount: Number(t.notes) || 0,
           notes: String(t.createdAt || ''),
           createdAt: '09:00',
           status: 'Đã thực hiện',
         };
       }
-      return t;
+
+      // Đảm bảo mọi trường luôn có kiểu dữ liệu chuẩn, không bị crash bởi null/number
+      return {
+        id: rec.id || idx + 1,
+        date: String(rec.date || '').trim(),
+        accountCode: String(rec.accountCode || '').trim(),
+        category: String(rec.category || '').trim(),
+        group: String(rec.group || '').trim(),
+        employeeName: String(rec.employeeName || '').trim(),
+        amount: Number(rec.amount) || 0,
+        notes: String(rec.notes || '').trim(),
+        createdAt: String(rec.createdAt || '09:00'),
+        status: String(rec.status || 'Đã thực hiện'),
+      };
     });
   }
 

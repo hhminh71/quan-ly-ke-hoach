@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import Navbar from './components/Navbar';
+import ErrorBoundary from './components/ErrorBoundary';
 import { LayoutDashboard, LogIn } from 'lucide-react';
 
 export default function App() {
@@ -53,7 +54,7 @@ export default function App() {
       {!user ? (
         <LoginPage onLogin={handleLogin} />
       ) : (
-        <>
+        <ErrorBoundary>
           <Navbar user={user} onLogout={handleLogout} />
           <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
             <DashboardPage user={user} />
@@ -63,7 +64,7 @@ export default function App() {
               © 2026 Quản Lý Kế Hoạch • Phát triển trên nền tảng React (Vite) & Tailwind CSS
             </div>
           </footer>
-        </>
+        </ErrorBoundary>
       )}
     </div>
   );

@@ -33,7 +33,23 @@ export default function DashboardPage({ user }) {
   const [transactions, setTransactions] = useState(() => {
     try {
       const saved = localStorage.getItem('app_transactions_v2');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          return parsed.map((t, idx) => ({
+            id: t.id || idx + 1,
+            date: String(t.date || '').trim(),
+            accountCode: String(t.accountCode || '').trim(),
+            category: String(t.category || '').trim(),
+            group: String(t.group || '').trim(),
+            employeeName: String(t.employeeName || '').trim(),
+            amount: Number(t.amount) || 0,
+            notes: String(t.notes || '').trim(),
+            createdAt: String(t.createdAt || '09:00'),
+            status: String(t.status || 'Đã thực hiện'),
+          }));
+        }
+      }
     } catch (e) {
       console.error(e);
     }
@@ -76,7 +92,7 @@ export default function DashboardPage({ user }) {
     const currentY = String(new Date().getFullYear());
     yearSet.add(currentY);
     yearSet.add(String(new Date().getFullYear() + 1));
-    return Array.from(yearSet).sort((a, b) => b.localeCompare(a));
+    return Array.from(yearSet).sort((a, b) => String(b).localeCompare(String(a)));
   }, [transactions]);
 
   // Filter transactions strictly for the selected fiscal year
