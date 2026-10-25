@@ -1,56 +1,62 @@
 import React from 'react';
-import { Wallet, FileSpreadsheet, TrendingUp, Users } from 'lucide-react';
+import { Wallet, FileSpreadsheet, TrendingUp, Users, ShieldAlert, CheckCircle2 } from 'lucide-react';
 
-export default function StatCards({ transactions }) {
+export default function StatCards({ transactions = [], budgets = [] }) {
   const totalAmount = transactions.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
   const totalCount = transactions.length;
-  const avgAmount = totalCount > 0 ? Math.round(totalAmount / totalCount) : 0;
-  
+
+  // Total approved from budgets
+  const totalApproved = budgets.reduce((acc, b) => acc + (Number(b.approvedAmount) || 0), 0);
+  const percentExecuted = totalApproved > 0 ? (totalAmount / totalApproved) * 100 : 0;
+  const remainingBudget = totalApproved - totalAmount;
+
   // Unique employees count
-  const uniqueEmployees = new Set(transactions.map((t) => t.employeeName.trim())).size;
+  const uniqueEmployees = new Set(
+    transactions.map((t) => (t.employeeName || '').trim()).filter((name) => name && name !== 'Ban Quản lý')
+  ).size;
 
   const formatCurrency = (val) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0);
   };
 
   const stats = [
     {
-      title: 'Tổng chi tiêu',
-      value: formatCurrency(totalAmount),
-      description: 'Tổng tiền các phiếu đã nhập',
+      title: 'Tổng ngân sách duyệt',
+      value: formatCurrency(totalApproved),
+      description: `${budgets.length} danh mục kế hoạch`,
       icon: Wallet,
       color: 'blue',
-      badge: '+12% tuần này',
+      badge: 'Định mức 2026',
       bgGradient: 'from-blue-500/10 to-indigo-500/5',
       iconBg: 'bg-blue-600 text-white',
     },
     {
-      title: 'Tổng số phiếu',
-      value: `${totalCount} phiếu`,
-      description: 'Lượt nhập liệu ghi nhận',
-      icon: FileSpreadsheet,
+      title: 'Đã thực hiện thực tế',
+      value: formatCurrency(totalAmount),
+      description: `${totalCount.toLocaleString('vi-VN')} phiếu đã phát sinh`,
+      icon: TrendingUp,
       color: 'emerald',
-      badge: 'Cập nhật tức thì',
+      badge: `Đạt ${percentExecuted.toFixed(1)}% kế hoạch`,
       bgGradient: 'from-emerald-500/10 to-teal-500/5',
       iconBg: 'bg-emerald-600 text-white',
     },
     {
-      title: 'Trung bình / phiếu',
-      value: formatCurrency(avgAmount),
-      description: 'Giá trị bình quân',
-      icon: TrendingUp,
-      color: 'amber',
-      badge: 'Ổn định',
-      bgGradient: 'from-amber-500/10 to-orange-500/5',
-      iconBg: 'bg-amber-600 text-white',
+      title: 'Ngân sách còn lại',
+      value: formatCurrency(remainingBudget),
+      description: remainingBudget >= 0 ? 'Trong hạn mức an toàn' : 'Cảnh báo vượt định mức',
+      icon: remainingBudget >= 0 ? CheckCircle2 : ShieldAlert,
+      color: remainingBudget >= 0 ? 'amber' : 'rose',
+      badge: `${(100 - percentExecuted).toFixed(1)}% dự trữ`,
+      bgGradient: remainingBudget >= 0 ? 'from-amber-500/10 to-orange-500/5' : 'from-rose-500/10 to-pink-500/5',
+      iconBg: remainingBudget >= 0 ? 'bg-amber-600 text-white' : 'bg-rose-600 text-white',
     },
     {
-      title: 'Nhân viên tham gia',
-      value: `${uniqueEmployees} nhân sự`,
-      description: 'Đã phát sinh phiếu thu chi',
+      title: 'Nhân sự thực hiện',
+      value: `${uniqueEmployees} cán bộ / kỹ sư`,
+      description: 'Phụ trách thi công & mua sắm',
       icon: Users,
       color: 'purple',
-      badge: 'Đang hoạt động',
+      badge: 'Hoạt động liên tục',
       bgGradient: 'from-purple-500/10 to-pink-500/5',
       iconBg: 'bg-purple-600 text-white',
     },

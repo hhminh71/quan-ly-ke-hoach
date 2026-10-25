@@ -1,50 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import StatCards from '../components/StatCards';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
-import { Calendar, Download, RefreshCw } from 'lucide-react';
-
-const INITIAL_TRANSACTIONS = [
-  {
-    id: 1,
-    date: '2026-10-21',
-    employeeName: 'Nguyễn Văn An',
-    amount: 1450000,
-    category: 'Văn phòng phẩm',
-    notes: 'Mua giấy in A4 Double A, mực máy in văn phòng và bút ký',
-    createdAt: '09:15',
-  },
-  {
-    id: 2,
-    date: '2026-10-21',
-    employeeName: 'Trần Thị Bích',
-    amount: 3200000,
-    category: 'Tiếp khách đối tác',
-    notes: 'Tiếp đoàn đối tác khách hàng ký kết hợp đồng quý 4',
-    createdAt: '11:30',
-  },
-  {
-    id: 3,
-    date: '2026-10-20',
-    employeeName: 'Lê Hoàng Nam',
-    amount: 850000,
-    category: 'Công tác phí & Đi lại',
-    notes: 'Chi phí taxi và phụ cấp công tác khảo sát thị trường Hải Phòng',
-    createdAt: '16:45',
-  },
-  {
-    id: 4,
-    date: '2026-10-19',
-    employeeName: 'Phạm Minh Tuấn',
-    amount: 2500000,
-    category: 'Thiết bị & Công cụ',
-    notes: 'Nâng cấp bàn phím cơ và ổ cứng SSD cho phòng kỹ thuật',
-    createdAt: '14:20',
-  },
-];
+import BudgetOverview from '../components/BudgetOverview';
+import { Calendar, Download, RefreshCw, LayoutDashboard, ListOrdered, FileSpreadsheet, PlusCircle } from 'lucide-react';
+import initialBudgets from '../data/budgets.json';
+import initialTransactions from '../data/transactions.json';
 
 export default function DashboardPage({ user }) {
-  const [transactions, setTransactions] = useState(INITIAL_TRANSACTIONS);
+  // Load saved transactions from localStorage or default to imported real data
+  const [transactions, setTransactions] = useState(() => {
+    try {
+      const saved = localStorage.getItem('app_transactions_v2');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error(e);
+    }
+    return initialTransactions;
+  });
+
+  const [budgets] = useState(initialBudgets);
+  const [activeTab, setActiveTab] = useState('ALL'); // 'ALL' (Form + List), 'BUDGETS' (76 Items), 'TRANSACTIONS' (Full List)
+
+  // Sync to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('app_transactions_v2', JSON.stringify(transactions));
+    } catch (e) {
+      console.error('Storage full or error', e);
+    }
+  }, [transactions]);
 
   const handleAddTransaction = (newRecord) => {
     setTransactions((prev) => [newRecord, ...prev]);
@@ -54,9 +39,10 @@ export default function DashboardPage({ user }) {
     setTransactions((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleResetSampleData = () => {
-    if (confirm('Khôi phục danh sách dữ liệu mẫu ban đầu?')) {
-      setTransactions(INITIAL_TRANSACTIONS);
+  const handleResetData = () => {
+    if (confirm('Khôi phục toàn bộ danh sách 1.216 giao dịch thực tế từ file Excel gốc?')) {
+      setTransactions(initialTransactions);
+      localStorage.removeItem('app_transactions_v2');
     }
   };
 
@@ -65,18 +51,18 @@ export default function DashboardPage({ user }) {
       alert('Không có dữ liệu để xuất.');
       return;
     }
-    const headers = 'ID,Ngay,NhanVien,SoTien,DanhMuc,GhiChu\n';
+    const headers = 'ID,MaKhoanMuc,DanhMuc,Nhom,Ngay,NguoiThucHien,SoTien,GhiChu\n';
     const rows = transactions
       .map(
         (t) =>
-          `"${t.id}","${t.date}","${t.employeeName}","${t.amount}","${t.category}","${t.notes.replace(/"/g, '""')}"`
+          `"${t.id}","${t.accountCode || ''}","${(t.category || '').replace(/"/g, '""')}","${(t.group || '').replace(/"/g, '""')}","${t.date || ''}","${(t.employeeName || '').replace(/"/g, '""')}","${t.amount || 0}","${(t.notes || '').replace(/"/g, '""')}"`
       )
       .join('\n');
     const blob = new Blob(['\uFEFF' + headers + rows], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `bao-cao-thu-chi-${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `bao-cao-ke-hoach-chi-phi-${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -100,54 +86,108 @@ export default function DashboardPage({ user }) {
             <span className="capitalize">{todayFormatted}</span>
           </div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Bảng Điều Khiển Quản Lý
+            Hệ Thống Quản Lý Kế Hoạch & Chi Phí Doanh Nghiệp
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">
-            Xin chào, <span className="font-semibold text-slate-700">{user?.name || 'Quản trị viên'}</span>! Chúc bạn một ngày làm việc hiệu quả.
+            Dữ liệu đồng bộ trực tiếp từ bảng tính: <span className="font-semibold text-slate-700">76 Khoản mục ngân sách</span> • <span className="font-semibold text-slate-700">{transactions.length.toLocaleString('vi-VN')} Phiếu chi thực tế</span>
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={handleResetSampleData}
+            onClick={handleResetData}
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-all"
-            title="Nạp lại dữ liệu mẫu"
+            title="Khôi phục lại dữ liệu gốc từ Excel"
           >
             <RefreshCw className="w-3.5 h-3.5 text-slate-500" />
-            <span className="hidden sm:inline">Dữ liệu mẫu</span>
+            <span className="hidden sm:inline">Nạp lại gốc</span>
           </button>
 
           <button
             type="button"
             onClick={handleExportCSV}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all"
-            title="Xuất danh sách ra file Excel / CSV"
+            title="Xuất toàn bộ danh sách ra file Excel / CSV"
           >
             <Download className="w-3.5 h-3.5" />
-            <span>Xuất CSV</span>
+            <span>Xuất Excel/CSV</span>
           </button>
         </div>
       </div>
 
       {/* 4 Summary Stat Cards */}
-      <StatCards transactions={transactions} />
+      <StatCards transactions={transactions} budgets={budgets} />
 
-      {/* Main Grid: Form (left on large screens) & Table (right/full width) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Form Column */}
-        <div className="lg:col-span-5 xl:col-span-4">
-          <TransactionForm onAddTransaction={handleAddTransaction} />
-        </div>
+      {/* View Tabs */}
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+        <button
+          type="button"
+          onClick={() => setActiveTab('ALL')}
+          className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
+            activeTab === 'ALL'
+              ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+          }`}
+        >
+          <LayoutDashboard className="w-4 h-4" />
+          <span>Bàn Làm Việc & Nhập Liệu</span>
+        </button>
 
-        {/* List Table Column */}
-        <div className="lg:col-span-7 xl:col-span-8">
-          <TransactionList
-            transactions={transactions}
-            onDeleteTransaction={handleDeleteTransaction}
-          />
-        </div>
+        <button
+          type="button"
+          onClick={() => setActiveTab('BUDGETS')}
+          className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
+            activeTab === 'BUDGETS'
+              ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+          }`}
+        >
+          <FileSpreadsheet className="w-4 h-4" />
+          <span>Định Mức Ngân Sách ({budgets.length})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('TRANSACTIONS')}
+          className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
+            activeTab === 'TRANSACTIONS'
+              ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+          }`}
+        >
+          <ListOrdered className="w-4 h-4" />
+          <span>Sổ Cái Toàn Bộ ({transactions.length.toLocaleString('vi-VN')})</span>
+        </button>
       </div>
+
+      {/* Tab 1: Form & List Side-by-Side */}
+      {activeTab === 'ALL' && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="lg:col-span-5 xl:col-span-4">
+            <TransactionForm onAddTransaction={handleAddTransaction} budgets={budgets} />
+          </div>
+          <div className="lg:col-span-7 xl:col-span-8">
+            <TransactionList
+              transactions={transactions}
+              onDeleteTransaction={handleDeleteTransaction}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Tab 2: Master Budgets Table */}
+      {activeTab === 'BUDGETS' && (
+        <BudgetOverview budgets={budgets} transactions={transactions} />
+      )}
+
+      {/* Tab 3: Full Width Transactions List */}
+      {activeTab === 'TRANSACTIONS' && (
+        <TransactionList
+          transactions={transactions}
+          onDeleteTransaction={handleDeleteTransaction}
+        />
+      )}
     </div>
   );
 }

@@ -1,60 +1,37 @@
-# Dự Án Web App Quản Lý Kế Hoạch
+# Dự Án Web App Quản Lý Kế Hoạch & Chi Phí Doanh Nghiệp
 
-Dự án web application được xây dựng bằng **React (Vite)** và **Tailwind CSS**, cung cấp giao diện hiện đại, tối giản và thân thiện cho doanh nghiệp theo dõi kế hoạch, quản lý thu chi và công tác phí nội bộ.
+Dự án web application được xây dựng bằng **React (Vite)** và **Tailwind CSS**, cung cấp giao diện hiện đại, tối giản và chuyên nghiệp cho doanh nghiệp theo dõi kế hoạch định mức ngân sách, quản lý phát sinh chi tiêu thực tế và đối soát số liệu.
 
----
-
-## 🌟 Tính Năng Chính
-
-### 1. Trang Đăng Nhập (Login)
-- Giao diện hiện đại (Modern Glassmorphism Card) trên nền tối sang trọng.
-- Trường nhập liệu: **Tài khoản / Email** và **Mật khẩu** (có nút bật/tắt hiển thị mật khẩu).
-- Nút **"Tự điền"** tài khoản dùng thử tiện lợi:
-  - **Tài khoản demo:** `admin@company.vn`
-  - **Mật khẩu demo:** `123456`
-- Kiểm tra tính hợp lệ (Validation) và hiệu ứng chuyển trạng thái mượt mà.
-
-### 2. Trang Bảng Điều Khiển (Dashboard)
-- **Thanh điều hướng (Navbar)**: Hiển thị logo nhận diện, thông tin người dùng đang đăng nhập, nút Đăng xuất.
-- **Thẻ thống kê thông minh (Stat Cards)**:
-  - Tổng số tiền chi tiêu / thu chi.
-  - Tổng số phiếu đã ghi nhận.
-  - Giá trị trung bình mỗi phiếu.
-  - Số lượng nhân viên tham gia.
-- **Biểu mẫu (Form) nhập liệu**:
-  - 📅 **Ngày giao dịch (Date)**: Bộ chọn ngày kèm phím tắt chọn nhanh *Hôm nay*.
-  - 👤 **Tên nhân viên (Employee Name)**: Ô nhập liệu có gợi ý sẵn danh sách nhân sự phổ biến.
-  - 💵 **Số tiền (Amount)**: Định dạng tiền tệ VNĐ trực quan kèm các nút cộng nhanh (+100k, +500k, +1M, +5M).
-  - 📝 **Ghi chú (Notes)**: Ô mô tả chi tiết mục đích chi tiêu hoặc công tác.
-  - 🏷️ **Phân loại danh mục (Category)**: Chi phí vận hành, công tác phí, tiếp khách, văn phòng phẩm...
-- **Bảng danh sách dữ liệu phiếu (Transaction List)**:
-  - Xem danh sách giao dịch cập nhật theo thời gian thực (Real-time).
-  - Tìm kiếm nhanh theo tên nhân viên hoặc nội dung ghi chú.
-  - Lọc theo danh mục và sắp xếp (Mới nhất, Cũ nhất, Số tiền cao/thấp).
-  - Nút **Xóa** từng phiếu với thông báo xác nhận an toàn.
-  - Nút **Xuất CSV** để tải báo cáo dữ liệu về máy tính (Excel tương thích).
-- **Phím chuyển nhanh (Quick Switcher)** ở góc dưới bên phải màn hình để dễ dàng kiểm thử qua lại giữa trang Login và Dashboard.
+Dữ liệu được chuẩn hóa và chuyển đổi hoàn toàn từ file bảng tính nghiệp vụ `TONG-HOP-KE-HOACH.xlsx` (88 sheets) thành cơ sở dữ liệu quan hệ tinh gọn cho Web App.
 
 ---
 
-## 🚀 Hướng Dẫn Cài Đặt & Khởi Chạy
+## 🌟 Tính Năng Nổi Bật
 
-### 1. Yêu cầu hệ thống
-- **Node.js**: Phiên bản 18+ hoặc 20+ trở lên (Hệ thống đã được thiết lập sẵn phiên bản LTS Node v24).
+### 1. Quản Lý Ngân Sách Định Mức (76 Khoản Mục)
+- Bảng tổng hợp kế hoạch theo dõi các mã tài khoản kế toán (`62721`, `62762101`, `62762209`, `627701`, `6412`...).
+- Theo dõi: **Số tiền được duyệt**, **Đã thực hiện thực tế**, **Còn lại** và **Tỷ lệ % giải ngân**.
+- Thanh tiến độ màu động:
+  - 🟢 **An toàn:** Giải ngân < 80%.
+  - 🟡 **Cảnh báo (Gần hết):** Giải ngân từ 80% - 100%.
+  - 🔴 **Vượt định mức:** Giải ngân vượt quá 100%.
 
-### 2. Khởi chạy máy chủ phát triển (Development Server)
-Mở cửa sổ dòng lệnh tại thư mục dự án và chạy:
+### 2. Sổ Cái Chi Tiết (1.216 Phiếu Chi Thực Tế)
+- Danh sách 1.216 giao dịch phát sinh thực tế bóc tách từ các sheet tài khoản.
+- Tìm kiếm tức thì theo: Tên cán bộ/kỹ sư, Mã tài khoản (627...), Nội dung công việc.
+- Bộ lọc theo từng mã tài khoản và sắp xếp linh hoạt.
+- Phân trang mượt mà (25 dòng/trang) giúp tải nhanh chóng không bị đơ giật.
 
-```bash
-npm run dev
-```
+### 3. Biểu Mẫu Ghi Nhận Phiếu Chi & Cảnh Báo Vượt Định Mức
+- Chọn mã khoản mục kế hoạch kèm hiển thị số dư ngân sách còn lại theo thời gian thực.
+- Tự động hiển thị **Cảnh báo màu vàng** nếu số tiền nhập vào vượt quá số dư còn lại của hạng mục đó.
+- Danh sách gợi ý hơn 110 nhân sự/kỹ sư phụ trách từ dữ liệu thực tế.
+- Các nút cộng nhanh tiền tệ (+500k, +2M, +5M, +10M) và định dạng VNĐ trực quan.
 
-Mở trình duyệt tại địa chỉ: [http://localhost:3000](http://localhost:3000)
-
-### 3. Đóng gói cho Production
-```bash
-npm run build
-```
+### 4. Báo Cáo & Xuất Dữ Liệu
+- Nút **Xuất Excel/CSV** hỗ trợ bảng mã tiếng Việt UTF-8 BOM chuẩn cho Excel.
+- 4 Thẻ thống kê tài chính thông minh: Tổng ngân sách duyệt, Đã thực hiện, Ngân sách còn lại, Số lượng nhân sự tham gia.
+- Nút **Nạp lại gốc** để khôi phục nhanh về trạng thái ban đầu khi cần kiểm thử.
 
 ---
 
@@ -65,18 +42,36 @@ quan-ly-ke-hoach/
 ├── src/
 │   ├── components/
 │   │   ├── Navbar.jsx           # Thanh điều hướng trên cùng
-│   │   ├── StatCards.jsx        # 4 thẻ tóm tắt số liệu
-│   │   ├── TransactionForm.jsx  # Biểu mẫu nhập liệu (Ngày, Tên, Số tiền, Ghi chú)
-│   │   └── TransactionList.jsx  # Bảng danh sách phiếu thu chi & bộ lọc
+│   │   ├── StatCards.jsx        # 4 thẻ tóm tắt ngân sách & tỷ lệ giải ngân
+│   │   ├── BudgetOverview.jsx   # Bảng theo dõi 76 khoản mục kế hoạch định mức
+│   │   ├── TransactionForm.jsx  # Biểu mẫu nhập phiếu chi & cảnh báo ngân sách
+│   │   └── TransactionList.jsx  # Sổ cái 1.216 phiếu chi, phân trang, tìm kiếm
+│   ├── data/
+│   │   ├── budgets.json         # 76 khoản mục kế hoạch từ sheet TỔNG HỢP
+│   │   ├── transactions.json    # 1.216 phiếu chi thực tế trích xuất từ 85 sheet
+│   │   └── employees.json       # Danh sách 112 nhân sự / kỹ sư phụ trách
 │   ├── pages/
-│   │   ├── LoginPage.jsx        # Trang đăng nhập
-│   │   └── DashboardPage.jsx    # Trang bảng điều khiển chính
-│   ├── App.jsx                  # Điều hướng & quản lý phiên đăng nhập
-│   ├── index.css                # Cấu hình Tailwind CSS & Custom scrollbar
-│   └── main.jsx                 # Entry point React
-├── index.html                   # HTML Template
-├── package.json                 # Cấu hình thư viện phụ thuộc
-├── tailwind.config.js           # Cấu hình Tailwind CSS
-├── postcss.config.js            # Cấu hình PostCSS
-└── vite.config.js               # Cấu hình Vite (Port 3000)
+│   │   ├── LoginPage.jsx        # Màn hình đăng nhập
+│   │   └── DashboardPage.jsx    # Bảng điều khiển quản lý trung tâm
+│   ├── App.jsx                  # Điều hướng & quản lý phiên người dùng
+│   ├── index.css
+│   └── main.jsx
+├── TONG-HOP-KE-HOACH.xlsx       # File bảng tính gốc 88 sheets
+├── index.html
+├── package.json
+└── vite.config.js
 ```
+
+---
+
+## 🚀 Khởi Chạy
+
+```bash
+# Khởi chạy môi trường phát triển
+npm run dev
+
+# Đóng gói sản phẩm
+npm run build
+```
+Mở trình duyệt tại [http://localhost:3000](http://localhost:3000)
+Tài khoản demo: `admin@company.vn` / `123456`
