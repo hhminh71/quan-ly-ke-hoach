@@ -199,122 +199,79 @@ export default function ExecutiveDashboard({
   }, [enhancedItems, selectedRiskFilter]);
 
   return (
-    <div className="space-y-2.5 sm:space-y-6 animate-in fade-in duration-200">
-      {/* 1. EXECUTIVE KPI SUMMARY CARDS */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-4">
+    <div className="space-y-2 sm:space-y-4 animate-in fade-in duration-200">
+      {/* 1. EXECUTIVE KPI SUMMARY CARDS: Slim, Elegant Tiles */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-3">
         {/* Card 1: Hạn mức duyệt */}
-        <div className="p-2.5 sm:p-5 rounded-lg sm:rounded-2xl bg-gradient-to-br from-blue-900 to-indigo-950 text-white shadow-sm sm:shadow-md border border-blue-800/40 relative overflow-hidden">
-          <div className="flex items-center justify-between">
-            <span className="text-[9px] sm:text-2xs font-bold uppercase tracking-wider text-blue-200 truncate">
-              Tổng Duyệt ({selectedYear})
+        <div className="p-2 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-900 to-indigo-950 text-white shadow-2xs border border-blue-800/40 relative overflow-hidden">
+          <div className="flex items-center justify-between text-blue-200">
+            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider truncate">
+              Hạn Mức ({selectedYear})
             </span>
-            <div className="w-5 h-5 sm:w-9 sm:h-9 rounded sm:rounded-xl bg-white/10 flex items-center justify-center text-blue-300 shrink-0">
-              <Wallet className="w-3 h-3 sm:w-5 sm:h-5" />
-            </div>
+            <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-300 shrink-0" />
           </div>
-          <p className="text-base sm:text-2xl font-black font-mono tracking-tight mt-0.5 sm:mt-2">
+          <p className="text-sm sm:text-2xl font-bold font-mono tracking-tight mt-0.5 sm:mt-1">
             {formatCompactVND(kpis.totalApproved)}
           </p>
-          <p className="hidden sm:block text-3xs sm:text-xs text-blue-300/80 mt-0.5 truncate" title={formatVND(kpis.totalApproved)}>
-            {formatVND(kpis.totalApproved)}
+          <p className="text-[9px] sm:text-xs text-blue-300/80 mt-0.5 truncate">
+            100% định mức • {budgets.length} danh mục
           </p>
-          <div className="mt-1.5 sm:mt-3 flex items-center gap-1 sm:gap-1.5 pt-1 sm:pt-2 border-t border-white/10 text-[9px] sm:text-2xs text-blue-200">
-            <span className="px-1 py-0.2 rounded bg-blue-500/30 font-bold">100% Định mức</span>
-            <span className="truncate">{budgets.length} danh mục</span>
-          </div>
         </div>
 
         {/* Card 2: Chi phí thực tế (MAX) */}
-        <div className="p-2.5 sm:p-5 rounded-lg sm:rounded-2xl bg-white border border-slate-200/90 shadow-2xs sm:shadow-sm relative overflow-hidden">
-          <div className="flex items-center justify-between">
-            <span className="text-[9px] sm:text-2xs font-bold uppercase tracking-wider text-slate-500 truncate">
+        <div className="p-2 sm:p-4 rounded-lg sm:rounded-xl bg-white border border-slate-200/80 shadow-2xs relative overflow-hidden">
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider truncate">
               Thực Tế (MAX)
             </span>
-            <div className="w-5 h-5 sm:w-9 sm:h-9 rounded sm:rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-              <TrendingUp className="w-3 h-3 sm:w-5 sm:h-5" />
-            </div>
+            <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 shrink-0" />
           </div>
-          <p className="text-base sm:text-2xl font-black font-mono tracking-tight text-slate-900 mt-0.5 sm:mt-2">
+          <p className="text-sm sm:text-2xl font-bold font-mono tracking-tight text-slate-900 mt-0.5 sm:mt-1">
             {formatCompactVND(kpis.totalReportActual)}
           </p>
-          <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5 sm:mt-1">
-            <span className="text-[9px] sm:text-xs font-bold text-emerald-700 bg-emerald-50 px-1 sm:px-2 py-0.2 sm:py-0.5 rounded-full border border-emerald-200">
-              Đã chi {kpis.avgPercent.toFixed(1)}%
-            </span>
-            <span className="text-[9px] text-slate-400 font-semibold uppercase hidden sm:inline">MAX(Bravo, Nhập liệu)</span>
-          </div>
-          <div className="mt-1.5 sm:mt-3 flex items-center justify-between pt-1 sm:pt-2 border-t border-slate-100 text-[9px] sm:text-2xs text-slate-500">
-            <span>{kpis.totalVouchers.toLocaleString('vi-VN')} phiếu</span>
-            <span className="font-semibold text-slate-700 hidden sm:inline">{formatCompactVND(kpis.totalReportActual)}</span>
-          </div>
+          <p className="text-[9px] sm:text-xs text-emerald-700 font-medium mt-0.5 truncate">
+            Đã chi {kpis.avgPercent.toFixed(1)}% • {kpis.totalVouchers} phiếu
+          </p>
         </div>
 
         {/* Card 3: Khả dụng còn lại */}
-        <div className="p-2.5 sm:p-5 rounded-lg sm:rounded-2xl bg-white border border-slate-200/90 shadow-2xs sm:shadow-sm relative overflow-hidden">
-          <div className="flex items-center justify-between">
-            <span className="text-[9px] sm:text-2xs font-bold uppercase tracking-wider text-slate-500 truncate">
+        <div className="p-2 sm:p-4 rounded-lg sm:rounded-xl bg-white border border-slate-200/80 shadow-2xs relative overflow-hidden">
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider truncate">
               Còn Lại
             </span>
-            <div
-              className={`w-5 h-5 sm:w-9 sm:h-9 rounded sm:rounded-xl flex items-center justify-center shrink-0 ${
-                kpis.totalRemaining >= 0 ? 'bg-blue-50 text-blue-600' : 'bg-rose-50 text-rose-600'
-              }`}
-            >
-              <CheckCircle2 className="w-3 h-3 sm:w-5 sm:h-5" />
-            </div>
+            <CheckCircle2 className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${
+              kpis.totalRemaining >= 0 ? 'text-blue-600' : 'text-rose-600'
+            }`} />
           </div>
           <p
-            className={`text-base sm:text-2xl font-black font-mono tracking-tight mt-0.5 sm:mt-2 ${
+            className={`text-sm sm:text-2xl font-bold font-mono tracking-tight mt-0.5 sm:mt-1 ${
               kpis.totalRemaining >= 0 ? 'text-slate-900' : 'text-rose-600'
             }`}
           >
             {formatCompactVND(kpis.totalRemaining)}
           </p>
-          <p className="text-[9px] sm:text-xs text-slate-500 mt-0.5 truncate" title={formatVND(kpis.totalRemaining)}>
+          <p className="text-[9px] sm:text-xs text-slate-500 mt-0.5 truncate">
             {kpis.totalRemaining >= 0
-              ? `Còn ${((kpis.totalRemaining / kpis.totalApproved) * 100).toFixed(1)}%`
-              : 'Đã vượt ngân sách'}
+              ? `Còn ${((kpis.totalRemaining / kpis.totalApproved) * 100).toFixed(1)}% • ${kpis.safeCount} an toàn`
+              : 'Đã vượt định mức'}
           </p>
-          <div className="mt-1.5 sm:mt-3 flex items-center gap-1 sm:gap-1.5 pt-1 sm:pt-2 border-t border-slate-100 text-[9px] sm:text-2xs text-slate-500">
-            <span
-              className={`w-1.5 h-1.5 rounded-full ${
-                kpis.totalRemaining >= 0 ? 'bg-emerald-500' : 'bg-rose-500'
-              }`}
-            ></span>
-            <span className="truncate">
-              {kpis.safeCount} an toàn • {kpis.warningCount + kpis.overCount} lưu ý
-            </span>
-          </div>
         </div>
 
         {/* Card 4: Tình trạng an toàn & Vận hành */}
-        <div className="p-2.5 sm:p-5 rounded-lg sm:rounded-2xl bg-white border border-slate-200/90 shadow-2xs sm:shadow-sm relative overflow-hidden">
-          <div className="flex items-center justify-between">
-            <span className="text-[9px] sm:text-2xs font-bold uppercase tracking-wider text-slate-500 truncate">
+        <div className="p-2 sm:p-4 rounded-lg sm:rounded-xl bg-white border border-slate-200/80 shadow-2xs relative overflow-hidden">
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider truncate">
               An Toàn
             </span>
-            <div className="w-5 h-5 sm:w-9 sm:h-9 rounded sm:rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-              <Activity className="w-3 h-3 sm:w-5 sm:h-5" />
-            </div>
+            <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-600 shrink-0" />
           </div>
-          <div className="flex items-baseline gap-1 mt-0.5 sm:mt-2">
-            <span className="text-base sm:text-2xl font-black font-mono text-slate-900">
-              {kpis.safeCount}
-            </span>
-            <span className="text-[9px] sm:text-xs text-slate-500 font-semibold">/ {budgets.length} an toàn</span>
-          </div>
-          <div className="flex items-center gap-1 mt-0.5 sm:mt-1.5">
-            <span className="px-1 py-0.2 rounded text-[9px] sm:text-3xs font-bold bg-rose-100 text-rose-800">
-              {kpis.overCount} Vượt
-            </span>
-            <span className="px-1 py-0.2 rounded text-[9px] sm:text-3xs font-bold bg-amber-100 text-amber-800">
-              {kpis.warningCount} Cảnh báo
-            </span>
-          </div>
-          <div className="mt-1.5 sm:mt-3 flex items-center justify-between pt-1 sm:pt-2 border-t border-slate-100 text-[9px] sm:text-2xs text-slate-500">
-            <span>{kpis.uniqueEmployees} cán bộ</span>
-            <span className="font-semibold text-blue-600">Năm {selectedYear}</span>
-          </div>
+          <p className="text-sm sm:text-2xl font-bold font-mono text-slate-900 mt-0.5 sm:mt-1">
+            {kpis.safeCount} <span className="text-xs text-slate-400 font-normal">/ {budgets.length}</span>
+          </p>
+          <p className="text-[9px] sm:text-xs font-medium text-amber-700 mt-0.5 truncate">
+            {kpis.overCount > 0 ? `${kpis.overCount} vượt • ` : ''}{kpis.warningCount} cảnh báo
+          </p>
         </div>
       </div>
 
@@ -486,27 +443,20 @@ export default function ExecutiveDashboard({
 
       {/* 3. LOWER SECTION: TOP 8 SPENDING & RISK MONITOR RADAR */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 sm:gap-6 items-start">
-        {/* Top 8 Spending Accounts (Col 7) */}
-        <div className="lg:col-span-7 bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs sm:shadow-sm p-2.5 sm:p-5 space-y-2.5 sm:space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2 sm:pb-3">
-            <div className="flex items-center gap-2 sm:gap-2.5">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
-                  Top 8 Khoản Mục Chi Phí Lớn Nhất
-                </h3>
-                <p className="hidden sm:block text-3xs text-slate-400">
-                  Xếp hạng theo giá trị thực tế MAX(Bravo, Nhập liệu)
-                </p>
-              </div>
+        {/* Top 8 Spending Accounts (Col 7): Ultra-slim 1-line Rows */}
+        <div className="lg:col-span-7 bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs sm:shadow-sm p-2.5 sm:p-5 space-y-2 sm:space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 shrink-0" />
+              <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
+                Top 8 Chi Phí Lớn Nhất ({selectedYear})
+              </h3>
             </div>
             {onNavigateToBudgets && (
               <button
                 type="button"
                 onClick={onNavigateToBudgets}
-                className="text-[11px] sm:text-xs text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-0.5 sm:gap-1 hover:underline"
+                className="text-[11px] sm:text-xs text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-0.5 hover:underline"
               >
                 <span>Xem tất cả</span>
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -519,75 +469,60 @@ export default function ExecutiveDashboard({
               <div
                 key={item.code}
                 onClick={() => onOpenAccountDetail && onOpenAccountDetail(item)}
-                className="py-1.5 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-3 hover:bg-blue-50/50 p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-colors cursor-pointer group"
-                title="Bấm để xem sổ cái chi tiết của khoản mục này"
+                className="py-1.5 px-1 sm:px-1.5 flex items-center justify-between gap-1.5 hover:bg-slate-50/80 rounded transition-colors cursor-pointer group"
+                title={`[${item.code}] ${item.name} • Duyệt: ${formatCompactVND(item.approved)} • Đã chi: ${formatVND(item.reportActual)}`}
               >
-                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-                  <span className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-slate-100 text-slate-700 font-mono font-bold text-[10px] sm:text-xs flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                    #{idx + 1}
+                {/* Left: Rank + Code + Full Item Name */}
+                <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                  <span className="font-mono text-[10px] text-slate-400 font-bold w-3 text-center shrink-0">
+                    {idx + 1}
                   </span>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="font-mono text-[10px] sm:text-2xs font-bold text-blue-700 bg-blue-50 px-1 py-0.2 rounded border border-blue-200/80">
-                        {item.code}
-                      </span>
-                      <p className="font-semibold text-slate-900 text-[11px] sm:text-xs truncate max-w-[150px] sm:max-w-xs group-hover:text-blue-700 transition-colors">
-                        {item.name}
-                      </p>
-                    </div>
-                    <p className="text-[9px] sm:text-3xs text-slate-400 truncate max-w-sm mt-0.5">
-                      {item.scope || item.group}
-                    </p>
-                  </div>
+                  <span className="font-mono text-[10px] font-bold text-blue-600 shrink-0">
+                    {item.code}
+                  </span>
+                  <span className="text-[11px] sm:text-xs font-medium text-slate-800 truncate group-hover:text-blue-600 transition-colors" title={item.name}>
+                    {item.name}
+                  </span>
                 </div>
 
-                <div className="text-right shrink-0">
-                  <div className="font-mono font-bold text-[11px] sm:text-xs text-slate-900">
-                    {formatVND(item.reportActual)}
-                  </div>
-                  <div className="flex items-center justify-end gap-1 mt-0.5">
-                    <span className="text-[9px] sm:text-3xs text-slate-400 font-mono hidden sm:inline">
-                      Duyệt: {formatCompactVND(item.approved)}
-                    </span>
-                    <span
-                      className={`text-[9px] sm:text-3xs font-bold px-1 py-0.2 rounded ${
-                        item.percent >= 100
-                          ? 'bg-rose-100 text-rose-800'
-                          : item.percent >= 80
-                          ? 'bg-amber-100 text-amber-800'
-                          : 'bg-emerald-100 text-emerald-800'
-                      }`}
-                    >
-                      {item.percent.toFixed(0)}%
-                    </span>
-                  </div>
+                {/* Right: Compact VND + Percent badge */}
+                <div className="flex items-center gap-1.5 shrink-0 text-right">
+                  <span className="font-mono text-[11px] sm:text-xs font-bold text-slate-900">
+                    {formatCompactVND(item.reportActual)}
+                  </span>
+                  <span
+                    className={`text-[9px] font-mono font-bold px-1 py-0.2 rounded ${
+                      item.percent >= 100
+                        ? 'bg-rose-50 text-rose-700 border border-rose-200/60'
+                        : item.percent >= 80
+                        ? 'bg-amber-50 text-amber-700 border border-amber-200/60'
+                        : 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
+                    }`}
+                  >
+                    {item.percent.toFixed(0)}%
+                  </span>
                 </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Risk Monitor Radar (Col 5) */}
-        <div className="lg:col-span-5 bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs sm:shadow-sm p-2.5 sm:p-5 space-y-2.5 sm:space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2 sm:pb-3">
-            <div className="flex items-center gap-2 sm:gap-2.5">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
-                <ShieldAlert className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-              </div>
-              <div>
-                <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
-                  Cảnh Báo Ngân Sách
-                </h3>
-                <p className="hidden sm:block text-3xs text-slate-400">Các khoản mục gần chạm trần hoặc vượt hạn mức</p>
-              </div>
+        {/* Risk Monitor Radar (Col 5): Ultra-slim 1-line Rows */}
+        <div className="lg:col-span-5 bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs sm:shadow-sm p-2.5 sm:p-5 space-y-2 sm:space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <ShieldAlert className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-500 shrink-0" />
+              <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
+                Cảnh Báo Ngân Sách
+              </h3>
             </div>
 
             {/* Filter buttons */}
-            <div className="flex items-center gap-0.5 sm:gap-1 bg-slate-100 p-0.5 rounded-md sm:rounded-lg text-[9px] sm:text-3xs font-semibold">
+            <div className="flex items-center gap-0.5 bg-slate-100 p-0.5 rounded text-[9px] sm:text-3xs font-semibold">
               <button
                 type="button"
                 onClick={() => setSelectedRiskFilter('ALL')}
-                className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded transition-all ${
+                className={`px-1.5 py-0.5 rounded transition-all ${
                   selectedRiskFilter === 'ALL'
                     ? 'bg-white text-slate-900 shadow-2xs font-bold'
                     : 'text-slate-600 hover:text-slate-900'
@@ -598,7 +533,7 @@ export default function ExecutiveDashboard({
               <button
                 type="button"
                 onClick={() => setSelectedRiskFilter('OVER')}
-                className={`px-1.5 py-0.5 sm:px-2 sm:py-1 rounded transition-all ${
+                className={`px-1.5 py-0.5 rounded transition-all ${
                   selectedRiskFilter === 'OVER'
                     ? 'bg-rose-600 text-white shadow-2xs font-bold'
                     : 'text-rose-700 hover:bg-rose-50'
@@ -610,48 +545,46 @@ export default function ExecutiveDashboard({
           </div>
 
           {/* List of risk items */}
-          <div className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1">
+          <div className="divide-y divide-slate-100 max-h-[360px] overflow-y-auto pr-1">
             {riskAccounts.length === 0 ? (
-              <div className="py-12 text-center text-slate-400 text-xs">
-                <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2 opacity-80" />
-                <p className="font-semibold text-slate-700">Tình trạng ngân sách an toàn!</p>
-                <p className="text-3xs text-slate-400 mt-0.5">Không có khoản mục nào vượt định mức.</p>
+              <div className="py-8 text-center text-slate-400 text-xs">
+                <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto mb-1 opacity-80" />
+                <p className="font-semibold text-slate-700 text-xs">Tất cả ngân sách an toàn</p>
               </div>
             ) : (
               riskAccounts.map((item) => (
                 <div
                   key={item.code}
                   onClick={() => onOpenAccountDetail && onOpenAccountDetail(item)}
-                  className={`p-3 rounded-xl border transition-all cursor-pointer hover:shadow-xs ${
-                    item.status === 'OVER'
-                      ? 'bg-rose-50/50 border-rose-200 hover:bg-rose-50'
-                      : 'bg-amber-50/50 border-amber-200 hover:bg-amber-50'
-                  }`}
+                  className="py-1.5 px-1 sm:px-1.5 flex items-center justify-between gap-1.5 hover:bg-slate-50/80 rounded transition-colors cursor-pointer group"
+                  title={`[${item.code}] ${item.name} • Duyệt: ${formatCompactVND(item.approved)} • Đã chi: ${formatVND(item.reportActual)}`}
                 >
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="font-mono text-3xs font-bold px-1.5 py-0.2 rounded bg-white border border-slate-200 text-slate-800">
-                        {item.code}
-                      </span>
-                      <p className="font-bold text-slate-900 truncate max-w-[190px]" title={item.name}>
-                        {item.name}
-                      </p>
-                    </div>
+                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
                     <span
-                      className={`text-3xs font-black px-1.5 py-0.5 rounded ${
-                        item.status === 'OVER'
-                          ? 'bg-rose-600 text-white'
-                          : 'bg-amber-600 text-white'
+                      className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                        item.status === 'OVER' ? 'bg-rose-500' : 'bg-amber-500'
                       }`}
-                    >
-                      {item.percent.toFixed(1)}%
+                    />
+                    <span className="font-mono text-[10px] font-bold text-slate-700 shrink-0">
+                      {item.code}
+                    </span>
+                    <span className="text-[11px] sm:text-xs font-medium text-slate-800 truncate group-hover:text-blue-600 transition-colors" title={item.name}>
+                      {item.name}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-3xs text-slate-600 mt-2 font-mono">
-                    <span>Đã chi: <strong>{formatVND(item.reportActual)}</strong></span>
-                    <span className={item.remaining < 0 ? 'text-rose-600 font-bold' : 'text-slate-500'}>
-                      {item.remaining < 0 ? `Vượt: ${formatVND(Math.abs(item.remaining))}` : `Còn: ${formatVND(item.remaining)}`}
+                  <div className="flex items-center gap-1.5 shrink-0 text-right">
+                    <span className="font-mono text-[11px] sm:text-xs font-bold text-slate-900">
+                      {formatCompactVND(item.reportActual)}
+                    </span>
+                    <span
+                      className={`text-[9px] font-mono font-bold px-1 py-0.2 rounded ${
+                        item.status === 'OVER'
+                          ? 'bg-rose-50 text-rose-700 border border-rose-200/60'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200/60'
+                      }`}
+                    >
+                      {item.percent.toFixed(0)}%
                     </span>
                   </div>
                 </div>
