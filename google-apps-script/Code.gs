@@ -40,11 +40,13 @@ function doGet(e) {
     if (action === 'getData') {
       const transactions = getTransactionsFromSheet(ss);
       const budgets = getBudgetsFromSheet(ss);
+      const bravoInfo = getBravoInfoFromSheet(ss);
 
       return createJsonResponse({
         status: 'success',
         transactions: transactions,
         budgets: budgets,
+        bravoInfo: bravoInfo,
         serverTime: new Date().toISOString()
       });
     }
@@ -251,6 +253,46 @@ function getBudgetsFromSheet(ss) {
       approved: yearlyApproved['2026'] || 0,
       yearlyApproved: yearlyApproved,
       scope: String(r[header.length - 1] || '')
+    });
+  }
+  return list;
+}
+
+/**
+ * Hàm lấy toàn bộ thông tin đối soát từ sheet INFO (kết xuất từ phần mềm BRAVO) nếu có
+ */
+function getBravoInfoFromSheet(ss) {
+  const sheet = ss.getSheetByName('INFO');
+  if (!sheet) return null;
+  const rows = sheet.getDataRange().getValues();
+  if (rows.length <= 2) return null;
+
+  const list = [];
+  let currentCategory = 'TỔNG THỂ CHI PHÍ';
+
+  for (let i = 2; i < rows.length; i++) {
+    const r = rows[i];
+    const name = String(r[0] || '').trim();
+    const code = String(r[1] || '').trim();
+    const approved = Number(r[2]) || 0;
+    const bravo = Number(r[3]) || 0;
+    const rate = Number(r[4]) || 0;
+    const note = String(r[7] || '').trim();
+
+    if (!name && !code) continue;
+    if (!code && name) {
+      currentCategory = name;
+    }
+
+    list.push({
+      row: i + 1,
+      code: code,
+      name: name,
+      category: currentCategory,
+      approvedAmount: approved,
+      bravoAmount: bravo,
+      rate: rate > 0 && rate < 10 ? Math.round(rate * 10000) / 100 : Math.round(rate * 100) / 100,
+      note: note
     });
   }
   return list;

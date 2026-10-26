@@ -16,9 +16,11 @@ import {
   Settings,
   CalendarDays,
   Sparkles,
+  Scale,
 } from 'lucide-react';
 import initialBudgets from '../data/budgets.json';
 import initialTransactions from '../data/transactions.json';
+import BravoReconciliation from '../components/BravoReconciliation';
 import {
   getSavedWebhookUrl,
   fetchFromGoogleSheet,
@@ -58,8 +60,10 @@ export default function DashboardPage({ user }) {
 
   const [budgets, setBudgets] = useState(() => {
     try {
-      const saved = localStorage.getItem('app_budgets_v2');
+      const saved = localStorage.getItem('app_budgets_v3');
       if (saved) return JSON.parse(saved);
+      // Clean up legacy v2 cache so user gets fresh enriched BRAVO data
+      localStorage.removeItem('app_budgets_v2');
     } catch (e) {
       console.error(e);
     }
@@ -113,7 +117,7 @@ export default function DashboardPage({ user }) {
   // Sync budgets to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('app_budgets_v2', JSON.stringify(budgets));
+      localStorage.setItem('app_budgets_v3', JSON.stringify(budgets));
     } catch (e) {
       console.error('Storage full or error', e);
     }
@@ -382,6 +386,22 @@ export default function DashboardPage({ user }) {
             Sổ Cái Năm {selectedYear} ({yearTransactions.length.toLocaleString('vi-VN')})
           </span>
         </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('BRAVO_RECON')}
+          className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
+            activeTab === 'BRAVO_RECON'
+              ? 'bg-amber-600 text-white shadow-sm shadow-amber-500/20'
+              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+          }`}
+        >
+          <Scale className="w-4 h-4" />
+          <span>Đối Soát BRAVO & Toàn Cảnh</span>
+          <span className="px-1.5 py-0.2 rounded-full text-3xs font-bold uppercase tracking-wider bg-amber-100 text-amber-900">
+            INFO
+          </span>
+        </button>
       </div>
 
       {/* Tab 1: Form & List Side-by-Side */}
@@ -417,7 +437,7 @@ export default function DashboardPage({ user }) {
           selectedYear={selectedYear}
           onUpdateBudgets={(newBudgets) => {
             setBudgets(newBudgets);
-            localStorage.setItem('app_budgets_v2', JSON.stringify(newBudgets));
+            localStorage.setItem('app_budgets_v3', JSON.stringify(newBudgets));
           }}
           onUpdateTransaction={handleUpdateTransaction}
           onDeleteTransaction={handleDeleteTransaction}
@@ -438,6 +458,21 @@ export default function DashboardPage({ user }) {
           selectedYear={selectedYear}
           selectedCategory={selectedLedgerAccount}
           onSelectCategory={setSelectedLedgerAccount}
+        />
+      )}
+
+      {/* Tab 4: BRAVO Reconciliation & Macro Airport View */}
+      {activeTab === 'BRAVO_RECON' && (
+        <BravoReconciliation
+          budgets={budgets}
+          transactions={yearTransactions}
+          selectedYear={selectedYear}
+          onUpdateTransaction={handleUpdateTransaction}
+          onDeleteTransaction={handleDeleteTransaction}
+          onNavigateToLedger={(accountCode) => {
+            setSelectedLedgerAccount(accountCode);
+            setActiveTab('TRANSACTIONS');
+          }}
         />
       )}
 

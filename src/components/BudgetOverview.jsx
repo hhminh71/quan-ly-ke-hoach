@@ -52,6 +52,13 @@ export default function BudgetOverview({
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num || 0);
   };
 
+  const formatCompactVND = (num) => {
+    const val = Number(num) || 0;
+    if (Math.abs(val) >= 1e9) return (val / 1e9).toFixed(2) + ' tỷ';
+    if (Math.abs(val) >= 1e6) return (val / 1e6).toFixed(1) + ' tr';
+    return val.toLocaleString('vi-VN') + ' đ';
+  };
+
   // Determine all available budget column years from the data
   const matrixYears = useMemo(() => {
     const yearSet = new Set();
@@ -458,8 +465,24 @@ export default function BudgetOverview({
                               Xem sổ cái →
                             </span>
                           </div>
-                          <div className="text-[11px] text-slate-400 mt-0.5 truncate" title={item.scope || item.group}>
-                            {item.scope ? item.scope : item.group}
+                          <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                            <span className="text-[11px] text-slate-400 truncate max-w-[200px]" title={item.scope || item.group}>
+                              {item.scope ? item.scope : item.group}
+                            </span>
+                            {item.bravoActual !== undefined && (
+                              <span
+                                className={`inline-flex items-center px-1.5 py-0.2 rounded text-3xs font-medium ${
+                                  Math.abs((item.bravoActual || 0) - item.liveActual) < 500
+                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
+                                    : (item.bravoActual || 0) > item.liveActual
+                                    ? 'bg-amber-50 text-amber-800 border border-amber-200/60'
+                                    : 'bg-purple-50 text-purple-800 border border-purple-200/60'
+                                }`}
+                                title={`Hạch toán BRAVO: ${formatVND(item.bravoActual)} (Chênh lệch: ${(item.bravoActual || 0) - item.liveActual > 0 ? '+' : ''}${formatCompactVND((item.bravoActual || 0) - item.liveActual)})`}
+                              >
+                                BRAVO: {formatCompactVND(item.bravoActual)}
+                              </span>
+                            )}
                           </div>
                         </td>
 

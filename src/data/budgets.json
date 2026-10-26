@@ -1,1294 +1,1674 @@
-﻿[
-    {
-        "remainingAmount":  119178381,
-        "bravoAmount":  2400000000,
-        "actualAmount":  140821619,
-        "approvedAmount":  260000000,
-        "percentExecuted":  54.16,
-        "name":  "Sửa chữa nhà ga quốc nội",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762101",
-        "scope":  "Sửa chửa kính, gạch vỡ, sơn tường cục bộ nhà ga và hư hỏng đột xuất khác",
-        "yearlyApproved":  {
-                               "2027":  280800000,
-                               "2025":  337615234,
-                               "2024":  305802200,
-                               "2026":  260000000
-                           }
-    },
-    {
-        "remainingAmount":  47617487,
-        "bravoAmount":  3520000000,
-        "actualAmount":  62382513,
-        "approvedAmount":  110000000,
-        "percentExecuted":  56.71,
-        "name":  "Sửa chữa bến bãi ô tô, sân đường",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762103",
-        "scope":  "Sơn sửa, bảo trì các biển báo giao thông nội cảng, sửa chữa các gờ giảm tốc, các cọc tiêu mềm",
-        "yearlyApproved":  {
-                               "2027":  118800000,
-                               "2025":  525800000,
-                               "2024":  16777200,
-                               "2026":  110000000
-                           }
-    },
-    {
-        "remainingAmount":  57909259,
-        "bravoAmount":  69000000,
-        "actualAmount":  11090741,
-        "approvedAmount":  69000000,
-        "percentExecuted":  16.07,
-        "name":  "Chi phí sửa chữa mương thoát nước",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762104",
-        "scope":  "Sửa chữa các tấm đan, mương bê tông xi măng nhà ga, sân dỗ ô tô, Out-House",
-        "yearlyApproved":  {
-                               "2027":  74520000,
-                               "2025":  58650000,
-                               "2024":  54868000,
-                               "2026":  69000000
-                           }
-    },
-    {
-        "remainingAmount":  30000000,
-        "bravoAmount":  30000000,
-        "actualAmount":  0,
-        "approvedAmount":  30000000,
-        "percentExecuted":  0,
-        "name":  "Chi phí cắt cỏ, nạo vét mương thoát nước",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762105",
-        "scope":  "Cắt cỏ, nạo vét các hố ga hố lọc rác",
-        "yearlyApproved":  {
-                               "2027":  32400000,
-                               "2025":  25500000,
-                               "2024":  22500000,
-                               "2026":  30000000
-                           }
-    },
-    {
-        "remainingAmount":  420000000,
-        "bravoAmount":  580000000,
-        "actualAmount":  0,
-        "approvedAmount":  420000000,
-        "percentExecuted":  0,
-        "name":  "Sửa chữa sân đậu",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762106",
-        "scope":  "Sơn tín hiệu sân đậu",
-        "yearlyApproved":  {
-                               "2027":  453600000,
-                               "2025":  15322560,
-                               "2024":  3361112,
-                               "2026":  420000000
-                           }
-    },
-    {
-        "remainingAmount":  5211497,
-        "bravoAmount":  60000000,
-        "actualAmount":  54788503,
-        "approvedAmount":  60000000,
-        "percentExecuted":  91.31,
-        "name":  "Sửa chữa hàng rào",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762107",
-        "scope":  "Bảo dưỡng hàng rào khu Air side - Land side",
-        "yearlyApproved":  {
-                               "2027":  64800000,
-                               "2025":  51000000,
-                               "2024":  45000000,
-                               "2026":  60000000
-                           }
-    },
-    {
-        "remainingAmount":  20706096,
-        "bravoAmount":  3230000000,
-        "actualAmount":  69293904,
-        "approvedAmount":  90000000,
-        "percentExecuted":  76.99,
-        "name":  "Sửa chữa nhà cửa, vật kiến trúc khác",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762188",
-        "scope":  "Sửa chữa Nhà xe nội bộ, kho cơ khí, kho cây xanh, Nhà xe ngoại trường, Nhà chứa rác, khu vực Trạm nguồn,…",
-        "yearlyApproved":  {
-                               "2027":  97200000,
-                               "2025":  9709722,
-                               "2024":  67500000,
-                               "2026":  90000000
-                           }
-    },
-    {
-        "remainingAmount":  90225600,
-        "bravoAmount":  110000000,
-        "actualAmount":  19774400,
-        "approvedAmount":  110000000,
-        "percentExecuted":  17.98,
-        "name":  "Sửa chữa nhà cửa, vật kiến trúc khác (khối gián tiếp)",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762189",
-        "scope":  "Sửa chữa thường xuyên, bảo dưỡng các nhà văn phòng, cầu thang….",
-        "yearlyApproved":  {
-                               "2027":  118800000,
-                               "2025":  44781616,
-                               "2024":  12771000,
-                               "2026":  110000000
-                           }
-    },
-    {
-        "remainingAmount":  626940000,
-        "bravoAmount":  920000000,
-        "actualAmount":  293060000,
-        "approvedAmount":  920000000,
-        "percentExecuted":  31.85,
-        "name":  "Sửa chữa hệ thống băng chuyền",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762201",
-        "scope":  "Bảo dưỡng, sửa chữa băng chuyền",
-        "yearlyApproved":  {
-                               "2027":  993600000,
-                               "2025":  442156660,
-                               "2024":  217258800,
-                               "2026":  920000000
-                           }
-    },
-    {
-        "remainingAmount":  844438600,
-        "bravoAmount":  3480000000,
-        "actualAmount":  335561400,
-        "approvedAmount":  1180000000,
-        "percentExecuted":  28.44,
-        "name":  "Sửa chữa hệ thống ống lồng",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762202",
-        "scope":  "Bảo dưỡng hệ thống ống lồng",
-        "yearlyApproved":  {
-                               "2027":  1274400000,
-                               "2025":  133432407,
-                               "2024":  62227231,
-                               "2026":  1180000000
-                           }
-    },
-    {
-        "remainingAmount":  149280000,
-        "bravoAmount":  350000000,
-        "actualAmount":  200720000,
-        "approvedAmount":  350000000,
-        "percentExecuted":  57.35,
-        "name":  "Sửa chữa hệ thống thang cuốn, thang máy",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762203",
-        "scope":  "Bảo dưỡng định kỳ thang máy thang cuốn và các hư hỏng nhỏ đột xuất khác",
-        "yearlyApproved":  {
-                               "2027":  378000000,
-                               "2025":  182211700,
-                               "2024":  30225800,
-                               "2026":  350000000
-                           }
-    },
-    {
-        "remainingAmount":  88830556,
-        "bravoAmount":  180000000,
-        "actualAmount":  91169444,
-        "approvedAmount":  180000000,
-        "percentExecuted":  50.65,
-        "name":  "Sửa chữa hệ thống thông tin liên lạc",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762204",
-        "scope":  "Bảo trì, bảo dưỡng hệ thống thông tin liên lạc",
-        "yearlyApproved":  {
-                               "2027":  194400000,
-                               "2025":  7752148,
-                               "2024":  135000000,
-                               "2026":  180000000
-                           }
-    },
-    {
-        "remainingAmount":  10000000,
-        "bravoAmount":  10000000,
-        "actualAmount":  0,
-        "approvedAmount":  10000000,
-        "percentExecuted":  0,
-        "name":  "Sửa chữa hệ thống quầy thủ tục, thiết bị nội thất",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762205",
-        "scope":  "Bảo trì, sửa chữa 24 quầy thủ tục",
-        "yearlyApproved":  {
-                               "2027":  10800000,
-                               "2025":  8500000,
-                               "2024":  7500000,
-                               "2026":  10000000
-                           }
-    },
-    {
-        "remainingAmount":  80681481,
-        "bravoAmount":  90000000,
-        "actualAmount":  9318519,
-        "approvedAmount":  90000000,
-        "percentExecuted":  10.35,
-        "name":  "Sửa chữa hệ thống máy móc, thiết bị làm thủ tục",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762206",
-        "scope":  "Sửa chữa thay thế màn hình, các thiết bị quầy thủ tục",
-        "yearlyApproved":  {
-                               "2027":  97200000,
-                               "2025":  47520000,
-                               "2024":  67500000,
-                               "2026":  90000000
-                           }
-    },
-    {
-        "remainingAmount":  74150000,
-        "bravoAmount":  760000000,
-        "actualAmount":  5850000,
-        "approvedAmount":  80000000,
-        "percentExecuted":  7.31,
-        "name":  "Sửa chữa hệ thống thiết bị vệ sinh",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762207",
-        "scope":  "Bảo dưỡng sửa chữa thiết bị vệ sinh",
-        "yearlyApproved":  {
-                               "2027":  86400000,
-                               "2025":  16767056,
-                               "2024":  9800000,
-                               "2026":  80000000
-                           }
-    },
-    {
-        "remainingAmount":  170000000,
-        "bravoAmount":  170000000,
-        "actualAmount":  0,
-        "approvedAmount":  170000000,
-        "percentExecuted":  0,
-        "name":  "Sửa chữa máy móc thiết bị kiểm tra an ninh",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762208",
-        "scope":  "Bảo trì bảo dưỡng máy soi cổng từ, máy dò chất nổ",
-        "yearlyApproved":  {
-                               "2027":  183600000,
-                               "2025":  148197500,
-                               "2024":  78210000,
-                               "2026":  170000000
-                           }
-    },
-    {
-        "remainingAmount":  514030793,
-        "bravoAmount":  2050000000,
-        "actualAmount":  215969207,
-        "approvedAmount":  730000000,
-        "percentExecuted":  29.58,
-        "name":  "Sửa chữa máy móc, thiết bị , hệ thống thiết bị điện",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762209",
-        "scope":  "Bảo trì bảo dưỡng hệ thống thiết bị điện, máy phát điện, hệ thống chống sét, hệ thống UPS, hệ thống quạt thông gió",
-        "yearlyApproved":  {
-                               "2027":  788400000,
-                               "2025":  622693390,
-                               "2024":  593877170,
-                               "2026":  730000000
-                           }
-    },
-    {
-        "remainingAmount":  186004407,
-        "bravoAmount":  2970000000,
-        "actualAmount":  2783995593,
-        "approvedAmount":  2970000000,
-        "percentExecuted":  93.74,
-        "name":  "Sửa chữa máy móc, thiết bị , hệ thống thiết bị lạnh",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762210",
-        "scope":  "Bảo dưỡng hệ thống Chiller định kỳ, tháp giải nhiệt, hệ thống máy lạnh cục bộ, hệ thống lạnh",
-        "yearlyApproved":  {
-                               "2027":  3207600000,
-                               "2025":  2524500000,
-                               "2024":  436624548,
-                               "2026":  2970000000
-                           }
-    },
-    {
-        "remainingAmount":  215799074,
-        "bravoAmount":  290000000,
-        "actualAmount":  74200926,
-        "approvedAmount":  290000000,
-        "percentExecuted":  25.59,
-        "name":  "Sửa chữa thiết bị PCCC",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762211",
-        "scope":  "Bảo dưỡng sửa chữa hệ thống báo cháy",
-        "yearlyApproved":  {
-                               "2027":  313200000,
-                               "2025":  305658268,
-                               "2024":  231377408,
-                               "2026":  290000000
-                           }
-    },
-    {
-        "remainingAmount":  295716500,
-        "bravoAmount":  880000000,
-        "actualAmount":  94283500,
-        "approvedAmount":  390000000,
-        "percentExecuted":  24.18,
-        "name":  "Sửa chữa hệ thống xử lý chất thải",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762212",
-        "scope":  "Bảo dưỡng sửa chữa hệ thống xử lý chất thải",
-        "yearlyApproved":  {
-                               "2027":  421200000,
-                               "2025":  481072686,
-                               "2024":  69919121,
-                               "2026":  390000000
-                           }
-    },
-    {
-        "remainingAmount":  66509000,
-        "bravoAmount":  780000000,
-        "actualAmount":  13491000,
-        "approvedAmount":  80000000,
-        "percentExecuted":  16.86,
-        "name":  "Sửa chữa hệ thống cấp nước",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762213",
-        "scope":  "Bảo dưỡng sửa chữa hệ thống cấp nước",
-        "yearlyApproved":  {
-                               "2027":  86400000,
-                               "2025":  17490387,
-                               "2024":  18966200,
-                               "2026":  80000000
-                           }
-    },
-    {
-        "remainingAmount":  40000000,
-        "bravoAmount":  40000000,
-        "actualAmount":  0,
-        "approvedAmount":  40000000,
-        "percentExecuted":  0,
-        "name":  "Sửa chữa hệ thống thoát nước",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762214",
-        "scope":  "Bảo dưỡng sửa chữa hệ thống thoát nước",
-        "yearlyApproved":  {
-                               "2027":  43200000,
-                               "2025":  6602200,
-                               "2024":  20521112,
-                               "2026":  40000000
-                           }
-    },
-    {
-        "remainingAmount":  18411600,
-        "bravoAmount":  570000000,
-        "actualAmount":  351588400,
-        "approvedAmount":  370000000,
-        "percentExecuted":  95.02,
-        "name":  "Sửa chữa hệ thống trạm thu phí",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762215",
-        "scope":  "Bảo dưỡng sửa chữa hệ thống trạm thu phí",
-        "yearlyApproved":  {
-                               "2027":  399600000,
-                               "2025":  83187060,
-                               "2024":  8479166,
-                               "2026":  370000000
-                           }
-    },
-    {
-        "remainingAmount":  0,
-        "bravoAmount":  0,
-        "actualAmount":  0,
-        "approvedAmount":  0,
-        "percentExecuted":  0,
-        "name":  "Sửa chữa hệ thống thiết bị phục vụ máy bay",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762216",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  0,
-                               "2025":  0,
-                               "2024":  0,
-                               "2026":  0
-                           }
-    },
-    {
-        "remainingAmount":  300000000,
-        "bravoAmount":  300000000,
-        "actualAmount":  0,
-        "approvedAmount":  300000000,
-        "percentExecuted":  0,
-        "name":  "Sửa chữa hệ thống camera, CCTV",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762217",
-        "scope":  "Bảo dưỡng sửa chữa hệ thống camera, CCTV",
-        "yearlyApproved":  {
-                               "2027":  324000000,
-                               "2025":  62239181,
-                               "2024":  37531791,
-                               "2026":  300000000
-                           }
-    },
-    {
-        "remainingAmount":  69431852,
-        "bravoAmount":  90000000,
-        "actualAmount":  20568148,
-        "approvedAmount":  90000000,
-        "percentExecuted":  22.85,
-        "name":  "Sửa chữa máy móc thiết bị khác",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762288",
-        "scope":  "Bảo dưỡng sửa chữa máy nước uống, chà sàn, máy cắt cỏ, máy đóng gói hành lý và các thiết bị khác",
-        "yearlyApproved":  {
-                               "2027":  97200000,
-                               "2025":  43335519,
-                               "2024":  17987852,
-                               "2026":  90000000
-                           }
-    },
-    {
-        "remainingAmount":  476703593,
-        "bravoAmount":  2720000000,
-        "actualAmount":  783296407,
-        "approvedAmount":  1260000000,
-        "percentExecuted":  62.17,
-        "name":  "Sửa chữa phương tiện vận tải đặc chủng phục vụ bay",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762301",
-        "scope":  "Bảo dưỡng sửa chữa chuyển mùa phương tiện vận tải đặc chủng phục vụ bay",
-        "yearlyApproved":  {
-                               "2027":  1360800000,
-                               "2025":  1317529107,
-                               "2024":  1650049584,
-                               "2026":  1260000000
-                           }
-    },
-    {
-        "remainingAmount":  -5308218,
-        "bravoAmount":  600000000,
-        "actualAmount":  395308218,
-        "approvedAmount":  390000000,
-        "percentExecuted":  1.0136108148148149,
-        "name":  "Sửa chữa xe cứu hỏa, cứu thương, xe chuyên dùng",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762302",
-        "scope":  "Bảo dưỡng sửa chữa các xe cứu hoả, cứu thương, xe chuyên dùng",
-        "yearlyApproved":  {
-                               "2027":  421200000,
-                               "2025":  726413167,
-                               "2024":  741798245,
-                               "2026":  390000000
-                           }
-    },
-    {
-        "remainingAmount":  67569251,
-        "bravoAmount":  100000000,
-        "actualAmount":  32430749,
-        "approvedAmount":  100000000,
-        "percentExecuted":  32.43,
-        "name":  "Sửa chữa xe ô tô, xe tải các loại",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762303",
-        "scope":  "Bảo dưỡng sửa chữa các xe 15 chỗ và xe tải các loại",
-        "yearlyApproved":  {
-                               "2027":  108000000,
-                               "2025":  107489616,
-                               "2024":  89110248,
-                               "2026":  100000000
-                           }
-    },
-    {
-        "remainingAmount":  17387263,
-        "bravoAmount":  30000000,
-        "actualAmount":  12612737,
-        "approvedAmount":  30000000,
-        "percentExecuted":  42.04,
-        "name":  "Sửa chữa xe ô tô (khối gián tiếp)",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762304",
-        "scope":  "Bảo dưỡng sửa chữa các xe ô tô 4 chỗ, 7 chỗ…",
-        "yearlyApproved":  {
-                               "2027":  32400000,
-                               "2025":  39635919,
-                               "2024":  22602752,
-                               "2026":  30000000
-                           }
-    },
-    {
-        "remainingAmount":  0,
-        "bravoAmount":  0,
-        "actualAmount":  0,
-        "approvedAmount":  0,
-        "percentExecuted":  0,
-        "name":  "Sửa chữa phương tiện vận tải khác",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62762388",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  0,
-                               "2025":  0,
-                               "2024":  0,
-                               "2026":  0
-                           }
-    },
-    {
-        "remainingAmount":  269104290,
-        "bravoAmount":  930000000,
-        "actualAmount":  660895710,
-        "approvedAmount":  930000000,
-        "percentExecuted":  71.06,
-        "name":  "Thuê dịch vụ vệ sinh",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627701",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  1004400000,
-                               "2025":  48553780,
-                               "2024":  82678420,
-                               "2026":  930000000
-                           }
-    },
-    {
-        "remainingAmount":  53337600,
-        "bravoAmount":  360000000,
-        "actualAmount":  306662400,
-        "approvedAmount":  360000000,
-        "percentExecuted":  85.18,
-        "name":  "Thuê dịch vụ bảo vệ",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627702",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  388800000,
-                               "2025":  306000000,
-                               "2024":  270000000,
-                               "2026":  360000000
-                           }
-    },
-    {
-        "remainingAmount":  91903634,
-        "bravoAmount":  120000000,
-        "actualAmount":  28096366,
-        "approvedAmount":  120000000,
-        "percentExecuted":  23.41,
-        "name":  "Thuê dịch vụ vệ sinh môi trường, chất thải",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627703",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  129600000,
-                               "2025":  102000000,
-                               "2024":  90000000,
-                               "2026":  120000000
-                           }
-    },
-    {
-        "remainingAmount":  5000000,
-        "bravoAmount":  5000000,
-        "actualAmount":  0,
-        "approvedAmount":  5000000,
-        "percentExecuted":  0,
-        "name":  "Dịch vụ VIP, khách hàng C",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627704",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  5400000,
-                               "2025":  4250000,
-                               "2024":  3750000,
-                               "2026":  5000000
-                           }
-    },
-    {
-        "remainingAmount":  100000000,
-        "bravoAmount":  0,
-        "actualAmount":  0,
-        "approvedAmount":  100000000,
-        "percentExecuted":  0,
-        "name":  "Thuê vận chuyển bốc xếp",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627706",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  108000000,
-                               "2025":  85000000,
-                               "2024":  75000000,
-                               "2026":  100000000
-                           }
-    },
-    {
-        "remainingAmount":  50202096,
-        "bravoAmount":  123000000,
-        "actualAmount":  72797904,
-        "approvedAmount":  123000000,
-        "percentExecuted":  59.19,
-        "name":  "Thông tin liên lạc",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627708",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  132840000,
-                               "2025":  104550000,
-                               "2024":  3968800,
-                               "2026":  123000000
-                           }
-    },
-    {
-        "remainingAmount":  3216808501,
-        "bravoAmount":  8500000000,
-        "actualAmount":  5283191499,
-        "approvedAmount":  8500000000,
-        "percentExecuted":  62.16,
-        "name":  "Tiền điện",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627709",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  9180000000,
-                               "2025":  7225000000,
-                               "2024":  6375000000,
-                               "2026":  8500000000
-                           }
-    },
-    {
-        "remainingAmount":  210586681,
-        "bravoAmount":  700000000,
-        "actualAmount":  489413319,
-        "approvedAmount":  700000000,
-        "percentExecuted":  69.92,
-        "name":  "Tiền nước",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627710",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  756000000,
-                               "2025":  595000000,
-                               "2024":  525000000,
-                               "2026":  700000000
-                           }
-    },
-    {
-        "remainingAmount":  114104431,
-        "bravoAmount":  500000000,
-        "actualAmount":  385895569,
-        "approvedAmount":  500000000,
-        "percentExecuted":  77.18,
-        "name":  "Bảo hiểm hàng không, phi hàng không",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627712",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  540000000,
-                               "2025":  116535190,
-                               "2024":  88723576,
-                               "2026":  500000000
-                           }
-    },
-    {
-        "remainingAmount":  516195840,
-        "bravoAmount":  1650000000,
-        "actualAmount":  1133804160,
-        "approvedAmount":  1650000000,
-        "percentExecuted":  68.72,
-        "name":  "Đào tạo, huấn luyện",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627715",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  1782000000,
-                               "2025":  58080000,
-                               "2024":  172931440,
-                               "2026":  1650000000
-                           }
-    },
-    {
-        "remainingAmount":  502000000,
-        "bravoAmount":  502000000,
-        "actualAmount":  0,
-        "approvedAmount":  502000000,
-        "percentExecuted":  0,
-        "name":  "Chi dịch vụ tư vấn, ISO",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627716",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  542160000,
-                               "2025":  426700000,
-                               "2024":  376500000,
-                               "2026":  502000000
-                           }
-    },
-    {
-        "remainingAmount":  0,
-        "bravoAmount":  0,
-        "actualAmount":  0,
-        "approvedAmount":  0,
-        "percentExecuted":  0,
-        "name":  "Truyền thông, quảng cáo",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627717",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  0,
-                               "2025":  0,
-                               "2024":  0,
-                               "2026":  0
-                           }
-    },
-    {
-        "remainingAmount":  21289000,
-        "bravoAmount":  42000000,
-        "actualAmount":  20711000,
-        "approvedAmount":  42000000,
-        "percentExecuted":  49.31,
-        "name":  "Dịch vụ giám sát môi trường",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627720",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  45360000,
-                               "2025":  35700000,
-                               "2024":  31500000,
-                               "2026":  42000000
-                           }
-    },
-    {
-        "remainingAmount":  49070000,
-        "bravoAmount":  277000000,
-        "actualAmount":  227930000,
-        "approvedAmount":  277000000,
-        "percentExecuted":  82.29,
-        "name":  "Kiểm định",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627721",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  299160000,
-                               "2025":  272055740,
-                               "2024":  77066144,
-                               "2026":  277000000
-                           }
-    },
-    {
-        "remainingAmount":  201500042,
-        "bravoAmount":  1027000000,
-        "actualAmount":  825499958,
-        "approvedAmount":  1027000000,
-        "percentExecuted":  80.38,
-        "name":  "Thuê/ mua dịch vụ khác",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627788",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  1109160000,
-                               "2025":  815534459,
-                               "2024":  770250000,
-                               "2026":  1027000000
-                           }
-    },
-    {
-        "remainingAmount":  487847594,
-        "bravoAmount":  910000000,
-        "actualAmount":  422152406,
-        "approvedAmount":  910000000,
-        "percentExecuted":  46.39,
-        "name":  "Trang phục ngành",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627801",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  982800000,
-                               "2025":  773500000,
-                               "2024":  29106000,
-                               "2026":  910000000
-                           }
-    },
-    {
-        "remainingAmount":  28605000,
-        "bravoAmount":  546000000,
-        "actualAmount":  517395000,
-        "approvedAmount":  546000000,
-        "percentExecuted":  94.76,
-        "name":  "Bảo hộ lao động",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627804",
-        "scope":  "0",
-        "yearlyApproved":  {
-                               "2027":  589680000,
-                               "2025":  31972600,
-                               "2024":  332750000,
-                               "2026":  546000000
-                           }
-    },
-    {
-        "remainingAmount":  13040833,
-        "bravoAmount":  60000000,
-        "actualAmount":  46959167,
-        "approvedAmount":  60000000,
-        "percentExecuted":  78.27,
-        "name":  "Văn phòng phẩm",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627806",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  64800000,
-                               "2025":  55926640,
-                               "2024":  45000000,
-                               "2026":  60000000
-                           }
-    },
-    {
-        "remainingAmount":  83583500,
-        "bravoAmount":  140000000,
-        "actualAmount":  56416500,
-        "approvedAmount":  140000000,
-        "percentExecuted":  40.3,
-        "name":  "Giấy , mực in, mực photo",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627807",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  151200000,
-                               "2025":  177075800,
-                               "2024":  162201207,
-                               "2026":  140000000
-                           }
-    },
-    {
-        "remainingAmount":  42223481,
-        "bravoAmount":  95000000,
-        "actualAmount":  52776519,
-        "approvedAmount":  95000000,
-        "percentExecuted":  55.55,
-        "name":  "Mua , in ấn , pho to chứng từ, tài liệu",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627808",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  102600000,
-                               "2025":  40885162,
-                               "2024":  28071481,
-                               "2026":  95000000
-                           }
-    },
-    {
-        "remainingAmount":  0,
-        "bravoAmount":  0,
-        "actualAmount":  22289815,
-        "approvedAmount":  0,
-        "percentExecuted":  0,
-        "name":  "Hội nghị, khánh thành",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627809",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  0,
-                               "2025":  0,
-                               "2024":  0,
-                               "2026":  0
-                           }
-    },
-    {
-        "remainingAmount":  1087215,
-        "bravoAmount":  420000000,
-        "actualAmount":  418912785,
-        "approvedAmount":  420000000,
-        "percentExecuted":  99.74,
-        "name":  "Chi phí giao dịch",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627810",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  453600000,
-                               "2025":  357000000,
-                               "2024":  315000000,
-                               "2026":  420000000
-                           }
-    },
-    {
-        "remainingAmount":  22477592,
-        "bravoAmount":  240000000,
-        "actualAmount":  217522408,
-        "approvedAmount":  240000000,
-        "percentExecuted":  90.63,
-        "name":  "Công tác phí trong nước",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627812",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  259200000,
-                               "2025":  204000000,
-                               "2024":  180000000,
-                               "2026":  240000000
-                           }
-    },
-    {
-        "remainingAmount":  19944126,
-        "bravoAmount":  50000000,
-        "actualAmount":  30055874,
-        "approvedAmount":  50000000,
-        "percentExecuted":  60.11,
-        "name":  "Lệ phí giao thông, cầu đường, đăng kiểm",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627813",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  54000000,
-                               "2025":  25662610,
-                               "2024":  69875840,
-                               "2026":  50000000
-                           }
-    },
-    {
-        "remainingAmount":  182184742,
-        "bravoAmount":  270000000,
-        "actualAmount":  87815258,
-        "approvedAmount":  270000000,
-        "percentExecuted":  32.52,
-        "name":  "Chi phí chăm sóc cây cảnh và trang trí nhà ga, văn phòng",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627816",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  291600000,
-                               "2025":  208210904,
-                               "2024":  142086893,
-                               "2026":  270000000
-                           }
-    },
-    {
-        "remainingAmount":  78040000,
-        "bravoAmount":  105000000,
-        "actualAmount":  26960000,
-        "approvedAmount":  105000000,
-        "percentExecuted":  25.68,
-        "name":  "Chi phí cấp phép an ninh, vận hành trang thiết bị",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627817",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  113400000,
-                               "2025":  89250000,
-                               "2024":  91300000,
-                               "2026":  105000000
-                           }
-    },
-    {
-        "remainingAmount":  160000000,
-        "bravoAmount":  160000000,
-        "actualAmount":  0,
-        "approvedAmount":  160000000,
-        "percentExecuted":  0,
-        "name":  "Công tác PCCC",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627818",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  172800000,
-                               "2025":  136000000,
-                               "2024":  120000000,
-                               "2026":  160000000
-                           }
-    },
-    {
-        "remainingAmount":  171789741,
-        "bravoAmount":  245000000,
-        "actualAmount":  73210259,
-        "approvedAmount":  245000000,
-        "percentExecuted":  29.88,
-        "name":  "Công tác an ninh, an toàn hàng không",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627826",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  264600000,
-                               "2025":  26920300,
-                               "2024":  46467386,
-                               "2026":  245000000
-                           }
-    },
-    {
-        "remainingAmount":  -116253686,
-        "bravoAmount":  800000000,
-        "actualAmount":  916253686,
-        "approvedAmount":  800000000,
-        "percentExecuted":  1.1453171075,
-        "name":  "Chi phí nhiên liệu",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62721",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  864000000,
-                               "2025":  680000000,
-                               "2024":  600000000,
-                               "2026":  800000000
-                           }
-    },
-    {
-        "remainingAmount":  -7182286,
-        "bravoAmount":  150000000,
-        "actualAmount":  157182286,
-        "approvedAmount":  150000000,
-        "percentExecuted":  1.0478819066666667,
-        "name":  "Vật tư vệ sinh",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62722",
-        "scope":  "Lưu ý chỉ tính khi xuất kho",
-        "yearlyApproved":  {
-                               "2027":  162000000,
-                               "2025":  282859767,
-                               "2024":  112500000,
-                               "2026":  150000000
-                           }
-    },
-    {
-        "remainingAmount":  20000000,
-        "bravoAmount":  20000000,
-        "actualAmount":  0,
-        "approvedAmount":  20000000,
-        "percentExecuted":  0,
-        "name":  "Vật tư, tem, nhãn kiểm tra an ninh hàng không",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62723",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  21600000,
-                               "2025":  17000000,
-                               "2024":  15000000,
-                               "2026":  20000000
-                           }
-    },
-    {
-        "remainingAmount":  286000,
-        "bravoAmount":  40000000,
-        "actualAmount":  27714000,
-        "approvedAmount":  28000000,
-        "percentExecuted":  98.98,
-        "name":  "Vật liệu phục vụ chuyến bay",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62724",
-        "scope":  "Lưu ý chỉ tính khi xuất kho",
-        "yearlyApproved":  {
-                               "2027":  30240000,
-                               "2025":  23038400,
-                               "2024":  21000000,
-                               "2026":  28000000
-                           }
-    },
-    {
-        "remainingAmount":  38044860,
-        "bravoAmount":  126000000,
-        "actualAmount":  87955140,
-        "approvedAmount":  126000000,
-        "percentExecuted":  69.81,
-        "name":  "Vật liệu xử lý chất thải, hóa chất hệ thống lạnh",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62725",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  136080000,
-                               "2025":  193501308,
-                               "2024":  94500000,
-                               "2026":  126000000
-                           }
-    },
-    {
-        "remainingAmount":  9750001,
-        "bravoAmount":  0,
-        "actualAmount":  10249999,
-        "approvedAmount":  20000000,
-        "percentExecuted":  51.25,
-        "name":  "Vật tư in ấn vé sân đường, hóa đơn",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62726",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  21600000,
-                               "2025":  17000000,
-                               "2024":  15000000,
-                               "2026":  20000000
-                           }
-    },
-    {
-        "remainingAmount":  43264737,
-        "bravoAmount":  75000000,
-        "actualAmount":  31735263,
-        "approvedAmount":  75000000,
-        "percentExecuted":  42.31,
-        "name":  "Chi phí nhiên liệu phục vụ công tác",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "62727",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  81000000,
-                               "2025":  63750000,
-                               "2024":  56250000,
-                               "2026":  75000000
-                           }
-    },
-    {
-        "remainingAmount":  238227507,
-        "bravoAmount":  610000000,
-        "actualAmount":  411772493,
-        "approvedAmount":  650000000,
-        "percentExecuted":  63.35,
-        "name":  "Công cụ dụng cụ lao động",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627311",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  702000000,
-                               "2025":  1311500510,
-                               "2024":  487500000,
-                               "2026":  650000000
-                           }
-    },
-    {
-        "remainingAmount":  -49391542,
-        "bravoAmount":  73000000,
-        "actualAmount":  122391542,
-        "approvedAmount":  73000000,
-        "percentExecuted":  1.6765964657534247,
-        "name":  "Trang thiết bị văn phòng",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627312",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  78840000,
-                               "2025":  38027000,
-                               "2024":  54750000,
-                               "2026":  73000000
-                           }
-    },
-    {
-        "remainingAmount":  100000000,
-        "bravoAmount":  100000000,
-        "actualAmount":  0,
-        "approvedAmount":  100000000,
-        "percentExecuted":  0,
-        "name":  "Trang thiết bị và bảng biểu nhà ga",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627313",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  108000000,
-                               "2025":  85000000,
-                               "2024":  75000000,
-                               "2026":  100000000
-                           }
-    },
-    {
-        "remainingAmount":  18449157,
-        "bravoAmount":  80000000,
-        "actualAmount":  61550843,
-        "approvedAmount":  80000000,
-        "percentExecuted":  76.94,
-        "name":  "Bàn ghế, tủ, quầy ,vật dụng khác",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627314",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  86400000,
-                               "2025":  23231146,
-                               "2024":  3088800,
-                               "2026":  80000000
-                           }
-    },
-    {
-        "remainingAmount":  190302861,
-        "bravoAmount":  196000000,
-        "actualAmount":  5697139,
-        "approvedAmount":  196000000,
-        "percentExecuted":  2.91,
-        "name":  "Chi phí sửa chữa công cụ dụng cụ",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627321",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  211680000,
-                               "2025":  59172277,
-                               "2024":  42022637,
-                               "2026":  196000000
-                           }
-    },
-    {
-        "remainingAmount":  10112593,
-        "bravoAmount":  30000000,
-        "actualAmount":  19887407,
-        "approvedAmount":  30000000,
-        "percentExecuted":  66.29,
-        "name":  "Chi phí sửa chữa công cụ dụng cụ (khối gián tiếp)",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "627322",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  32400000,
-                               "2025":  24893000,
-                               "2024":  2194500,
-                               "2026":  30000000
-                           }
-    },
-    {
-        "remainingAmount":  4157500,
-        "bravoAmount":  70000000,
-        "actualAmount":  65842500,
-        "approvedAmount":  70000000,
-        "percentExecuted":  94.06,
-        "name":  "Chi phí nguyên vật liệu, bao bì",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "6412",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  75600000,
-                               "2025":  116337650,
-                               "2024":  46893682,
-                               "2026":  70000000
-                           }
-    },
-    {
-        "remainingAmount":  125666664,
-        "bravoAmount":  147000000,
-        "actualAmount":  21333336,
-        "approvedAmount":  147000000,
-        "percentExecuted":  14.51,
-        "name":  "Chi phí công cụ dụng cụ, đồ dùng",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "6413",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  158760000,
-                               "2025":  74430481,
-                               "2024":  110250000,
-                               "2026":  147000000
-                           }
-    },
-    {
-        "remainingAmount":  70000000,
-        "bravoAmount":  0,
-        "actualAmount":  0,
-        "approvedAmount":  70000000,
-        "percentExecuted":  0,
-        "name":  "Chi phí bảo dưỡng, sửa chữa",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "6416",
-        "scope":  "",
-        "yearlyApproved":  {
-                               "2027":  75600000,
-                               "2025":  59500000,
-                               "2024":  1020000,
-                               "2026":  70000000
-                           }
-    },
-    {
-        "remainingAmount":  144900000,
-        "bravoAmount":  147000000,
-        "actualAmount":  2100000,
-        "approvedAmount":  147000000,
-        "percentExecuted":  1.43,
-        "name":  "Chi phí dịch vụ thuê/mua ngoài khác",
-        "group":  "SỬA CHỮA THƯỜNG XUYÊN",
-        "code":  "641788",
-        "scope":  "Khấu hao theo tháng",
-        "yearlyApproved":  {
-                               "2027":  158760000,
-                               "2025":  919600,
-                               "2024":  484000000,
-                               "2026":  147000000
-                           }
-    }
+[
+  {
+    "code": "62762101",
+    "name": "Sửa chữa nhà ga quốc nội",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "",
+    "scope": "Sửa chửa kính, gạch vỡ, sơn tường cục bộ nhà ga và hư hỏng đột xuất khác",
+    "bravoQuota": 2400000000,
+    "approvedAmount": 260000000,
+    "bravoAmount": 102604899,
+    "bravoActual": 102604899,
+    "actualAmount": 140821619,
+    "maxActual": 140821619,
+    "remainingAmount": 119178381,
+    "percentExecuted": 54.16,
+    "yearlyApproved": {
+      "2024": 305802200,
+      "2025": 337615234,
+      "2026": 260000000,
+      "2027": 280800000
+    },
+    "diffBravo": -38216720
+  },
+  {
+    "code": "62762103",
+    "name": "Sửa chữa bến bãi ô tô, sân đường",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "",
+    "scope": "Sơn sửa, bảo trì các biển báo giao thông nội cảng, sửa chữa các gờ giảm tốc, các cọc tiêu mềm",
+    "bravoQuota": 3520000000,
+    "approvedAmount": 110000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 62382513.4074074,
+    "maxActual": 62382513.4074074,
+    "remainingAmount": 47617486.5925926,
+    "percentExecuted": 56.71,
+    "yearlyApproved": {
+      "2024": 16777200,
+      "2025": 525800000,
+      "2026": 110000000,
+      "2027": 118800000
+    },
+    "diffBravo": -62382513
+  },
+  {
+    "code": "62762104",
+    "name": "Chi phí sửa chữa mương thoát nước",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "",
+    "scope": "Sửa chữa các tấm đan, mương bê tông xi măng nhà ga, sân dỗ ô tô, Out-House",
+    "bravoQuota": 69000000,
+    "approvedAmount": 69000000,
+    "bravoAmount": 3240741,
+    "bravoActual": 3240741,
+    "actualAmount": 11090740.74074074,
+    "maxActual": 11090740.74074074,
+    "remainingAmount": 57909259.25925926,
+    "percentExecuted": 16.07,
+    "yearlyApproved": {
+      "2024": 54868000,
+      "2025": 58650000,
+      "2026": 69000000,
+      "2027": 74520000
+    },
+    "diffBravo": -7850000
+  },
+  {
+    "code": "62762105",
+    "name": "Chi phí cắt cỏ, nạo vét mương thoát nước",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "",
+    "scope": "Cắt cỏ, nạo vét các hố ga hố lọc rác",
+    "bravoQuota": 30000000,
+    "approvedAmount": 30000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 0,
+    "maxActual": 0,
+    "remainingAmount": 30000000,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 22500000,
+      "2025": 25500000,
+      "2026": 30000000,
+      "2027": 32400000
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "62762106",
+    "name": "Sửa chữa sân đậu",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "",
+    "scope": "Sơn tín hiệu sân đậu",
+    "bravoQuota": 580000000,
+    "approvedAmount": 420000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 0,
+    "maxActual": 0,
+    "remainingAmount": 420000000,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 3361112,
+      "2025": 15322560,
+      "2026": 420000000,
+      "2027": 453600000
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "62762107",
+    "name": "Sửa chữa hàng rào",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "",
+    "scope": "Bảo dưỡng hàng rào khu Air side - Land side",
+    "bravoQuota": 60000000,
+    "approvedAmount": 60000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 54788502.777777776,
+    "maxActual": 54788502.777777776,
+    "remainingAmount": 5211497.222222224,
+    "percentExecuted": 91.31,
+    "yearlyApproved": {
+      "2024": 45000000,
+      "2025": 51000000,
+      "2026": 60000000,
+      "2027": 64800000
+    },
+    "diffBravo": -54788503
+  },
+  {
+    "code": "62762188",
+    "name": "Sửa chữa nhà cửa, vật kiến trúc khác",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "",
+    "scope": "Sửa chữa Nhà xe nội bộ, kho cơ khí, kho cây xanh, Nhà xe ngoại trường, Nhà chứa rác, khu vực Trạm nguồn,…",
+    "bravoQuota": 3230000000,
+    "approvedAmount": 90000000,
+    "bravoAmount": 198150575,
+    "bravoActual": 198150575,
+    "actualAmount": 69293904,
+    "maxActual": 69293904,
+    "remainingAmount": 20706096,
+    "percentExecuted": 76.99,
+    "yearlyApproved": {
+      "2024": 67500000,
+      "2025": 9709722,
+      "2026": 90000000,
+      "2027": 97200000
+    },
+    "diffBravo": 128856671
+  },
+  {
+    "code": "62762189",
+    "name": "Sửa chữa nhà cửa, vật kiến trúc khác (khối gián tiếp)",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "",
+    "scope": "Sửa chữa thường xuyên, bảo dưỡng các nhà văn phòng, cầu thang….",
+    "bravoQuota": 110000000,
+    "approvedAmount": 110000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 19774400,
+    "maxActual": 19774400,
+    "remainingAmount": 90225600,
+    "percentExecuted": 17.98,
+    "yearlyApproved": {
+      "2024": 12771000,
+      "2025": 44781616,
+      "2026": 110000000,
+      "2027": 118800000
+    },
+    "diffBravo": -19774400
+  },
+  {
+    "code": "62762201",
+    "name": "Sửa chữa hệ thống băng chuyền",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Bảo dưỡng, sửa chữa băng chuyền",
+    "bravoQuota": 920000000,
+    "approvedAmount": 920000000,
+    "bravoAmount": 13100000,
+    "bravoActual": 13100000,
+    "actualAmount": 293060000,
+    "maxActual": 293060000,
+    "remainingAmount": 626940000,
+    "percentExecuted": 31.85,
+    "yearlyApproved": {
+      "2024": 217258800,
+      "2025": 442156660,
+      "2026": 920000000,
+      "2027": 993600000
+    },
+    "diffBravo": -279960000
+  },
+  {
+    "code": "62762202",
+    "name": "Sửa chữa hệ thống ống lồng",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Bảo dưỡng hệ thống ống lồng",
+    "bravoQuota": 3480000000,
+    "approvedAmount": 1180000000,
+    "bravoAmount": 510932400,
+    "bravoActual": 510932400,
+    "actualAmount": 335561400,
+    "maxActual": 335561400,
+    "remainingAmount": 844438600,
+    "percentExecuted": 28.44,
+    "yearlyApproved": {
+      "2024": 62227231,
+      "2025": 133432407,
+      "2026": 1180000000,
+      "2027": 1274400000
+    },
+    "diffBravo": 175371000
+  },
+  {
+    "code": "62762203",
+    "name": "Sửa chữa hệ thống thang cuốn, thang máy",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Bảo dưỡng định kỳ thang máy thang cuốn và các hư hỏng nhỏ đột xuất khác",
+    "bravoQuota": 350000000,
+    "approvedAmount": 350000000,
+    "bravoAmount": 82210000,
+    "bravoActual": 82210000,
+    "actualAmount": 200720000,
+    "maxActual": 200720000,
+    "remainingAmount": 149280000,
+    "percentExecuted": 57.35,
+    "yearlyApproved": {
+      "2024": 30225800,
+      "2025": 182211700,
+      "2026": 350000000,
+      "2027": 378000000
+    },
+    "diffBravo": -118510000
+  },
+  {
+    "code": "62762204",
+    "name": "Sửa chữa hệ thống thông tin liên lạc",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Bảo trì, bảo dưỡng hệ thống thông tin liên lạc",
+    "bravoQuota": 180000000,
+    "approvedAmount": 180000000,
+    "bravoAmount": 7270000,
+    "bravoActual": 7270000,
+    "actualAmount": 91169444.44444443,
+    "maxActual": 91169444.44444443,
+    "remainingAmount": 88830555.55555557,
+    "percentExecuted": 50.65,
+    "yearlyApproved": {
+      "2024": 135000000,
+      "2025": 7752148,
+      "2026": 180000000,
+      "2027": 194400000
+    },
+    "diffBravo": -83899444
+  },
+  {
+    "code": "62762205",
+    "name": "Sửa chữa hệ thống quầy thủ tục, thiết bị nội thất",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Bảo trì, sửa chữa 24 quầy thủ tục",
+    "bravoQuota": 10000000,
+    "approvedAmount": 10000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 0,
+    "maxActual": 0,
+    "remainingAmount": 10000000,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 7500000,
+      "2025": 8500000,
+      "2026": 10000000,
+      "2027": 10800000
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "62762206",
+    "name": "Sửa chữa hệ thống máy móc, thiết bị làm thủ tục",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Sửa chữa thay thế màn hình, các thiết bị quầy thủ tục",
+    "bravoQuota": 90000000,
+    "approvedAmount": 90000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 9318519,
+    "maxActual": 9318519,
+    "remainingAmount": 80681481,
+    "percentExecuted": 10.35,
+    "yearlyApproved": {
+      "2024": 67500000,
+      "2025": 47520000,
+      "2026": 90000000,
+      "2027": 97200000
+    },
+    "diffBravo": -9318519
+  },
+  {
+    "code": "62762207",
+    "name": "Sửa chữa hệ thống thiết bị vệ sinh",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Bảo dưỡng sửa chữa thiết bị vệ sinh",
+    "bravoQuota": 760000000,
+    "approvedAmount": 80000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 5850000,
+    "maxActual": 5850000,
+    "remainingAmount": 74150000,
+    "percentExecuted": 7.31,
+    "yearlyApproved": {
+      "2024": 9800000,
+      "2025": 16767056,
+      "2026": 80000000,
+      "2027": 86400000
+    },
+    "diffBravo": -5850000
+  },
+  {
+    "code": "62762208",
+    "name": "Sửa chữa máy móc thiết bị kiểm tra an ninh",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Bảo trì bảo dưỡng máy soi cổng từ, máy dò chất nổ",
+    "bravoQuota": 170000000,
+    "approvedAmount": 170000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 0,
+    "maxActual": 0,
+    "remainingAmount": 170000000,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 78210000,
+      "2025": 148197500,
+      "2026": 170000000,
+      "2027": 183600000
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "62762209",
+    "name": "Sửa chữa máy móc, thiết bị , hệ thống thiết bị điện",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Bảo trì bảo dưỡng hệ thống thiết bị điện, máy phát điện, hệ thống chống sét, hệ thống UPS, hệ thống quạt thông gió",
+    "bravoQuota": 2050000000,
+    "approvedAmount": 730000000,
+    "bravoAmount": 165545096,
+    "bravoActual": 165545096,
+    "actualAmount": 215969207.4074074,
+    "maxActual": 215969207.4074074,
+    "remainingAmount": 514030792.5925926,
+    "percentExecuted": 29.58,
+    "yearlyApproved": {
+      "2024": 593877170,
+      "2025": 622693390,
+      "2026": 730000000,
+      "2027": 788400000
+    },
+    "diffBravo": -50424111
+  },
+  {
+    "code": "62762210",
+    "name": "Sửa chữa máy móc, thiết bị , hệ thống thiết bị lạnh",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Bảo dưỡng hệ thống Chiller định kỳ, tháp giải nhiệt, hệ thống máy lạnh cục bộ, hệ thống lạnh",
+    "bravoQuota": 2970000000,
+    "approvedAmount": 2970000000,
+    "bravoAmount": 78720000,
+    "bravoActual": 78720000,
+    "actualAmount": 2783995592.5925922,
+    "maxActual": 2783995592.5925922,
+    "remainingAmount": 186004407.40740776,
+    "percentExecuted": 93.74,
+    "yearlyApproved": {
+      "2024": 436624548,
+      "2025": 2524500000,
+      "2026": 2970000000,
+      "2027": 3207600000
+    },
+    "diffBravo": -2705275593
+  },
+  {
+    "code": "62762211",
+    "name": "Sửa chữa thiết bị PCCC",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Bảo dưỡng sửa chữa hệ thống báo cháy",
+    "bravoQuota": 290000000,
+    "approvedAmount": 290000000,
+    "bravoAmount": 33958680,
+    "bravoActual": 33958680,
+    "actualAmount": 74200926.07407407,
+    "maxActual": 74200926.07407407,
+    "remainingAmount": 215799073.9259259,
+    "percentExecuted": 25.59,
+    "yearlyApproved": {
+      "2024": 231377408,
+      "2025": 305658268,
+      "2026": 290000000,
+      "2027": 313200000
+    },
+    "diffBravo": -40242246
+  },
+  {
+    "code": "62762212",
+    "name": "Sửa chữa hệ thống xử lý chất thải",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Bảo dưỡng sửa chữa hệ thống xử lý chất thải",
+    "bravoQuota": 880000000,
+    "approvedAmount": 390000000,
+    "bravoAmount": 94283500,
+    "bravoActual": 94283500,
+    "actualAmount": 94283500,
+    "maxActual": 94283500,
+    "remainingAmount": 295716500,
+    "percentExecuted": 24.18,
+    "yearlyApproved": {
+      "2024": 69919121,
+      "2025": 481072686,
+      "2026": 390000000,
+      "2027": 421200000
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "62762213",
+    "name": "Sửa chữa hệ thống cấp nước",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Bảo dưỡng sửa chữa hệ thống cấp nước",
+    "bravoQuota": 780000000,
+    "approvedAmount": 80000000,
+    "bravoAmount": 13491000,
+    "bravoActual": 13491000,
+    "actualAmount": 13491000,
+    "maxActual": 13491000,
+    "remainingAmount": 66509000,
+    "percentExecuted": 16.86,
+    "yearlyApproved": {
+      "2024": 18966200,
+      "2025": 17490387,
+      "2026": 80000000,
+      "2027": 86400000
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "62762214",
+    "name": "Sửa chữa hệ thống thoát nước",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Bảo dưỡng sửa chữa hệ thống thoát nước",
+    "bravoQuota": 40000000,
+    "approvedAmount": 40000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 0,
+    "maxActual": 0,
+    "remainingAmount": 40000000,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 20521112,
+      "2025": 6602200,
+      "2026": 40000000,
+      "2027": 43200000
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "62762215",
+    "name": "Sửa chữa hệ thống trạm thu phí",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Bảo dưỡng sửa chữa hệ thống trạm thu phí",
+    "bravoQuota": 570000000,
+    "approvedAmount": 370000000,
+    "bravoAmount": 351588400,
+    "bravoActual": 351588400,
+    "actualAmount": 346450000,
+    "maxActual": 351588400,
+    "remainingAmount": 18411600,
+    "percentExecuted": 95.02,
+    "yearlyApproved": {
+      "2024": 8479166,
+      "2025": 83187060,
+      "2026": 370000000,
+      "2027": 399600000
+    },
+    "diffBravo": 5138400
+  },
+  {
+    "code": "62762216",
+    "name": "Sửa chữa hệ thống thiết bị phục vụ máy bay",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "",
+    "bravoQuota": 0,
+    "approvedAmount": 0,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 0,
+    "maxActual": 0,
+    "remainingAmount": 0,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 0,
+      "2025": 0,
+      "2026": 0,
+      "2027": 0
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "62762217",
+    "name": "Sửa chữa hệ thống camera, CCTV",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Bảo dưỡng sửa chữa hệ thống camera, CCTV",
+    "bravoQuota": 300000000,
+    "approvedAmount": 300000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 0,
+    "maxActual": 0,
+    "remainingAmount": 300000000,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 37531791,
+      "2025": 62239181,
+      "2026": 300000000,
+      "2027": 324000000
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "62762288",
+    "name": "Sửa chữa máy móc thiết bị khác",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX MÁY MÓC THIẾT BỊ",
+    "scope": "Bảo dưỡng sửa chữa máy nước uống, chà sàn, máy cắt cỏ, máy đóng gói hành lý và các thiết bị khác",
+    "bravoQuota": 90000000,
+    "approvedAmount": 90000000,
+    "bravoAmount": 15182434,
+    "bravoActual": 15182434,
+    "actualAmount": 20568148,
+    "maxActual": 20568148,
+    "remainingAmount": 69431852,
+    "percentExecuted": 22.85,
+    "yearlyApproved": {
+      "2024": 17987852,
+      "2025": 43335519,
+      "2026": 90000000,
+      "2027": 97200000
+    },
+    "diffBravo": -5385714
+  },
+  {
+    "code": "62762301",
+    "name": "Sửa chữa phương tiện vận tải đặc chủng phục vụ bay",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "Bảo dưỡng sửa chữa chuyển mùa phương tiện vận tải đặc chủng phục vụ bay",
+    "bravoQuota": 2720000000,
+    "approvedAmount": 1260000000,
+    "bravoAmount": 581779517,
+    "bravoActual": 581779517,
+    "actualAmount": 783296406.5555556,
+    "maxActual": 783296406.5555556,
+    "remainingAmount": 476703593.4444444,
+    "percentExecuted": 62.17,
+    "yearlyApproved": {
+      "2024": 1650049584,
+      "2025": 1317529107,
+      "2026": 1260000000,
+      "2027": 1360800000
+    },
+    "diffBravo": -201516890
+  },
+  {
+    "code": "62762302",
+    "name": "Sửa chữa xe cứu hỏa, cứu thương, xe chuyên dùng",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "Bảo dưỡng sửa chữa các xe cứu hoả, cứu thương, xe chuyên dùng",
+    "bravoQuota": 600000000,
+    "approvedAmount": 390000000,
+    "bravoAmount": 230464464,
+    "bravoActual": 230464464,
+    "actualAmount": 395308217.7777778,
+    "maxActual": 395308217.7777778,
+    "remainingAmount": -5308217.777777791,
+    "percentExecuted": 101.36,
+    "yearlyApproved": {
+      "2024": 741798245,
+      "2025": 726413167,
+      "2026": 390000000,
+      "2027": 421200000
+    },
+    "diffBravo": -164843754
+  },
+  {
+    "code": "62762303",
+    "name": "Sửa chữa xe ô tô, xe tải các loại",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "Bảo dưỡng sửa chữa các xe 15 chỗ và xe tải các loại",
+    "bravoQuota": 100000000,
+    "approvedAmount": 100000000,
+    "bravoAmount": 32430749,
+    "bravoActual": 32430749,
+    "actualAmount": 28931349,
+    "maxActual": 32430749,
+    "remainingAmount": 67569251,
+    "percentExecuted": 32.43,
+    "yearlyApproved": {
+      "2024": 89110248,
+      "2025": 107489616,
+      "2026": 100000000,
+      "2027": 108000000
+    },
+    "diffBravo": 3499400
+  },
+  {
+    "code": "62762304",
+    "name": "Sửa chữa xe ô tô (khối gián tiếp)",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "Bảo dưỡng sửa chữa các xe ô tô 4 chỗ, 7 chỗ…",
+    "bravoQuota": 30000000,
+    "approvedAmount": 30000000,
+    "bravoAmount": 8410964,
+    "bravoActual": 8410964,
+    "actualAmount": 12612737,
+    "maxActual": 12612737,
+    "remainingAmount": 17387263,
+    "percentExecuted": 42.04,
+    "yearlyApproved": {
+      "2024": 22602752,
+      "2025": 39635919,
+      "2026": 30000000,
+      "2027": 32400000
+    },
+    "diffBravo": -4201773
+  },
+  {
+    "code": "62762388",
+    "name": "Sửa chữa phương tiện vận tải khác",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 0,
+    "approvedAmount": 0,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 0,
+    "maxActual": 0,
+    "remainingAmount": 0,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 0,
+      "2025": 0,
+      "2026": 0,
+      "2027": 0
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "627701",
+    "name": "Thuê dịch vụ vệ sinh",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 930000000,
+    "approvedAmount": 930000000,
+    "bravoAmount": 158714210,
+    "bravoActual": 158714210,
+    "actualAmount": 660895710,
+    "maxActual": 660895710,
+    "remainingAmount": 269104290,
+    "percentExecuted": 71.06,
+    "yearlyApproved": {
+      "2024": 82678420,
+      "2025": 48553780,
+      "2026": 930000000,
+      "2027": 1004400000
+    },
+    "diffBravo": -502181500
+  },
+  {
+    "code": "627702",
+    "name": "Thuê dịch vụ bảo vệ",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 360000000,
+    "approvedAmount": 360000000,
+    "bravoAmount": 137293626,
+    "bravoActual": 137293626,
+    "actualAmount": 306662400,
+    "maxActual": 306662400,
+    "remainingAmount": 53337600,
+    "percentExecuted": 85.18,
+    "yearlyApproved": {
+      "2024": 270000000,
+      "2025": 306000000,
+      "2026": 360000000,
+      "2027": 388800000
+    },
+    "diffBravo": -169368774
+  },
+  {
+    "code": "627703",
+    "name": "Thuê dịch vụ vệ sinh môi trường, chất thải",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 120000000,
+    "approvedAmount": 120000000,
+    "bravoAmount": 28096366,
+    "bravoActual": 28096366,
+    "actualAmount": 0,
+    "maxActual": 28096366,
+    "remainingAmount": 91903634,
+    "percentExecuted": 23.41,
+    "yearlyApproved": {
+      "2024": 90000000,
+      "2025": 102000000,
+      "2026": 120000000,
+      "2027": 129600000
+    },
+    "diffBravo": 28096366
+  },
+  {
+    "code": "627704",
+    "name": "Dịch vụ VIP, khách hàng C",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 5000000,
+    "approvedAmount": 5000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 0,
+    "maxActual": 0,
+    "remainingAmount": 5000000,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 3750000,
+      "2025": 4250000,
+      "2026": 5000000,
+      "2027": 5400000
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "627706",
+    "name": "Thuê vận chuyển bốc xếp",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 0,
+    "approvedAmount": 100000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 0,
+    "maxActual": 0,
+    "remainingAmount": 100000000,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 75000000,
+      "2025": 85000000,
+      "2026": 100000000,
+      "2027": 108000000
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "627708",
+    "name": "Thông tin liên lạc",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 123000000,
+    "approvedAmount": 123000000,
+    "bravoAmount": 72797904,
+    "bravoActual": 72797904,
+    "actualAmount": 0,
+    "maxActual": 72797904,
+    "remainingAmount": 50202096,
+    "percentExecuted": 59.19,
+    "yearlyApproved": {
+      "2024": 3968800,
+      "2025": 104550000,
+      "2026": 123000000,
+      "2027": 132840000
+    },
+    "diffBravo": 72797904
+  },
+  {
+    "code": "627709",
+    "name": "Tiền điện",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 8500000000,
+    "approvedAmount": 8500000000,
+    "bravoAmount": 5283191499,
+    "bravoActual": 5283191499,
+    "actualAmount": 0,
+    "maxActual": 5283191499,
+    "remainingAmount": 3216808501,
+    "percentExecuted": 62.16,
+    "yearlyApproved": {
+      "2024": 6375000000,
+      "2025": 7225000000,
+      "2026": 8500000000,
+      "2027": 9180000000
+    },
+    "diffBravo": 5283191499
+  },
+  {
+    "code": "627710",
+    "name": "Tiền nước",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 700000000,
+    "approvedAmount": 700000000,
+    "bravoAmount": 489413319,
+    "bravoActual": 489413319,
+    "actualAmount": 0,
+    "maxActual": 489413319,
+    "remainingAmount": 210586681,
+    "percentExecuted": 69.92,
+    "yearlyApproved": {
+      "2024": 525000000,
+      "2025": 595000000,
+      "2026": 700000000,
+      "2027": 756000000
+    },
+    "diffBravo": 489413319
+  },
+  {
+    "code": "627712",
+    "name": "Bảo hiểm hàng không, phi hàng không",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 500000000,
+    "approvedAmount": 500000000,
+    "bravoAmount": 385895569,
+    "bravoActual": 385895569,
+    "actualAmount": 58796160,
+    "maxActual": 385895569,
+    "remainingAmount": 114104431,
+    "percentExecuted": 77.18,
+    "yearlyApproved": {
+      "2024": 88723576,
+      "2025": 116535190,
+      "2026": 500000000,
+      "2027": 540000000
+    },
+    "diffBravo": 327099409
+  },
+  {
+    "code": "627715",
+    "name": "Đào tạo, huấn luyện",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 1650000000,
+    "approvedAmount": 1650000000,
+    "bravoAmount": 1133804160,
+    "bravoActual": 1133804160,
+    "actualAmount": 0,
+    "maxActual": 1133804160,
+    "remainingAmount": 516195840,
+    "percentExecuted": 68.72,
+    "yearlyApproved": {
+      "2024": 172931440,
+      "2025": 58080000,
+      "2026": 1650000000,
+      "2027": 1782000000
+    },
+    "diffBravo": 1133804160
+  },
+  {
+    "code": "627716",
+    "name": "Chi dịch vụ tư vấn, ISO",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 502000000,
+    "approvedAmount": 502000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 0,
+    "maxActual": 0,
+    "remainingAmount": 502000000,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 376500000,
+      "2025": 426700000,
+      "2026": 502000000,
+      "2027": 542160000
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "627717",
+    "name": "Truyền thông, quảng cáo",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 0,
+    "approvedAmount": 0,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 0,
+    "maxActual": 0,
+    "remainingAmount": 0,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 0,
+      "2025": 0,
+      "2026": 0,
+      "2027": 0
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "627720",
+    "name": "Dịch vụ giám sát môi trường",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 42000000,
+    "approvedAmount": 42000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 8711000,
+    "maxActual": 20711000,
+    "remainingAmount": 21289000,
+    "percentExecuted": 49.31,
+    "yearlyApproved": {
+      "2024": 31500000,
+      "2025": 35700000,
+      "2026": 42000000,
+      "2027": 45360000
+    },
+    "diffBravo": -8711000
+  },
+  {
+    "code": "627721",
+    "name": "Kiểm định",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 277000000,
+    "approvedAmount": 277000000,
+    "bravoAmount": 121826301,
+    "bravoActual": 121826301,
+    "actualAmount": 227930000,
+    "maxActual": 227930000,
+    "remainingAmount": 49070000,
+    "percentExecuted": 82.29,
+    "yearlyApproved": {
+      "2024": 77066144,
+      "2025": 272055740,
+      "2026": 277000000,
+      "2027": 299160000
+    },
+    "diffBravo": -106103699
+  },
+  {
+    "code": "627788",
+    "name": "Thuê/ mua dịch vụ khác",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 1027000000,
+    "approvedAmount": 1027000000,
+    "bravoAmount": 522713989,
+    "bravoActual": 522713989,
+    "actualAmount": 825499957.7724867,
+    "maxActual": 825499957.7724867,
+    "remainingAmount": 201500042.2275133,
+    "percentExecuted": 80.38,
+    "yearlyApproved": {
+      "2024": 770250000,
+      "2025": 815534459,
+      "2026": 1027000000,
+      "2027": 1109160000
+    },
+    "diffBravo": -302785969
+  },
+  {
+    "code": "627801",
+    "name": "Trang phục ngành",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 910000000,
+    "approvedAmount": 910000000,
+    "bravoAmount": 422152406,
+    "bravoActual": 422152406,
+    "actualAmount": 0,
+    "maxActual": 422152406,
+    "remainingAmount": 487847594,
+    "percentExecuted": 46.39,
+    "yearlyApproved": {
+      "2024": 29106000,
+      "2025": 773500000,
+      "2026": 910000000,
+      "2027": 982800000
+    },
+    "diffBravo": 422152406
+  },
+  {
+    "code": "627804",
+    "name": "Bảo hộ lao động",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "0",
+    "bravoQuota": 546000000,
+    "approvedAmount": 546000000,
+    "bravoAmount": 410503960,
+    "bravoActual": 410503960,
+    "actualAmount": 517395000,
+    "maxActual": 517395000,
+    "remainingAmount": 28605000,
+    "percentExecuted": 94.76,
+    "yearlyApproved": {
+      "2024": 332750000,
+      "2025": 31972600,
+      "2026": 546000000,
+      "2027": 589680000
+    },
+    "diffBravo": -106891040
+  },
+  {
+    "code": "627806",
+    "name": "Văn phòng phẩm",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 60000000,
+    "approvedAmount": 60000000,
+    "bravoAmount": 34944722,
+    "bravoActual": 34944722,
+    "actualAmount": 46959166.666666664,
+    "maxActual": 46959166.666666664,
+    "remainingAmount": 13040833.333333336,
+    "percentExecuted": 78.27,
+    "yearlyApproved": {
+      "2024": 45000000,
+      "2025": 55926640,
+      "2026": 60000000,
+      "2027": 64800000
+    },
+    "diffBravo": -12014445
+  },
+  {
+    "code": "627807",
+    "name": "Giấy , mực in, mực photo",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 140000000,
+    "approvedAmount": 140000000,
+    "bravoAmount": 56343149,
+    "bravoActual": 56343149,
+    "actualAmount": 56416500,
+    "maxActual": 56416500,
+    "remainingAmount": 83583500,
+    "percentExecuted": 40.3,
+    "yearlyApproved": {
+      "2024": 162201207,
+      "2025": 177075800,
+      "2026": 140000000,
+      "2027": 151200000
+    },
+    "diffBravo": -73351
+  },
+  {
+    "code": "627808",
+    "name": "Mua , in ấn , pho to chứng từ, tài liệu",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 95000000,
+    "approvedAmount": 95000000,
+    "bravoAmount": 35656764,
+    "bravoActual": 35656764,
+    "actualAmount": 52776518.51851852,
+    "maxActual": 52776518.51851852,
+    "remainingAmount": 42223481.48148148,
+    "percentExecuted": 55.55,
+    "yearlyApproved": {
+      "2024": 28071481,
+      "2025": 40885162,
+      "2026": 95000000,
+      "2027": 102600000
+    },
+    "diffBravo": -17119755
+  },
+  {
+    "code": "627809",
+    "name": "Hội nghị, khánh thành",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 0,
+    "approvedAmount": 0,
+    "bravoAmount": 22289815,
+    "bravoActual": 22289815,
+    "actualAmount": 0,
+    "maxActual": 22289815,
+    "remainingAmount": 0,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 0,
+      "2025": 0,
+      "2026": 0,
+      "2027": 0
+    },
+    "diffBravo": 22289815
+  },
+  {
+    "code": "627810",
+    "name": "Chi phí giao dịch",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 420000000,
+    "approvedAmount": 420000000,
+    "bravoAmount": 418912785,
+    "bravoActual": 418912785,
+    "actualAmount": 0,
+    "maxActual": 418912785,
+    "remainingAmount": 1087215,
+    "percentExecuted": 99.74,
+    "yearlyApproved": {
+      "2024": 315000000,
+      "2025": 357000000,
+      "2026": 420000000,
+      "2027": 453600000
+    },
+    "diffBravo": 418912785
+  },
+  {
+    "code": "627812",
+    "name": "Công tác phí trong nước",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 240000000,
+    "approvedAmount": 240000000,
+    "bravoAmount": 217522408,
+    "bravoActual": 217522408,
+    "actualAmount": 0,
+    "maxActual": 217522408,
+    "remainingAmount": 22477592,
+    "percentExecuted": 90.63,
+    "yearlyApproved": {
+      "2024": 180000000,
+      "2025": 204000000,
+      "2026": 240000000,
+      "2027": 259200000
+    },
+    "diffBravo": 217522408
+  },
+  {
+    "code": "627813",
+    "name": "Lệ phí giao thông, cầu đường, đăng kiểm",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 50000000,
+    "approvedAmount": 50000000,
+    "bravoAmount": 30055874,
+    "bravoActual": 30055874,
+    "actualAmount": 12598920,
+    "maxActual": 30055874,
+    "remainingAmount": 19944126,
+    "percentExecuted": 60.11,
+    "yearlyApproved": {
+      "2024": 69875840,
+      "2025": 25662610,
+      "2026": 50000000,
+      "2027": 54000000
+    },
+    "diffBravo": 17456954
+  },
+  {
+    "code": "627816",
+    "name": "Chi phí chăm sóc cây cảnh và trang trí nhà ga, văn phòng",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 270000000,
+    "approvedAmount": 270000000,
+    "bravoAmount": 74440904,
+    "bravoActual": 74440904,
+    "actualAmount": 87815258.37037037,
+    "maxActual": 87815258.37037037,
+    "remainingAmount": 182184741.6296296,
+    "percentExecuted": 32.52,
+    "yearlyApproved": {
+      "2024": 142086893,
+      "2025": 208210904,
+      "2026": 270000000,
+      "2027": 291600000
+    },
+    "diffBravo": -13374354
+  },
+  {
+    "code": "627817",
+    "name": "Chi phí cấp phép an ninh, vận hành trang thiết bị",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 105000000,
+    "approvedAmount": 105000000,
+    "bravoAmount": 26960000,
+    "bravoActual": 26960000,
+    "actualAmount": 0,
+    "maxActual": 26960000,
+    "remainingAmount": 78040000,
+    "percentExecuted": 25.68,
+    "yearlyApproved": {
+      "2024": 91300000,
+      "2025": 89250000,
+      "2026": 105000000,
+      "2027": 113400000
+    },
+    "diffBravo": 26960000
+  },
+  {
+    "code": "627818",
+    "name": "Công tác PCCC",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 160000000,
+    "approvedAmount": 160000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 0,
+    "maxActual": 0,
+    "remainingAmount": 160000000,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 120000000,
+      "2025": 136000000,
+      "2026": 160000000,
+      "2027": 172800000
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "627826",
+    "name": "Công tác an ninh, an toàn hàng không",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 245000000,
+    "approvedAmount": 245000000,
+    "bravoAmount": 73210259,
+    "bravoActual": 73210259,
+    "actualAmount": 16837320,
+    "maxActual": 73210259,
+    "remainingAmount": 171789741,
+    "percentExecuted": 29.88,
+    "yearlyApproved": {
+      "2024": 46467386,
+      "2025": 26920300,
+      "2026": 245000000,
+      "2027": 264600000
+    },
+    "diffBravo": 56372939
+  },
+  {
+    "code": "62721",
+    "name": "Chi phí nhiên liệu",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 800000000,
+    "approvedAmount": 800000000,
+    "bravoAmount": 916253686,
+    "bravoActual": 916253686,
+    "actualAmount": 0,
+    "maxActual": 916253686,
+    "remainingAmount": -116253686,
+    "percentExecuted": 114.53,
+    "yearlyApproved": {
+      "2024": 600000000,
+      "2025": 680000000,
+      "2026": 800000000,
+      "2027": 864000000
+    },
+    "diffBravo": 916253686
+  },
+  {
+    "code": "62722",
+    "name": "Vật tư vệ sinh",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "Lưu ý chỉ tính khi xuất kho",
+    "bravoQuota": 150000000,
+    "approvedAmount": 150000000,
+    "bravoAmount": 157182286,
+    "bravoActual": 157182286,
+    "actualAmount": 149813883.14814815,
+    "maxActual": 157182286,
+    "remainingAmount": -7182286,
+    "percentExecuted": 104.79,
+    "yearlyApproved": {
+      "2024": 112500000,
+      "2025": 282859767,
+      "2026": 150000000,
+      "2027": 162000000
+    },
+    "diffBravo": 7368403
+  },
+  {
+    "code": "62723",
+    "name": "Vật tư, tem, nhãn kiểm tra an ninh hàng không",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 20000000,
+    "approvedAmount": 20000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 0,
+    "maxActual": 0,
+    "remainingAmount": 20000000,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 15000000,
+      "2025": 17000000,
+      "2026": 20000000,
+      "2027": 21600000
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "62724",
+    "name": "Vật liệu phục vụ chuyến bay",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "Lưu ý chỉ tính khi xuất kho",
+    "bravoQuota": 40000000,
+    "approvedAmount": 28000000,
+    "bravoAmount": 27714000,
+    "bravoActual": 27714000,
+    "actualAmount": 19394320,
+    "maxActual": 27714000,
+    "remainingAmount": 286000,
+    "percentExecuted": 98.98,
+    "yearlyApproved": {
+      "2024": 21000000,
+      "2025": 23038400,
+      "2026": 28000000,
+      "2027": 30240000
+    },
+    "diffBravo": 8319680
+  },
+  {
+    "code": "62725",
+    "name": "Vật liệu xử lý chất thải, hóa chất hệ thống lạnh",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 126000000,
+    "approvedAmount": 126000000,
+    "bravoAmount": 87955140,
+    "bravoActual": 87955140,
+    "actualAmount": 87955140,
+    "maxActual": 87955140,
+    "remainingAmount": 38044860,
+    "percentExecuted": 69.81,
+    "yearlyApproved": {
+      "2024": 94500000,
+      "2025": 193501308,
+      "2026": 126000000,
+      "2027": 136080000
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "62726",
+    "name": "Vật tư in ấn vé sân đường, hóa đơn",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 0,
+    "approvedAmount": 20000000,
+    "bravoAmount": 10249999,
+    "bravoActual": 10249999,
+    "actualAmount": 2000000,
+    "maxActual": 10249999,
+    "remainingAmount": 9750001,
+    "percentExecuted": 51.25,
+    "yearlyApproved": {
+      "2024": 15000000,
+      "2025": 17000000,
+      "2026": 20000000,
+      "2027": 21600000
+    },
+    "diffBravo": 8249999
+  },
+  {
+    "code": "62727",
+    "name": "Chi phí nhiên liệu phục vụ công tác",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 75000000,
+    "approvedAmount": 75000000,
+    "bravoAmount": 31735263,
+    "bravoActual": 31735263,
+    "actualAmount": 0,
+    "maxActual": 31735263,
+    "remainingAmount": 43264737,
+    "percentExecuted": 42.31,
+    "yearlyApproved": {
+      "2024": 56250000,
+      "2025": 63750000,
+      "2026": 75000000,
+      "2027": 81000000
+    },
+    "diffBravo": 31735263
+  },
+  {
+    "code": "627311",
+    "name": "Công cụ dụng cụ lao động",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 610000000,
+    "approvedAmount": 650000000,
+    "bravoAmount": 411772493,
+    "bravoActual": 411772493,
+    "actualAmount": 353492650.40740746,
+    "maxActual": 411772493,
+    "remainingAmount": 238227507,
+    "percentExecuted": 63.35,
+    "yearlyApproved": {
+      "2024": 487500000,
+      "2025": 1311500510,
+      "2026": 650000000,
+      "2027": 702000000
+    },
+    "diffBravo": 58279843
+  },
+  {
+    "code": "627312",
+    "name": "Trang thiết bị văn phòng",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 73000000,
+    "approvedAmount": 73000000,
+    "bravoAmount": 122391542,
+    "bravoActual": 122391542,
+    "actualAmount": 0,
+    "maxActual": 122391542,
+    "remainingAmount": -49391542,
+    "percentExecuted": 167.66,
+    "yearlyApproved": {
+      "2024": 54750000,
+      "2025": 38027000,
+      "2026": 73000000,
+      "2027": 78840000
+    },
+    "diffBravo": 122391542
+  },
+  {
+    "code": "627313",
+    "name": "Trang thiết bị và bảng biểu nhà ga",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 100000000,
+    "approvedAmount": 100000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 0,
+    "maxActual": 0,
+    "remainingAmount": 100000000,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 75000000,
+      "2025": 85000000,
+      "2026": 100000000,
+      "2027": 108000000
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "627314",
+    "name": "Bàn ghế, tủ, quầy ,vật dụng khác",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 80000000,
+    "approvedAmount": 80000000,
+    "bravoAmount": 61550843,
+    "bravoActual": 61550843,
+    "actualAmount": 0,
+    "maxActual": 61550843,
+    "remainingAmount": 18449157,
+    "percentExecuted": 76.94,
+    "yearlyApproved": {
+      "2024": 3088800,
+      "2025": 23231146,
+      "2026": 80000000,
+      "2027": 86400000
+    },
+    "diffBravo": 61550843
+  },
+  {
+    "code": "627321",
+    "name": "Chi phí sửa chữa công cụ dụng cụ",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 196000000,
+    "approvedAmount": 196000000,
+    "bravoAmount": 5697139,
+    "bravoActual": 5697139,
+    "actualAmount": 157407.4074074074,
+    "maxActual": 5697139,
+    "remainingAmount": 190302861,
+    "percentExecuted": 2.91,
+    "yearlyApproved": {
+      "2024": 42022637,
+      "2025": 59172277,
+      "2026": 196000000,
+      "2027": 211680000
+    },
+    "diffBravo": 5539732
+  },
+  {
+    "code": "627322",
+    "name": "Chi phí sửa chữa công cụ dụng cụ (khối gián tiếp)",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 30000000,
+    "approvedAmount": 30000000,
+    "bravoAmount": 4151848,
+    "bravoActual": 4151848,
+    "actualAmount": 19887407.407407407,
+    "maxActual": 19887407.407407407,
+    "remainingAmount": 10112592.592592593,
+    "percentExecuted": 66.29,
+    "yearlyApproved": {
+      "2024": 2194500,
+      "2025": 24893000,
+      "2026": 30000000,
+      "2027": 32400000
+    },
+    "diffBravo": -15735559
+  },
+  {
+    "code": "6412",
+    "name": "Chi phí nguyên vật liệu, bao bì",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 70000000,
+    "approvedAmount": 70000000,
+    "bravoAmount": 46589959,
+    "bravoActual": 46589959,
+    "actualAmount": 65842500,
+    "maxActual": 65842500,
+    "remainingAmount": 4157500,
+    "percentExecuted": 94.06,
+    "yearlyApproved": {
+      "2024": 46893682,
+      "2025": 116337650,
+      "2026": 70000000,
+      "2027": 75600000
+    },
+    "diffBravo": -19252541
+  },
+  {
+    "code": "6413",
+    "name": "Chi phí công cụ dụng cụ, đồ dùng",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 147000000,
+    "approvedAmount": 147000000,
+    "bravoAmount": 21333336,
+    "bravoActual": 21333336,
+    "actualAmount": 0,
+    "maxActual": 21333336,
+    "remainingAmount": 125666664,
+    "percentExecuted": 14.51,
+    "yearlyApproved": {
+      "2024": 110250000,
+      "2025": 74430481,
+      "2026": 147000000,
+      "2027": 158760000
+    },
+    "diffBravo": 21333336
+  },
+  {
+    "code": "6416",
+    "name": "Chi phí bảo dưỡng, sửa chữa",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "",
+    "bravoQuota": 0,
+    "approvedAmount": 70000000,
+    "bravoAmount": 0,
+    "bravoActual": 0,
+    "actualAmount": 0,
+    "maxActual": 0,
+    "remainingAmount": 70000000,
+    "percentExecuted": 0,
+    "yearlyApproved": {
+      "2024": 1020000,
+      "2025": 59500000,
+      "2026": 70000000,
+      "2027": 75600000
+    },
+    "diffBravo": 0
+  },
+  {
+    "code": "641788",
+    "name": "Chi phí dịch vụ thuê/mua ngoài khác",
+    "group": "SCTX CƠ SỞ HẠ TẦNG",
+    "subGroup": "SCTX PHƯƠNG TIỆN VẬN TẢI",
+    "scope": "Khấu hao theo tháng",
+    "bravoQuota": 147000000,
+    "approvedAmount": 147000000,
+    "bravoAmount": 2100000,
+    "bravoActual": 2100000,
+    "actualAmount": 9200000,
+    "maxActual": 2100000,
+    "remainingAmount": 144900000,
+    "percentExecuted": 1.43,
+    "yearlyApproved": {
+      "2024": 484000000,
+      "2025": 919600,
+      "2026": 147000000,
+      "2027": 158760000
+    },
+    "diffBravo": -7100000
+  }
 ]
