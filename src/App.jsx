@@ -25,7 +25,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
       {/* Dev Switcher Banner / Quick Test bar at top right */}
-      <div className="fixed bottom-4 right-4 z-50 bg-slate-900/90 text-white backdrop-blur-md px-3.5 py-2 rounded-full shadow-xl border border-slate-700/60 flex items-center gap-2 text-xs">
+      <div className="hidden sm:flex fixed bottom-4 right-4 z-50 bg-slate-900/90 text-white backdrop-blur-md px-3.5 py-2 rounded-full shadow-xl border border-slate-700/60 items-center gap-2 text-xs">
         <span className="text-slate-400">Xem nhanh:</span>
         <button
           onClick={() => {
@@ -56,12 +56,12 @@ export default function App() {
       ) : (
         <ErrorBoundary>
           <Navbar user={user} onLogout={handleLogout} />
-          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <main className="flex-1 max-w-7xl w-full mx-auto px-2.5 sm:px-6 lg:px-8 py-3 sm:py-6">
             <DashboardPage user={user} />
           </main>
-          <footer className="border-t border-slate-200 bg-white/50 py-5 text-center text-xs text-slate-500">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6">
-              © 2026 Quản Lý Kế Hoạch • Phát triển trên nền tảng React (Vite) & Tailwind CSS
+          <footer className="border-t border-slate-200 bg-white/50 py-3 sm:py-5 text-center text-3xs sm:text-xs text-slate-500">
+            <div className="max-w-7xl mx-auto px-2.5 sm:px-6">
+              © 2026 Quản Lý Kế Hoạch • Cảng HKQT Cần Thơ
             </div>
           </footer>
         </ErrorBoundary>

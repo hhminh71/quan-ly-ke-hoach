@@ -199,139 +199,136 @@ export default function ExecutiveDashboard({
   }, [enhancedItems, selectedRiskFilter]);
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-3 sm:space-y-6 animate-in fade-in duration-200">
       {/* 1. EXECUTIVE KPI SUMMARY CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {/* Card 1: Hạn mức duyệt */}
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-900 to-indigo-950 text-white shadow-md border border-blue-800/40 relative overflow-hidden">
+        <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-900 to-indigo-950 text-white shadow-md border border-blue-800/40 relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-2xs font-bold uppercase tracking-wider text-blue-200">
+            <span className="text-3xs sm:text-2xs font-bold uppercase tracking-wider text-blue-200">
               Tổng Hạn Mức Duyệt ({selectedYear})
             </span>
-            <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-blue-300">
-              <Wallet className="w-5 h-5" />
+            <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-white/10 flex items-center justify-center text-blue-300">
+              <Wallet className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <p className="text-2xl font-black font-mono tracking-tight mt-2">
+          <p className="text-lg sm:text-2xl font-black font-mono tracking-tight mt-1 sm:mt-2">
             {formatCompactVND(kpis.totalApproved)}
           </p>
-          <p className="text-xs text-blue-300/80 mt-1 truncate" title={formatVND(kpis.totalApproved)}>
+          <p className="text-3xs sm:text-xs text-blue-300/80 mt-0.5 truncate" title={formatVND(kpis.totalApproved)}>
             {formatVND(kpis.totalApproved)}
           </p>
-          <div className="mt-3 flex items-center gap-2 pt-2 border-t border-white/10 text-2xs text-blue-200">
+          <div className="mt-2 sm:mt-3 flex items-center gap-1.5 pt-1.5 sm:pt-2 border-t border-white/10 text-3xs sm:text-2xs text-blue-200">
             <span className="px-1.5 py-0.2 rounded bg-blue-500/30 font-bold">100% Định mức</span>
-            <span>{budgets.length} danh mục kế hoạch</span>
+            <span className="truncate">{budgets.length} danh mục</span>
           </div>
         </div>
 
         {/* Card 2: Chi phí thực tế (MAX) */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm relative overflow-hidden">
+        <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-white border border-slate-200/90 shadow-sm relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-2xs font-bold uppercase tracking-wider text-slate-500">
-              Chi Phí Thực Tế (Báo Cáo)
+            <span className="text-3xs sm:text-2xs font-bold uppercase tracking-wider text-slate-500">
+              Chi Phí Thực Tế (MAX)
             </span>
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5" />
+            <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <TrendingUp className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <p className="text-2xl font-black font-mono tracking-tight text-slate-900 mt-2">
+          <p className="text-lg sm:text-2xl font-black font-mono tracking-tight text-slate-900 mt-1 sm:mt-2">
             {formatCompactVND(kpis.totalReportActual)}
           </p>
-          <div className="flex items-center gap-1.5 mt-1">
-            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+          <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5 sm:mt-1">
+            <span className="text-3xs sm:text-xs font-bold text-emerald-700 bg-emerald-50 px-1.5 sm:px-2 py-0.5 rounded-full border border-emerald-200">
               Đã chi {kpis.avgPercent.toFixed(1)}%
             </span>
-            <span className="text-3xs text-slate-400 font-semibold uppercase">MAX(Bravo, Nhập liệu)</span>
+            <span className="text-3xs text-slate-400 font-semibold uppercase hidden sm:inline">MAX(Bravo, Nhập liệu)</span>
           </div>
-          <div className="mt-3 flex items-center justify-between pt-2 border-t border-slate-100 text-2xs text-slate-500">
-            <span>{kpis.totalVouchers.toLocaleString('vi-VN')} phiếu chi phát sinh</span>
+          <div className="mt-2 sm:mt-3 flex items-center justify-between pt-1.5 sm:pt-2 border-t border-slate-100 text-3xs sm:text-2xs text-slate-500">
+            <span>{kpis.totalVouchers.toLocaleString('vi-VN')} phiếu chi</span>
             <span className="font-semibold text-slate-700">{formatCompactVND(kpis.totalReportActual)}</span>
           </div>
         </div>
 
         {/* Card 3: Khả dụng còn lại */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm relative overflow-hidden">
+        <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-white border border-slate-200/90 shadow-sm relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-2xs font-bold uppercase tracking-wider text-slate-500">
+            <span className="text-3xs sm:text-2xs font-bold uppercase tracking-wider text-slate-500">
               Hạn Mức Khả Dụng Còn Lại
             </span>
             <div
-              className={`w-9 h-9 rounded-xl flex items-center justify-center ${
+              className={`w-6 h-6 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl flex items-center justify-center ${
                 kpis.totalRemaining >= 0 ? 'bg-blue-50 text-blue-600' : 'bg-rose-50 text-rose-600'
               }`}
             >
-              <CheckCircle2 className="w-5 h-5" />
+              <CheckCircle2 className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </div>
           <p
-            className={`text-2xl font-black font-mono tracking-tight mt-2 ${
+            className={`text-lg sm:text-2xl font-black font-mono tracking-tight mt-1 sm:mt-2 ${
               kpis.totalRemaining >= 0 ? 'text-slate-900' : 'text-rose-600'
             }`}
           >
             {formatCompactVND(kpis.totalRemaining)}
           </p>
-          <p className="text-xs text-slate-500 mt-1 truncate" title={formatVND(kpis.totalRemaining)}>
+          <p className="text-3xs sm:text-xs text-slate-500 mt-0.5 truncate" title={formatVND(kpis.totalRemaining)}>
             {kpis.totalRemaining >= 0
-              ? `Dự trữ khả dụng: ${((kpis.totalRemaining / kpis.totalApproved) * 100).toFixed(1)}%`
+              ? `Còn ${((kpis.totalRemaining / kpis.totalApproved) * 100).toFixed(1)}%`
               : 'Đã vượt ngân sách'}
           </p>
-          <div className="mt-3 flex items-center gap-2 pt-2 border-t border-slate-100 text-2xs text-slate-500">
+          <div className="mt-2 sm:mt-3 flex items-center gap-1.5 pt-1.5 sm:pt-2 border-t border-slate-100 text-3xs sm:text-2xs text-slate-500">
             <span
-              className={`w-2 h-2 rounded-full ${
+              className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
                 kpis.totalRemaining >= 0 ? 'bg-emerald-500' : 'bg-rose-500'
               }`}
             ></span>
-            <span>
-              {kpis.safeCount} danh mục an toàn • {kpis.warningCount + kpis.overCount} cần lưu ý
+            <span className="truncate">
+              {kpis.safeCount} an toàn • {kpis.warningCount + kpis.overCount} lưu ý
             </span>
           </div>
         </div>
 
         {/* Card 4: Tình trạng an toàn & Vận hành */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-sm relative overflow-hidden">
+        <div className="p-3 sm:p-5 rounded-xl sm:rounded-2xl bg-white border border-slate-200/90 shadow-sm relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="text-2xs font-bold uppercase tracking-wider text-slate-500">
+            <span className="text-3xs sm:text-2xs font-bold uppercase tracking-wider text-slate-500">
               An Toàn Ngân Sách
             </span>
-            <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-              <Activity className="w-5 h-5" />
+            <div className="w-6 h-6 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+              <Activity className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
             </div>
           </div>
-          <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-2xl font-black font-mono text-slate-900">
+          <div className="flex items-baseline gap-1.5 mt-1 sm:mt-2">
+            <span className="text-lg sm:text-2xl font-black font-mono text-slate-900">
               {kpis.safeCount}
             </span>
-            <span className="text-xs text-slate-500 font-semibold">/ {budgets.length} danh mục an toàn</span>
+            <span className="text-3xs sm:text-xs text-slate-500 font-semibold">/ {budgets.length} an toàn</span>
           </div>
-          <div className="flex items-center gap-2 mt-1.5">
-            <span className="px-2 py-0.5 rounded text-2xs font-bold bg-rose-100 text-rose-800">
+          <div className="flex items-center gap-1 mt-1 sm:mt-1.5">
+            <span className="px-1.5 py-0.2 rounded text-3xs font-bold bg-rose-100 text-rose-800">
               {kpis.overCount} Vượt
             </span>
-            <span className="px-2 py-0.5 rounded text-2xs font-bold bg-amber-100 text-amber-800">
+            <span className="px-1.5 py-0.2 rounded text-3xs font-bold bg-amber-100 text-amber-800">
               {kpis.warningCount} Cảnh báo
             </span>
-            <span className="px-2 py-0.5 rounded text-2xs font-bold bg-emerald-100 text-emerald-800">
-              {kpis.safeCount} An toàn
-            </span>
           </div>
-          <div className="mt-3 flex items-center justify-between pt-2 border-t border-slate-100 text-2xs text-slate-500">
-            <span>{kpis.uniqueEmployees} cán bộ thực hiện</span>
+          <div className="mt-2 sm:mt-3 flex items-center justify-between pt-1.5 sm:pt-2 border-t border-slate-100 text-3xs sm:text-2xs text-slate-500">
+            <span>{kpis.uniqueEmployees} cán bộ</span>
             <span className="font-semibold text-blue-600">Năm {selectedYear}</span>
           </div>
         </div>
       </div>
 
       {/* 2. MAIN ANALYTICS GRID: CƠ CẤU THEO NHÓM CHI PHÍ & TIẾN ĐỘ THEO QUÝ */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-6 items-start">
         {/* Left Column: Cơ Cấu Ngân Sách Theo Nhóm Chi Phí (Col 7) */}
-        <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200/90 shadow-sm p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                <PieChart className="w-4 h-4" />
+        <div className="lg:col-span-7 bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-sm p-3.5 sm:p-5 space-y-3 sm:space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2.5 sm:pb-3">
+            <div className="flex items-center gap-2 sm:gap-2.5">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                <PieChart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
               <div>
-                <h3 className="font-bold text-slate-900 text-sm">
+                <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
                   Cơ Cấu Chi Phí Theo Nhóm Danh Mục
                 </h3>
                 <p className="text-3xs text-slate-400">
@@ -345,7 +342,8 @@ export default function ExecutiveDashboard({
                 onClick={onNavigateToBudgets}
                 className="text-xs text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-1 hover:underline"
               >
-                <span>Xem chi tiết 76 mục</span>
+                <span className="hidden sm:inline">Xem chi tiết 76 mục</span>
+                <span className="sm:hidden">76 mục</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             )}
