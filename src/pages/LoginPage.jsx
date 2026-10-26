@@ -39,16 +39,18 @@ export default function LoginPage({ onLogin }) {
     <div className="min-h-screen w-full flex items-center justify-center bg-slate-900 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.25),rgba(255,255,255,0))] p-4 sm:p-6">
       <div className="w-full max-w-md">
         {/* Logo and Brand */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white shadow-xl shadow-blue-500/25 mb-4 ring-8 ring-blue-500/10">
-            <ShieldCheck className="w-8 h-8" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-            Quản Lý Kế Hoạch
-          </h1>
-          <p className="mt-2 text-sm text-slate-400">
-            Hệ thống quản lý kế hoạch và hoạt động doanh nghiệp
+        <div className="text-center mb-6">
+          <p className="text-2xs sm:text-xs font-semibold text-blue-300 uppercase tracking-widest mb-1">
+            TỔNG CÔNG TY CẢNG HÀNG KHÔNG VIỆT NAM - CTCP
           </p>
+          <h1 className="text-xl sm:text-2xl font-black tracking-wide text-white uppercase drop-shadow-sm">
+            CẢNG HÀNG KHÔNG QUỐC TẾ CẦN THƠ
+          </h1>
+          <div className="mt-2.5 inline-block">
+            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-900/60 text-blue-200 border border-blue-400/30">
+              Phòng Tài chính - Kế hoạch | Phần mềm quản lý Kế hoạch
+            </span>
+          </div>
         </div>
 
         {/* Login Card */}

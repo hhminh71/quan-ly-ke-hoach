@@ -226,6 +226,15 @@ export default function DashboardPage({ user }) {
     document.body.removeChild(link);
   };
 
+  // Event listener for Header Export Button
+  useEffect(() => {
+    const handleCustomExport = () => {
+      handleExportCSV();
+    };
+    window.addEventListener('app_export_csv', handleCustomExport);
+    return () => window.removeEventListener('app_export_csv', handleCustomExport);
+  }, [yearTransactions, selectedYear]);
+
   // Format today in Vietnamese format
   const todayFormatted = new Intl.DateTimeFormat('vi-VN', {
     weekday: 'long',
