@@ -293,12 +293,12 @@ export default function BudgetOverview({
   return (
     <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="p-3 sm:p-6 border-b border-slate-100 space-y-2.5 sm:space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4">
+      <div className="p-2.5 sm:p-6 border-b border-slate-100 space-y-2 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-blue-600 ring-2 sm:ring-4 ring-blue-100"></span>
-              <h2 className="text-sm sm:text-lg font-bold text-slate-800">
+              <h2 className="text-xs sm:text-lg font-bold text-slate-800">
                 {viewMode === 'PROGRESS' ? (
                   <>
                     Tiến Độ Kế Hoạch Định Mức{' '}
@@ -316,7 +316,7 @@ export default function BudgetOverview({
                 )}
               </h2>
             </div>
-            <p className="text-3xs sm:text-xs text-slate-500 mt-0.5">
+            <p className="hidden sm:block text-xs text-slate-500 mt-0.5">
               {viewMode === 'PROGRESS'
                 ? `Hạn mức và tiến độ giải ngân theo từng mã tài khoản riêng cho năm ${selectedYear}`
                 : 'Mỗi năm là một cột hạn mức riêng biệt. Thêm cột mới khi sang năm mới mà không làm xáo trộn năm cũ.'}
@@ -324,50 +324,50 @@ export default function BudgetOverview({
           </div>
 
           {/* Toggle View Mode & Actions */}
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+          <div className="flex flex-wrap items-center gap-1 sm:gap-2">
             {/* View Mode Buttons */}
-            <div className="flex items-center p-0.5 sm:p-1 bg-slate-100 rounded-lg sm:rounded-xl">
+            <div className="flex items-center p-0.5 bg-slate-100 rounded-md sm:rounded-xl">
               <button
                 type="button"
                 onClick={() => setViewMode('PROGRESS')}
-                className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg text-2xs sm:text-xs font-semibold transition-all ${
+                className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-3 sm:py-1.5 rounded sm:rounded-lg text-[10px] sm:text-xs font-semibold transition-all ${
                   viewMode === 'PROGRESS'
                     ? 'bg-white text-blue-700 shadow-2xs font-bold'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
                 title="Xem tiến độ giải ngân chi tiết theo năm đang chọn"
               >
-                <BarChart3 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <BarChart3 className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
                 <span>Tiến Độ ({selectedYear})</span>
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode('MATRIX')}
-                className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg text-2xs sm:text-xs font-semibold transition-all ${
+                className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-3 sm:py-1.5 rounded sm:rounded-lg text-[10px] sm:text-xs font-semibold transition-all ${
                   viewMode === 'MATRIX'
                     ? 'bg-white text-indigo-700 shadow-2xs font-bold'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
                 title="Xem bảng ma trận nhiều cột năm (2024, 2025, 2026, 2027...)"
               >
-                <TableProperties className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <TableProperties className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
                 <span>Ma Trận Các Năm</span>
               </button>
             </div>
 
             {/* Column Visibility Toggles in Progress View (Theo Bravo & Theo Nhập Liệu) */}
             {viewMode === 'PROGRESS' && (
-              <div className="flex items-center gap-0.5 sm:gap-1 p-0.5 sm:p-1 bg-slate-100/90 rounded-lg sm:rounded-xl border border-slate-200/80 text-xs shadow-2xs">
-                <span className="text-3xs font-bold text-slate-500 uppercase px-1 sm:px-2 flex items-center gap-1">
+              <div className="flex items-center gap-0.5 p-0.5 bg-slate-100/90 rounded-md sm:rounded-xl border border-slate-200/80 text-xs shadow-2xs">
+                <span className="text-3xs font-bold text-slate-500 uppercase px-1 sm:px-2 flex items-center gap-1 hidden sm:flex">
                   <SlidersHorizontal className="w-2.5 h-2.5 text-slate-400" />
-                  <span className="hidden sm:inline">Cột So Sánh:</span>
+                  <span>Cột So Sánh:</span>
                 </span>
 
                 {/* Toggle Cột Theo Bravo */}
                 <button
                   type="button"
                   onClick={() => setShowBravoCol((prev) => !prev)}
-                  className={`inline-flex items-center gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-md sm:rounded-lg text-2xs sm:text-xs font-semibold transition-all cursor-pointer ${
+                  className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1.5 rounded sm:rounded-lg text-[10px] sm:text-xs font-semibold transition-all cursor-pointer ${
                     showBravoCol
                       ? 'bg-amber-500 text-white shadow-xs font-bold'
                       : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80 hover:bg-slate-50'
@@ -382,7 +382,7 @@ export default function BudgetOverview({
                 <button
                   type="button"
                   onClick={() => setShowActualCol((prev) => !prev)}
-                  className={`inline-flex items-center gap-1 px-1.5 py-1 sm:px-2.5 sm:py-1.5 rounded-md sm:rounded-lg text-2xs sm:text-xs font-semibold transition-all cursor-pointer ${
+                  className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1.5 rounded sm:rounded-lg text-[10px] sm:text-xs font-semibold transition-all cursor-pointer ${
                     showActualCol
                       ? 'bg-blue-600 text-white shadow-xs font-bold'
                       : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80 hover:bg-slate-50'
@@ -401,10 +401,10 @@ export default function BudgetOverview({
                 <button
                   type="button"
                   onClick={() => setShowAddYearModal(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-all"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-3 sm:py-2 rounded-md sm:rounded-xl text-[10px] sm:text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-all"
                   title="Thêm một cột năm mới (ví dụ 2028)"
                 >
-                  <PlusCircle className="w-3.5 h-3.5" />
+                  <PlusCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   <span>+ Thêm Cột Năm</span>
                 </button>
 
@@ -412,29 +412,29 @@ export default function BudgetOverview({
                   <button
                     type="button"
                     onClick={() => setIsEditingMatrix(true)}
-                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-all"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-3 sm:py-2 rounded-md sm:rounded-xl text-[10px] sm:text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-all"
                   >
-                    <Edit3 className="w-3.5 h-3.5 text-slate-500" />
+                    <Edit3 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-500" />
                     <span>Sửa Hạn Mức</span>
                   </button>
                 ) : (
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1">
                     <button
                       type="button"
                       onClick={() => {
                         setEditedBudgets(budgets);
                         setIsEditingMatrix(false);
                       }}
-                      className="px-2.5 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                      className="px-2 py-0.5 sm:px-2.5 sm:py-2 rounded-md sm:rounded-xl text-[10px] sm:text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
                     >
                       Hủy
                     </button>
                     <button
                       type="button"
                       onClick={handleSaveMatrix}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all"
+                      className="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3.5 sm:py-2 rounded-md sm:rounded-xl text-[10px] sm:text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all"
                     >
-                      <Save className="w-3.5 h-3.5" />
+                      <Save className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                       <span>Lưu Hạn Mức</span>
                     </button>
                   </div>
@@ -444,29 +444,29 @@ export default function BudgetOverview({
           </div>
         </div>
 
-        {/* Filter bar (shared) */}
-        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-3 pt-1">
+        {/* Filter bar (shared): 2 selects side-by-side on mobile */}
+        <div className="grid grid-cols-2 sm:grid-cols-12 gap-1.5 sm:gap-3 pt-0.5 sm:pt-1">
           {/* Search */}
-          <div className="sm:col-span-5 relative">
-            <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <div className="col-span-2 sm:col-span-5 relative">
+            <Search className="w-3 h-3 sm:w-4 sm:h-4 absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
-              placeholder="Tìm theo mã (627...), tên hạng mục, quy mô..."
+              placeholder="Tìm theo mã (627...), tên, quy mô..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-8 sm:pl-9 pr-3 py-1.5 sm:py-2 text-xs rounded-lg sm:rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+              className="w-full pl-7 sm:pl-9 pr-2.5 py-1 sm:py-2 text-[11px] sm:text-xs rounded-md sm:rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 sm:focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
             />
           </div>
 
           {/* Group */}
-          <div className="sm:col-span-4 relative">
-            <Layers className="w-3.5 h-3.5 absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <div className="col-span-1 sm:col-span-4 relative">
+            <Layers className="w-3 h-3 absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <select
               value={selectedGroup}
               onChange={(e) => setSelectedGroup(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 sm:py-2 text-xs rounded-lg sm:rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer"
+              className="w-full pl-6 sm:pl-8 pr-2 py-1 sm:py-2 text-[10px] sm:text-xs rounded-md sm:rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 sm:focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer truncate"
             >
-              <option value="ALL">Tất cả nhóm chi phí</option>
+              <option value="ALL">Tất cả nhóm</option>
               {groups.map((g) => (
                 <option key={g} value={g}>
                   {g}
@@ -476,17 +476,17 @@ export default function BudgetOverview({
           </div>
 
           {/* Status (only relevant in Progress view) */}
-          <div className="sm:col-span-3 relative">
-            <Filter className="w-3.5 h-3.5 absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <div className="col-span-1 sm:col-span-3 relative">
+            <Filter className="w-3 h-3 absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 sm:py-2 text-xs rounded-lg sm:rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer"
+              className="w-full pl-6 sm:pl-8 pr-2 py-1 sm:py-2 text-[10px] sm:text-xs rounded-md sm:rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 sm:focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer truncate"
             >
               <option value="ALL">Tất cả trạng thái</option>
               <option value="SAFE">An toàn (&lt; 80%)</option>
-              <option value="WARNING">Cảnh báo (80% - 100%)</option>
-              <option value="OVER">Vượt ngân sách (&gt; 100%)</option>
+              <option value="WARNING">Cảnh báo (80-100%)</option>
+              <option value="OVER">Vượt (&gt; 100%)</option>
             </select>
           </div>
         </div>
@@ -496,85 +496,85 @@ export default function BudgetOverview({
       {viewMode === 'PROGRESS' && (
         <>
           {/* Quick Summary Bar */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3 p-2.5 sm:p-4 bg-slate-50/80 border-b border-slate-200 text-xs">
-            <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-              <span className="text-3xs sm:text-2xs font-semibold text-slate-500 uppercase tracking-wide">
-                1. Tổng Được Duyệt
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-1.5 sm:gap-3 p-1.5 sm:p-4 bg-slate-50/80 border-b border-slate-200 text-xs">
+            <div className="p-1.5 sm:p-3 rounded-md sm:rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <span className="text-[9px] sm:text-2xs font-semibold text-slate-500 uppercase tracking-wide">
+                1. Tổng Duyệt
               </span>
-              <p className="text-xs sm:text-base font-extrabold text-slate-900 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate" title={formatVND(summary.totalApproved)}>
+              <p className="text-[11px] sm:text-base font-extrabold text-slate-900 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate" title={formatVND(summary.totalApproved)}>
                 {formatVND(summary.totalApproved)}
               </p>
-              <p className="text-3xs text-slate-400 mt-0.5">Năm tài chính {selectedYear}</p>
+              <p className="hidden sm:block text-3xs text-slate-400 mt-0.5">Năm tài chính {selectedYear}</p>
             </div>
 
             {showBravoCol && (
-              <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-amber-50/70 border border-amber-200/80 shadow-2xs">
-                <span className="text-3xs sm:text-2xs font-semibold text-amber-800 uppercase tracking-wide">
-                  2. Tổng Theo Bravo
+              <div className="p-1.5 sm:p-3 rounded-md sm:rounded-xl bg-amber-50/70 border border-amber-200/80 shadow-2xs">
+                <span className="text-[9px] sm:text-2xs font-semibold text-amber-800 uppercase tracking-wide">
+                  2. Theo Bravo
                 </span>
-                <p className="text-xs sm:text-base font-extrabold text-amber-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate" title={formatVND(summary.totalBravo)}>
+                <p className="text-[11px] sm:text-base font-extrabold text-amber-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate" title={formatVND(summary.totalBravo)}>
                   {formatVND(summary.totalBravo)}
                 </p>
-                <p className="text-3xs text-amber-700 mt-0.5">Hạch toán BRAVO</p>
+                <p className="hidden sm:block text-3xs text-amber-700 mt-0.5">Hạch toán BRAVO</p>
               </div>
             )}
 
             {showActualCol && (
-              <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-blue-50/70 border border-blue-200/80 shadow-2xs">
-                <span className="text-3xs sm:text-2xs font-semibold text-blue-800 uppercase tracking-wide">
-                  3. Tổng Theo Nhập Liệu
+              <div className="p-1.5 sm:p-3 rounded-md sm:rounded-xl bg-blue-50/70 border border-blue-200/80 shadow-2xs">
+                <span className="text-[9px] sm:text-2xs font-semibold text-blue-800 uppercase tracking-wide">
+                  3. Theo Nhập Liệu
                 </span>
-                <p className="text-xs sm:text-base font-extrabold text-blue-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate" title={formatVND(summary.totalLiveActual)}>
+                <p className="text-[11px] sm:text-base font-extrabold text-blue-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate" title={formatVND(summary.totalLiveActual)}>
                   {formatVND(summary.totalLiveActual)}
                 </p>
-                <p className="text-3xs text-blue-700 mt-0.5">Sổ cái phiếu chi</p>
+                <p className="hidden sm:block text-3xs text-blue-700 mt-0.5">Sổ cái phiếu chi</p>
               </div>
             )}
 
-            <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-emerald-50/80 border border-emerald-200/90 shadow-2xs">
+            <div className="p-1.5 sm:p-3 rounded-md sm:rounded-xl bg-emerald-50/80 border border-emerald-200/90 shadow-2xs">
               <div className="flex items-center justify-between">
-                <span className="text-3xs sm:text-2xs font-bold text-emerald-800 uppercase tracking-wide">
-                  Chi Phí Thực Tế (Báo Cáo)
+                <span className="text-[9px] sm:text-2xs font-bold text-emerald-800 uppercase tracking-wide truncate">
+                  Thực Tế (MAX)
                 </span>
-                <span className="text-3xs font-mono font-bold px-1 py-0.2 bg-emerald-200 text-emerald-900 rounded">
+                <span className="text-[8px] sm:text-3xs font-mono font-bold px-1 py-0.2 bg-emerald-200 text-emerald-900 rounded">
                   MAX
                 </span>
               </div>
-              <p className="text-xs sm:text-base font-extrabold text-emerald-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate" title={formatVND(summary.totalReportActual)}>
+              <p className="text-[11px] sm:text-base font-extrabold text-emerald-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate" title={formatVND(summary.totalReportActual)}>
                 {formatVND(summary.totalReportActual)}
               </p>
-              <p className="text-3xs text-emerald-700 mt-0.5">
+              <p className="hidden sm:block text-3xs text-emerald-700 mt-0.5">
                 MAX(Bravo, Nhập liệu)
               </p>
             </div>
 
-            <div className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-white border border-slate-200/80 shadow-2xs">
-              <span className="text-3xs sm:text-2xs font-semibold text-slate-500 uppercase tracking-wide">
-                Tổng Còn Lại (Khả Dụng)
+            <div className="p-1.5 sm:p-3 rounded-md sm:rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <span className="text-[9px] sm:text-2xs font-semibold text-slate-500 uppercase tracking-wide">
+                Còn Lại (Khả Dụng)
               </span>
               <p
-                className={`text-xs sm:text-base font-extrabold mt-0.5 font-mono tracking-tight whitespace-nowrap truncate ${
+                className={`text-[11px] sm:text-base font-extrabold mt-0.5 font-mono tracking-tight whitespace-nowrap truncate ${
                   summary.totalRemaining < 0 ? 'text-rose-600' : 'text-slate-900'
                 }`}
                 title={formatVND(summary.totalRemaining)}
               >
                 {formatVND(summary.totalRemaining)}
               </p>
-              <p className="text-3xs text-slate-500 mt-0.5">
+              <p className="hidden sm:block text-3xs text-slate-500 mt-0.5">
                 Giải ngân: <strong className="text-slate-800">{summary.avgPercent.toFixed(1)}%</strong>
               </p>
             </div>
           </div>
 
           {/* Hint banner */}
-          <div className="px-3 sm:px-5 py-1.5 sm:py-2.5 bg-blue-50/70 border-b border-blue-100 flex flex-wrap items-center justify-between text-3xs sm:text-xs text-blue-800 gap-1.5">
-            <div className="flex items-center gap-1.5">
-              <span className="flex h-2 w-2 relative">
+          <div className="px-2.5 sm:px-5 py-1 sm:py-2 bg-blue-50/70 border-b border-blue-100 flex items-center justify-between text-[10px] sm:text-xs text-blue-800 gap-1.5">
+            <div className="flex items-center gap-1.5 truncate">
+              <span className="flex h-1.5 w-1.5 relative shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-600"></span>
               </span>
-              <span>
-                💡 <strong>Quy tắc báo cáo:</strong> Cột <strong>Chi Phí Thực Tế</strong> tự động so sánh và lấy <strong>giá trị lớn nhất giữa Bravo và Nhập liệu: MAX(Bravo, Nhập liệu)</strong>. Click vào dòng để xem sổ cái chi tiết.
+              <span className="truncate">
+                💡 <strong>Quy tắc báo cáo:</strong> Chi Phí Thực Tế = <strong>MAX(Bravo, Nhập liệu)</strong>. <span className="hidden sm:inline">Click vào dòng để xem sổ cái chi tiết.</span>
               </span>
             </div>
           </div>

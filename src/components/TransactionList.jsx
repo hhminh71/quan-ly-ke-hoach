@@ -218,28 +218,30 @@ export default function TransactionList({
       <div className="p-3 sm:p-6 border-b border-slate-100 space-y-2.5 sm:space-y-4">
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-2.5 sm:gap-4">
           <div>
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-3">
-              <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500 ring-2 sm:ring-4 ring-emerald-100"></span>
-              <h2 className="text-sm sm:text-lg font-bold text-slate-800">
-                Sổ Cái Chi Tiết Các Phiếu Chi{' '}
-                <span className="text-emerald-700 font-extrabold">
-                  ({selectedYear === 'ALL' ? 'Tất Cả' : `Năm ${selectedYear}`})
-                </span>
-              </h2>
+            <div className="flex items-center justify-between gap-1.5 sm:gap-3">
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-emerald-500 ring-2 sm:ring-4 ring-emerald-100"></span>
+                <h2 className="text-xs sm:text-lg font-bold text-slate-800">
+                  Sổ Cái Phiếu Chi{' '}
+                  <span className="text-emerald-700 font-extrabold">
+                    ({selectedYear === 'ALL' ? 'Tất Cả' : `Năm ${selectedYear}`})
+                  </span>
+                </h2>
+              </div>
 
               {onAddTransaction && (
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(true)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl text-2xs sm:text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-all"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-3 sm:py-1.5 rounded-md sm:rounded-xl text-[10px] sm:text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-2xs transition-all"
                   title="Thêm mới phiếu chi và đồng bộ trực tiếp lên Google Sheet"
                 >
-                  <PlusCircle className="w-3.5 h-3.5" />
-                  <span>+ Thêm Phiếu Chi</span>
+                  <PlusCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  <span>+ Thêm Phiếu</span>
                 </button>
               )}
             </div>
-            <p className="text-3xs sm:text-xs text-slate-500 mt-0.5 sm:mt-1">
+            <p className="hidden sm:block text-3xs sm:text-xs text-slate-500 mt-0.5 sm:mt-1">
               Hiển thị {sorted.length.toLocaleString('vi-VN')} giao dịch phát sinh trong{' '}
               {selectedYear === 'ALL' ? 'toàn bộ lịch sử' : `năm tài chính ${selectedYear}`}
               {selectedCategory !== 'ALL' && (
@@ -251,34 +253,34 @@ export default function TransactionList({
           </div>
 
           {/* 3 KPI Summary Cards: Được duyệt, Phát sinh (tiền & %), Còn lại (tiền & %) */}
-          <div className="grid grid-cols-3 gap-1 sm:gap-3 bg-slate-50/90 p-1 sm:p-2.5 rounded-xl sm:rounded-2xl border border-slate-200/80 shadow-2xs">
+          <div className="grid grid-cols-3 gap-1 sm:gap-3 bg-slate-50/90 p-1 sm:p-2.5 rounded-lg sm:rounded-2xl border border-slate-200/80 shadow-2xs">
             {/* 1. Tổng được duyệt */}
-            <div className="px-1.5 py-1 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl bg-white border border-slate-200/70 shadow-2xs text-left">
+            <div className="px-1.5 py-1 sm:px-3 sm:py-2 rounded-md sm:rounded-xl bg-white border border-slate-200/70 shadow-2xs text-left">
               <div className="flex items-center justify-between">
-                <span className="text-3xs sm:text-[10px] font-semibold text-slate-500 uppercase tracking-tight sm:tracking-wide">
+                <span className="text-[9px] sm:text-[10px] font-semibold text-slate-500 uppercase tracking-tight">
                   Được duyệt
                 </span>
                 <span className="hidden sm:inline-block text-[10px] font-bold text-slate-500 bg-slate-100 px-1 py-0.2 rounded">
                   100%
                 </span>
               </div>
-              <div className="text-[11px] sm:text-sm font-extrabold text-slate-800 font-mono mt-0.5 truncate" title={formatVND(budgetStats.approved)}>
+              <div className="text-[10px] sm:text-sm font-extrabold text-slate-800 font-mono mt-0.5 truncate" title={formatVND(budgetStats.approved)}>
                 {formatVND(budgetStats.approved)}
               </div>
               <div className="text-3xs sm:text-[10px] text-slate-400 font-medium hidden sm:block">Hạn mức ngân sách</div>
             </div>
 
             {/* 2. Tổng phát sinh (số tiền và %) */}
-            <div className="px-1.5 py-1 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl bg-blue-50/80 border border-blue-200 shadow-2xs text-left">
+            <div className="px-1.5 py-1 sm:px-3 sm:py-2 rounded-md sm:rounded-xl bg-blue-50/80 border border-blue-200 shadow-2xs text-left">
               <div className="flex items-center justify-between">
-                <span className="text-3xs sm:text-[10px] font-semibold text-blue-700 uppercase tracking-tight sm:tracking-wide">
+                <span className="text-[9px] sm:text-[10px] font-semibold text-blue-700 uppercase tracking-tight">
                   Phát sinh
                 </span>
-                <span className="text-3xs sm:text-[10px] font-bold bg-blue-600 text-white px-1 py-0.2 rounded">
-                  {budgetStats.spentPercent.toFixed(1)}%
+                <span className="text-[8px] sm:text-[10px] font-bold bg-blue-600 text-white px-1 py-0.2 rounded">
+                  {budgetStats.spentPercent.toFixed(0)}%
                 </span>
               </div>
-              <div className="text-[11px] sm:text-sm font-extrabold text-blue-900 font-mono mt-0.5 truncate" title={formatVND(budgetStats.spent)}>
+              <div className="text-[10px] sm:text-sm font-extrabold text-blue-900 font-mono mt-0.5 truncate" title={formatVND(budgetStats.spent)}>
                 {formatVND(budgetStats.spent)}
               </div>
               <div className="text-3xs sm:text-[10px] text-blue-600 font-medium hidden sm:block">Đã thực hiện</div>
@@ -286,7 +288,7 @@ export default function TransactionList({
 
             {/* 3. Tổng còn lại (số tiền và %) */}
             <div
-              className={`px-1.5 py-1 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl border shadow-2xs text-left ${
+              className={`px-1.5 py-1 sm:px-3 sm:py-2 rounded-md sm:rounded-xl border shadow-2xs text-left ${
                 budgetStats.remaining >= 0
                   ? 'bg-emerald-50/80 border-emerald-200'
                   : 'bg-rose-50/80 border-rose-200'
@@ -294,22 +296,22 @@ export default function TransactionList({
             >
               <div className="flex items-center justify-between">
                 <span
-                  className={`text-3xs sm:text-[10px] font-semibold uppercase tracking-tight sm:tracking-wide truncate ${
+                  className={`text-[9px] sm:text-[10px] font-semibold uppercase tracking-tight ${
                     budgetStats.remaining >= 0 ? 'text-emerald-700' : 'text-rose-700'
                   }`}
                 >
                   {budgetStats.remaining >= 0 ? 'Còn lại' : 'Vượt'}
                 </span>
                 <span
-                  className={`text-3xs sm:text-[10px] font-bold px-1 py-0.2 rounded text-white ${
+                  className={`text-[8px] sm:text-[10px] font-bold px-1 py-0.2 rounded text-white ${
                     budgetStats.remaining >= 0 ? 'bg-emerald-600' : 'bg-rose-600'
                   }`}
                 >
-                  {budgetStats.remainingPercent.toFixed(1)}%
+                  {budgetStats.remainingPercent.toFixed(0)}%
                 </span>
               </div>
               <div
-                className={`text-[11px] sm:text-sm font-extrabold font-mono mt-0.5 truncate ${
+                className={`text-[10px] sm:text-sm font-extrabold font-mono mt-0.5 truncate ${
                   budgetStats.remaining >= 0 ? 'text-emerald-900' : 'text-rose-700'
                 }`}
                 title={formatVND(budgetStats.remaining)}
@@ -329,7 +331,7 @@ export default function TransactionList({
 
         {/* Thanh tiến độ trực quan */}
         {budgetStats.approved > 0 && (
-          <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+          <div className="w-full bg-slate-100 rounded-full h-1 sm:h-1.5 overflow-hidden">
             <div
               className={`h-full transition-all duration-500 rounded-full ${
                 budgetStats.spentPercent > 100
@@ -343,11 +345,11 @@ export default function TransactionList({
           </div>
         )}
 
-        {/* Search, Filter & Sort Bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2">
+        {/* Search, Filter & Sort Bar: 2 selects side-by-side on mobile */}
+        <div className="grid grid-cols-2 sm:grid-cols-12 gap-1.5 sm:gap-3 pt-1">
           {/* Search Input */}
-          <div className={`${onAddTransaction ? 'sm:col-span-4' : 'sm:col-span-5'} relative`}>
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <div className="col-span-2 sm:col-span-5 relative">
+            <Search className="w-3 h-3 sm:w-4 sm:h-4 absolute left-2.5 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Tìm theo nhân viên, nội dung, mã (627...)..."
@@ -356,13 +358,13 @@ export default function TransactionList({
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+              className="w-full pl-7 sm:pl-9 pr-2.5 py-1 sm:py-2 text-[11px] sm:text-xs rounded-md sm:rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 sm:focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
             />
           </div>
 
           {/* Category Filter */}
-          <div className={`${onAddTransaction ? 'sm:col-span-3' : 'sm:col-span-4'} relative`}>
-            <Layers className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <div className="col-span-1 sm:col-span-4 relative">
+            <Layers className="w-3 h-3 absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <select
               value={selectedCategory}
               onChange={(e) => {
@@ -371,7 +373,7 @@ export default function TransactionList({
                 if (onSelectCategory) onSelectCategory(val);
                 setCurrentPage(1);
               }}
-              className="w-full pl-8 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer truncate"
+              className="w-full pl-6 sm:pl-8 pr-2 py-1 sm:py-2 text-[10px] sm:text-xs rounded-md sm:rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 sm:focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer truncate"
             >
               <option value="ALL">Tất cả tài khoản ({categories.length})</option>
               {categories.map((c) => (
@@ -383,25 +385,25 @@ export default function TransactionList({
           </div>
 
           {/* Sort Order */}
-          <div className="sm:col-span-3 relative">
-            <ArrowUpDown className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <div className="col-span-1 sm:col-span-3 relative">
+            <ArrowUpDown className="w-3 h-3 absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
-              className="w-full pl-8 pr-3 py-2 text-xs rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer font-medium"
+              className="w-full pl-6 sm:pl-8 pr-2 py-1 sm:py-2 text-[10px] sm:text-xs rounded-md sm:rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 sm:focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer truncate font-medium"
             >
               <option value="newest">Mới nhất trước</option>
               <option value="oldest">Cũ nhất trước</option>
-              <option value="account_asc">Mã khoản mục (627... tăng dần)</option>
-              <option value="account_desc">Mã khoản mục (giảm dần)</option>
-              <option value="highest">Số tiền cao nhất</option>
-              <option value="lowest">Số tiền thấp nhất</option>
+              <option value="account_asc">Mã tăng dần</option>
+              <option value="account_desc">Mã giảm dần</option>
+              <option value="highest">Tiền cao nhất</option>
+              <option value="lowest">Tiền thấp nhất</option>
             </select>
           </div>
 
-          {/* Quick Add Button */}
+          {/* Quick Add Button (Desktop only, mobile has it in header) */}
           {onAddTransaction && (
-            <div className="sm:col-span-2">
+            <div className="hidden sm:block sm:col-span-2">
               <button
                 type="button"
                 onClick={() => setIsAddModalOpen(true)}
