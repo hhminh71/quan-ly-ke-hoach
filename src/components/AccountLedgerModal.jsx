@@ -318,13 +318,13 @@ export default function AccountLedgerModal({
             ) : (
               <table className="w-full text-left border-collapse">
                 <thead className="sticky top-0 bg-slate-50 z-10 border-b border-slate-200 shadow-sm">
-                  <tr className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                    <th className="py-2.5 px-3 sm:px-5 w-12 text-center">#</th>
-                    <th className="py-2.5 px-3 sm:px-4">Ngày</th>
-                    <th className="py-2.5 px-3 sm:px-4">Người Thực Hiện</th>
-                    <th className="py-2.5 px-3 sm:px-4 text-right">Số Tiền (VNĐ)</th>
-                    <th className="py-2.5 px-3 sm:px-4">Nội Dung Diễn Giải</th>
-                    <th className="py-2.5 px-3 sm:px-4 text-right">Thao Tác</th>
+                  <tr className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                    <th className="py-2 px-2 sm:py-2.5 sm:px-3 w-10 text-center">#</th>
+                    <th className="py-2 px-2 sm:py-2.5 sm:px-3 w-24 sm:w-28">Ngày</th>
+                    <th className="py-2 px-2 sm:py-2.5 sm:px-3 w-32 sm:w-40">Người Thực Hiện</th>
+                    <th className="py-2 px-2 sm:py-2.5 sm:px-3 text-right w-28 sm:w-36">Số Tiền (VNĐ)</th>
+                    <th className="py-2 px-2 sm:py-2.5 sm:px-3 max-w-[180px] sm:max-w-xs">Nội Dung Diễn Giải</th>
+                    <th className="py-2 px-1.5 sm:py-2.5 sm:px-2 text-right w-16">Thao Tác</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
@@ -334,12 +334,12 @@ export default function AccountLedgerModal({
                       className="hover:bg-blue-50/50 transition-colors group"
                     >
                       {/* STT */}
-                      <td className="py-3 px-3 sm:px-5 text-center font-mono text-[11px] text-slate-400">
+                      <td className="py-2 px-2 sm:py-2.5 sm:px-3 text-center font-mono text-[11px] text-slate-400">
                         {index + 1}
                       </td>
 
                       {/* Ngày */}
-                      <td className="py-3 px-3 sm:px-4 whitespace-nowrap">
+                      <td className="py-2 px-2 sm:py-2.5 sm:px-3 whitespace-nowrap">
                         <div className="flex items-center gap-1.5 text-slate-700 font-medium">
                           <Calendar className="w-3.5 h-3.5 text-slate-400" />
                           <span>{formatDate(item.date)}</span>
@@ -347,29 +347,29 @@ export default function AccountLedgerModal({
                       </td>
 
                       {/* Người thực hiện */}
-                      <td className="py-3 px-3 sm:px-4 whitespace-nowrap">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-blue-100 text-blue-700 font-bold text-[10px] flex items-center justify-center shrink-0">
+                      <td className="py-2 px-2 sm:py-2.5 sm:px-3 max-w-[120px] sm:max-w-[160px] truncate">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-bold text-[9px] flex items-center justify-center shrink-0">
                             {String(item.employeeName || 'U').trim().charAt(0).toUpperCase() || 'U'}
                           </div>
-                          <span className="font-medium text-slate-800">
+                          <span className="font-medium text-slate-800 truncate" title={item.employeeName}>
                             {item.employeeName || 'Chưa ghi nhận'}
                           </span>
                         </div>
                       </td>
 
                       {/* Số tiền */}
-                      <td className="py-3 px-3 sm:px-4 text-right whitespace-nowrap font-mono font-bold text-slate-900 text-xs sm:text-sm">
+                      <td className="py-2 px-2 sm:py-2.5 sm:px-3 text-right whitespace-nowrap font-mono font-bold text-slate-900 text-xs sm:text-sm">
                         {formatVND(item.amount)}
                       </td>
 
                       {/* Nội dung diễn giải */}
-                      <td className="py-3 px-3 sm:px-4 text-slate-600 max-w-xs sm:max-w-md truncate" title={item.notes}>
+                      <td className="py-2 px-2 sm:py-2.5 sm:px-3 text-slate-600 max-w-[180px] sm:max-w-xs truncate" title={item.notes}>
                         {item.notes}
                       </td>
 
                       {/* Thao tác: Chỉnh sửa & Xóa */}
-                      <td className="py-3 px-3 sm:px-4 text-right whitespace-nowrap">
+                      <td className="py-2 px-1.5 sm:py-2.5 sm:px-2 text-right whitespace-nowrap">
                         <div className="flex items-center justify-end gap-1">
                           {onUpdateTransaction && (
                             <button

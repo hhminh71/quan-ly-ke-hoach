@@ -24,33 +24,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
-      {/* Dev Switcher Banner / Quick Test bar at top right */}
-      <div className="hidden sm:flex fixed bottom-4 right-4 z-50 bg-slate-900/90 text-white backdrop-blur-md px-3.5 py-2 rounded-full shadow-xl border border-slate-700/60 items-center gap-2 text-xs">
-        <span className="text-slate-400">Xem nhanh:</span>
-        <button
-          onClick={() => {
-            if (user) {
-              handleLogout();
-            } else {
-              handleLogin({ name: 'Quản trị viên', email: 'admin@company.vn', role: 'Quản trị viên (Admin)' });
-            }
-          }}
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-medium transition-all"
-        >
-          {user ? (
-            <>
-              <LogIn className="w-3.5 h-3.5" />
-              <span>Chuyển sang trang Login</span>
-            </>
-          ) : (
-            <>
-              <LayoutDashboard className="w-3.5 h-3.5" />
-              <span>Chuyển sang trang Dashboard</span>
-            </>
-          )}
-        </button>
-      </div>
-
       {!user ? (
         <LoginPage onLogin={handleLogin} />
       ) : (

@@ -431,7 +431,7 @@ export default function TransactionList({
               <tr className="bg-slate-50/80 border-b border-slate-200 text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                 <th
                   onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
-                  className="py-2.5 px-3 sm:py-3 sm:px-6 cursor-pointer hover:text-blue-600 transition-colors select-none"
+                  className="py-2 px-2 sm:py-2.5 sm:px-3 w-24 sm:w-28 cursor-pointer hover:text-blue-600 transition-colors select-none"
                   title="Click để đổi thứ tự ngày"
                 >
                   <div className="flex items-center gap-1">
@@ -441,7 +441,7 @@ export default function TransactionList({
                 </th>
                 <th
                   onClick={() => setSortOrder(sortOrder === 'account_asc' ? 'account_desc' : 'account_asc')}
-                  className="py-2.5 px-3 sm:py-3 sm:px-4 cursor-pointer hover:text-blue-600 transition-colors select-none"
+                  className="py-2 px-2 sm:py-2.5 sm:px-3 w-40 sm:w-52 cursor-pointer hover:text-blue-600 transition-colors select-none"
                   title="Click để sort theo Mã khoản mục"
                 >
                   <div className="flex items-center gap-1">
@@ -449,10 +449,10 @@ export default function TransactionList({
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
                   </div>
                 </th>
-                <th className="py-2.5 px-3 sm:py-3 sm:px-4">Người thực hiện</th>
+                <th className="py-2 px-2 sm:py-2.5 sm:px-3 w-32 sm:w-40">Người thực hiện</th>
                 <th
                   onClick={() => setSortOrder(sortOrder === 'highest' ? 'lowest' : 'highest')}
-                  className="py-2.5 px-3 sm:py-3 sm:px-4 text-right cursor-pointer hover:text-blue-600 transition-colors select-none"
+                  className="py-2 px-2 sm:py-2.5 sm:px-3 text-right w-28 sm:w-36 cursor-pointer hover:text-blue-600 transition-colors select-none"
                   title="Click để đổi thứ tự số tiền"
                 >
                   <div className="flex items-center justify-end gap-1">
@@ -460,8 +460,8 @@ export default function TransactionList({
                     <ArrowUpDown className="w-3 h-3 text-slate-400" />
                   </div>
                 </th>
-                <th className="py-2.5 px-3 sm:py-3 sm:px-4">Nội dung diễn giải</th>
-                <th className="py-2.5 px-3 sm:py-3 sm:px-4 text-right">Thao tác</th>
+                <th className="py-2 px-2 sm:py-2.5 sm:px-3 max-w-[180px] sm:max-w-xs">Nội dung diễn giải</th>
+                <th className="py-2 px-1.5 sm:py-2.5 sm:px-2 text-right w-16">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
@@ -471,7 +471,7 @@ export default function TransactionList({
                   className="hover:bg-slate-50/70 transition-colors group"
                 >
                   {/* Ngày */}
-                  <td className="py-2 px-3 sm:py-3.5 sm:px-6 whitespace-nowrap">
+                  <td className="py-2 px-2 sm:py-2.5 sm:px-3 w-24 sm:w-28 whitespace-nowrap">
                     <div className="flex items-center gap-1 text-slate-700 font-medium text-2xs sm:text-xs">
                       <Calendar className="w-3 h-3 text-slate-400" />
                       <span>{formatDate(item.date)}</span>
@@ -479,51 +479,51 @@ export default function TransactionList({
                   </td>
 
                   {/* Khoản mục & Mã */}
-                  <td className="py-2 px-3 sm:py-3.5 sm:px-4 whitespace-nowrap">
+                  <td className="py-2 px-2 sm:py-2.5 sm:px-3 w-40 sm:w-52 whitespace-nowrap">
                     <div className="flex items-center gap-1">
                       {item.accountCode && (
                         <span className="font-mono text-3xs sm:text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200">
                           {item.accountCode}
                         </span>
                       )}
-                      <span className="font-semibold text-2xs sm:text-xs text-slate-800 max-w-[140px] sm:max-w-[160px] truncate" title={item.category}>
+                      <span className="font-semibold text-2xs sm:text-xs text-slate-800 max-w-[120px] sm:max-w-[160px] truncate" title={item.category}>
                         {item.category}
                       </span>
                     </div>
                   </td>
 
                   {/* Người thực hiện */}
-                  <td className="py-2 px-3 sm:py-3.5 sm:px-4 whitespace-nowrap">
+                  <td className="py-2 px-2 sm:py-2.5 sm:px-3 w-32 sm:w-40 whitespace-nowrap">
                     <div className="flex items-center gap-1.5">
-                      <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-slate-100 text-slate-700 font-bold text-3xs sm:text-[11px] flex items-center justify-center shrink-0">
+                      <div className="w-5 h-5 rounded-full bg-slate-100 text-slate-700 font-bold text-3xs flex items-center justify-center shrink-0">
                         {String(item.employeeName || 'U').trim().charAt(0).toUpperCase() || 'U'}
                       </div>
-                      <span className="font-medium text-slate-700 text-2xs sm:text-xs">
+                      <span className="font-medium text-slate-700 text-2xs sm:text-xs max-w-[100px] sm:max-w-[140px] truncate" title={item.employeeName}>
                         {item.employeeName || 'Chưa ghi nhận'}
                       </span>
                     </div>
                   </td>
 
                   {/* Số tiền */}
-                  <td className="py-2 px-3 sm:py-3.5 sm:px-4 whitespace-nowrap font-mono font-bold text-slate-900 text-2xs sm:text-sm">
+                  <td className="py-2 px-2 sm:py-2.5 sm:px-3 w-28 sm:w-36 text-right whitespace-nowrap font-mono font-bold text-slate-900 text-2xs sm:text-sm">
                     {formatVND(item.amount)}
                   </td>
 
                   {/* Diễn giải */}
-                  <td className="py-2 px-3 sm:py-3.5 sm:px-4 max-w-xs truncate text-2xs sm:text-xs text-slate-600" title={item.notes}>
+                  <td className="py-2 px-2 sm:py-2.5 sm:px-3 max-w-[180px] sm:max-w-xs truncate text-2xs sm:text-xs text-slate-600" title={item.notes}>
                     {item.notes}
                   </td>
 
                   {/* Thao tác: Chỉnh sửa & Xóa */}
-                  <td className="py-2 px-3 sm:py-3.5 sm:px-4 text-right whitespace-nowrap">
+                  <td className="py-2 px-1.5 sm:py-2.5 sm:px-2 w-16 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-0.5 sm:gap-1">
                       <button
                         type="button"
                         onClick={() => handleStartEdit(item)}
-                        className="p-1 sm:p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-70 group-hover:opacity-100"
+                        className="p-1 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-70 group-hover:opacity-100"
                         title="Chỉnh sửa nội dung phiếu này"
                       >
-                        <Edit3 className="w-4 h-4" />
+                        <Edit3 className="w-3.5 h-3.5" />
                       </button>
                       <button
                         type="button"
@@ -532,10 +532,10 @@ export default function TransactionList({
                             onDeleteTransaction(item.id);
                           }
                         }}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-70 group-hover:opacity-100"
+                        className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-70 group-hover:opacity-100"
                         title="Xóa phiếu này"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </td>

@@ -583,33 +583,33 @@ export default function BudgetOverview({
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50/90 border-b border-slate-200 text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                  <th className="py-2 px-3 sm:py-3 sm:px-6 w-20 sm:w-24">Mã KH</th>
-                  <th className="py-2 px-3 sm:py-3 sm:px-4 min-w-[190px] sm:min-w-[220px]">Tên Hạng Mục / Khoản Mục</th>
-                  <th className="py-2 px-3 sm:py-3 sm:px-4 text-right min-w-[110px] sm:min-w-[120px]">Được Duyệt ({selectedYear})</th>
+                  <th className="py-2 px-2 sm:py-2.5 sm:px-3 w-16 sm:w-20">Mã KH</th>
+                  <th className="py-2 px-2 sm:py-2.5 sm:px-3 max-w-[220px] sm:max-w-[280px]">Tên Hạng Mục / Khoản Mục</th>
+                  <th className="py-2 px-2 sm:py-2.5 sm:px-2.5 text-right whitespace-nowrap">Được Duyệt ({selectedYear})</th>
                   
                   {/* Cột Tùy Chọn: Theo Bravo */}
                   {showBravoCol && (
-                    <th className="py-2 px-3 sm:py-3 sm:px-4 text-right min-w-[110px] sm:min-w-[130px] bg-amber-50/70 text-amber-900 border-l border-r border-amber-200/50">
+                    <th className="py-2 px-2 sm:py-2.5 sm:px-2.5 text-right whitespace-nowrap bg-amber-50/70 text-amber-900 border-l border-r border-amber-200/50">
                       Theo Bravo
                     </th>
                   )}
 
                   {/* Cột Tùy Chọn: Theo Nhập Liệu */}
                   {showActualCol && (
-                    <th className="py-2 px-3 sm:py-3 sm:px-4 text-right min-w-[110px] sm:min-w-[130px] bg-blue-50/70 text-blue-900 border-l border-r border-blue-200/50">
+                    <th className="py-2 px-2 sm:py-2.5 sm:px-2.5 text-right whitespace-nowrap bg-blue-50/70 text-blue-900 border-l border-r border-blue-200/50">
                       Theo Nhập Liệu
                     </th>
                   )}
 
                   {/* Cột Chính: Chi Phí Thực Tế (MAX Báo Cáo) */}
-                  <th className="py-2 px-3 sm:py-3 sm:px-4 text-right min-w-[130px] sm:min-w-[155px] bg-emerald-50/90 text-emerald-950 font-bold border-l border-r border-emerald-200/70">
+                  <th className="py-2 px-2 sm:py-2.5 sm:px-2.5 text-right whitespace-nowrap bg-emerald-50/90 text-emerald-950 font-bold border-l border-r border-emerald-200/70">
                     Chi Phí Thực Tế
                     <span className="block text-3xs font-normal text-emerald-700">MAX(Bravo, Nhập liệu)</span>
                   </th>
 
-                  <th className="py-2 px-3 sm:py-3 sm:px-4 text-right min-w-[100px] sm:min-w-[120px]">Còn Lại</th>
-                  <th className="py-2 px-3 sm:py-3 sm:px-4 min-w-[120px] sm:min-w-[140px]">Tiến Độ Giải Ngân</th>
-                  <th className="py-2 px-3 sm:py-3 sm:px-4 text-center w-24 sm:w-28">Trạng Thái</th>
+                  <th className="py-2 px-2 sm:py-2.5 sm:px-2.5 text-right whitespace-nowrap">Còn Lại</th>
+                  <th className="py-2 px-2 sm:py-2.5 sm:px-2.5 whitespace-nowrap w-24 sm:w-28">Tiến Độ</th>
+                  <th className="py-2 px-1.5 sm:py-2.5 sm:px-2 text-center w-20 whitespace-nowrap">Trạng Thái</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
@@ -634,14 +634,14 @@ export default function BudgetOverview({
                         title={`Click để mở sổ cái chi tiết của [${item.code}] ${item.name}`}
                       >
                         {/* Mã */}
-                        <td className="py-2 px-3 sm:py-3.5 sm:px-6 whitespace-nowrap">
+                        <td className="py-2 px-2 sm:py-2.5 sm:px-3 whitespace-nowrap">
                           <div className="flex items-center gap-1">
-                            <span className="font-mono text-[11px] sm:text-xs font-bold text-blue-700 bg-blue-50 group-hover:bg-blue-600 group-hover:text-white px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md border border-blue-200 group-hover:border-blue-600 transition-colors shadow-2xs">
+                            <span className="font-mono text-2xs sm:text-xs font-bold text-blue-700 bg-blue-50 group-hover:bg-blue-600 group-hover:text-white px-1.5 py-0.5 rounded border border-blue-200 group-hover:border-blue-600 transition-colors shadow-2xs">
                               {item.code}
                             </span>
                             {count > 0 && (
                               <span
-                                className="text-3xs font-bold text-blue-700 bg-blue-100/80 group-hover:bg-white group-hover:text-blue-700 px-1 py-0.2 sm:px-1.5 sm:py-0.5 rounded-full border border-blue-200 transition-colors"
+                                className="text-3xs font-bold text-blue-700 bg-blue-100/80 group-hover:bg-white group-hover:text-blue-700 px-1 py-0.2 rounded-full border border-blue-200 transition-colors"
                                 title={`${count} phiếu chi phát sinh trong năm ${selectedYear}`}
                               >
                                 {count}
@@ -651,39 +651,36 @@ export default function BudgetOverview({
                         </td>
 
                         {/* Tên & Nhóm */}
-                        <td className="py-2 px-3 sm:py-3.5 sm:px-4 max-w-xs sm:max-w-md">
-                          <div className="font-semibold text-slate-800 text-xs sm:text-sm group-hover:text-blue-700 transition-colors flex items-center justify-between gap-1 leading-snug">
-                            <span>{item.name}</span>
-                            <span className="text-3xs sm:text-[11px] text-blue-600 font-semibold opacity-0 group-hover:opacity-100 transition-opacity flex items-center shrink-0">
-                              Xem sổ cái →
-                            </span>
+                        <td className="py-2 px-2 sm:py-2.5 sm:px-3 max-w-[220px] sm:max-w-[280px]">
+                          <div className="font-semibold text-slate-800 text-xs truncate leading-snug group-hover:text-blue-700 transition-colors" title={item.name}>
+                            {item.name}
                           </div>
-                          <div className="text-3xs sm:text-[11px] text-slate-400 mt-0.5 truncate" title={item.scope || item.group}>
+                          <div className="text-3xs text-slate-400 mt-0.5 truncate" title={item.scope || item.group}>
                             {item.scope ? item.scope : item.group}
                           </div>
                         </td>
 
                         {/* Được duyệt của năm đang chọn */}
-                        <td className="py-2 px-3 sm:py-3.5 sm:px-4 text-right whitespace-nowrap font-mono text-2xs sm:text-xs text-slate-700 font-semibold">
+                        <td className="py-2 px-2 sm:py-2.5 sm:px-2.5 text-right whitespace-nowrap font-mono text-2xs sm:text-xs text-slate-700 font-semibold">
                           {formatVND(item.selectedYearApproved)}
                         </td>
 
                         {/* Cột Tùy Chọn: Theo Bravo */}
                         {showBravoCol && (
-                          <td className="py-2 px-3 sm:py-3.5 sm:px-4 text-right whitespace-nowrap font-mono text-2xs sm:text-xs font-semibold text-amber-900 bg-amber-50/20 border-l border-r border-amber-100/60">
+                          <td className="py-2 px-2 sm:py-2.5 sm:px-2.5 text-right whitespace-nowrap font-mono text-2xs sm:text-xs font-semibold text-amber-900 bg-amber-50/20 border-l border-r border-amber-100/60">
                             {formatVND(item.bravoVal)}
                           </td>
                         )}
 
                         {/* Cột Tùy Chọn: Theo Nhập Liệu */}
                         {showActualCol && (
-                          <td className="py-2 px-3 sm:py-3.5 sm:px-4 text-right whitespace-nowrap font-mono text-2xs sm:text-xs font-semibold text-blue-700 bg-blue-50/20 border-l border-r border-blue-100/60">
+                          <td className="py-2 px-2 sm:py-2.5 sm:px-2.5 text-right whitespace-nowrap font-mono text-2xs sm:text-xs font-semibold text-blue-700 bg-blue-50/20 border-l border-r border-blue-100/60">
                             {formatVND(item.liveActual)}
                           </td>
                         )}
 
                         {/* Cột Chính: Chi Phí Thực Tế (MAX Báo Cáo) */}
-                        <td className="py-2 px-3 sm:py-3.5 sm:px-4 text-right whitespace-nowrap font-mono text-2xs sm:text-xs font-bold text-emerald-950 bg-emerald-50/40 border-l border-r border-emerald-100">
+                        <td className="py-2 px-2 sm:py-2.5 sm:px-2.5 text-right whitespace-nowrap font-mono text-2xs sm:text-xs font-bold text-emerald-950 bg-emerald-50/40 border-l border-r border-emerald-100">
                           <div className="flex flex-col items-end">
                             <span className="font-bold">{formatVND(item.reportActual)}</span>
                             {item.source === 'BRAVO' ? (
@@ -713,7 +710,7 @@ export default function BudgetOverview({
 
                         {/* Còn lại */}
                         <td
-                          className={`py-2 px-3 sm:py-3.5 sm:px-4 text-right whitespace-nowrap font-mono text-2xs sm:text-xs font-bold ${
+                          className={`py-2 px-2 sm:py-2.5 sm:px-2.5 text-right whitespace-nowrap font-mono text-2xs sm:text-xs font-bold ${
                             item.liveRemaining < 0 ? 'text-rose-600' : 'text-emerald-700'
                           }`}
                         >
@@ -721,9 +718,9 @@ export default function BudgetOverview({
                         </td>
 
                         {/* Progress Bar */}
-                        <td className="py-2 px-3 sm:py-3.5 sm:px-4">
-                          <div className="flex items-center gap-1.5 sm:gap-2">
-                            <div className="flex-1 h-1.5 sm:h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <td className="py-2 px-2 sm:py-2.5 sm:px-2.5 whitespace-nowrap w-24 sm:w-28">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-12 sm:w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                               <div
                                 className={`h-full rounded-full transition-all duration-300 ${
                                   item.livePercent >= 100
@@ -735,28 +732,25 @@ export default function BudgetOverview({
                                 style={{ width: `${percentClamped}%` }}
                               ></div>
                             </div>
-                            <span className="text-3xs sm:text-[11px] font-mono font-bold text-slate-600 shrink-0 w-10 sm:w-12 text-right">
-                              {item.livePercent.toFixed(1)}%
+                            <span className="text-3xs font-mono font-bold text-slate-600 shrink-0">
+                              {item.livePercent.toFixed(0)}%
                             </span>
                           </div>
                         </td>
 
                         {/* Status Badge */}
-                        <td className="py-2 px-3 sm:py-3.5 sm:px-4 text-center whitespace-nowrap">
+                        <td className="py-2 px-1.5 sm:py-2.5 sm:px-2 text-center whitespace-nowrap w-20">
                           {item.status === 'OVER' ? (
-                            <span className="inline-flex items-center gap-1 text-3xs sm:text-[11px] font-semibold text-rose-700 bg-rose-50 px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full border border-rose-200">
-                              <AlertTriangle className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-rose-500" />
-                              <span>Vượt mức</span>
+                            <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-3xs font-semibold text-rose-700 bg-rose-50 border border-rose-200">
+                              Vượt
                             </span>
                           ) : item.status === 'WARNING' ? (
-                            <span className="inline-flex items-center gap-1 text-3xs sm:text-[11px] font-semibold text-amber-700 bg-amber-50 px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full border border-amber-200">
-                              <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-500" />
-                              <span>Gần hết</span>
+                            <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-3xs font-semibold text-amber-700 bg-amber-50 border border-amber-200">
+                              Gần hết
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-3xs sm:text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded-full border border-emerald-200">
-                              <CheckCircle2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-500" />
-                              <span>An toàn</span>
+                            <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-3xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200">
+                              An toàn
                             </span>
                           )}
                         </td>
@@ -770,37 +764,37 @@ export default function BudgetOverview({
               {filtered.length > 0 && (
                 <tfoot className="bg-slate-100/90 font-bold text-slate-800 border-t-2 border-slate-300 text-xs">
                   <tr>
-                    <td colSpan="2" className="py-3.5 px-4 sm:px-6">
+                    <td colSpan="2" className="py-2.5 px-2.5 sm:px-3">
                       Tổng cộng ({filtered.length} khoản mục)
                     </td>
-                    <td className="py-3.5 px-4 text-right font-mono text-slate-900">
+                    <td className="py-2.5 px-2 sm:px-2.5 text-right font-mono text-slate-900 whitespace-nowrap">
                       {formatVND(summary.totalApproved)}
                     </td>
                     {showBravoCol && (
-                      <td className="py-3.5 px-4 text-right font-mono text-amber-900 bg-amber-100/50 border-l border-r border-amber-200">
+                      <td className="py-2.5 px-2 sm:px-2.5 text-right font-mono text-amber-900 bg-amber-100/50 border-l border-r border-amber-200 whitespace-nowrap">
                         {formatVND(summary.totalBravo)}
                       </td>
                     )}
                     {showActualCol && (
-                      <td className="py-3.5 px-4 text-right font-mono text-blue-900 bg-blue-100/50 border-l border-r border-blue-200">
+                      <td className="py-2.5 px-2 sm:px-2.5 text-right font-mono text-blue-900 bg-blue-100/50 border-l border-r border-blue-200 whitespace-nowrap">
                         {formatVND(summary.totalLiveActual)}
                       </td>
                     )}
-                    <td className="py-3.5 px-4 text-right font-mono text-emerald-950 bg-emerald-100/70 border-l border-r border-emerald-300 text-sm">
+                    <td className="py-2.5 px-2 sm:px-2.5 text-right font-mono text-emerald-950 bg-emerald-100/70 border-l border-r border-emerald-300 whitespace-nowrap">
                       {formatVND(summary.totalReportActual)}
                     </td>
                     <td
-                      className={`py-3.5 px-4 text-right font-mono ${
+                      className={`py-2.5 px-2 sm:px-2.5 text-right font-mono whitespace-nowrap ${
                         summary.totalRemaining < 0 ? 'text-rose-600' : 'text-emerald-700'
                       }`}
                     >
                       {formatVND(summary.totalRemaining)}
                     </td>
-                    <td className="py-3.5 px-4 text-center font-mono text-slate-700">
+                    <td className="py-2.5 px-2 sm:px-2.5 text-center font-mono text-slate-700 whitespace-nowrap">
                       {summary.avgPercent.toFixed(1)}%
                     </td>
-                    <td className="py-3.5 px-4 text-center text-3xs text-slate-500">
-                      {summary.overCount > 0 ? `${summary.overCount} mục vượt` : '100% OK'}
+                    <td className="py-2.5 px-1.5 sm:px-2 text-center text-3xs text-slate-500 whitespace-nowrap">
+                      {summary.overCount > 0 ? `${summary.overCount} vượt` : '100% OK'}
                     </td>
                   </tr>
                 </tfoot>
@@ -815,14 +809,14 @@ export default function BudgetOverview({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                <th className="py-3 px-4 sm:px-6 sticky left-0 bg-slate-50 z-10">Mã KH</th>
-                <th className="py-3 px-4 min-w-[200px]">Tên Hạng Mục</th>
-                <th className="py-3 px-4 min-w-[150px]">Nhóm Chi Phí</th>
+              <tr className="bg-slate-50/80 border-b border-slate-200 text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                <th className="py-2 px-2 sm:py-2.5 sm:px-3 sticky left-0 bg-slate-50 z-10 w-16 sm:w-20">Mã KH</th>
+                <th className="py-2 px-2 sm:py-2.5 sm:px-3 max-w-[220px] sm:max-w-[280px]">Tên Hạng Mục</th>
+                <th className="py-2 px-2 sm:py-2.5 sm:px-3 max-w-[140px]">Nhóm Chi Phí</th>
                 {matrixYears.map((yr) => (
                   <th
                     key={yr}
-                    className={`py-3 px-4 text-right min-w-[140px] font-mono ${
+                    className={`py-2 px-2.5 sm:py-2.5 sm:px-3 text-right whitespace-nowrap min-w-[110px] font-mono ${
                       yr === selectedYear
                         ? 'bg-blue-100/70 text-blue-900 font-bold border-x border-blue-200'
                         : ''
@@ -838,7 +832,7 @@ export default function BudgetOverview({
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-sm">
+            <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
               {filtered.map((item) => (
                 <tr
                   key={item.code}
@@ -847,19 +841,19 @@ export default function BudgetOverview({
                   title={!isEditingMatrix ? `Click để mở sổ cái chi tiết của [${item.code}] ${item.name}` : ''}
                 >
                   {/* Mã */}
-                  <td className="py-3 px-4 sm:px-6 whitespace-nowrap sticky left-0 bg-white group-hover:bg-slate-50 z-10">
-                    <span className="font-mono text-xs font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                  <td className="py-2 px-2 sm:py-2.5 sm:px-3 whitespace-nowrap sticky left-0 bg-white group-hover:bg-slate-50 z-10">
+                    <span className="font-mono text-2xs sm:text-xs font-bold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
                       {item.code}
                     </span>
                   </td>
 
                   {/* Tên */}
-                  <td className="py-3 px-4 text-xs font-medium text-slate-800">
+                  <td className="py-2 px-2 sm:py-2.5 sm:px-3 text-xs font-medium text-slate-800 max-w-[220px] sm:max-w-[280px] truncate" title={item.name}>
                     {item.name}
                   </td>
 
                   {/* Nhóm */}
-                  <td className="py-3 px-4 text-xs text-slate-500">
+                  <td className="py-2 px-2 sm:py-2.5 sm:px-3 text-xs text-slate-500 max-w-[140px] truncate" title={item.group}>
                     {item.group}
                   </td>
 
@@ -871,7 +865,7 @@ export default function BudgetOverview({
                     return (
                       <td
                         key={yr}
-                        className={`py-2 px-3 text-right whitespace-nowrap font-mono text-xs ${
+                        className={`py-2 px-2.5 sm:py-2.5 sm:px-3 text-right whitespace-nowrap font-mono text-xs ${
                           isSelected ? 'bg-blue-50/50 border-x border-blue-100 font-bold text-blue-900' : 'text-slate-700'
                         }`}
                       >
