@@ -369,7 +369,7 @@ export default function DashboardPage({ user }) {
           }`}
         >
           <FileSpreadsheet className="w-4 h-4" />
-          <span>Định Mức Ngân Sách ({budgets.length})</span>
+          <span>Kế Hoạch & Báo Cáo Chi Phí ({budgets.length})</span>
         </button>
 
         <button
@@ -384,22 +384,6 @@ export default function DashboardPage({ user }) {
           <ListOrdered className="w-4 h-4" />
           <span>
             Sổ Cái Năm {selectedYear} ({yearTransactions.length.toLocaleString('vi-VN')})
-          </span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('BRAVO_RECON')}
-          className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
-            activeTab === 'BRAVO_RECON'
-              ? 'bg-amber-600 text-white shadow-sm shadow-amber-500/20'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-          }`}
-        >
-          <Scale className="w-4 h-4" />
-          <span>Đối Soát BRAVO & Toàn Cảnh</span>
-          <span className="px-1.5 py-0.2 rounded-full text-3xs font-bold uppercase tracking-wider bg-amber-100 text-amber-900">
-            INFO
           </span>
         </button>
       </div>

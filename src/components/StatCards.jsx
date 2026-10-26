@@ -2,19 +2,44 @@ import React from 'react';
 import { Wallet, TrendingUp, Users, ShieldAlert, CheckCircle2 } from 'lucide-react';
 
 export default function StatCards({ transactions = [], budgets = [], selectedYear = '2026' }) {
-  const totalAmount = transactions.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
   const totalCount = transactions.length;
 
+  // Map live actuals by code from transactions
+  const liveActualsByCode = React.useMemo(() => {
+    const map = {};
+    (transactions || []).forEach((t) => {
+      if (t && t.accountCode) {
+        const code = String(t.accountCode).trim();
+        map[code] = (map[code] || 0) + (Number(t.amount) || 0);
+      }
+    });
+    return map;
+  }, [transactions]);
+
   // Total approved from budgets for selected year
-  const totalApproved = budgets.reduce((acc, b) => {
-    const val =
-      b.yearlyApproved && selectedYear !== 'ALL' && b.yearlyApproved[selectedYear] !== undefined
-        ? Number(b.yearlyApproved[selectedYear])
-        : Number(b.approvedAmount) || 0;
-    return acc + val;
-  }, 0);
-  const percentExecuted = totalApproved > 0 ? (totalAmount / totalApproved) * 100 : 0;
-  const remainingBudget = totalApproved - totalAmount;
+  const totalApproved = React.useMemo(() => {
+    return budgets.reduce((acc, b) => {
+      const val =
+        b.yearlyApproved && selectedYear !== 'ALL' && b.yearlyApproved[selectedYear] !== undefined
+          ? Number(b.yearlyApproved[selectedYear])
+          : Number(b.approvedAmount) || 0;
+      return acc + val;
+    }, 0);
+  }, [budgets, selectedYear]);
+
+  // Total actual reporting cost = SUM(MAX(liveActual, bravoVal))
+  const totalReportActual = React.useMemo(() => {
+    return budgets.reduce((acc, b) => {
+      const code = String(b.code || '').trim();
+      const liveActual =
+        liveActualsByCode[code] !== undefined ? liveActualsByCode[code] : Number(b.actualAmount) || 0;
+      const bravoVal = Number(b.bravoActual !== undefined ? b.bravoActual : b.bravoAmount) || 0;
+      return acc + Math.max(liveActual, bravoVal);
+    }, 0);
+  }, [budgets, liveActualsByCode]);
+
+  const percentExecuted = totalApproved > 0 ? (totalReportActual / totalApproved) * 100 : 0;
+  const remainingBudget = totalApproved - totalReportActual;
 
   // Unique employees count
   const uniqueEmployees = new Set(
@@ -43,9 +68,9 @@ export default function StatCards({ transactions = [], budgets = [], selectedYea
       iconBg: 'bg-blue-600 text-white',
     },
     {
-      title: `Tổng phát sinh (${yearLabel})`,
-      value: formatCurrency(totalAmount),
-      description: `${totalCount.toLocaleString('vi-VN')} phiếu chi thực tế`,
+      title: `Tổng chi phí thực tế (${yearLabel})`,
+      value: formatCurrency(totalReportActual),
+      description: `MAX(Bravo, Nhập liệu) • ${totalCount.toLocaleString('vi-VN')} phiếu chi`,
       icon: TrendingUp,
       color: 'emerald',
       badge: `Đã chi ${percentExecuted.toFixed(1)}%`,

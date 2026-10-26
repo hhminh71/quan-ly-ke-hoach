@@ -99,10 +99,19 @@ export default function AccountLedgerModal({
   // Live account stats defensively
   const approved = Number(account.selectedYearApproved) || 0;
   const spent = Number(account.liveActual) || 0;
-  const remaining = typeof account.liveRemaining === 'number' && !isNaN(account.liveRemaining)
-    ? account.liveRemaining
-    : (approved - spent);
-  const spentPercent = approved > 0 ? (spent / approved) * 100 : 0;
+  const bravoVal = Number(
+    account.bravoVal !== undefined
+      ? account.bravoVal
+      : account.bravoActual !== undefined
+      ? account.bravoActual
+      : account.bravoAmount
+  ) || 0;
+  const reportActual = Math.max(spent, bravoVal);
+  const remaining =
+    typeof account.liveRemaining === 'number' && !isNaN(account.liveRemaining)
+      ? account.liveRemaining
+      : approved - reportActual;
+  const spentPercent = approved > 0 ? (reportActual / approved) * 100 : 0;
   const remainingPercent = approved > 0 ? (remaining / approved) * 100 : 0;
 
   return (
@@ -184,21 +193,23 @@ export default function AccountLedgerModal({
                 </div>
               </div>
 
-              {/* 2. Tổng phát sinh */}
+              {/* 2. Chi phí thực tế (Báo cáo MAX) */}
               <div className="p-3 rounded-xl bg-blue-50/80 border border-blue-200 shadow-sm">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wide">
-                    Tổng Phát Sinh
+                    Chi Phí Thực Tế
                   </span>
                   <span className="text-[10px] font-bold bg-blue-600 text-white px-1.5 py-0.5 rounded">
                     {spentPercent.toFixed(1)}%
                   </span>
                 </div>
                 <div className="text-base sm:text-lg font-extrabold text-blue-900 font-mono mt-1 truncate">
-                  {formatVND(spent)}
+                  {formatVND(reportActual)}
                 </div>
-                <div className="text-[11px] text-blue-600 font-medium">
-                  {accountTransactions.length} phiếu chi thực tế
+                <div className="text-[11px] text-blue-700 font-medium truncate">
+                  {bravoVal > spent
+                    ? `Theo Bravo (${formatVND(bravoVal)}) > Phiếu chi (${formatVND(spent)})`
+                    : `${accountTransactions.length} phiếu chi (${formatVND(spent)})`}
                 </div>
               </div>
 

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Search,
   Filter,
@@ -15,6 +15,9 @@ import {
   Info,
   ChevronRight,
   ArrowUpRight,
+  Eye,
+  EyeOff,
+  SlidersHorizontal,
 } from 'lucide-react';
 import AccountLedgerModal from './AccountLedgerModal';
 
@@ -42,6 +45,41 @@ export default function BudgetOverview({
   const [editedBudgets, setEditedBudgets] = useState(budgets);
   const [newYearInput, setNewYearInput] = useState('');
   const [showAddYearModal, setShowAddYearModal] = useState(false);
+
+  // Admin toggle for optional comparison columns: "Theo Bravo" and "Theo Nhập Liệu"
+  const [showBravoCol, setShowBravoCol] = useState(() => {
+    try {
+      const saved = localStorage.getItem('app_col_show_bravo');
+      return saved !== null ? JSON.parse(saved) : false; // Mặc định ẩn, bật lên khi cần
+    } catch {
+      return false;
+    }
+  });
+
+  const [showActualCol, setShowActualCol] = useState(() => {
+    try {
+      const saved = localStorage.getItem('app_col_show_actual');
+      return saved !== null ? JSON.parse(saved) : false; // Mặc định ẩn, bật lên khi cần
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('app_col_show_bravo', JSON.stringify(showBravoCol));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [showBravoCol]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('app_col_show_actual', JSON.stringify(showActualCol));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [showActualCol]);
 
   // Sync editedBudgets when budgets prop updates
   useMemo(() => {
@@ -103,9 +141,12 @@ export default function BudgetOverview({
   }, [editedBudgets]);
 
   // Enhanced budgets for PROGRESS view: picks the approved amount for the selected fiscal year
+  // AND compares between Bravo and Nhập Liệu to pick whichever is larger (MAX) for reporting!
   const enhancedBudgets = useMemo(() => {
     return editedBudgets.map((b) => {
-      const liveActual = liveActualsByCode[b.code] || 0;
+      const liveActual =
+        liveActualsByCode[b.code] !== undefined ? liveActualsByCode[b.code] : Number(b.actualAmount) || 0;
+      const bravoVal = Number(b.bravoActual !== undefined ? b.bravoActual : b.bravoAmount) || 0;
       
       // Pick approved budget for the selected year, fallback to approvedAmount
       const approved =
@@ -113,8 +154,12 @@ export default function BudgetOverview({
           ? Number(b.yearlyApproved[selectedYear])
           : Number(b.approvedAmount) || 0;
 
-      const remaining = approved - liveActual;
-      const percent = approved > 0 ? (liveActual / approved) * 100 : 0;
+      // RULE: Compare and pick whichever is larger as the official reporting actual cost!
+      const reportActual = Math.max(liveActual, bravoVal);
+      const source = bravoVal > liveActual ? 'BRAVO' : 'NHAP_LIEU';
+
+      const remaining = approved - reportActual;
+      const percent = approved > 0 ? (reportActual / approved) * 100 : 0;
 
       let status = 'SAFE'; // < 80%
       if (percent >= 100) status = 'OVER';
@@ -124,6 +169,9 @@ export default function BudgetOverview({
         ...b,
         selectedYearApproved: approved,
         liveActual,
+        bravoVal,
+        reportActual,
+        source,
         liveRemaining: remaining,
         livePercent: percent,
         status,
@@ -162,13 +210,24 @@ export default function BudgetOverview({
   // Totals for filtered
   const summary = useMemo(() => {
     const totalApproved = filtered.reduce((sum, b) => sum + (Number(b.selectedYearApproved) || 0), 0);
-    const totalActual = filtered.reduce((sum, b) => sum + (Number(b.liveActual) || 0), 0);
-    const totalRemaining = totalApproved - totalActual;
-    const avgPercent = totalApproved > 0 ? (totalActual / totalApproved) * 100 : 0;
+    const totalLiveActual = filtered.reduce((sum, b) => sum + (Number(b.liveActual) || 0), 0);
+    const totalBravo = filtered.reduce((sum, b) => sum + (Number(b.bravoVal) || 0), 0);
+    const totalReportActual = filtered.reduce((sum, b) => sum + (Number(b.reportActual) || 0), 0);
+    const totalRemaining = totalApproved - totalReportActual;
+    const avgPercent = totalApproved > 0 ? (totalReportActual / totalApproved) * 100 : 0;
     const overCount = filtered.filter((b) => b.status === 'OVER').length;
     const warningCount = filtered.filter((b) => b.status === 'WARNING').length;
 
-    return { totalApproved, totalActual, totalRemaining, avgPercent, overCount, warningCount };
+    return {
+      totalApproved,
+      totalLiveActual,
+      totalBravo,
+      totalReportActual,
+      totalRemaining,
+      avgPercent,
+      overCount,
+      warningCount,
+    };
   }, [filtered]);
 
   // Handle cell edit in Matrix mode
@@ -296,6 +355,46 @@ export default function BudgetOverview({
               </button>
             </div>
 
+            {/* Column Visibility Toggles in Progress View (Theo Bravo & Theo Nhập Liệu) */}
+            {viewMode === 'PROGRESS' && (
+              <div className="flex items-center gap-1 p-1 bg-slate-100/90 rounded-xl border border-slate-200/80 text-xs shadow-2xs">
+                <span className="text-3xs font-bold text-slate-500 uppercase px-2 flex items-center gap-1">
+                  <SlidersHorizontal className="w-3 h-3 text-slate-400" />
+                  <span>Cột So Sánh:</span>
+                </span>
+
+                {/* Toggle Cột Theo Bravo */}
+                <button
+                  type="button"
+                  onClick={() => setShowBravoCol((prev) => !prev)}
+                  className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    showBravoCol
+                      ? 'bg-amber-500 text-white shadow-xs'
+                      : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80 hover:bg-slate-50'
+                  }`}
+                  title={showBravoCol ? 'Bấm để ẩn cột số liệu Theo Bravo' : 'Bấm để hiện cột số liệu Theo Bravo'}
+                >
+                  {showBravoCol ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3 text-slate-400" />}
+                  <span>Theo Bravo</span>
+                </button>
+
+                {/* Toggle Cột Theo Nhập Liệu */}
+                <button
+                  type="button"
+                  onClick={() => setShowActualCol((prev) => !prev)}
+                  className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    showActualCol
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80 hover:bg-slate-50'
+                  }`}
+                  title={showActualCol ? 'Bấm để ẩn cột số liệu Theo Nhập Liệu' : 'Bấm để hiện cột số liệu Theo Nhập Liệu'}
+                >
+                  {showActualCol ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3 text-slate-400" />}
+                  <span>Theo Nhập Liệu</span>
+                </button>
+              </div>
+            )}
+
             {/* Matrix Actions */}
             {viewMode === 'MATRIX' && (
               <>
@@ -396,15 +495,85 @@ export default function BudgetOverview({
       {/* VIEW 1: PROGRESS VIEW (Tiến độ giải ngân 1 năm) */}
       {viewMode === 'PROGRESS' && (
         <>
+          {/* Quick Summary Bar */}
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 p-4 bg-slate-50/80 border-b border-slate-200 text-xs">
+            <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <span className="text-2xs font-semibold text-slate-500 uppercase tracking-wide">
+                1. Tổng Được Duyệt
+              </span>
+              <p className="text-base font-bold text-slate-900 mt-0.5 font-mono">
+                {formatVND(summary.totalApproved)}
+              </p>
+              <p className="text-3xs text-slate-400 mt-0.5">Năm tài chính {selectedYear}</p>
+            </div>
+
+            {showBravoCol && (
+              <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/80 shadow-2xs">
+                <span className="text-2xs font-semibold text-amber-800 uppercase tracking-wide">
+                  2. Tổng Theo Bravo
+                </span>
+                <p className="text-base font-bold text-amber-950 mt-0.5 font-mono">
+                  {formatVND(summary.totalBravo)}
+                </p>
+                <p className="text-3xs text-amber-700 mt-0.5">Hạch toán phần mềm BRAVO</p>
+              </div>
+            )}
+
+            {showActualCol && (
+              <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200/80 shadow-2xs">
+                <span className="text-2xs font-semibold text-blue-800 uppercase tracking-wide">
+                  3. Tổng Theo Nhập Liệu
+                </span>
+                <p className="text-base font-bold text-blue-950 mt-0.5 font-mono">
+                  {formatVND(summary.totalLiveActual)}
+                </p>
+                <p className="text-3xs text-blue-700 mt-0.5">Sổ cái phiếu chi thực tế</p>
+              </div>
+            )}
+
+            <div className="p-3 rounded-xl bg-emerald-50/80 border border-emerald-200/90 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="text-2xs font-bold text-emerald-800 uppercase tracking-wide">
+                  Chi Phí Thực Tế (Báo Cáo)
+                </span>
+                <span className="text-3xs font-mono font-bold px-1.5 py-0.2 bg-emerald-200 text-emerald-900 rounded">
+                  MAX
+                </span>
+              </div>
+              <p className="text-base font-bold text-emerald-950 mt-0.5 font-mono">
+                {formatVND(summary.totalReportActual)}
+              </p>
+              <p className="text-3xs text-emerald-700 mt-0.5">
+                Lấy số lớn hơn giữa Bravo và Nhập liệu
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+              <span className="text-2xs font-semibold text-slate-500 uppercase tracking-wide">
+                Tổng Còn Lại (Khả Dụng)
+              </span>
+              <p
+                className={`text-base font-bold mt-0.5 font-mono ${
+                  summary.totalRemaining < 0 ? 'text-rose-600' : 'text-slate-900'
+                }`}
+              >
+                {formatVND(summary.totalRemaining)}
+              </p>
+              <p className="text-3xs text-slate-500 mt-0.5">
+                Giải ngân: <strong className="text-slate-800">{summary.avgPercent.toFixed(1)}%</strong>
+              </p>
+            </div>
+          </div>
+
           {/* Hint banner */}
-          <div className="px-5 py-2.5 bg-blue-50/70 border-b border-blue-100 flex items-center justify-between text-xs text-blue-800">
+          <div className="px-5 py-2.5 bg-blue-50/70 border-b border-blue-100 flex flex-wrap items-center justify-between text-xs text-blue-800 gap-2">
             <div className="flex items-center gap-2">
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
               </span>
               <span>
-                💡 <strong>Mẹo:</strong> Click vào bất kỳ dòng nào bên dưới để mở ngay <strong>Sổ Cái Chi Tiết</strong> các phiếu chi tương ứng (sort theo mã khoản mục, xem phát sinh, sửa/xóa trực tiếp).
+                💡 <strong>Quy tắc báo cáo:</strong> Cột <strong>Chi Phí Thực Tế</strong> tự động so sánh và lấy <strong>giá trị lớn nhất giữa Bravo và Nhập liệu: MAX(Bravo, Nhập liệu)</strong>. Click vào dòng để xem sổ cái chi tiết.
               </span>
             </div>
           </div>
@@ -412,20 +581,43 @@ export default function BudgetOverview({
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                  <th className="py-3 px-4 sm:px-6">Mã KH</th>
-                  <th className="py-3 px-4">Tên Hạng Mục / Khoản Mục</th>
-                  <th className="py-3 px-4 text-right">Được Duyệt ({selectedYear})</th>
-                  <th className="py-3 px-4 text-right">Đã Chi ({selectedYear})</th>
-                  <th className="py-3 px-4 text-right">Còn Lại</th>
+                <tr className="bg-slate-50/90 border-b border-slate-200 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3 px-4 sm:px-6 w-24">Mã KH</th>
+                  <th className="py-3 px-4 min-w-[220px]">Tên Hạng Mục / Khoản Mục</th>
+                  <th className="py-3 px-4 text-right min-w-[120px]">Được Duyệt ({selectedYear})</th>
+                  
+                  {/* Cột Tùy Chọn: Theo Bravo */}
+                  {showBravoCol && (
+                    <th className="py-3 px-4 text-right min-w-[130px] bg-amber-50/70 text-amber-900 border-l border-r border-amber-200/50">
+                      Theo Bravo
+                    </th>
+                  )}
+
+                  {/* Cột Tùy Chọn: Theo Nhập Liệu */}
+                  {showActualCol && (
+                    <th className="py-3 px-4 text-right min-w-[130px] bg-blue-50/70 text-blue-900 border-l border-r border-blue-200/50">
+                      Theo Nhập Liệu
+                    </th>
+                  )}
+
+                  {/* Cột Chính: Chi Phí Thực Tế (MAX Báo Cáo) */}
+                  <th className="py-3 px-4 text-right min-w-[155px] bg-emerald-50/90 text-emerald-950 font-bold border-l border-r border-emerald-200/70">
+                    Chi Phí Thực Tế
+                    <span className="block text-3xs font-normal text-emerald-700">MAX(Bravo, Nhập liệu)</span>
+                  </th>
+
+                  <th className="py-3 px-4 text-right min-w-[120px]">Còn Lại</th>
                   <th className="py-3 px-4 min-w-[140px]">Tiến Độ Giải Ngân</th>
-                  <th className="py-3 px-4 text-center">Trạng Thái</th>
+                  <th className="py-3 px-4 text-center w-28">Trạng Thái</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="text-center py-10 text-slate-400 text-xs">
+                    <td
+                      colSpan={5 + (showBravoCol ? 1 : 0) + (showActualCol ? 1 : 0)}
+                      className="text-center py-10 text-slate-400 text-xs"
+                    >
                       Không tìm thấy khoản mục kế hoạch phù hợp
                     </td>
                   </tr>
@@ -465,24 +657,8 @@ export default function BudgetOverview({
                               Xem sổ cái →
                             </span>
                           </div>
-                          <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                            <span className="text-[11px] text-slate-400 truncate max-w-[200px]" title={item.scope || item.group}>
-                              {item.scope ? item.scope : item.group}
-                            </span>
-                            {item.bravoActual !== undefined && (
-                              <span
-                                className={`inline-flex items-center px-1.5 py-0.2 rounded text-3xs font-medium ${
-                                  Math.abs((item.bravoActual || 0) - item.liveActual) < 500
-                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
-                                    : (item.bravoActual || 0) > item.liveActual
-                                    ? 'bg-amber-50 text-amber-800 border border-amber-200/60'
-                                    : 'bg-purple-50 text-purple-800 border border-purple-200/60'
-                                }`}
-                                title={`Hạch toán BRAVO: ${formatVND(item.bravoActual)} (Chênh lệch: ${(item.bravoActual || 0) - item.liveActual > 0 ? '+' : ''}${formatCompactVND((item.bravoActual || 0) - item.liveActual)})`}
-                              >
-                                BRAVO: {formatCompactVND(item.bravoActual)}
-                              </span>
-                            )}
+                          <div className="text-[11px] text-slate-400 mt-0.5 truncate" title={item.scope || item.group}>
+                            {item.scope ? item.scope : item.group}
                           </div>
                         </td>
 
@@ -491,9 +667,47 @@ export default function BudgetOverview({
                           {formatVND(item.selectedYearApproved)}
                         </td>
 
-                        {/* Đã chi trong năm đang chọn */}
-                        <td className="py-3.5 px-4 text-right whitespace-nowrap font-mono text-xs text-blue-600 font-bold">
-                          {formatVND(item.liveActual)}
+                        {/* Cột Tùy Chọn: Theo Bravo */}
+                        {showBravoCol && (
+                          <td className="py-3.5 px-4 text-right whitespace-nowrap font-mono text-xs font-semibold text-amber-900 bg-amber-50/20 border-l border-r border-amber-100/60">
+                            {formatVND(item.bravoVal)}
+                          </td>
+                        )}
+
+                        {/* Cột Tùy Chọn: Theo Nhập Liệu */}
+                        {showActualCol && (
+                          <td className="py-3.5 px-4 text-right whitespace-nowrap font-mono text-xs font-semibold text-blue-700 bg-blue-50/20 border-l border-r border-blue-100/60">
+                            {formatVND(item.liveActual)}
+                          </td>
+                        )}
+
+                        {/* Cột Chính: Chi Phí Thực Tế (MAX Báo Cáo) */}
+                        <td className="py-3.5 px-4 text-right whitespace-nowrap font-mono text-xs font-bold text-emerald-950 bg-emerald-50/40 border-l border-r border-emerald-100">
+                          <div className="flex flex-col items-end">
+                            <span className="text-xs font-bold">{formatVND(item.reportActual)}</span>
+                            {item.source === 'BRAVO' ? (
+                              <span
+                                className="inline-block text-[10px] font-semibold text-amber-800 bg-amber-100/90 px-1.5 py-0.2 rounded mt-0.5 border border-amber-200"
+                                title={`Số này lấy theo BRAVO (${formatVND(item.bravoVal)}) vì lớn hơn số nhập liệu (${formatVND(item.liveActual)})`}
+                              >
+                                (Theo Bravo)
+                              </span>
+                            ) : item.bravoVal > 0 && item.liveActual === item.bravoVal ? (
+                              <span
+                                className="inline-block text-[10px] font-semibold text-emerald-800 bg-emerald-100/90 px-1.5 py-0.2 rounded mt-0.5 border border-emerald-200"
+                                title="Bravo và Nhập liệu bằng nhau"
+                              >
+                                (Khớp)
+                              </span>
+                            ) : (
+                              <span
+                                className="inline-block text-[10px] font-semibold text-blue-800 bg-blue-100/90 px-1.5 py-0.2 rounded mt-0.5 border border-blue-200"
+                                title={`Số này lấy theo Nhập liệu phiếu chi (${formatVND(item.liveActual)})`}
+                              >
+                                (Theo Nhập liệu)
+                              </span>
+                            )}
+                          </div>
                         </td>
 
                         {/* Còn lại */}
@@ -550,6 +764,46 @@ export default function BudgetOverview({
                   })
                 )}
               </tbody>
+
+              {/* Table Footer with Column Totals */}
+              {filtered.length > 0 && (
+                <tfoot className="bg-slate-100/90 font-bold text-slate-800 border-t-2 border-slate-300 text-xs">
+                  <tr>
+                    <td colSpan="2" className="py-3.5 px-4 sm:px-6">
+                      Tổng cộng ({filtered.length} khoản mục)
+                    </td>
+                    <td className="py-3.5 px-4 text-right font-mono text-slate-900">
+                      {formatVND(summary.totalApproved)}
+                    </td>
+                    {showBravoCol && (
+                      <td className="py-3.5 px-4 text-right font-mono text-amber-900 bg-amber-100/50 border-l border-r border-amber-200">
+                        {formatVND(summary.totalBravo)}
+                      </td>
+                    )}
+                    {showActualCol && (
+                      <td className="py-3.5 px-4 text-right font-mono text-blue-900 bg-blue-100/50 border-l border-r border-blue-200">
+                        {formatVND(summary.totalLiveActual)}
+                      </td>
+                    )}
+                    <td className="py-3.5 px-4 text-right font-mono text-emerald-950 bg-emerald-100/70 border-l border-r border-emerald-300 text-sm">
+                      {formatVND(summary.totalReportActual)}
+                    </td>
+                    <td
+                      className={`py-3.5 px-4 text-right font-mono ${
+                        summary.totalRemaining < 0 ? 'text-rose-600' : 'text-emerald-700'
+                      }`}
+                    >
+                      {formatVND(summary.totalRemaining)}
+                    </td>
+                    <td className="py-3.5 px-4 text-center font-mono text-slate-700">
+                      {summary.avgPercent.toFixed(1)}%
+                    </td>
+                    <td className="py-3.5 px-4 text-center text-3xs text-slate-500">
+                      {summary.overCount > 0 ? `${summary.overCount} mục vượt` : '100% OK'}
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
         </>
