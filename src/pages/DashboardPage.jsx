@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import StatCards from '../components/StatCards';
-import TransactionForm from '../components/TransactionForm';
+import ExecutiveDashboard from '../components/ExecutiveDashboard';
+import AccountLedgerModal from '../components/AccountLedgerModal';
 import TransactionList from '../components/TransactionList';
 import BudgetOverview from '../components/BudgetOverview';
 import SyncModal from '../components/SyncModal';
@@ -69,7 +69,10 @@ export default function DashboardPage({ user }) {
     }
     return initialBudgets;
   });
-  const [activeTab, setActiveTab] = useState('ALL'); // 'ALL', 'BUDGETS', 'TRANSACTIONS'
+  const [activeTab, setActiveTab] = useState('DASHBOARD'); // 'DASHBOARD', 'BUDGETS', 'TRANSACTIONS'
+
+  // Selected account for drilldown modal
+  const [selectedDetailAccount, setSelectedDetailAccount] = useState(null);
 
   // Fiscal Year Selection
   const [selectedYear, setSelectedYear] = useState('2026');
@@ -245,32 +248,31 @@ export default function DashboardPage({ user }) {
 
   return (
     <div className="space-y-6">
-      {/* Page Title & Action Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-slate-200/60">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
+      {/* Top Action Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-200/80">
+        <div className="flex flex-wrap items-center gap-2.5 text-xs text-slate-500">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 font-medium text-slate-700">
             <Calendar className="w-3.5 h-3.5 text-blue-600" />
             <span className="capitalize">{todayFormatted}</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Hệ Thống Quản Lý Kế Hoạch & Chi Phí Doanh Nghiệp
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            <span className="font-semibold text-slate-700">76 Khoản mục kế hoạch</span> •{' '}
-            <span className="font-semibold text-blue-600">
-              {selectedYear === 'ALL'
-                ? `Toàn bộ ${transactions.length.toLocaleString('vi-VN')} phiếu chi`
-                : `${yearTransactions.length.toLocaleString('vi-VN')} Phiếu chi năm ${selectedYear}`}
-            </span>
-          </p>
+          <span className="text-slate-300">•</span>
+          <span className="font-semibold text-slate-700">
+            {budgets.length} Khoản mục kế hoạch
+          </span>
+          <span className="text-slate-300">•</span>
+          <span className="font-semibold text-blue-700">
+            {selectedYear === 'ALL'
+              ? `Toàn bộ ${transactions.length.toLocaleString('vi-VN')} phiếu chi`
+              : `${yearTransactions.length.toLocaleString('vi-VN')} Phiếu chi (${selectedYear})`}
+          </span>
         </div>
 
         {/* Action Controls & Fiscal Year Selector */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           {/* FISCAL YEAR SELECTOR BADGE */}
-          <div className="flex items-center gap-1.5 p-1 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 rounded-xl shadow-xs">
+          <div className="flex items-center gap-1.5 p-1 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 rounded-xl shadow-2xs">
             <div className="flex items-center gap-1 pl-2 text-blue-700 text-xs font-bold">
-              <CalendarDays className="w-4 h-4 text-blue-600" />
+              <CalendarDays className="w-3.5 h-3.5 text-blue-600" />
               <span className="hidden sm:inline">Năm tài chính:</span>
             </div>
             <select
@@ -288,7 +290,7 @@ export default function DashboardPage({ user }) {
           </div>
 
           {/* Google Sheets Sync Pill */}
-          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white border border-slate-200 shadow-2xs">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-white border border-slate-200 shadow-2xs">
             <button
               type="button"
               onClick={() => handleSyncNow()}
@@ -350,30 +352,27 @@ export default function DashboardPage({ user }) {
         </div>
       </div>
 
-      {/* 4 Summary Stat Cards (Strictly for the selected fiscal year) */}
-      <StatCards transactions={yearTransactions} budgets={budgets} selectedYear={selectedYear} />
-
       {/* View Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
         <button
           type="button"
-          onClick={() => setActiveTab('ALL')}
-          className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
-            activeTab === 'ALL'
-              ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+          onClick={() => setActiveTab('DASHBOARD')}
+          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            activeTab === 'DASHBOARD'
+              ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-600/20'
               : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
           }`}
         >
           <LayoutDashboard className="w-4 h-4" />
-          <span>Bàn Làm Việc & Nhập Liệu</span>
+          <span>Dashboard Điều Hành</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('BUDGETS')}
-          className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
+          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
             activeTab === 'BUDGETS'
-              ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+              ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-600/20'
               : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
           }`}
         >
@@ -384,42 +383,34 @@ export default function DashboardPage({ user }) {
         <button
           type="button"
           onClick={() => setActiveTab('TRANSACTIONS')}
-          className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
+          className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
             activeTab === 'TRANSACTIONS'
-              ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/20'
+              ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-600/20'
               : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
           }`}
         >
           <ListOrdered className="w-4 h-4" />
           <span>
-            Sổ Cái Năm {selectedYear} ({yearTransactions.length.toLocaleString('vi-VN')})
+            Sổ Cái Phiếu Chi {selectedYear !== 'ALL' ? `(${selectedYear})` : ''} ({yearTransactions.length.toLocaleString('vi-VN')})
           </span>
         </button>
       </div>
 
-      {/* Tab 1: Form & List Side-by-Side */}
-      {activeTab === 'ALL' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          <div className="lg:col-span-5 xl:col-span-4">
-            <TransactionForm
-              onAddTransaction={handleAddTransaction}
-              budgets={budgets}
-              transactions={yearTransactions}
-              selectedYear={selectedYear}
-            />
-          </div>
-          <div className="lg:col-span-7 xl:col-span-8">
-            <TransactionList
-              transactions={yearTransactions}
-              budgets={budgets}
-              onUpdateTransaction={handleUpdateTransaction}
-              onDeleteTransaction={handleDeleteTransaction}
-              selectedYear={selectedYear}
-              selectedCategory={selectedLedgerAccount}
-              onSelectCategory={setSelectedLedgerAccount}
-            />
-          </div>
-        </div>
+      {/* Tab 1: Executive Dashboard (Macro Analytics, Group breakdown, Cashflow, Top 8, Risk radar) */}
+      {activeTab === 'DASHBOARD' && (
+        <ExecutiveDashboard
+          budgets={budgets}
+          transactions={yearTransactions}
+          selectedYear={selectedYear}
+          onNavigateToBudgets={() => setActiveTab('BUDGETS')}
+          onNavigateToLedger={(accountCode) => {
+            setSelectedLedgerAccount(accountCode);
+            setActiveTab('TRANSACTIONS');
+          }}
+          onOpenAccountDetail={(account) => {
+            setSelectedDetailAccount(account);
+          }}
+        />
       )}
 
       {/* Tab 2: Master Budgets Table for this Fiscal Year */}
@@ -446,11 +437,31 @@ export default function DashboardPage({ user }) {
         <TransactionList
           transactions={yearTransactions}
           budgets={budgets}
+          onAddTransaction={handleAddTransaction}
           onUpdateTransaction={handleUpdateTransaction}
           onDeleteTransaction={handleDeleteTransaction}
           selectedYear={selectedYear}
           selectedCategory={selectedLedgerAccount}
           onSelectCategory={setSelectedLedgerAccount}
+        />
+      )}
+
+      {/* Account Ledger Modal for Executive Dashboard drilldown */}
+      {selectedDetailAccount && (
+        <AccountLedgerModal
+          isOpen={Boolean(selectedDetailAccount)}
+          account={selectedDetailAccount}
+          transactions={yearTransactions}
+          budgets={budgets}
+          selectedYear={selectedYear}
+          onClose={() => setSelectedDetailAccount(null)}
+          onUpdateTransaction={handleUpdateTransaction}
+          onDeleteTransaction={handleDeleteTransaction}
+          onNavigateToLedger={(accountCode) => {
+            setSelectedDetailAccount(null);
+            setSelectedLedgerAccount(accountCode);
+            setActiveTab('TRANSACTIONS');
+          }}
         />
       )}
 

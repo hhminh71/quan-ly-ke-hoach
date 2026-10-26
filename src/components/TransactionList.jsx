@@ -19,12 +19,15 @@ import {
   FileText,
   Clock,
   Sparkles,
+  PlusCircle,
 } from 'lucide-react';
 import EditTransactionModal from './EditTransactionModal';
+import AddTransactionModal from './AddTransactionModal';
 
 export default function TransactionList({
   transactions = [],
   budgets = [],
+  onAddTransaction,
   onUpdateTransaction,
   onDeleteTransaction,
   selectedYear = '2026',
@@ -37,9 +40,11 @@ export default function TransactionList({
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 25;
 
-  // Edit Modal State
+  // Add & Edit Modal States
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [showEditToast, setShowEditToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   // Sync selectedCategory when prop changes
   useEffect(() => {
@@ -205,7 +210,7 @@ export default function TransactionList({
       {showEditToast && (
         <div className="absolute top-4 right-4 z-50 flex items-center gap-2 bg-emerald-600 text-white px-4 py-2.5 rounded-xl shadow-lg text-xs font-semibold animate-in fade-in slide-in-from-top-2">
           <CheckCircle2 className="w-4 h-4 shrink-0" />
-          <span>Đã lưu chỉnh sửa & đồng bộ trực tiếp về Google Sheet!</span>
+          <span>{toastMessage || 'Đã lưu chỉnh sửa & đồng bộ trực tiếp về Google Sheet!'}</span>
         </div>
       )}
 
@@ -213,7 +218,7 @@ export default function TransactionList({
       <div className="p-5 sm:p-6 border-b border-slate-100 space-y-4">
         <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100"></span>
               <h2 className="text-lg font-bold text-slate-800">
                 Sổ Cái Chi Tiết Các Phiếu Chi{' '}
@@ -221,6 +226,18 @@ export default function TransactionList({
                   ({selectedYear === 'ALL' ? 'Tất Cả Các Năm' : `Năm ${selectedYear}`})
                 </span>
               </h2>
+
+              {onAddTransaction && (
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-500/20 transition-all"
+                  title="Thêm mới phiếu chi và đồng bộ trực tiếp lên Google Sheet"
+                >
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  <span>+ Thêm Phiếu Chi</span>
+                </button>
+              )}
             </div>
             <p className="text-xs text-slate-500 mt-1">
               Hiển thị {sorted.length.toLocaleString('vi-VN')} giao dịch phát sinh trong{' '}
@@ -328,7 +345,7 @@ export default function TransactionList({
         {/* Search, Filter & Sort Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2">
           {/* Search Input */}
-          <div className="sm:col-span-5 relative">
+          <div className={`${onAddTransaction ? 'sm:col-span-4' : 'sm:col-span-5'} relative`}>
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
@@ -343,7 +360,7 @@ export default function TransactionList({
           </div>
 
           {/* Category Filter */}
-          <div className="sm:col-span-4 relative">
+          <div className={`${onAddTransaction ? 'sm:col-span-3' : 'sm:col-span-4'} relative`}>
             <Layers className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <select
               value={selectedCategory}
@@ -380,6 +397,21 @@ export default function TransactionList({
               <option value="lowest">Số tiền thấp nhất</option>
             </select>
           </div>
+
+          {/* Quick Add Button */}
+          {onAddTransaction && (
+            <div className="sm:col-span-2">
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(true)}
+                className="w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-sm shadow-blue-500/25 transition-all"
+                title="Tạo phiếu chi mới theo mã khoản mục"
+              >
+                <PlusCircle className="w-4 h-4 shrink-0" />
+                <span className="truncate">Thêm Phiếu</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -576,8 +608,28 @@ export default function TransactionList({
             if (onUpdateTransaction) {
               onUpdateTransaction(updated);
             }
+            setToastMessage('Đã lưu chỉnh sửa & đồng bộ trực tiếp về Google Sheet!');
             setShowEditToast(true);
             setTimeout(() => setShowEditToast(false), 3000);
+          }}
+        />
+      )}
+
+      {/* ADD TRANSACTION MODAL: Thêm mới theo mã khoản mục & đồng bộ tức thì */}
+      {isAddModalOpen && (
+        <AddTransactionModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          budgets={budgets}
+          transactions={transactions}
+          selectedYear={selectedYear}
+          onAddTransaction={(newRec) => {
+            if (onAddTransaction) {
+              onAddTransaction(newRec);
+            }
+            setToastMessage('Đã thêm phiếu chi mới & đồng bộ trực tiếp về Google Sheet!');
+            setShowEditToast(true);
+            setTimeout(() => setShowEditToast(false), 3500);
           }}
         />
       )}
