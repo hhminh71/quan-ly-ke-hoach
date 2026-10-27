@@ -1,6 +1,7 @@
 @echo off
 chcp 65001 > nul
-title TU DONG XUAT BRAVO 10 - CTIA
+set "PYTHONIOENCODING=utf-8"
+title CTIA - HE THONG DONG BO CHI PHI
 color 0b
 
 echo =====================================================================
@@ -25,11 +26,11 @@ if not exist "%SCRIPT_PATH%" (
     set "SCRIPT_PATH=I:\My Drive\APP\Projects\quan-ly-ke-hoach\scripts\auto_export_bravo.py"
 )
 
-echo [*] Python: %PY_EXE%
-echo [*] Script: %SCRIPT_PATH%
+echo [*] Trinh thuc thi Python : %PY_EXE%
+echo [*] Duong dan kich ban    : %SCRIPT_PATH%
 echo.
 
-"%PY_EXE%" "%SCRIPT_PATH%"
+"%PY_EXE%" "%SCRIPT_PATH%" %*
 
 echo.
 echo =====================================================================
