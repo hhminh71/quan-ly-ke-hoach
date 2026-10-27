@@ -1,7 +1,9 @@
 import React from 'react';
-import { Download, LogOut, User, Bell, Plane, ShieldCheck, FileSpreadsheet } from 'lucide-react';
+import { Download, LogOut, User, Bell, Plane, ShieldCheck, FileSpreadsheet, Smartphone } from 'lucide-react';
 
-export default function Navbar({ user, onLogout, onExportReport }) {
+export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator }) {
+  const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
+
   const handleExportQuick = () => {
     if (onExportReport) {
       onExportReport();
@@ -42,7 +44,20 @@ export default function Navbar({ user, onLogout, onExportReport }) {
           </div>
 
           {/* RIGHT: Action Controls & User Account - Ultra-slim on mobile */}
-          <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+            {/* Desktop Simulator Button */}
+            {!isInIframe && onOpenSimulator && (
+              <button
+                type="button"
+                onClick={onOpenSimulator}
+                className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 text-xs font-bold shadow-2xs transition-all cursor-pointer"
+                title="Bật chế độ xem trước giả lập màn hình điện thoại iPhone/Android"
+              >
+                <Smartphone className="w-4 h-4 text-amber-300" />
+                <span>Giả Lập Điện Thoại</span>
+              </button>
+            )}
+
             {/* Yellow Action Button: Compact Excel */}
             <button
               type="button"
