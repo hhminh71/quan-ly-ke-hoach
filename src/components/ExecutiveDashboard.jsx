@@ -201,57 +201,57 @@ export default function ExecutiveDashboard({
   return (
     <div className="space-y-2 sm:space-y-4 animate-in fade-in duration-200">
       {/* 1. EXECUTIVE KPI SUMMARY CARDS: Slim, Elegant Tiles */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-1 sm:gap-2">
         {/* Card 1: Hạn mức duyệt */}
-        <div className="p-2 sm:p-4 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-900 to-indigo-950 text-white shadow-2xs border border-blue-800/40 relative overflow-hidden">
+        <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-900 to-indigo-950 text-white shadow-2xs border border-blue-800/40 relative overflow-hidden">
           <div className="flex items-center justify-between text-blue-200">
-            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider truncate">
+            <span className="text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider truncate">
               Hạn Mức ({selectedYear})
             </span>
-            <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-300 shrink-0" />
+            <Wallet className="w-3.5 h-3.5 text-blue-300 shrink-0" />
           </div>
-          <p className="text-sm sm:text-2xl font-bold font-mono tracking-tight mt-0.5 sm:mt-1">
+          <p className="text-sm sm:text-lg font-bold font-mono tracking-tight mt-0.5">
             {formatCompactVND(kpis.totalApproved)}
           </p>
-          <p className="text-[9px] sm:text-xs text-blue-300/80 mt-0.5 truncate">
+          <p className="text-[9px] sm:text-[11px] text-blue-300/80 mt-0.5 truncate">
             100% định mức • {budgets.length} danh mục
           </p>
         </div>
 
         {/* Card 2: Chi phí thực tế (MAX) */}
-        <div className="p-2 sm:p-4 rounded-lg sm:rounded-xl bg-white border border-slate-200/80 shadow-2xs relative overflow-hidden">
+        <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white border border-slate-200/80 shadow-2xs relative overflow-hidden">
           <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider truncate">
+            <span className="text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider truncate">
               Thực Tế (MAX)
             </span>
-            <TrendingUp className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 shrink-0" />
+            <TrendingUp className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
           </div>
-          <p className="text-sm sm:text-2xl font-bold font-mono tracking-tight text-slate-900 mt-0.5 sm:mt-1">
+          <p className="text-sm sm:text-lg font-bold font-mono tracking-tight text-slate-900 mt-0.5">
             {formatCompactVND(kpis.totalReportActual)}
           </p>
-          <p className="text-[9px] sm:text-xs text-emerald-700 font-medium mt-0.5 truncate">
+          <p className="text-[9px] sm:text-[11px] text-emerald-700 font-medium mt-0.5 truncate">
             Đã chi {kpis.avgPercent.toFixed(1)}% • {kpis.totalVouchers} phiếu
           </p>
         </div>
 
         {/* Card 3: Khả dụng còn lại */}
-        <div className="p-2 sm:p-4 rounded-lg sm:rounded-xl bg-white border border-slate-200/80 shadow-2xs relative overflow-hidden">
+        <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white border border-slate-200/80 shadow-2xs relative overflow-hidden">
           <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider truncate">
+            <span className="text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider truncate">
               Còn Lại
             </span>
-            <CheckCircle2 className={`w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0 ${
+            <CheckCircle2 className={`w-3.5 h-3.5 shrink-0 ${
               kpis.totalRemaining >= 0 ? 'text-blue-600' : 'text-rose-600'
             }`} />
           </div>
           <p
-            className={`text-sm sm:text-2xl font-bold font-mono tracking-tight mt-0.5 sm:mt-1 ${
+            className={`text-sm sm:text-lg font-bold font-mono tracking-tight mt-0.5 ${
               kpis.totalRemaining >= 0 ? 'text-slate-900' : 'text-rose-600'
             }`}
           >
             {formatCompactVND(kpis.totalRemaining)}
           </p>
-          <p className="text-[9px] sm:text-xs text-slate-500 mt-0.5 truncate">
+          <p className="text-[9px] sm:text-[11px] text-slate-500 mt-0.5 truncate">
             {kpis.totalRemaining >= 0
               ? `Còn ${((kpis.totalRemaining / kpis.totalApproved) * 100).toFixed(1)}% • ${kpis.safeCount} an toàn`
               : 'Đã vượt định mức'}
@@ -259,36 +259,36 @@ export default function ExecutiveDashboard({
         </div>
 
         {/* Card 4: Tình trạng an toàn & Vận hành */}
-        <div className="p-2 sm:p-4 rounded-lg sm:rounded-xl bg-white border border-slate-200/80 shadow-2xs relative overflow-hidden">
+        <div className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white border border-slate-200/80 shadow-2xs relative overflow-hidden">
           <div className="flex items-center justify-between text-slate-500">
-            <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider truncate">
+            <span className="text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider truncate">
               An Toàn
             </span>
-            <Activity className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-purple-600 shrink-0" />
+            <Activity className="w-3.5 h-3.5 text-purple-600 shrink-0" />
           </div>
-          <p className="text-sm sm:text-2xl font-bold font-mono text-slate-900 mt-0.5 sm:mt-1">
+          <p className="text-sm sm:text-lg font-bold font-mono text-slate-900 mt-0.5">
             {kpis.safeCount} <span className="text-xs text-slate-400 font-normal">/ {budgets.length}</span>
           </p>
-          <p className="text-[9px] sm:text-xs font-medium text-amber-700 mt-0.5 truncate">
+          <p className="text-[9px] sm:text-[11px] font-medium text-amber-700 mt-0.5 truncate">
             {kpis.overCount > 0 ? `${kpis.overCount} vượt • ` : ''}{kpis.warningCount} cảnh báo
           </p>
         </div>
       </div>
 
       {/* 2. MAIN ANALYTICS GRID: CƠ CẤU THEO NHÓM CHI PHÍ & TIẾN ĐỘ THEO QUÝ */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 sm:gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-4 items-start">
         {/* Left Column: Cơ Cấu Ngân Sách Theo Nhóm Chi Phí (Col 7) */}
-        <div className="lg:col-span-7 bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs sm:shadow-sm p-2.5 sm:p-5 space-y-2.5 sm:space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2 sm:pb-3">
-            <div className="flex items-center gap-2 sm:gap-2.5">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                <PieChart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        <div className="lg:col-span-7 bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs sm:shadow-sm p-2 sm:p-3.5 space-y-2 sm:space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-1.5 sm:pb-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <PieChart className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </div>
               <div>
                 <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
                   Cơ Cấu Chi Phí Theo Nhóm
                 </h3>
-                <p className="hidden sm:block text-3xs text-slate-400">
+                <p className="hidden sm:block text-[10px] text-slate-400 leading-none">
                   Phân bổ hạn mức và tiến độ giải ngân chi tiết
                 </p>
               </div>
@@ -307,11 +307,11 @@ export default function ExecutiveDashboard({
           </div>
 
           {/* Group breakdown progress bars */}
-          <div className="space-y-2 sm:space-y-4 pt-0.5 sm:pt-1">
+          <div className="space-y-1 sm:space-y-2 pt-0.5">
             {groupStats.map((g) => {
               const clamped = Math.min(Math.max(g.percent, 0), 100);
               return (
-                <div key={g.name} className="space-y-1 sm:space-y-1.5 p-2 sm:p-3 rounded-lg sm:rounded-xl bg-slate-50/60 border border-slate-100 hover:bg-slate-50 transition-colors">
+                <div key={g.name} className="space-y-0.5 sm:space-y-1 p-1.5 sm:p-2 rounded-lg bg-slate-50/60 border border-slate-100 hover:bg-slate-50 transition-colors">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-bold text-slate-800 text-[11px] sm:text-xs truncate max-w-[160px] sm:max-w-[280px]" title={g.name}>
                       {g.name}
@@ -321,7 +321,7 @@ export default function ExecutiveDashboard({
                       <span className="text-slate-400">/</span>
                       <span className="text-slate-500">{formatCompactVND(g.approved)}</span>
                       <span
-                        className={`px-1 py-0.2 rounded text-[9px] sm:text-3xs font-bold ${
+                        className={`px-1 py-0.2 rounded text-[9px] sm:text-[10px] font-bold ${
                           g.percent >= 100
                             ? 'bg-rose-100 text-rose-800'
                             : g.percent >= 80
@@ -335,7 +335,7 @@ export default function ExecutiveDashboard({
                   </div>
 
                   {/* Progress bar */}
-                  <div className="h-1.5 sm:h-2 w-full bg-slate-200/80 rounded-full overflow-hidden">
+                  <div className="h-1 sm:h-1.5 w-full bg-slate-200/80 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${
                         g.percent >= 100
@@ -348,7 +348,7 @@ export default function ExecutiveDashboard({
                     ></div>
                   </div>
 
-                  <div className="flex items-center justify-between text-[9px] sm:text-3xs text-slate-400">
+                  <div className="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-400">
                     <span>{g.count} mục con</span>
                     <span>Còn: <strong className="text-slate-600 font-mono">{formatVND(g.remaining)}</strong></span>
                   </div>
@@ -359,17 +359,17 @@ export default function ExecutiveDashboard({
         </div>
 
         {/* Right Column: Dòng Tiền Theo Quý & Các Tháng (Col 5) */}
-        <div className="lg:col-span-5 bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs sm:shadow-sm p-2.5 sm:p-5 space-y-2.5 sm:space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2 sm:pb-3">
-            <div className="flex items-center gap-2 sm:gap-2.5">
-              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-                <BarChart3 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+        <div className="lg:col-span-5 bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs sm:shadow-sm p-2 sm:p-3.5 space-y-2 sm:space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-1.5 sm:pb-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                <BarChart3 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </div>
               <div>
                 <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
                   Giải Ngân 4 Quý ({selectedYear})
                 </h3>
-                <p className="hidden sm:block text-3xs text-slate-400">Dòng tiền phát sinh từ sổ cái phiếu chi</p>
+                <p className="hidden sm:block text-[10px] text-slate-400 leading-none">Dòng tiền phát sinh từ sổ cái phiếu chi</p>
               </div>
             </div>
             {onNavigateToLedger && (
@@ -385,16 +385,16 @@ export default function ExecutiveDashboard({
           </div>
 
           {/* 4 Quarters mini cards */}
-          <div className="grid grid-cols-2 gap-1.5 sm:gap-2.5">
+          <div className="grid grid-cols-2 gap-1 sm:gap-2">
             {monthlyStats.quarters.map((q) => (
-              <div key={q.label} className="p-2 sm:p-3 rounded-lg sm:rounded-xl bg-slate-50 border border-slate-100">
-                <span className="text-[9px] sm:text-3xs font-bold text-slate-500 uppercase tracking-wider">
+              <div key={q.label} className="p-1.5 sm:p-2 rounded-lg bg-slate-50 border border-slate-100">
+                <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                   {q.label}
                 </span>
-                <p className="text-xs sm:text-sm font-bold font-mono text-slate-900 mt-0.5 sm:mt-1">
+                <p className="text-xs sm:text-xs font-bold font-mono text-slate-900 mt-0.5">
                   {formatCompactVND(q.amount)}
                 </p>
-                <div className="mt-1 sm:mt-1.5 h-1 sm:h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                <div className="mt-1 h-1 w-full bg-slate-200 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-blue-600 rounded-full"
                     style={{
@@ -407,11 +407,11 @@ export default function ExecutiveDashboard({
           </div>
 
           {/* Monthly Burn Rate Bar Chart */}
-          <div className="pt-2">
-            <span className="text-3xs font-bold text-slate-500 uppercase tracking-wider block mb-2">
+          <div className="pt-1">
+            <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
               Phát sinh 12 tháng trong năm {selectedYear}
             </span>
-            <div className="grid grid-cols-12 gap-1 items-end h-28 pt-4 pb-1 border-b border-slate-100">
+            <div className="grid grid-cols-12 gap-0.5 sm:gap-1 items-end h-16 pt-2 pb-0.5 border-b border-slate-100">
               {monthlyStats.months.map((m) => {
                 const heightPercent =
                   monthlyStats.maxMonthAmount > 0
@@ -423,18 +423,18 @@ export default function ExecutiveDashboard({
                     className="flex flex-col items-center h-full justify-end group relative"
                   >
                     <div
-                      className="w-full max-w-[18px] bg-blue-600/80 group-hover:bg-blue-600 rounded-t transition-all"
+                      className="w-full max-w-[12px] sm:max-w-[14px] bg-blue-600/80 group-hover:bg-blue-600 rounded-t transition-all"
                       style={{ height: `${heightPercent}%` }}
                       title={`Tháng ${m.month}: ${formatVND(m.amount)} (${m.count} phiếu)`}
                     ></div>
-                    <span className="text-[10px] text-slate-400 font-mono mt-1 group-hover:text-blue-600 font-semibold">
+                    <span className="text-[9px] text-slate-400 font-mono mt-0.5 group-hover:text-blue-600 font-semibold">
                       {m.name}
                     </span>
                   </div>
                 );
               })}
             </div>
-            <p className="text-3xs text-slate-400 mt-2 text-center">
+            <p className="text-[9px] text-slate-400 mt-1 text-center">
               Rê chuột vào từng cột để xem chi tiết số tiền phát sinh theo tháng
             </p>
           </div>
@@ -442,9 +442,9 @@ export default function ExecutiveDashboard({
       </div>
 
       {/* 3. LOWER SECTION: TOP 8 SPENDING & RISK MONITOR RADAR */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2.5 sm:gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-2 sm:gap-4 items-start">
         {/* Top 8 Spending Accounts (Col 7): Ultra-slim 1-line Rows */}
-        <div className="lg:col-span-7 bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs sm:shadow-sm p-2.5 sm:p-5 space-y-2 sm:space-y-3">
+        <div className="lg:col-span-7 bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs sm:shadow-sm p-2 sm:p-3.5 space-y-1.5 sm:space-y-2">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <Flame className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-500 shrink-0" />
@@ -508,7 +508,7 @@ export default function ExecutiveDashboard({
         </div>
 
         {/* Risk Monitor Radar (Col 5): Ultra-slim 1-line Rows */}
-        <div className="lg:col-span-5 bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs sm:shadow-sm p-2.5 sm:p-5 space-y-2 sm:space-y-3">
+        <div className="lg:col-span-5 bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-2xs sm:shadow-sm p-2 sm:p-3.5 space-y-1.5 sm:space-y-2">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <ShieldAlert className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-500 shrink-0" />

@@ -229,50 +229,80 @@ export default function DashboardPage({ user }) {
     document.body.removeChild(link);
   };
 
-  // Event listener for Header Export Button
+  // Event listeners for Header Actions (dispatched from User Avatar Menu)
   useEffect(() => {
-    const handleCustomExport = () => {
-      handleExportCSV();
-    };
+    const handleCustomExport = () => handleExportCSV();
+    const handleSync = () => handleSyncNow(null, true);
+    const handleSettings = () => setIsSyncModalOpen(true);
+    const handleReset = () => handleResetData();
+
     window.addEventListener('app_export_csv', handleCustomExport);
-    return () => window.removeEventListener('app_export_csv', handleCustomExport);
+    window.addEventListener('app_sync_sheet', handleSync);
+    window.addEventListener('app_open_sheet_settings', handleSettings);
+    window.addEventListener('app_reset_data', handleReset);
+
+    return () => {
+      window.removeEventListener('app_export_csv', handleCustomExport);
+      window.removeEventListener('app_sync_sheet', handleSync);
+      window.removeEventListener('app_open_sheet_settings', handleSettings);
+      window.removeEventListener('app_reset_data', handleReset);
+    };
   }, [yearTransactions, selectedYear]);
 
-  // Format today in Vietnamese format
-  const todayFormatted = new Intl.DateTimeFormat('vi-VN', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date());
-
-  const mobileDateStr = new Intl.DateTimeFormat('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(new Date());
-
   return (
-    <div className="space-y-2.5 sm:space-y-6">
-      {/* Top Action Toolbar: Ultra-slim Single Line */}
-      <div className="flex flex-wrap items-center justify-between gap-1.5 pb-1 sm:pb-2 border-b border-slate-200/70 text-xs">
-        {/* Info summary */}
-        <div className="flex items-center gap-1 text-[11px] text-slate-500">
-          <Calendar className="w-3 h-3 text-blue-600 shrink-0" />
-          <span className="font-semibold text-slate-700">{selectedYear === 'ALL' ? 'Tất cả' : selectedYear}</span>
-          <span>•</span>
-          <span className="text-slate-600">{budgets.length} mục</span>
-          <span>•</span>
-          <span className="font-semibold text-blue-600">{yearTransactions.length} phiếu</span>
+    <div className="space-y-2 sm:space-y-4">
+      {/* View Tabs & Fiscal Year Selector in One Single Elegant Line */}
+      <div className="flex items-center justify-between gap-2 border-b border-slate-200/80 pb-1.5">
+        {/* Navigation Tabs */}
+        <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar">
+          <button
+            type="button"
+            onClick={() => setActiveTab('DASHBOARD')}
+            className={`inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+              activeTab === 'DASHBOARD'
+                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-600/20'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+            }`}
+          >
+            <LayoutDashboard className="w-3.5 h-3.5" />
+            <span className="sm:hidden">Dashboard</span>
+            <span className="hidden sm:inline">Dashboard Điều Hành</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('BUDGETS')}
+            className={`inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+              activeTab === 'BUDGETS'
+                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-600/20'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+            }`}
+          >
+            <FileSpreadsheet className="w-3.5 h-3.5" />
+            <span className="sm:hidden">Kế Hoạch</span>
+            <span className="hidden sm:inline">Kế Hoạch & Báo Cáo</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('TRANSACTIONS')}
+            className={`inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+              activeTab === 'TRANSACTIONS'
+                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-600/20'
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+            }`}
+          >
+            <ListOrdered className="w-3.5 h-3.5" />
+            <span>Sổ Cái</span>
+          </button>
         </div>
 
-        {/* Action Controls & Fiscal Year Selector: Ultra-compact, single line */}
-        <div className="flex items-center gap-1">
-          {/* Year select: sleek, compact */}
+        {/* ONLY Year Selector: Clean and Prominent */}
+        <div className="shrink-0 flex items-center">
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
-            className="px-1.5 py-0.5 rounded border border-slate-200 bg-white text-[11px] font-bold text-slate-800 focus:outline-none focus:border-blue-400 cursor-pointer shadow-2xs"
+            className="px-2 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-400 cursor-pointer shadow-2xs transition-all"
             title="Chọn năm tài chính"
           >
             {availableYears.map((yr) => (
@@ -282,107 +312,7 @@ export default function DashboardPage({ user }) {
             ))}
             <option value="ALL">Tất cả năm</option>
           </select>
-
-          {/* Google Sheets Sync: Slim pill */}
-          <button
-            type="button"
-            onClick={() => (hasWebhook ? handleSyncNow() : setIsSyncModalOpen(true))}
-            disabled={isSyncing}
-            className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[11px] font-medium transition-all border shadow-2xs ${
-              hasWebhook
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
-                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
-            }`}
-            title={hasWebhook ? 'Bấm để đồng bộ lại dữ liệu từ Google Sheet' : 'Bấm để kết nối Google Sheet'}
-          >
-            {isSyncing ? (
-              <RefreshCw className="w-2.5 h-2.5 animate-spin text-emerald-600" />
-            ) : hasWebhook ? (
-              <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
-            ) : (
-              <Cloud className="w-2.5 h-2.5 text-slate-400" />
-            )}
-            <span>{hasWebhook ? 'Sheet' : 'Nối Sheet'}</span>
-          </button>
-
-          {/* Sheet Settings Gear */}
-          <button
-            type="button"
-            onClick={() => setIsSyncModalOpen(true)}
-            className="p-1 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-            title="Cài đặt kết nối Google Sheet"
-          >
-            <Settings className="w-3 h-3" />
-          </button>
-
-          {/* Reload Original Data */}
-          <button
-            type="button"
-            onClick={handleResetData}
-            className="p-1 rounded bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-700 border border-slate-200 shadow-2xs transition-all"
-            title="Khôi phục dữ liệu gốc từ Excel"
-          >
-            <RefreshCw className="w-3 h-3" />
-          </button>
-
-          {/* Export CSV: Sleek slim button */}
-          <button
-            type="button"
-            onClick={handleExportCSV}
-            className="p-1 sm:px-2 sm:py-0.5 rounded text-[11px] font-medium bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 shadow-2xs inline-flex items-center gap-1 transition-all"
-            title={`Xuất dữ liệu năm ${selectedYear} ra file CSV`}
-          >
-            <Download className="w-3 h-3 text-emerald-600" />
-            <span className="hidden sm:inline">Xuất CSV</span>
-          </button>
         </div>
-      </div>
-
-      {/* View Tabs - Smooth Horizontal Scroll on Mobile */}
-      <div className="flex items-center gap-1 sm:gap-2 border-b border-slate-200 pb-1 overflow-x-auto no-scrollbar">
-        <button
-          type="button"
-          onClick={() => setActiveTab('DASHBOARD')}
-          className={`inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
-            activeTab === 'DASHBOARD'
-              ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-600/20'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-          }`}
-        >
-          <LayoutDashboard className="w-3 h-3 sm:w-4 sm:h-4" />
-          <span className="sm:hidden">Dashboard</span>
-          <span className="hidden sm:inline">Dashboard Điều Hành</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('BUDGETS')}
-          className={`inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
-            activeTab === 'BUDGETS'
-              ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-600/20'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-          }`}
-        >
-          <FileSpreadsheet className="w-3 h-3 sm:w-4 sm:h-4" />
-          <span className="sm:hidden">Kế Hoạch ({budgets.length})</span>
-          <span className="hidden sm:inline">Kế Hoạch & Báo Cáo ({budgets.length})</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setActiveTab('TRANSACTIONS')}
-          className={`inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
-            activeTab === 'TRANSACTIONS'
-              ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-600/20'
-              : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-          }`}
-        >
-          <ListOrdered className="w-3 h-3 sm:w-4 sm:h-4" />
-          <span className="sm:hidden">Sổ Cái ({yearTransactions.length})</span>
-          <span className="hidden sm:inline">
-            Sổ Cái Phiếu Chi ({yearTransactions.length.toLocaleString('vi-VN')})
-          </span>
-        </button>
       </div>
 
       {/* Tab 1: Executive Dashboard (Macro Analytics, Group breakdown, Cashflow, Top 8, Risk radar) */}
