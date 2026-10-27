@@ -1,5 +1,6 @@
 import React from 'react';
 import { Wallet, TrendingUp, Users, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { calculateReportActual } from '../utils/sctsConfig';
 
 export default function StatCards({ transactions = [], budgets = [], selectedYear = '2026' }) {
   const totalCount = transactions.length;
@@ -27,14 +28,15 @@ export default function StatCards({ transactions = [], budgets = [], selectedYea
     }, 0);
   }, [budgets, selectedYear]);
 
-  // Total actual reporting cost = SUM(MAX(liveActual, bravoVal))
+  // Total actual reporting cost = SUM(calculateReportActual(liveActual, bravoVal, code))
   const totalReportActual = React.useMemo(() => {
     return budgets.reduce((acc, b) => {
       const code = String(b.code || '').trim();
       const liveActual =
         liveActualsByCode[code] !== undefined ? liveActualsByCode[code] : Number(b.actualAmount) || 0;
       const bravoVal = Number(b.bravoActual !== undefined ? b.bravoActual : b.bravoAmount) || 0;
-      return acc + Math.max(liveActual, bravoVal);
+      const { reportActual } = calculateReportActual(liveActual, bravoVal, code);
+      return acc + reportActual;
     }, 0);
   }, [budgets, liveActualsByCode]);
 

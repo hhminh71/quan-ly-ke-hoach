@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   TrendingUp,
   Wallet,
@@ -19,6 +19,7 @@ import {
   ArrowRight,
   Sparkles,
 } from 'lucide-react';
+import { getSctsSeparatedCodes, calculateReportActual } from '../utils/sctsConfig';
 
 export default function ExecutiveDashboard({
   budgets = [],
@@ -29,6 +30,15 @@ export default function ExecutiveDashboard({
   onOpenAccountDetail,
 }) {
   const [selectedRiskFilter, setSelectedRiskFilter] = useState('ALL'); // 'ALL', 'OVER', 'WARNING', 'SAFE'
+  const [sctsCodes, setSctsCodes] = useState(getSctsSeparatedCodes);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setSctsCodes(getSctsSeparatedCodes());
+    };
+    window.addEventListener('app_scts_codes_updated', handleUpdate);
+    return () => window.removeEventListener('app_scts_codes_updated', handleUpdate);
+  }, []);
 
   const formatVND = (num) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num || 0);
@@ -67,8 +77,13 @@ export default function ExecutiveDashboard({
           ? Number(b.yearlyApproved[selectedYear])
           : Number(b.approvedAmount) || 0;
 
-      // Executive Rule: MAX(Bravo, Nhập liệu)
-      const reportActual = Math.max(liveActual, bravoVal);
+      // Executive Rule: Chi phí thực tế báo cáo (Tách riêng SCTS nếu có)
+      const { reportActual, isSctsSeparated: isScts } = calculateReportActual(
+        liveActual,
+        bravoVal,
+        code,
+        sctsCodes
+      );
       const remaining = approved - reportActual;
       const percent = approved > 0 ? (reportActual / approved) * 100 : 0;
 
@@ -83,13 +98,14 @@ export default function ExecutiveDashboard({
         liveActual,
         bravoVal,
         reportActual,
+        isSctsSeparated: isScts,
         remaining,
         percent,
         status,
         voucherCount: (transactions || []).filter((t) => String(t.accountCode).trim() === code).length,
       };
     });
-  }, [budgets, liveActualsByCode, selectedYear, transactions]);
+  }, [budgets, liveActualsByCode, selectedYear, transactions, sctsCodes]);
 
   // 3. Macro KPI Totals
   const kpis = useMemo(() => {

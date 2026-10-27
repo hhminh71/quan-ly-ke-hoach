@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   X,
   Calendar,
@@ -8,10 +8,18 @@ import {
   Edit3,
   FileSpreadsheet,
   ArrowUpRight,
+  Shield,
+  Layers,
 } from 'lucide-react';
 import EditTransactionModal from './EditTransactionModal';
 import { matchesVietnameseSearch } from '../utils/searchUtils';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
+import {
+  getSctsSeparatedCodes,
+  isSctsSeparated,
+  toggleSctsSeparation,
+  calculateReportActual,
+} from '../utils/sctsConfig';
 
 export default function AccountLedgerModal({
   isOpen = true,
@@ -81,6 +89,16 @@ export default function AccountLedgerModal({
     return sortedTransactions.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   }, [isOpen, account, sortedTransactions]);
 
+  const [sctsCodes, setSctsCodes] = useState(getSctsSeparatedCodes);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setSctsCodes(getSctsSeparatedCodes());
+    };
+    window.addEventListener('app_scts_codes_updated', handleUpdate);
+    return () => window.removeEventListener('app_scts_codes_updated', handleUpdate);
+  }, []);
+
   // 2. ONLY return early after ALL hooks have been executed
   if (!isOpen || !account) return null;
 
@@ -108,11 +126,10 @@ export default function AccountLedgerModal({
       ? account.bravoActual
       : account.bravoAmount
   ) || 0;
-  const reportActual = Math.max(spent, bravoVal);
-  const remaining =
-    typeof account.liveRemaining === 'number' && !isNaN(account.liveRemaining)
-      ? account.liveRemaining
-      : approved - reportActual;
+
+  const isSeparated = isSctsSeparated(account.code, sctsCodes);
+  const { reportActual, source } = calculateReportActual(spent, bravoVal, account.code, sctsCodes);
+  const remaining = approved - reportActual;
   const spentPercent = approved > 0 ? (reportActual / approved) * 100 : 0;
   const remainingPercent = approved > 0 ? (remaining / approved) * 100 : 0;
 
@@ -201,7 +218,9 @@ export default function AccountLedgerModal({
                   <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wide">
                     Chi Phí Thực Tế
                   </span>
-                  <span className="text-[10px] font-bold bg-blue-600 text-white px-1.5 py-0.5 rounded">
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded text-white ${
+                    isSeparated ? 'bg-indigo-600' : 'bg-blue-600'
+                  }`}>
                     {spentPercent.toFixed(1)}%
                   </span>
                 </div>
@@ -209,9 +228,15 @@ export default function AccountLedgerModal({
                   {formatVND(reportActual)}
                 </div>
                 <div className="text-[11px] text-blue-700 font-medium truncate">
-                  {bravoVal > spent
-                    ? `Theo Bravo (${formatVND(bravoVal)}) > Phiếu chi (${formatVND(spent)})`
-                    : `${accountTransactions.length} phiếu chi (${formatVND(spent)})`}
+                  {isSeparated ? (
+                    <span className="text-indigo-700 font-semibold">
+                      Chỉ tính SCTX nhập liệu (Đã tách SCTS riêng)
+                    </span>
+                  ) : bravoVal > spent ? (
+                    `Theo Bravo (${formatVND(bravoVal)}) > Phiếu chi (${formatVND(spent)})`
+                  ) : (
+                    `${accountTransactions.length} phiếu chi (${formatVND(spent)})`
+                  )}
                 </div>
               </div>
 
@@ -269,6 +294,63 @@ export default function AccountLedgerModal({
                 ></div>
               </div>
             )}
+
+            {/* SCTS separation toggle / alert box */}
+            <div
+              className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-xl border text-xs transition-colors ${
+                isSeparated
+                  ? 'bg-indigo-50/80 border-indigo-200 text-indigo-950'
+                  : 'bg-slate-50 border-slate-200 text-slate-700'
+              }`}
+            >
+              <div className="flex items-start sm:items-center gap-2.5">
+                <div
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                    isSeparated ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-200 text-slate-600'
+                  }`}
+                >
+                  <Shield className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-xs">
+                      {isSeparated
+                        ? 'Đã Tách Riêng Sửa Chữa Tài Sản (SCTS)'
+                        : 'Quy tắc Mặc định: So sánh gộp MAX(Bravo, Nhập liệu)'}
+                    </span>
+                    {isSeparated && (
+                      <span className="text-3xs font-bold bg-indigo-200/80 text-indigo-800 px-1.5 py-0.2 rounded-full">
+                        Đang kích hoạt
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
+                    {isSeparated ? (
+                      <>
+                        Phần mềm Bravo ghi nhận gộp <strong>{formatVND(bravoVal)}</strong> (bao gồm cả dự án SCTS lớn do Tổng công ty giao). Hệ thống đã tự động tách riêng số liệu Bravo để <strong>chỉ theo dõi hạn mức SCTX của Cảng ({formatVND(spent)})</strong>.
+                      </>
+                    ) : (
+                      <>
+                        Nếu khoản mục này có dự án SCTS sửa chữa lớn hạch toán chung trên Bravo, bạn có thể bật nút bên cạnh để tách riêng SCTS và chỉ tính SCTX theo nhập liệu.
+                      </>
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => toggleSctsSeparation(account.code)}
+                className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition-all shadow-2xs cursor-pointer ${
+                  isSeparated
+                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
+                    : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-300'
+                }`}
+                title="Bấm để bật/tắt chế độ tách riêng chi phí SCTS cho mã tài khoản này"
+              >
+                {isSeparated ? '✓ Đang Tách SCTS (Nhấn để hủy)' : 'Tách Riêng SCTS Cho Mã Này'}
+              </button>
+            </div>
           </div>
 
           {/* Search & Sort Controls inside Modal */}

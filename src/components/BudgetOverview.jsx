@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import AccountLedgerModal from './AccountLedgerModal';
 import { matchesVietnameseSearch } from '../utils/searchUtils';
+import { calculateReportActual, getSctsSeparatedCodes, saveSctsSeparatedCodes, isSctsSeparated } from '../utils/sctsConfig';
 
 export default function BudgetOverview({
   budgets = [],
@@ -46,6 +47,16 @@ export default function BudgetOverview({
   const [editedBudgets, setEditedBudgets] = useState(budgets);
   const [newYearInput, setNewYearInput] = useState('');
   const [showAddYearModal, setShowAddYearModal] = useState(false);
+
+  const [sctsCodes, setSctsCodes] = useState(getSctsSeparatedCodes);
+
+  useEffect(() => {
+    const handleSctsUpdate = () => {
+      setSctsCodes(getSctsSeparatedCodes());
+    };
+    window.addEventListener('app_scts_codes_updated', handleSctsUpdate);
+    return () => window.removeEventListener('app_scts_codes_updated', handleSctsUpdate);
+  }, []);
 
   // Admin toggle for optional comparison columns: "Theo Bravo" and "Theo Nhập Liệu"
   const [showBravoCol, setShowBravoCol] = useState(() => {
@@ -155,9 +166,13 @@ export default function BudgetOverview({
           ? Number(b.yearlyApproved[selectedYear])
           : Number(b.approvedAmount) || 0;
 
-      // RULE: Compare and pick whichever is larger as the official reporting actual cost!
-      const reportActual = Math.max(liveActual, bravoVal);
-      const source = bravoVal > liveActual ? 'BRAVO' : 'NHAP_LIEU';
+      // RULE: Tính chi phí thực tế báo cáo (Tách riêng SCTS nếu thuộc diện dự án lớn của TCT)
+      const { reportActual, source, isSctsSeparated: sctsFlag } = calculateReportActual(
+        liveActual,
+        bravoVal,
+        b.code,
+        sctsCodes
+      );
 
       const remaining = approved - reportActual;
       const percent = approved > 0 ? (reportActual / approved) * 100 : 0;
@@ -173,12 +188,13 @@ export default function BudgetOverview({
         bravoVal,
         reportActual,
         source,
+        isSctsSeparated: sctsFlag,
         liveRemaining: remaining,
         livePercent: percent,
         status,
       };
     });
-  }, [editedBudgets, liveActualsByCode, selectedYear]);
+  }, [editedBudgets, liveActualsByCode, selectedYear, sctsCodes]);
 
   // Selected detail account for drilldown modal
   const selectedDetailAccount = useMemo(() => {
@@ -663,7 +679,17 @@ export default function BudgetOverview({
                         {/* Cột Tùy Chọn: Theo Bravo */}
                         {showBravoCol && (
                           <td className="py-2 px-2 sm:py-2.5 sm:px-2.5 text-right whitespace-nowrap font-mono text-2xs sm:text-xs font-semibold text-amber-900 bg-amber-50/20 border-l border-r border-amber-100/60">
-                            {formatVND(item.bravoVal)}
+                            <div className="flex flex-col items-end">
+                              <span>{formatVND(item.bravoVal)}</span>
+                              {item.isSctsSeparated && (
+                                <span
+                                  className="inline-block text-3xs font-semibold text-amber-800 bg-amber-100/90 px-1 py-0.2 rounded mt-0.5 border border-amber-300"
+                                  title="Bravo hạch toán gộp chung cả SCTX và SCTS (Sửa chữa lớn)"
+                                >
+                                  Gộp SCTS & SCTX
+                                </span>
+                              )}
+                            </div>
                           </td>
                         )}
 
@@ -678,7 +704,14 @@ export default function BudgetOverview({
                         <td className="py-2 px-2 sm:py-2.5 sm:px-2.5 text-right whitespace-nowrap font-mono text-2xs sm:text-xs font-bold text-emerald-950 bg-emerald-50/40 border-l border-r border-emerald-100">
                           <div className="flex flex-col items-end">
                             <span className="font-bold">{formatVND(item.reportActual)}</span>
-                            {item.source === 'BRAVO' ? (
+                            {item.isSctsSeparated ? (
+                              <span
+                                className="inline-block text-3xs font-semibold text-indigo-800 bg-indigo-100/90 px-1 py-0.2 rounded mt-0.5 border border-indigo-200"
+                                title="Đã tách riêng Sửa chữa tài sản (SCTS) theo nghiệp vụ Cảng. Chi phí kế hoạch chỉ tính theo SCTX nhập liệu."
+                              >
+                                SCTX (Đã tách SCTS)
+                              </span>
+                            ) : item.source === 'BRAVO' ? (
                               <span
                                 className="inline-block text-3xs font-semibold text-amber-800 bg-amber-100/90 px-1 py-0.2 rounded mt-0.5 border border-amber-200"
                                 title={`Số này lấy theo BRAVO (${formatVND(item.bravoVal)}) vì lớn hơn số nhập liệu (${formatVND(item.liveActual)})`}

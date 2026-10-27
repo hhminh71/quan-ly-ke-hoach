@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Scale,
   Search,
@@ -23,6 +23,7 @@ import {
 import bravoInfoData from '../data/bravoInfo.json';
 import AccountLedgerModal from './AccountLedgerModal';
 import { matchesVietnameseSearch } from '../utils/searchUtils';
+import { getSctsSeparatedCodes, calculateReportActual, isSctsSeparated } from '../utils/sctsConfig';
 
 export default function BravoReconciliation({
   budgets = [],
@@ -52,6 +53,15 @@ export default function BravoReconciliation({
 
   // Drilldown modal state
   const [selectedDetailCode, setSelectedDetailCode] = useState(null);
+  const [sctsCodes, setSctsCodes] = useState(getSctsSeparatedCodes);
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      setSctsCodes(getSctsSeparatedCodes());
+    };
+    window.addEventListener('app_scts_codes_updated', handleUpdate);
+    return () => window.removeEventListener('app_scts_codes_updated', handleUpdate);
+  }, []);
 
   const formatVND = (num) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num || 0);
@@ -103,8 +113,13 @@ export default function BravoReconciliation({
       const diff = bravo - actual;
       const absDiff = Math.abs(diff);
 
-      // Prudent Management Spent = MAX(Thực tế, BRAVO)
-      const maxActual = Math.max(actual, bravo);
+      // Prudent Management Spent = Chi phí thực tế báo cáo (Tách riêng SCTS nếu có)
+      const { reportActual: maxActual, isSctsSeparated: isScts } = calculateReportActual(
+        actual,
+        bravo,
+        code,
+        sctsCodes
+      );
       const remaining = approved - maxActual;
       const percent = approved > 0 ? (maxActual / approved) * 100 : 0;
 
@@ -125,12 +140,13 @@ export default function BravoReconciliation({
         diff,
         absDiff,
         maxActual,
+        isSctsSeparated: isScts,
         remaining,
         percent,
         status,
       };
     });
-  }, [budgets, liveActualsByCode, selectedYear]);
+  }, [budgets, liveActualsByCode, selectedYear, sctsCodes]);
 
   // 3. Unique Groups in Planning Items
   const planningGroups = useMemo(() => {
@@ -732,7 +748,19 @@ export default function BravoReconciliation({
 
                           {/* Discrepancy (BRAVO - Thực tế) */}
                           <td className="py-3 px-3.5 text-center">
-                            {isBravoHigh ? (
+                            {item.isSctsSeparated ? (
+                              <div className="inline-flex flex-col items-center">
+                                <span
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-3xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200"
+                                  title="Khoản mục này đã được tách riêng SCTS do Bravo hạch toán gộp cả dự án lớn của TCT"
+                                >
+                                  Đã tách SCTS
+                                </span>
+                                <span className="text-3xs text-slate-500 font-normal mt-0.5" title="Chênh lệch gộp Bravo">
+                                  Bravo: +{formatCompactVND(item.diff)}
+                                </span>
+                              </div>
+                            ) : isBravoHigh ? (
                               <div className="inline-flex flex-col items-center">
                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-3xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
                                   +{formatCompactVND(item.diff)}
@@ -759,7 +787,12 @@ export default function BravoReconciliation({
 
                           {/* Max Actual Spent */}
                           <td className="py-3 px-3.5 text-right font-bold text-emerald-950 bg-emerald-50/30">
-                            {formatVND(item.maxActual)}
+                            <div>{formatVND(item.maxActual)}</div>
+                            {item.isSctsSeparated && (
+                              <span className="text-3xs font-medium text-indigo-700 bg-indigo-50 px-1 py-0.2 rounded border border-indigo-200 inline-block mt-0.5" title="Chỉ lấy theo số nhập liệu SCTX của Cảng">
+                                SCTX Nhập liệu
+                              </span>
+                            )}
                           </td>
 
                           {/* Remaining */}
