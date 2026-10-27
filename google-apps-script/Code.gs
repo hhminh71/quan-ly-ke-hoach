@@ -175,15 +175,15 @@ function doPost(e) {
       }
 
       const rowsToSet = [];
-      // Dòng 1: Tiêu đề báo cáo và Ghi chú thời gian cập nhật Bravo nổi bật
-      rowsToSet.push(['BÁO CÁO THỰC HIỆN CHI PHÍ (BRAVO)', 'CẬP NHẬT LÚC: ' + updateTime, 'NGUỒN: BRAVO DAILY', '', '', '', '', 'Đồng bộ tự động']);
-      // Dòng 2: Tiêu đề cột
-      rowsToSet.push(['Chỉ tiêu', 'Mã khoản mục', 'Kế hoạch năm', 'Thực hiện trong kỳ', 'Tỷ lệ (%)', 'Thực hiện từ đầu năm', 'Tỷ lệ YTD (%)', 'Thời gian cập nhật Bravo']);
+      // Dòng 1: Tiêu đề báo cáo và Ghi chú thời gian cập nhật Bravo ở ô H1
+      rowsToSet.push(['NƠI NHẬP DỮ LIỆU TỪ PHẦN MỀM KẾ TOÁN BRAVO ĐỂ SO SÁNH', '', '', '', '', '', '', 'CẬP NHẬT LÚC: ' + updateTime]);
+      // Dòng 2: Cột B2 PHẢI ĐỂ TRỐNG y hệt file gốc để không phá vỡ hàm =VLOOKUP(C4; INFO!$B$2:$F$164; 5; 1)
+      rowsToSet.push(['', '', '', 'Giá trị', 'Tỷ lệ', 'Giá trị', 'Tỷ lệ', 'Thời gian cập nhật Bravo']);
 
       items.forEach(function(item) {
         rowsToSet.push([
           item.name || '',
-          item.code || '',
+          item.code ? String(item.code) : '',
           Number(item.approvedAmount) || 0,
           Number(item.bravoAmount) || 0,
           Number(item.rate) || 0,
