@@ -5,8 +5,10 @@
 const STORAGE_KEY_WEBHOOK_URL = 'app_google_sheet_webhook_url';
 const STORAGE_KEY_LAST_SYNC = 'app_last_sync_time';
 
+export const DEFAULT_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbypvdO6D1QW4K_PgKlIRAoUFfWnRyC4Wkn3oYU4Tbz5GOyX5gd3zpIhx93715PKUp8A/exec';
+
 export const getSavedWebhookUrl = () => {
-  return localStorage.getItem(STORAGE_KEY_WEBHOOK_URL) || '';
+  return localStorage.getItem(STORAGE_KEY_WEBHOOK_URL) || DEFAULT_WEBHOOK_URL;
 };
 
 export const saveWebhookUrl = (url) => {
@@ -109,8 +111,30 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
     });
   }
 
+  // Tự động kết nối và ánh xạ số liệu thực hiện Bravo từ sheet INFO vào từng khoản mục kế hoạch
+  if (Array.isArray(result.budgets) && Array.isArray(result.bravoInfo)) {
+    const bravoMap = {};
+    result.bravoInfo.forEach((item) => {
+      if (item && item.code) {
+        bravoMap[String(item.code).trim()] = Number(item.bravoAmount) || 0;
+      }
+    });
+
+    result.budgets = result.budgets.map((b) => {
+      const codeKey = String(b.code || '').trim();
+      const valFromBravo = bravoMap[codeKey];
+      return {
+        ...b,
+        bravoActual:
+          valFromBravo !== undefined
+            ? valFromBravo
+            : Number(b.bravoActual !== undefined ? b.bravoActual : b.bravoAmount) || 0,
+      };
+    });
+  }
+
   setLastSyncTime();
-  return result; // { budgets: [...], transactions: [...] }
+  return result; // { budgets: [...], transactions: [...], bravoInfo: [...] }
 };
 
 /**

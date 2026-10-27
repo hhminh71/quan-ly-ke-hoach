@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import initialBudgets from '../data/budgets.json';
 import initialTransactions from '../data/transactions.json';
+import initialBravoInfo from '../data/bravoInfo.json';
 import BravoReconciliation from '../components/BravoReconciliation';
 import {
   getSavedWebhookUrl,
@@ -68,6 +69,16 @@ export default function DashboardPage({ user }) {
       console.error(e);
     }
     return initialBudgets;
+  });
+
+  const [bravoInfo, setBravoInfo] = useState(() => {
+    try {
+      const saved = localStorage.getItem('app_bravo_info_v2');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error(e);
+    }
+    return initialBravoInfo;
   });
 
   // Mobile Back Button & URL Hash Navigation Helpers
@@ -177,6 +188,15 @@ export default function DashboardPage({ user }) {
     }
   }, [budgets]);
 
+  // Sync bravoInfo to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('app_bravo_info_v2', JSON.stringify(bravoInfo));
+    } catch (e) {
+      console.error('Storage full or error', e);
+    }
+  }, [bravoInfo]);
+
   // Initial auto-sync from Google Sheet if URL exists
   useEffect(() => {
     const webhookUrl = getSavedWebhookUrl();
@@ -201,10 +221,13 @@ export default function DashboardPage({ user }) {
       if (data && data.budgets && data.budgets.length > 0) {
         setBudgets(data.budgets);
       }
+      if (data && data.bravoInfo && data.bravoInfo.length > 0) {
+        setBravoInfo(data.bravoInfo);
+      }
       setHasWebhook(true);
       setLastSyncTimeState(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }));
       if (showAlert) {
-        alert(`Đồng bộ thành công! Đã nạp ${data.transactions?.length || 0} phiếu từ Google Sheet.`);
+        alert(`Đồng bộ thành công! Đã nạp ${data.transactions?.length || 0} phiếu chi và số liệu đối soát Bravo từ Google Sheet.`);
       }
     } catch (err) {
       console.error('Sync error', err);
@@ -441,6 +464,7 @@ export default function DashboardPage({ user }) {
           budgets={budgets}
           transactions={yearTransactions}
           selectedYear={selectedYear}
+          bravoInfo={bravoInfo}
           onUpdateTransaction={handleUpdateTransaction}
           onDeleteTransaction={handleDeleteTransaction}
           onNavigateToLedger={(accountCode) => {
@@ -457,6 +481,7 @@ export default function DashboardPage({ user }) {
         onSyncSuccess={(data) => {
           if (data?.transactions) setTransactions(data.transactions);
           if (data?.budgets) setBudgets(data.budgets);
+          if (data?.bravoInfo) setBravoInfo(data.bravoInfo);
           setHasWebhook(true);
         }}
       />

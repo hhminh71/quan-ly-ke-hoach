@@ -31,7 +31,11 @@ export default function BravoReconciliation({
   onUpdateTransaction,
   onDeleteTransaction,
   onNavigateToLedger,
+  bravoInfo = null,
 }) {
+  const activeBravoInfo = useMemo(() => {
+    return Array.isArray(bravoInfo) && bravoInfo.length > 0 ? bravoInfo : bravoInfoData;
+  }, [bravoInfo]);
   // Mode: 'PLANNING_RECON' (Đối soát 76 khoản mục Tổ KH) or 'MACRO_INFO' (Toàn cảnh 152 mục Sheet INFO)
   const [activeSubTab, setActiveSubTab] = useState('PLANNING_RECON');
 
@@ -195,15 +199,15 @@ export default function BravoReconciliation({
   // 6. Macro INFO Data Processing
   const macroCategories = useMemo(() => {
     const set = new Set(
-      bravoInfoData
+      activeBravoInfo
         .filter((i) => i.category && i.row > 2)
         .map((i) => i.category)
     );
     return Array.from(set);
-  }, []);
+  }, [activeBravoInfo]);
 
   const filteredMacroItems = useMemo(() => {
-    return bravoInfoData
+    return activeBravoInfo
       .filter((item) => item.row > 2 && (item.code || item.name))
       .filter((item) => {
         const matchSearch = matchesVietnameseSearch(
@@ -219,7 +223,7 @@ export default function BravoReconciliation({
 
         return matchSearch && matchCat && matchOwner;
       });
-  }, [macroSearch, macroCategoryFilter, macroOwnerFilter]);
+  }, [activeBravoInfo, macroSearch, macroCategoryFilter, macroOwnerFilter]);
 
   // Aggregate KPIs for Sheet INFO (Macro View)
   const macroKPIs = useMemo(() => {
@@ -861,7 +865,7 @@ export default function BravoReconciliation({
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
-                  Tất cả ({bravoInfoData.filter((i) => i.row > 2).length})
+                  Tất cả ({activeBravoInfo.filter((i) => i.row > 2).length})
                 </button>
                 <button
                   type="button"
