@@ -164,6 +164,7 @@ function doPost(e) {
     // 4. Đồng bộ toàn bộ dữ liệu đối soát từ file Excel Bravo Daily vào sheet INFO
     if (action === 'syncBravoInfo') {
       const items = data.items;
+      const updateTime = data.updateTime || Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm:ss');
       if (!Array.isArray(items) || items.length === 0) {
         throw new Error('Dữ liệu kết xuất Bravo rỗng');
       }
@@ -174,8 +175,10 @@ function doPost(e) {
       }
 
       const rowsToSet = [];
-      rowsToSet.push(['BÁO CÁO THỰC HIỆN CHI PHÍ', '', '', '', '', '', '', '']);
-      rowsToSet.push(['Chỉ tiêu', 'Mã khoản mục', 'Kế hoạch năm', 'Thực hiện trong kỳ', 'Tỷ lệ', 'Thực hiện từ đầu năm', 'Tỷ lệ', 'Ghi chú']);
+      // Dòng 1: Tiêu đề báo cáo và Ghi chú thời gian cập nhật Bravo nổi bật
+      rowsToSet.push(['BÁO CÁO THỰC HIỆN CHI PHÍ (BRAVO)', 'CẬP NHẬT LÚC: ' + updateTime, 'NGUỒN: BRAVO DAILY', '', '', '', '', 'Đồng bộ tự động']);
+      // Dòng 2: Tiêu đề cột
+      rowsToSet.push(['Chỉ tiêu', 'Mã khoản mục', 'Kế hoạch năm', 'Thực hiện trong kỳ', 'Tỷ lệ (%)', 'Thực hiện từ đầu năm', 'Tỷ lệ YTD (%)', 'Thời gian cập nhật Bravo']);
 
       items.forEach(function(item) {
         rowsToSet.push([
@@ -186,16 +189,24 @@ function doPost(e) {
           Number(item.rate) || 0,
           Number(item.actualYTD) || 0,
           Number(item.rateYTD) || 0,
-          item.note || ''
+          item.updateTime || updateTime
         ]);
       });
 
       infoSheet.clear();
       infoSheet.getRange(1, 1, rowsToSet.length, rowsToSet[0].length).setValues(rowsToSet);
 
+      // Định dạng làm đẹp trực quan cho Sheet INFO
+      try {
+        infoSheet.getRange('A1:H1').setFontWeight('bold').setBackground('#e0f2fe').setFontColor('#0369a1');
+        infoSheet.getRange('A2:H2').setFontWeight('bold').setBackground('#f1f5f9').setFontColor('#334155');
+        infoSheet.setFrozenRows(2);
+      } catch (styleErr) {}
+
       return createJsonResponse({
         status: 'success',
-        message: 'Đã cập nhật thành công ' + items.length + ' dòng vào sheet INFO',
+        message: 'Đã cập nhật thành công ' + items.length + ' dòng vào sheet INFO lúc ' + updateTime,
+        updateTime: updateTime,
         count: items.length
       });
     }
@@ -306,6 +317,8 @@ function getBravoInfoFromSheet(ss) {
   const rows = sheet.getDataRange().getValues();
   if (rows.length <= 2) return null;
 
+  const updateTimeNote = String(rows[0][1] || '').trim();
+
   const list = [];
   let currentCategory = 'TỔNG THỂ CHI PHÍ';
 
@@ -316,7 +329,9 @@ function getBravoInfoFromSheet(ss) {
     const approved = Number(r[2]) || 0;
     const bravo = Number(r[3]) || 0;
     const rate = Number(r[4]) || 0;
-    const note = String(r[7] || '').trim();
+    const actualYTD = Number(r[5]) || 0;
+    const rateYTD = Number(r[6]) || 0;
+    const updateTime = String(r[7] || updateTimeNote).trim();
 
     if (!name && !code) continue;
     if (!code && name) {
@@ -331,7 +346,10 @@ function getBravoInfoFromSheet(ss) {
       approvedAmount: approved,
       bravoAmount: bravo,
       rate: rate > 0 && rate < 10 ? Math.round(rate * 10000) / 100 : Math.round(rate * 100) / 100,
-      note: note
+      actualYTD: actualYTD,
+      rateYTD: rateYTD > 0 && rateYTD < 10 ? Math.round(rateYTD * 10000) / 100 : Math.round(rateYTD * 100) / 100,
+      updateTime: updateTime,
+      note: updateTime
     });
   }
   return list;

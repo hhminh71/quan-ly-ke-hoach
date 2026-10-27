@@ -21,11 +21,15 @@ if sys.platform.startswith("win"):
 try:
     import openpyxl
     import requests
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 except ImportError:
     print("[*] Đang cài đặt thư viện cần thiết: openpyxl, requests...")
     os.system(f'"{sys.executable}" -m pip install openpyxl requests')
     import openpyxl
     import requests
+    import urllib3
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 CURRENT_YEAR = datetime.now().year
 PROJECT_DIR = r"I:\My Drive\APP\Projects\quan-ly-ke-hoach"
@@ -144,8 +148,10 @@ def run():
     except Exception as e:
         print(f"      [CẢNH BÁO] Không thể ghi budgets.json: {e}")
 
-    # 3. Tùy chọn gửi lên Google Apps Script Webhook nếu có cấu hình
-    print("[3/3] Kiểm tra đồng bộ trực tiếp lên Google Sheet...")
+    update_time_str = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
+    # 3. Gửi lên Google Apps Script Webhook để đồng bộ vào Sheet INFO
+    print(f"[3/3] Đồng bộ trực tiếp lên Sheet INFO (Google Sheets)...")
     # Đọc URL Webhook nếu có lưu trong config
     webhook_cfg = os.path.join(PROJECT_DIR, ".webhook_url.txt")
     webhook_url = ""
@@ -155,20 +161,33 @@ def run():
 
     if webhook_url and webhook_url.startswith("https://script.google.com"):
         try:
-            print(f"      Đang gửi {len(items)} dòng lên Webhook Google Sheet...")
+            print(f"      Đang gửi {len(items)} dòng (Kèm ghi chú cập nhật: {update_time_str})...")
             payload = {
                 "action": "syncBravoInfo",
+                "updateTime": update_time_str,
                 "items": items
             }
-            res = requests.post(webhook_url, json=payload, timeout=25)
+            res = requests.post(webhook_url, json=payload, verify=False, timeout=30)
             if res.status_code == 200:
-                print("      [THÀNH CÔNG] Đã ghi đè trực tiếp vào tab INFO của Google Sheet!")
+                res_data = {}
+                try:
+                    res_data = res.json()
+                except Exception:
+                    pass
+                if res_data.get("status") == "success":
+                    print(f"      [THÀNH CÔNG] Đã ghi đè vào tab INFO của Google Sheet!")
+                    print(f"      -> Ghi chú thời gian: {update_time_str}")
+                else:
+                    msg = res_data.get("message", res.text)
+                    print(f"      [CHÚ Ý TỪ GOOGLE SCRIPT]: {msg}")
+                    if "Hành động POST không hợp lệ" in str(msg) or "không hợp lệ" in str(msg):
+                        print("      >> Vui lòng mở Google Sheets -> Tiện ích mở rộng -> Apps Script -> Dán nội dung Code.gs mới và Triển khai (Deploy) Phiên bản mới!")
             else:
                 print(f"      [CẢNH BÁO] Phản hồi Webhook HTTP {res.status_code}")
         except Exception as e:
-            print(f"      [THÔNG BÁO] Không thể gửi Webhook (Offline): {e}")
+            print(f"      [THÔNG BÁO] Không thể gửi Webhook: {e}")
     else:
-        print("      (Chưa lưu URL Webhook Google Sheet trong .webhook_url.txt - Đã cập nhật xong dữ liệu cho Web App)")
+        print("      (Chưa cấu hình URL Webhook Google Sheet trong .webhook_url.txt)")
 
     print("\n=====================================================================")
     print(" [HOÀN TẤT] DỮ LIỆU ĐÃ ĐƯỢC ĐỒNG BỘ THÀNH CÔNG!")
