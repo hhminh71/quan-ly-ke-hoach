@@ -161,6 +161,45 @@ function doPost(e) {
       });
     }
 
+    // 4. Đồng bộ toàn bộ dữ liệu đối soát từ file Excel Bravo Daily vào sheet INFO
+    if (action === 'syncBravoInfo') {
+      const items = data.items;
+      if (!Array.isArray(items) || items.length === 0) {
+        throw new Error('Dữ liệu kết xuất Bravo rỗng');
+      }
+
+      let infoSheet = ss.getSheetByName('INFO');
+      if (!infoSheet) {
+        infoSheet = ss.insertSheet('INFO');
+      }
+
+      const rowsToSet = [];
+      rowsToSet.push(['BÁO CÁO THỰC HIỆN CHI PHÍ', '', '', '', '', '', '', '']);
+      rowsToSet.push(['Chỉ tiêu', 'Mã khoản mục', 'Kế hoạch năm', 'Thực hiện trong kỳ', 'Tỷ lệ', 'Thực hiện từ đầu năm', 'Tỷ lệ', 'Ghi chú']);
+
+      items.forEach(function(item) {
+        rowsToSet.push([
+          item.name || '',
+          item.code || '',
+          Number(item.approvedAmount) || 0,
+          Number(item.bravoAmount) || 0,
+          Number(item.rate) || 0,
+          Number(item.actualYTD) || 0,
+          Number(item.rateYTD) || 0,
+          item.note || ''
+        ]);
+      });
+
+      infoSheet.clear();
+      infoSheet.getRange(1, 1, rowsToSet.length, rowsToSet[0].length).setValues(rowsToSet);
+
+      return createJsonResponse({
+        status: 'success',
+        message: 'Đã cập nhật thành công ' + items.length + ' dòng vào sheet INFO',
+        count: items.length
+      });
+    }
+
     return createJsonResponse({ status: 'error', message: 'Hành động POST không hợp lệ' });
   } catch (err) {
     return createJsonResponse({ status: 'error', message: err.toString() });
