@@ -20,6 +20,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import AccountLedgerModal from './AccountLedgerModal';
+import { matchesVietnameseSearch } from '../utils/searchUtils';
 
 export default function BudgetOverview({
   budgets = [],
@@ -188,17 +189,11 @@ export default function BudgetOverview({
 
   // Filtered
   const filtered = useMemo(() => {
-    const lowerSearch = String(searchTerm || '').toLowerCase().trim();
     return enhancedBudgets.filter((b) => {
-      const code = String(b.code || '').toLowerCase();
-      const name = String(b.name || '').toLowerCase();
-      const scope = String(b.scope || '').toLowerCase();
-
-      const matchSearch =
-        !lowerSearch ||
-        code.includes(lowerSearch) ||
-        name.includes(lowerSearch) ||
-        scope.includes(lowerSearch);
+      const matchSearch = matchesVietnameseSearch(
+        [b.code, b.name, b.scope, b.group],
+        searchTerm
+      );
 
       const matchGroup = selectedGroup === 'ALL' || b.group === selectedGroup;
       const matchStatus = statusFilter === 'ALL' || b.status === statusFilter;

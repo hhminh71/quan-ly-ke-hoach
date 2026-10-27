@@ -10,6 +10,7 @@ import {
   ArrowUpRight,
 } from 'lucide-react';
 import EditTransactionModal from './EditTransactionModal';
+import { matchesVietnameseSearch } from '../utils/searchUtils';
 
 export default function AccountLedgerModal({
   isOpen = true,
@@ -42,14 +43,11 @@ export default function AccountLedgerModal({
 
   const filteredTransactions = useMemo(() => {
     if (!isOpen || !account) return [];
-    const lower = String(searchTerm || '').toLowerCase().trim();
     return accountTransactions.filter((item) => {
-      if (!lower) return true;
-      const emp = String(item.employeeName || '').toLowerCase();
-      const notes = String(item.notes || '').toLowerCase();
-      const date = String(item.date || '').toLowerCase();
-      const amt = String(item.amount || '');
-      return emp.includes(lower) || notes.includes(lower) || date.includes(lower) || amt.includes(lower);
+      return matchesVietnameseSearch(
+        [item.employeeName, item.notes, item.date, item.amount],
+        searchTerm
+      );
     });
   }, [isOpen, account, accountTransactions, searchTerm]);
 

@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import EditTransactionModal from './EditTransactionModal';
 import AddTransactionModal from './AddTransactionModal';
+import { matchesVietnameseSearch } from '../utils/searchUtils';
 
 export default function TransactionList({
   transactions = [],
@@ -90,22 +91,15 @@ export default function TransactionList({
 
   // Filter logic
   const filtered = useMemo(() => {
-    const lowerSearch = String(searchTerm || '').toLowerCase().trim();
     const catFilter = String(selectedCategory || 'ALL').trim();
 
     return (transactions || []).filter((item) => {
       if (!item) return false;
-      const emp = String(item.employeeName || '').toLowerCase();
-      const notes = String(item.notes || '').toLowerCase();
-      const acc = String(item.accountCode || '').toLowerCase();
-      const cat = String(item.category || '').toLowerCase();
 
-      const matchesSearch =
-        !lowerSearch ||
-        emp.includes(lowerSearch) ||
-        notes.includes(lowerSearch) ||
-        acc.includes(lowerSearch) ||
-        cat.includes(lowerSearch);
+      const matchesSearch = matchesVietnameseSearch(
+        [item.employeeName, item.notes, item.accountCode, item.category],
+        searchTerm
+      );
 
       const itemAcc = String(item.accountCode || '').trim();
       const itemCat = String(item.category || '').trim();

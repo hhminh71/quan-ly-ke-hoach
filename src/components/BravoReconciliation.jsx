@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import bravoInfoData from '../data/bravoInfo.json';
 import AccountLedgerModal from './AccountLedgerModal';
+import { matchesVietnameseSearch } from '../utils/searchUtils';
 
 export default function BravoReconciliation({
   budgets = [],
@@ -135,15 +136,12 @@ export default function BravoReconciliation({
 
   // 4. Filter & Sort Planning Items
   const filteredReconItems = useMemo(() => {
-    const lower = String(planningSearch || '').toLowerCase().trim();
-
     return reconItems
       .filter((item) => {
-        const matchSearch =
-          !lower ||
-          item.code.toLowerCase().includes(lower) ||
-          item.name.toLowerCase().includes(lower) ||
-          (item.scope && item.scope.toLowerCase().includes(lower));
+        const matchSearch = matchesVietnameseSearch(
+          [item.code, item.name, item.scope, item.group],
+          planningSearch
+        );
 
         const matchGroup = planningGroupFilter === 'ALL' || item.group === planningGroupFilter;
 
@@ -205,16 +203,13 @@ export default function BravoReconciliation({
   }, []);
 
   const filteredMacroItems = useMemo(() => {
-    const lower = String(macroSearch || '').toLowerCase().trim();
     return bravoInfoData
       .filter((item) => item.row > 2 && (item.code || item.name))
       .filter((item) => {
-        const matchSearch =
-          !lower ||
-          (item.code && item.code.toLowerCase().includes(lower)) ||
-          (item.name && item.name.toLowerCase().includes(lower)) ||
-          (item.category && item.category.toLowerCase().includes(lower)) ||
-          (item.nonPlanningReason && item.nonPlanningReason.toLowerCase().includes(lower));
+        const matchSearch = matchesVietnameseSearch(
+          [item.code, item.name, item.category, item.nonPlanningReason],
+          macroSearch
+        );
 
         const matchCat = macroCategoryFilter === 'ALL' || item.category === macroCategoryFilter;
 

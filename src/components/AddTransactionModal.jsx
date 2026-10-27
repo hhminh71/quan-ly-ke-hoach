@@ -14,6 +14,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import employeesList from '../data/employees.json';
+import { matchesVietnameseSearch } from '../utils/searchUtils';
 
 export default function AddTransactionModal({
   isOpen,
@@ -111,15 +112,11 @@ export default function AddTransactionModal({
     });
   }, [budgets, liveActualsByCode, selectedYear]);
 
-  // Filter accounts by search query
+  // Filter accounts by search query (Accent-insensitive)
   const filteredAccounts = useMemo(() => {
-    const q = accountSearch.toLowerCase().trim();
-    if (!q) return enrichedBudgets;
-    return enrichedBudgets.filter(
-      (b) =>
-        b.code.toLowerCase().includes(q) ||
-        b.name.toLowerCase().includes(q) ||
-        (b.group && b.group.toLowerCase().includes(q))
+    if (!accountSearch.trim()) return enrichedBudgets;
+    return enrichedBudgets.filter((b) =>
+      matchesVietnameseSearch([b.code, b.name, b.group], accountSearch)
     );
   }, [enrichedBudgets, accountSearch]);
 
