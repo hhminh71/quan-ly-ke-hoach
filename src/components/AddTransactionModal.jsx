@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import employeesList from '../data/employees.json';
 import { matchesVietnameseSearch } from '../utils/searchUtils';
+import { useModalBackHandler } from '../hooks/useModalBackHandler';
 
 export default function AddTransactionModal({
   isOpen,
@@ -38,6 +39,9 @@ export default function AddTransactionModal({
   const [employeeName, setEmployeeName] = useState('');
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
+
+  // Handle mobile Back button to close modal instead of exiting app
+  useModalBackHandler(isOpen, onClose, 'add-transaction');
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [accountSearch, setAccountSearch] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);

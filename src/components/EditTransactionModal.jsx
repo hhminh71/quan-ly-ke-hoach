@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Edit3, X, Save, Calendar, Tag, DollarSign, User, FileText } from 'lucide-react';
 import employeesList from '../data/employees.json';
+import { useModalBackHandler } from '../hooks/useModalBackHandler';
 
 export default function EditTransactionModal({
   isOpen,
@@ -32,6 +33,9 @@ export default function EditTransactionModal({
       });
     }
   }, [transaction, budgets]);
+
+  // Handle mobile Back button
+  useModalBackHandler(isOpen && Boolean(transaction), onClose, 'edit-transaction');
 
   if (!isOpen || !transaction) return null;
 

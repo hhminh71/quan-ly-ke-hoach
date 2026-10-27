@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { X, Cloud, CheckCircle2, RefreshCw, ExternalLink, Check, Copy, AlertCircle } from 'lucide-react';
 import { getSavedWebhookUrl, saveWebhookUrl, fetchFromGoogleSheet } from '../services/googleSheetService';
+import { useModalBackHandler } from '../hooks/useModalBackHandler';
 
 export default function SyncModal({ isOpen, onClose, onSyncSuccess }) {
   const [url, setUrl] = useState(() => getSavedWebhookUrl());
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState(null); // { success: true/false, message: '' }
   const [copied, setCopied] = useState(false);
+
+  // Handle mobile Back button to close modal
+  useModalBackHandler(isOpen, onClose, 'sync-modal');
 
   if (!isOpen) return null;
 

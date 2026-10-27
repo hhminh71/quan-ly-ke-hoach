@@ -69,7 +69,58 @@ export default function DashboardPage({ user }) {
     }
     return initialBudgets;
   });
-  const [activeTab, setActiveTab] = useState('DASHBOARD'); // 'DASHBOARD', 'BUDGETS', 'TRANSACTIONS'
+
+  // Mobile Back Button & URL Hash Navigation Helpers
+  const getTabFromHash = () => {
+    if (typeof window === 'undefined') return 'DASHBOARD';
+    const hash = window.location.hash.toLowerCase();
+    if (hash.startsWith('#ke-hoach') || hash.startsWith('#budgets')) return 'BUDGETS';
+    if (hash.startsWith('#so-cai') || hash.startsWith('#transactions') || hash.startsWith('#ledger')) return 'TRANSACTIONS';
+    if (hash.startsWith('#doi-soat') || hash.startsWith('#bravo')) return 'BRAVO_RECON';
+    return 'DASHBOARD';
+  };
+
+  const getHashFromTab = (tab) => {
+    if (tab === 'BUDGETS') return '#ke-hoach';
+    if (tab === 'TRANSACTIONS') return '#so-cai';
+    if (tab === 'BRAVO_RECON') return '#doi-soat';
+    return '#dashboard';
+  };
+
+  const [activeTab, setActiveTab] = useState(() => getTabFromHash());
+
+  const handleTabChange = (newTab, replace = false) => {
+    if (newTab === activeTab) return;
+    setActiveTab(newTab);
+    const hash = getHashFromTab(newTab);
+    if (replace) {
+      window.history.replaceState({ tab: newTab }, '', hash);
+    } else {
+      window.history.pushState({ tab: newTab }, '', hash);
+    }
+  };
+
+  // Đồng bộ điều hướng Tab với Browser History (Nút Back trên điện thoại)
+  useEffect(() => {
+    const initialTab = getTabFromHash();
+    if (!window.location.hash) {
+      window.history.replaceState({ tab: initialTab }, '', getHashFromTab(initialTab));
+    }
+
+    const handlePopState = (e) => {
+      if (e.state?.isAppModal) return;
+      const targetTab = e.state?.tab || getTabFromHash();
+      setActiveTab(targetTab);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handlePopState);
+    };
+  }, []);
 
   // Selected account for drilldown modal
   const [selectedDetailAccount, setSelectedDetailAccount] = useState(null);
@@ -257,7 +308,7 @@ export default function DashboardPage({ user }) {
         <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar">
           <button
             type="button"
-            onClick={() => setActiveTab('DASHBOARD')}
+            onClick={() => handleTabChange('DASHBOARD')}
             className={`inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
               activeTab === 'DASHBOARD'
                 ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-600/20'
@@ -271,7 +322,7 @@ export default function DashboardPage({ user }) {
 
           <button
             type="button"
-            onClick={() => setActiveTab('BUDGETS')}
+            onClick={() => handleTabChange('BUDGETS')}
             className={`inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
               activeTab === 'BUDGETS'
                 ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-600/20'
@@ -285,7 +336,7 @@ export default function DashboardPage({ user }) {
 
           <button
             type="button"
-            onClick={() => setActiveTab('TRANSACTIONS')}
+            onClick={() => handleTabChange('TRANSACTIONS')}
             className={`inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
               activeTab === 'TRANSACTIONS'
                 ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-600/20'
@@ -321,10 +372,10 @@ export default function DashboardPage({ user }) {
           budgets={budgets}
           transactions={yearTransactions}
           selectedYear={selectedYear}
-          onNavigateToBudgets={() => setActiveTab('BUDGETS')}
+          onNavigateToBudgets={() => handleTabChange('BUDGETS')}
           onNavigateToLedger={(accountCode) => {
             setSelectedLedgerAccount(accountCode);
-            setActiveTab('TRANSACTIONS');
+            handleTabChange('TRANSACTIONS');
           }}
           onOpenAccountDetail={(account) => {
             setSelectedDetailAccount(account);
@@ -346,7 +397,7 @@ export default function DashboardPage({ user }) {
           onDeleteTransaction={handleDeleteTransaction}
           onNavigateToLedger={(accountCode) => {
             setSelectedLedgerAccount(accountCode);
-            setActiveTab('TRANSACTIONS');
+            handleTabChange('TRANSACTIONS');
           }}
         />
       )}
@@ -379,7 +430,7 @@ export default function DashboardPage({ user }) {
           onNavigateToLedger={(accountCode) => {
             setSelectedDetailAccount(null);
             setSelectedLedgerAccount(accountCode);
-            setActiveTab('TRANSACTIONS');
+            handleTabChange('TRANSACTIONS');
           }}
         />
       )}
@@ -394,7 +445,7 @@ export default function DashboardPage({ user }) {
           onDeleteTransaction={handleDeleteTransaction}
           onNavigateToLedger={(accountCode) => {
             setSelectedLedgerAccount(accountCode);
-            setActiveTab('TRANSACTIONS');
+            handleTabChange('TRANSACTIONS');
           }}
         />
       )}

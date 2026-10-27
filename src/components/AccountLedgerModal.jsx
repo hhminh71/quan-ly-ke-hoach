@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import EditTransactionModal from './EditTransactionModal';
 import { matchesVietnameseSearch } from '../utils/searchUtils';
+import { useModalBackHandler } from '../hooks/useModalBackHandler';
 
 export default function AccountLedgerModal({
   isOpen = true,
@@ -26,6 +27,9 @@ export default function AccountLedgerModal({
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('newest'); // 'newest', 'oldest', 'highest', 'lowest'
   const [editingItem, setEditingItem] = useState(null);
+
+  // Sync with browser history for mobile hardware/gesture Back button
+  useModalBackHandler(isOpen && Boolean(account), onClose, 'account-ledger');
 
   // 1. ALL hooks MUST be declared at the top unconditionally (React Rules of Hooks)
   const accountTransactions = useMemo(() => {

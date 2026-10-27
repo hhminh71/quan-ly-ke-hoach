@@ -10,6 +10,7 @@ import {
   Check,
   ChevronDown,
 } from 'lucide-react';
+import { useModalBackHandler } from '../hooks/useModalBackHandler';
 
 const DEVICES = [
   { id: 'iphone14', name: 'iPhone 14 / 15', width: 390, height: 844, type: 'phone' },
@@ -25,6 +26,9 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
   const [scale, setScale] = useState(1);
   const [iframeKey, setIframeKey] = useState(0);
   const iframeRef = useRef(null);
+
+  // Handle mobile Back button to close simulator
+  useModalBackHandler(isOpen, onClose, 'mobile-simulator');
 
   const device = DEVICES.find((d) => d.id === selectedDeviceId) || DEVICES[0];
   const frameWidth = isLandscape ? device.height : device.width;
