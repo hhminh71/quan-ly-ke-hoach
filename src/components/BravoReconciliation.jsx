@@ -267,8 +267,14 @@ export default function BravoReconciliation({
   const selectedDetailAccount = useMemo(() => {
     if (!selectedDetailCode) return null;
     const target = String(selectedDetailCode).trim();
-    return reconItems.find((b) => b.code === target) || null;
-  }, [selectedDetailCode, reconItems]);
+    return (
+      reconItems.find((b) => String(b.code || '').trim() === target) ||
+      budgets.find((b) => String(b.code || '').trim() === target) || {
+        code: target,
+        name: `Khoản mục ${target}`,
+      }
+    );
+  }, [selectedDetailCode, reconItems, budgets]);
 
   // Export Planning Reconciliation to CSV
   const handleExportReconCSV = () => {

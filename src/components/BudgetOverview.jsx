@@ -200,8 +200,14 @@ export default function BudgetOverview({
   const selectedDetailAccount = useMemo(() => {
     if (!selectedDetailCode) return null;
     const targetCode = String(selectedDetailCode).trim();
-    return enhancedBudgets.find((b) => String(b.code || '').trim() === targetCode) || null;
-  }, [selectedDetailCode, enhancedBudgets]);
+    return (
+      enhancedBudgets.find((b) => String(b.code || '').trim() === targetCode) ||
+      budgets.find((b) => String(b.code || '').trim() === targetCode) || {
+        code: targetCode,
+        name: `Khoản mục ${targetCode}`,
+      }
+    );
+  }, [selectedDetailCode, enhancedBudgets, budgets]);
 
   // Filtered
   const filtered = useMemo(() => {
