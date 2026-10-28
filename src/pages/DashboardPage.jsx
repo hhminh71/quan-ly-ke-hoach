@@ -35,7 +35,7 @@ export default function DashboardPage({ user }) {
   // Load saved transactions from localStorage or default to imported real data
   const [transactions, setTransactions] = useState(() => {
     try {
-      const saved = localStorage.getItem('app_transactions_v3');
+      const saved = localStorage.getItem('app_transactions_v4');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
@@ -55,6 +55,7 @@ export default function DashboardPage({ user }) {
         }
       }
       // Clean up legacy cache so user gets fresh normalized transaction data
+      localStorage.removeItem('app_transactions_v3');
       localStorage.removeItem('app_transactions_v2');
       localStorage.removeItem('app_transactions');
     } catch (e) {
@@ -178,7 +179,7 @@ export default function DashboardPage({ user }) {
   // Sync transactions to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('app_transactions_v3', JSON.stringify(transactions));
+      localStorage.setItem('app_transactions_v4', JSON.stringify(transactions));
     } catch (e) {
       console.error('Storage full or error', e);
     }
@@ -290,6 +291,7 @@ export default function DashboardPage({ user }) {
   const handleResetData = () => {
     if (confirm('Khôi phục toàn bộ danh sách 1.216 giao dịch thực tế (2024, 2025, 2026) từ file gốc?')) {
       setTransactions(initialTransactions);
+      localStorage.removeItem('app_transactions_v4');
       localStorage.removeItem('app_transactions_v3');
       localStorage.removeItem('app_transactions_v2');
       localStorage.removeItem('app_transactions');
