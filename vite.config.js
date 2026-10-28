@@ -5,6 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
+    host: true, // Mở cho mọi IP nội bộ (LAN / Wi-Fi) truy cập
     port: 3000,
     open: true
   }
