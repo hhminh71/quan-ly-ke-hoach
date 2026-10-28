@@ -403,7 +403,7 @@ export default function TransactionList({
                 {/* 1. Ngày: dd/mm/yy không icon, bóp siêu gọn */}
                 <th
                   onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
-                  className="py-0.5 px-1 sm:px-1.5 w-14 sm:w-16 cursor-pointer hover:text-blue-600 transition-colors select-none whitespace-nowrap text-center leading-tight"
+                  className="py-0.5 px-0.5 sm:px-1 w-12 sm:w-14 cursor-pointer hover:text-blue-600 transition-colors select-none whitespace-nowrap text-center leading-tight"
                   title="Click để đổi thứ tự ngày"
                 >
                   <div className="flex items-center justify-center gap-0.5">
@@ -415,7 +415,7 @@ export default function TransactionList({
                 {/* 2. Khoản mục & Nhóm */}
                 <th
                   onClick={() => setSortOrder(sortOrder === 'account_asc' ? 'account_desc' : 'account_asc')}
-                  className="py-0.5 px-1 sm:px-1.5 w-24 sm:w-32 cursor-pointer hover:text-blue-600 transition-colors select-none whitespace-nowrap leading-tight"
+                  className="py-0.5 px-0.5 sm:px-1 w-20 sm:w-28 cursor-pointer hover:text-blue-600 transition-colors select-none whitespace-nowrap leading-tight"
                   title="Click để sort theo Mã khoản mục"
                 >
                   <div className="flex items-center gap-0.5">
@@ -425,12 +425,12 @@ export default function TransactionList({
                 </th>
 
                 {/* 3. Nội dung diễn giải */}
-                <th className="py-0.5 px-1 sm:px-1.5 min-w-[110px] leading-tight">Nội dung diễn giải</th>
+                <th className="py-0.5 px-0.5 sm:px-1 min-w-[95px] leading-tight">Nội dung diễn giải</th>
 
                 {/* 4. Số tiền (VNĐ) */}
                 <th
                   onClick={() => setSortOrder(sortOrder === 'highest' ? 'lowest' : 'highest')}
-                  className="py-0.5 px-1 sm:px-1.5 text-right w-18 sm:w-24 cursor-pointer hover:text-blue-600 transition-colors select-none whitespace-nowrap leading-tight"
+                  className="py-0.5 px-0.5 sm:px-1 text-right w-18 sm:w-22 cursor-pointer hover:text-blue-600 transition-colors select-none whitespace-nowrap leading-tight"
                   title="Click để đổi thứ tự số tiền"
                 >
                   <div className="flex items-center justify-end gap-0.5">
@@ -440,10 +440,10 @@ export default function TransactionList({
                 </th>
 
                 {/* 5. Người thực hiện (di chuyển ra trước cột điều chỉnh) */}
-                <th className="py-0.5 px-1 sm:px-1.5 w-18 sm:w-24 leading-tight">Người thực hiện</th>
+                <th className="py-0.5 px-0.5 sm:px-1 w-16 sm:w-22 leading-tight">Người thực hiện</th>
 
                 {/* 6. Điều chỉnh (Thao tác) */}
-                <th className="py-0.5 px-0.5 text-center w-10 sm:w-12 whitespace-nowrap leading-tight">Điều chỉnh</th>
+                <th className="py-0.5 px-0.5 text-center w-8 sm:w-10 whitespace-nowrap leading-tight">Điều chỉnh</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">
@@ -453,12 +453,12 @@ export default function TransactionList({
                   className="hover:bg-slate-50/70 transition-colors group"
                 >
                   {/* 1. Ngày: dd/mm/yy không logo lịch */}
-                  <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-center whitespace-nowrap font-mono text-[9px] sm:text-xs text-slate-700 font-medium leading-tight">
+                  <td className="py-0.5 px-0.5 sm:px-1 text-center whitespace-nowrap font-mono text-[9px] sm:text-xs text-slate-700 font-medium leading-tight">
                     {formatDate(item.date)}
                   </td>
 
                   {/* 2. Khoản mục & Mã */}
-                  <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 whitespace-nowrap leading-tight">
+                  <td className="py-0.5 px-0.5 sm:px-1 whitespace-nowrap leading-tight">
                     <div className="flex items-center gap-0.5">
                       {item.accountCode && (
                         <span className="font-mono text-[8px] sm:text-[9.5px] font-bold px-1 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200">
@@ -472,17 +472,17 @@ export default function TransactionList({
                   </td>
 
                   {/* 3. Nội dung diễn giải */}
-                  <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-[9.5px] sm:text-xs text-slate-700 break-words whitespace-normal leading-tight" title={item.notes}>
+                  <td className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs text-slate-700 break-words whitespace-normal leading-tight" title={item.notes}>
                     {item.notes}
                   </td>
 
                   {/* 4. Số tiền */}
-                  <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-right whitespace-nowrap font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight">
+                  <td className="py-0.5 px-0.5 sm:px-1 text-right whitespace-nowrap font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight">
                     {formatVND(item.amount)}
                   </td>
 
                   {/* 5. Người thực hiện */}
-                  <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-[9.5px] sm:text-xs text-slate-700 break-words leading-tight">
+                  <td className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs text-slate-700 break-words leading-tight">
                     <div className="flex items-center gap-1">
                       <div className="w-3 h-3 rounded-full bg-slate-100 text-slate-700 font-bold text-[7.5px] flex items-center justify-center shrink-0">
                         {String(item.employeeName || 'U').trim().charAt(0).toUpperCase() || 'U'}

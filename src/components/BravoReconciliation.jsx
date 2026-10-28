@@ -666,24 +666,24 @@ export default function BravoReconciliation({
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-slate-50/80 text-slate-600 font-semibold border-b border-slate-200 text-2xs uppercase tracking-wider">
-                    <th className="py-1.5 px-2 w-10 text-center">STT</th>
-                    <th className="py-1.5 px-2 w-20">Mã TK</th>
-                    <th className="py-1.5 px-2 min-w-[180px]">Khoản Mục & Quy Mô</th>
-                    <th className="py-1.5 px-2 min-w-[120px]">Nhóm</th>
-                    <th className="py-1.5 px-2 text-right min-w-[100px]">Hạn Mức Duyệt</th>
-                    <th className="py-1.5 px-2 text-right min-w-[110px] bg-blue-50/40 text-blue-900">
+                    <th className="py-0.5 px-0.5 sm:px-1 w-8 sm:w-10 text-center">STT</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 w-14 sm:w-18">Mã TK</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 min-w-[130px] sm:min-w-[160px]">Khoản Mục & Quy Mô</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 min-w-[90px] sm:min-w-[110px]">Nhóm</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 text-right min-w-[80px] sm:min-w-[95px]">Hạn Mức Duyệt</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 text-right min-w-[85px] sm:min-w-[100px] bg-blue-50/40 text-blue-900">
                       Thực Tế Tổ KH
                     </th>
-                    <th className="py-1.5 px-2 text-right min-w-[110px] bg-amber-50/40 text-amber-900">
+                    <th className="py-0.5 px-0.5 sm:px-1 text-right min-w-[85px] sm:min-w-[100px] bg-amber-50/40 text-amber-900">
                       Hạch Toán BRAVO
                     </th>
-                    <th className="py-1.5 px-2 text-center min-w-[120px]">Chênh Lệch (±)</th>
-                    <th className="py-1.5 px-2 text-right min-w-[110px] bg-emerald-50/40 text-emerald-950 font-bold">
+                    <th className="py-0.5 px-0.5 sm:px-1 text-center min-w-[90px] sm:min-w-[110px]">Chênh Lệch (±)</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 text-right min-w-[90px] sm:min-w-[105px] bg-emerald-50/40 text-emerald-950 font-bold">
                       MAX Quản Lý
                     </th>
-                    <th className="py-1.5 px-2 text-right min-w-[100px]">Còn Lại</th>
-                    <th className="py-1.5 px-2 text-center min-w-[70px]">Tỷ Lệ</th>
-                    <th className="py-1.5 px-2 text-center w-16">Sổ Cái</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 text-right min-w-[80px] sm:min-w-[95px]">Còn Lại</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 text-center w-12 sm:w-14">Tỷ Lệ</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 text-center w-10 sm:w-12">Sổ Cái</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
@@ -706,110 +706,110 @@ export default function BravoReconciliation({
                           onClick={() => setSelectedDetailCode(item.code)}
                         >
                           {/* STT */}
-                          <td className="py-1 px-2 text-center text-slate-400 text-2xs font-mono">
+                          <td className="py-0.5 px-0.5 sm:px-1 text-center text-slate-400 text-2xs font-mono">
                             {item.stt}
                           </td>
 
                           {/* Account Code */}
-                          <td className="py-1 px-2">
-                            <span className="inline-block px-1.5 py-0.2 rounded font-mono text-xs font-bold bg-slate-100 text-slate-800 border border-slate-200/80 group-hover:border-blue-400 group-hover:bg-blue-50 group-hover:text-blue-700 transition-colors">
+                          <td className="py-0.5 px-0.5 sm:px-1">
+                            <span className="inline-block px-1 py-0.2 rounded font-mono text-[9px] sm:text-2xs font-bold bg-slate-100 text-slate-800 border border-slate-200/80 group-hover:border-blue-400 group-hover:bg-blue-50 group-hover:text-blue-700 transition-colors">
                               {item.code}
                             </span>
                           </td>
 
                           {/* Name & Scope */}
-                          <td className="py-1 px-2">
-                            <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors flex items-center gap-1.5">
+                          <td className="py-0.5 px-0.5 sm:px-1">
+                            <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors flex items-center gap-1 text-[9.5px] sm:text-xs leading-tight">
                               <span>{item.name}</span>
-                              <ArrowUpRight className="w-3 h-3 opacity-0 group-hover:opacity-100 text-blue-500 transition-opacity" />
+                              <ArrowUpRight className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 text-blue-500 transition-opacity" />
                             </div>
                             {item.scope && (
-                              <p className="text-3xs text-slate-400 line-clamp-1 mt-0.5" title={item.scope}>
+                              <p className="text-[7.5px] sm:text-3xs text-slate-400 line-clamp-1 mt-0.5 leading-tight" title={item.scope}>
                                 {item.scope}
                               </p>
                             )}
                           </td>
 
                           {/* Group */}
-                          <td className="py-1 px-2 text-slate-500 text-3xs">
-                            <span className="inline-block px-1.5 py-0.2 bg-slate-100 rounded text-slate-600 truncate max-w-[130px]" title={item.group}>
+                          <td className="py-0.5 px-0.5 sm:px-1 text-slate-500 text-[8px] sm:text-3xs leading-tight">
+                            <span className="inline-block px-1 py-0.2 bg-slate-100 rounded text-slate-600 truncate max-w-[110px]" title={item.group}>
                               {item.group}
                             </span>
                           </td>
 
                           {/* Approved Budget */}
-                          <td className="py-1 px-2 text-right font-semibold text-slate-900">
+                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-slate-900 font-mono text-[9px] sm:text-xs leading-tight">
                             {formatVND(item.approved)}
                           </td>
 
                           {/* Actual Spent (Planning) */}
-                          <td className="py-1 px-2 text-right font-semibold text-blue-900 bg-blue-50/20">
+                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-blue-900 bg-blue-50/20 font-mono text-[9px] sm:text-xs leading-tight">
                             {formatVND(item.actual)}
                           </td>
 
                           {/* BRAVO Recorded Spent */}
-                          <td className="py-1 px-2 text-right font-semibold text-amber-900 bg-amber-50/20">
+                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-amber-900 bg-amber-50/20 font-mono text-[9px] sm:text-xs leading-tight">
                             {formatVND(item.bravo)}
                           </td>
 
                           {/* Discrepancy (BRAVO - Thực tế) */}
-                          <td className="py-1 px-2 text-center">
+                          <td className="py-0.5 px-0.5 sm:px-1 text-center leading-tight">
                             {item.isSctsSeparated ? (
                               <div className="inline-flex flex-col items-center">
                                 <span
-                                  className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-3xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200"
+                                  className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200"
                                   title="Khoản mục này đã được tách riêng SCTS do Bravo hạch toán gộp cả dự án lớn của TCT"
                                 >
                                   Đã tách SCTS
                                 </span>
-                                <span className="text-3xs text-slate-500 font-normal mt-0.5" title="Chênh lệch gộp Bravo">
+                                <span className="text-[7px] sm:text-3xs text-slate-500 font-normal mt-0.5" title="Chênh lệch gộp Bravo">
                                   Bravo: +{formatCompactVND(item.diff)}
                                 </span>
                               </div>
                             ) : isBravoHigh ? (
                               <div className="inline-flex flex-col items-center">
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-3xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
                                   +{formatCompactVND(item.diff)}
                                 </span>
-                                <span className="text-3xs text-amber-600 font-normal mt-0.5">
+                                <span className="text-[7px] sm:text-3xs text-amber-600 font-normal mt-0.5">
                                   BRAVO &gt; KH
                                 </span>
                               </div>
                             ) : isActualHigh ? (
                               <div className="inline-flex flex-col items-center">
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-3xs font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                                <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-purple-100 text-purple-800 border border-purple-200">
                                   {formatCompactVND(item.diff)}
                                 </span>
-                                <span className="text-3xs text-purple-600 font-normal mt-0.5">
+                                <span className="text-[7px] sm:text-3xs text-purple-600 font-normal mt-0.5">
                                   KH &gt; BRAVO
                                 </span>
                               </div>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-3xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                              <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
                                 <CheckCircle2 className="w-2.5 h-2.5" /> Khớp 100%
                               </span>
                             )}
                           </td>
 
                           {/* Max Actual Spent */}
-                          <td className="py-1 px-2 text-right font-bold text-emerald-950 bg-emerald-50/30">
+                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-bold text-emerald-950 bg-emerald-50/30 font-mono text-[9px] sm:text-xs leading-tight">
                             <div>{formatVND(item.maxActual)}</div>
                             {item.isSctsSeparated && (
-                              <span className="text-3xs font-medium text-indigo-700 bg-indigo-50 px-1 py-0.2 rounded border border-indigo-200 inline-block mt-0.5" title="Chỉ lấy theo số nhập liệu SCTX của Cảng">
+                              <span className="text-[7px] sm:text-3xs font-medium text-indigo-700 bg-indigo-50 px-1 py-0.2 rounded border border-indigo-200 inline-block mt-0.5" title="Chỉ lấy theo số nhập liệu SCTX của Cảng">
                                 SCTX Nhập liệu
                               </span>
                             )}
                           </td>
 
                           {/* Remaining */}
-                          <td className={`py-1 px-2 text-right font-semibold ${isOver ? 'text-rose-600' : 'text-slate-700'}`}>
+                          <td className={`py-0.5 px-0.5 sm:px-1 text-right font-semibold font-mono text-[9px] sm:text-xs leading-tight ${isOver ? 'text-rose-600' : 'text-slate-700'}`}>
                             {formatVND(item.remaining)}
                           </td>
 
                           {/* Percent */}
-                          <td className="py-1 px-2 text-center">
+                          <td className="py-0.5 px-0.5 sm:px-1 text-center leading-tight">
                             <span
-                              className={`px-1.5 py-0.5 rounded text-3xs font-bold ${
+                              className={`px-1 py-0.2 rounded text-[7.5px] sm:text-3xs font-bold ${
                                 item.percent >= 100
                                   ? 'bg-rose-100 text-rose-800'
                                   : item.percent >= 80
@@ -822,14 +822,14 @@ export default function BravoReconciliation({
                           </td>
 
                           {/* Action Button: View Ledger */}
-                          <td className="py-1 px-2 text-center" onClick={(e) => e.stopPropagation()}>
+                          <td className="py-0.5 px-0.5 sm:px-1 text-center" onClick={(e) => e.stopPropagation()}>
                             <button
                               type="button"
                               onClick={() => setSelectedDetailCode(item.code)}
-                              className="p-1 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
+                              className="p-0.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
                               title="Xem chi tiết các phiếu chi của khoản mục này"
                             >
-                              <FileSpreadsheet className="w-3.5 h-3.5" />
+                              <FileSpreadsheet className="w-3 h-3" />
                             </button>
                           </td>
                         </tr>
@@ -963,17 +963,17 @@ export default function BravoReconciliation({
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="bg-slate-50/80 text-slate-600 font-semibold border-b border-slate-200 text-2xs uppercase tracking-wider">
-                    <th className="py-1.5 px-2 w-10 text-center">Dòng</th>
-                    <th className="py-1.5 px-2 w-20">Mã TK</th>
-                    <th className="py-1.5 px-2 min-w-[200px]">Tên Hạng Mục / Khoản Mục</th>
-                    <th className="py-1.5 px-2 min-w-[120px]">Nhóm Danh Mục</th>
-                    <th className="py-1.5 px-2 text-right min-w-[100px]">Hạn Mức Duyệt</th>
-                    <th className="py-1.5 px-2 text-right min-w-[110px] bg-amber-50/40 text-amber-900">
+                    <th className="py-0.5 px-0.5 sm:px-1 w-8 sm:w-10 text-center">Dòng</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 w-14 sm:w-18">Mã TK</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 min-w-[140px] sm:min-w-[180px]">Tên Hạng Mục / Khoản Mục</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 min-w-[90px] sm:min-w-[110px]">Nhóm Danh Mục</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 text-right min-w-[80px] sm:min-w-[95px]">Hạn Mức Duyệt</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 text-right min-w-[85px] sm:min-w-[100px] bg-amber-50/40 text-amber-900">
                       Đã Ghi Sổ BRAVO
                     </th>
-                    <th className="py-1.5 px-2 text-center min-w-[70px]">Tỷ Lệ</th>
-                    <th className="py-1.5 px-2 text-center min-w-[110px]">Đơn Vị Quản Lý</th>
-                    <th className="py-1.5 px-2 min-w-[200px]">Giải Trình &amp; Lý Do Chênh Lệch</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 text-center w-12 sm:w-14">Tỷ Lệ</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 text-center min-w-[80px] sm:min-w-[100px]">Đơn Vị Quản Lý</th>
+                    <th className="py-0.5 px-0.5 sm:px-1 min-w-[140px] sm:min-w-[180px]">Giải Trình &amp; Lý Do Chênh Lệch</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
@@ -991,29 +991,29 @@ export default function BravoReconciliation({
                       if (isHeaderGroup) {
                         return (
                           <tr key={`header-${item.row}`} className="bg-slate-100/70 font-bold text-slate-900">
-                            <td className="py-1 px-2 text-center text-2xs text-slate-400">
+                            <td className="py-0.5 px-0.5 sm:px-1 text-center text-2xs text-slate-400">
                               {item.row}
                             </td>
-                            <td className="py-1 px-2 font-mono text-slate-400">—</td>
-                            <td className="py-1 px-2 text-blue-900 font-bold uppercase tracking-wide">
+                            <td className="py-0.5 px-0.5 sm:px-1 font-mono text-slate-400">—</td>
+                            <td className="py-0.5 px-0.5 sm:px-1 text-blue-900 font-bold uppercase tracking-wide text-[9.5px] sm:text-xs">
                               {item.name}
                             </td>
-                            <td className="py-1 px-2 text-slate-400">—</td>
-                            <td className="py-1 px-2 text-right text-slate-900">
+                            <td className="py-0.5 px-0.5 sm:px-1 text-slate-400">—</td>
+                            <td className="py-0.5 px-0.5 sm:px-1 text-right text-slate-900 font-mono text-[9px] sm:text-xs">
                               {formatVND(item.approvedAmount)}
                             </td>
-                            <td className="py-1 px-2 text-right text-amber-900 bg-amber-100/40">
+                            <td className="py-0.5 px-0.5 sm:px-1 text-right text-amber-900 bg-amber-100/40 font-mono text-[9px] sm:text-xs">
                               {formatVND(item.bravoAmount)}
                             </td>
-                            <td className="py-1 px-2 text-center text-slate-800">
+                            <td className="py-0.5 px-0.5 sm:px-1 text-center text-slate-800 text-[9px] sm:text-xs">
                               {item.rate.toFixed(1)}%
                             </td>
-                            <td className="py-1 px-2 text-center">
-                              <span className="px-1.5 py-0.2 rounded text-3xs font-bold uppercase bg-slate-200 text-slate-700">
+                            <td className="py-0.5 px-0.5 sm:px-1 text-center">
+                              <span className="px-1 py-0.2 rounded text-[7.5px] sm:text-3xs font-bold uppercase bg-slate-200 text-slate-700">
                                 Nhóm Lớn
                               </span>
                             </td>
-                            <td className="py-1 px-2 text-3xs text-slate-500 italic">
+                            <td className="py-0.5 px-0.5 sm:px-1 text-3xs text-slate-500 italic">
                               Tổng cộng nhóm danh mục
                             </td>
                           </tr>
@@ -1028,41 +1028,41 @@ export default function BravoReconciliation({
                           }`}
                         >
                           {/* Row */}
-                          <td className="py-1 px-2 text-center text-slate-400 text-3xs font-mono">
+                          <td className="py-0.5 px-0.5 sm:px-1 text-center text-slate-400 text-3xs font-mono">
                             {item.row}
                           </td>
 
                           {/* Code */}
-                          <td className="py-1 px-2">
-                            <span className="font-mono text-xs font-bold text-slate-800">
+                          <td className="py-0.5 px-0.5 sm:px-1">
+                            <span className="font-mono text-[9px] sm:text-2xs font-bold text-slate-800">
                               {item.code}
                             </span>
                           </td>
 
                           {/* Name */}
-                          <td className="py-1 px-2 font-medium text-slate-900">
+                          <td className="py-0.5 px-0.5 sm:px-1 font-medium text-slate-900 text-[9.5px] sm:text-xs leading-tight">
                             {item.name}
                           </td>
 
                           {/* Category */}
-                          <td className="py-1 px-2 text-3xs text-slate-500">
+                          <td className="py-0.5 px-0.5 sm:px-1 text-[8px] sm:text-3xs text-slate-500 leading-tight">
                             {item.category}
                           </td>
 
                           {/* Approved */}
-                          <td className="py-1 px-2 text-right text-slate-800">
+                          <td className="py-0.5 px-0.5 sm:px-1 text-right text-slate-800 font-mono text-[9px] sm:text-xs leading-tight">
                             {formatVND(item.approvedAmount)}
                           </td>
 
                           {/* BRAVO Amount */}
-                          <td className="py-1 px-2 text-right font-semibold text-amber-900 bg-amber-50/20">
+                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-amber-900 bg-amber-50/20 font-mono text-[9px] sm:text-xs leading-tight">
                             {formatVND(item.bravoAmount)}
                           </td>
 
                           {/* Rate */}
-                          <td className="py-1 px-2 text-center text-3xs">
+                          <td className="py-0.5 px-0.5 sm:px-1 text-center text-3xs leading-tight">
                             <span
-                              className={`px-1.5 py-0.5 rounded font-bold ${
+                              className={`px-1 py-0.2 rounded font-bold text-[7.5px] sm:text-3xs ${
                                 item.rate > 100
                                   ? 'bg-rose-100 text-rose-800'
                                   : item.rate >= 80
@@ -1075,20 +1075,20 @@ export default function BravoReconciliation({
                           </td>
 
                           {/* Owner Badge */}
-                          <td className="py-1 px-2 text-center">
+                          <td className="py-0.5 px-0.5 sm:px-1 text-center leading-tight">
                             {isPlanning ? (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-3xs font-bold bg-blue-100 text-blue-800">
+                              <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-blue-100 text-blue-800">
                                 <CheckCircle2 className="w-2.5 h-2.5" /> Tổ Kế Hoạch
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-3xs font-bold bg-slate-200 text-slate-700">
+                              <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-slate-200 text-slate-700">
                                 Kế Toán / TCT
                               </span>
                             )}
                           </td>
 
                           {/* Reason */}
-                          <td className="py-1 px-2 text-3xs text-slate-500 leading-tight">
+                          <td className="py-0.5 px-0.5 sm:px-1 text-[7.5px] sm:text-3xs text-slate-500 leading-tight">
                             {isPlanning ? (
                               <span className="text-emerald-700 font-medium">
                                 Tổ KH theo dõi định mức và kiểm soát từng phiếu chi
