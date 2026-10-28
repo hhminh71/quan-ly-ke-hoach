@@ -40,29 +40,29 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
 
   return (
     <header className="w-full bg-gradient-to-r from-[#074780] via-[#09579d] to-[#063c6d] text-white shadow-md border-b border-blue-900/40 sticky top-0 z-40">
-      <div className="w-full px-2.5 sm:px-6 lg:px-8 py-1.5 sm:py-2.5">
-        <div className="flex items-center justify-between gap-2">
+      <div className="w-full px-2 sm:px-6 lg:px-8 py-0.5 sm:py-2">
+        <div className="flex items-center justify-between gap-1.5 sm:gap-2">
           
           {/* LEFT: Official Corporate Brand Header - ALWAYS FULLY VISIBLE IN ALL MODES */}
-          <div className="min-w-0 flex-1 pr-1">
+          <div className="min-w-0 flex-1 pr-1 leading-none">
             {/* Line 1: Parent Corporation */}
-            <div className="text-[8px] sm:text-[10px] font-semibold text-blue-200/90 tracking-wider uppercase leading-none truncate block">
+            <div className="text-[7px] sm:text-[10px] font-semibold text-blue-200/90 tracking-wider uppercase leading-none truncate block">
               TỔNG CÔNG TY CẢNG HÀNG KHÔNG VIỆT NAM - CTCP
             </div>
 
             {/* Line 2: Member Airport - Never truncated, crisp and prominent */}
-            <h1 className="text-[11px] sm:text-base lg:text-lg font-black text-white tracking-wide uppercase leading-tight mt-0.5 whitespace-nowrap">
+            <h1 className="text-[9.5px] sm:text-base lg:text-lg font-black text-white tracking-wide uppercase leading-tight mt-0.5 whitespace-nowrap">
               CẢNG HÀNG KHÔNG QUỐC TẾ CẦN THƠ
             </h1>
 
             {/* Line 3: Department & Software Name */}
-            <div className="text-[8.5px] sm:text-[10px] text-blue-200 font-medium leading-none mt-0.5 truncate">
+            <div className="text-[7.5px] sm:text-[10px] text-blue-200 font-medium leading-none mt-0.5 truncate">
               Phòng TC-KH • Quản lý Kế hoạch
             </div>
           </div>
 
           {/* RIGHT: Minimalist Icon Controls */}
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             {/* Desktop Simulator Button */}
             {!isInIframe && onOpenSimulator && (
               <button
@@ -79,10 +79,10 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
             <button
               type="button"
               onClick={handleExportQuick}
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 flex items-center justify-center shadow-xs transition-all active:scale-95 cursor-pointer border border-amber-300 shrink-0"
+              className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 flex items-center justify-center shadow-xs transition-all active:scale-95 cursor-pointer border border-amber-300 shrink-0"
               title="Xuất bảng báo cáo kế hoạch và chi phí ra file Excel / CSV"
             >
-              <Download className="w-3.5 h-3.5 stroke-[2.5]" />
+              <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
             </button>
 
             {/* User Profile Area: ONLY Person Icon with Interactive Dropdown Menu */}
@@ -90,14 +90,14 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
               <button
                 type="button"
                 onClick={() => setIsUserMenuOpen((prev) => !prev)}
-                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg border flex items-center justify-center shadow-2xs transition-all cursor-pointer shrink-0 ${
+                className={`w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg border flex items-center justify-center shadow-2xs transition-all cursor-pointer shrink-0 ${
                   isUserMenuOpen
                     ? 'bg-white text-blue-900 border-white'
                     : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
                 }`}
                 title="Quản trị viên & Menu cài đặt hệ thống"
               >
-                <User className="w-3.5 h-3.5" />
+                <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </button>
 
               {/* Administrator Dropdown Menu */}

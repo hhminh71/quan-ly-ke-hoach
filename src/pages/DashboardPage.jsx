@@ -339,21 +339,21 @@ export default function DashboardPage({ user }) {
   }, [yearTransactions, selectedYear]);
 
   return (
-    <div className="space-y-2 sm:space-y-4">
+    <div className="space-y-1 sm:space-y-3">
       {/* View Tabs & Fiscal Year Selector in One Single Elegant Line */}
-      <div className="flex items-center justify-between gap-2 border-b border-slate-200/80 pb-1.5">
+      <div className="flex items-center justify-between gap-1.5 border-b border-slate-200/80 pb-1">
         {/* Navigation Tabs */}
         <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => handleTabChange('DASHBOARD')}
-            className={`inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+            className={`inline-flex items-center gap-1 px-2 py-0.5 sm:px-3 sm:py-1 rounded-md sm:rounded-lg text-2xs sm:text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
               activeTab === 'DASHBOARD'
-                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-600/20'
+                ? 'bg-blue-600 text-white shadow-xs ring-1 ring-blue-600/30'
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
-            <LayoutDashboard className="w-3.5 h-3.5" />
+            <LayoutDashboard className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span className="sm:hidden">Dashboard</span>
             <span className="hidden sm:inline">Dashboard Điều Hành</span>
           </button>
@@ -361,13 +361,13 @@ export default function DashboardPage({ user }) {
           <button
             type="button"
             onClick={() => handleTabChange('BUDGETS')}
-            className={`inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+            className={`inline-flex items-center gap-1 px-2 py-0.5 sm:px-3 sm:py-1 rounded-md sm:rounded-lg text-2xs sm:text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
               activeTab === 'BUDGETS'
-                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-600/20'
+                ? 'bg-blue-600 text-white shadow-xs ring-1 ring-blue-600/30'
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
-            <FileSpreadsheet className="w-3.5 h-3.5" />
+            <FileSpreadsheet className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span className="sm:hidden">Kế Hoạch</span>
             <span className="hidden sm:inline">Kế Hoạch & Báo Cáo</span>
           </button>
@@ -375,13 +375,13 @@ export default function DashboardPage({ user }) {
           <button
             type="button"
             onClick={() => handleTabChange('TRANSACTIONS')}
-            className={`inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-lg text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+            className={`inline-flex items-center gap-1 px-2 py-0.5 sm:px-3 sm:py-1 rounded-md sm:rounded-lg text-2xs sm:text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
               activeTab === 'TRANSACTIONS'
-                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/25 ring-2 ring-blue-600/20'
+                ? 'bg-blue-600 text-white shadow-xs ring-1 ring-blue-600/30'
                 : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
-            <ListOrdered className="w-3.5 h-3.5" />
+            <ListOrdered className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             <span>Sổ Cái</span>
           </button>
         </div>
@@ -391,7 +391,7 @@ export default function DashboardPage({ user }) {
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
-            className="px-2 py-1 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-400 cursor-pointer shadow-2xs transition-all"
+            className="px-1.5 py-0.5 rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-2xs sm:text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-400 cursor-pointer shadow-2xs transition-all"
             title="Chọn năm tài chính"
           >
             {availableYears.map((yr) => (

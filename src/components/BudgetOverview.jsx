@@ -310,44 +310,38 @@ export default function BudgetOverview({
   return (
     <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
       {/* Header: Slim, minimalist height */}
-      <div className="p-2 sm:p-3.5 border-b border-slate-100 space-y-1.5 sm:space-y-2.5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-3">
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-blue-600 ring-2 ring-blue-100"></span>
-              <h2 className="text-xs sm:text-base font-bold text-slate-800">
-                {viewMode === 'PROGRESS' ? (
-                  <>
-                    Tiến Độ Kế Hoạch Định Mức{' '}
-                    <span className="text-blue-600 font-extrabold">
-                      ({selectedYear === 'ALL' ? 'Tất Cả Các Năm' : `Năm ${selectedYear}`})
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    Ma Trận Kế Hoạch Ngân Sách Đa Năm{' '}
-                    <span className="text-indigo-600 font-extrabold">
-                      (Cột {matrixYears.join(', ')})
-                    </span>
-                  </>
-                )}
-              </h2>
-            </div>
-            <p className="hidden sm:block text-3xs sm:text-xs text-slate-500 mt-0.5">
-              {viewMode === 'PROGRESS'
-                ? `Hạn mức và tiến độ giải ngân theo từng mã tài khoản riêng cho năm ${selectedYear}`
-                : 'Mỗi năm là một cột hạn mức riêng biệt. Thêm cột mới khi sang năm mới mà không làm xáo trộn năm cũ.'}
-            </p>
+      <div className="p-1.5 sm:p-3 border-b border-slate-100 space-y-1 sm:space-y-2">
+        {/* Row 1: Title + View Mode & Actions (Single flex row on all screens) */}
+        <div className="flex items-center justify-between gap-1.5 flex-wrap sm:flex-nowrap">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-600 ring-2 ring-blue-100 shrink-0"></span>
+            <h2 className="text-[11px] sm:text-base font-bold text-slate-800 truncate">
+              {viewMode === 'PROGRESS' ? (
+                <>
+                  Tiến Độ Kế Hoạch{' '}
+                  <span className="text-blue-600 font-extrabold">
+                    ({selectedYear === 'ALL' ? 'Tất Cả Năm' : `Năm ${selectedYear}`})
+                  </span>
+                </>
+              ) : (
+                <>
+                  Ma Trận Ngân Sách{' '}
+                  <span className="text-indigo-600 font-extrabold">
+                    ({matrixYears.join(', ')})
+                  </span>
+                </>
+              )}
+            </h2>
           </div>
 
-          {/* Toggle View Mode & Actions */}
-          <div className="flex flex-wrap items-center gap-1 sm:gap-1.5">
+          {/* Toggle View Mode & Actions in same row */}
+          <div className="flex items-center gap-1 shrink-0">
             {/* View Mode Buttons */}
-            <div className="flex items-center p-0.5 bg-slate-100 rounded-md sm:rounded-lg">
+            <div className="flex items-center p-0.5 bg-slate-100 rounded-md">
               <button
                 type="button"
                 onClick={() => setViewMode('PROGRESS')}
-                className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded text-2xs sm:text-xs font-semibold transition-all ${
+                className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded text-3xs sm:text-xs font-semibold transition-all ${
                   viewMode === 'PROGRESS'
                     ? 'bg-white text-blue-700 shadow-2xs font-bold'
                     : 'text-slate-600 hover:text-slate-900'
@@ -355,12 +349,12 @@ export default function BudgetOverview({
                 title="Xem tiến độ giải ngân chi tiết theo năm đang chọn"
               >
                 <BarChart3 className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                <span>Tiến Độ ({selectedYear})</span>
+                <span>Tiến Độ</span>
               </button>
               <button
                 type="button"
                 onClick={() => setViewMode('MATRIX')}
-                className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded text-2xs sm:text-xs font-semibold transition-all ${
+                className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded text-3xs sm:text-xs font-semibold transition-all ${
                   viewMode === 'MATRIX'
                     ? 'bg-white text-indigo-700 shadow-2xs font-bold'
                     : 'text-slate-600 hover:text-slate-900'
@@ -368,49 +362,9 @@ export default function BudgetOverview({
                 title="Xem bảng ma trận nhiều cột năm (2024, 2025, 2026, 2027...)"
               >
                 <TableProperties className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                <span>Ma Trận Các Năm</span>
+                <span>Ma Trận</span>
               </button>
             </div>
-
-            {/* Column Visibility Toggles in Progress View (Theo Bravo & Theo Nhập Liệu) */}
-            {viewMode === 'PROGRESS' && (
-              <div className="flex items-center gap-0.5 p-0.5 bg-slate-100/90 rounded-md sm:rounded-lg border border-slate-200/80 text-xs shadow-2xs">
-                <span className="text-3xs font-bold text-slate-500 uppercase px-1 flex items-center gap-1 hidden sm:flex">
-                  <SlidersHorizontal className="w-2.5 h-2.5 text-slate-400" />
-                  <span>Cột:</span>
-                </span>
-
-                {/* Toggle Cột Theo Bravo */}
-                <button
-                  type="button"
-                  onClick={() => setShowBravoCol((prev) => !prev)}
-                  className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-3xs sm:text-2xs font-semibold transition-all cursor-pointer ${
-                    showBravoCol
-                      ? 'bg-amber-500 text-white shadow-2xs font-bold'
-                      : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80 hover:bg-slate-50'
-                  }`}
-                  title={showBravoCol ? 'Bấm để ẩn cột số liệu Theo Bravo' : 'Bấm để hiện cột số liệu Theo Bravo'}
-                >
-                  {showBravoCol ? <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> : <EyeOff className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" />}
-                  <span>Theo Bravo</span>
-                </button>
-
-                {/* Toggle Cột Theo Nhập Liệu */}
-                <button
-                  type="button"
-                  onClick={() => setShowActualCol((prev) => !prev)}
-                  className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-3xs sm:text-2xs font-semibold transition-all cursor-pointer ${
-                    showActualCol
-                      ? 'bg-blue-600 text-white shadow-2xs font-bold'
-                      : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80 hover:bg-slate-50'
-                  }`}
-                  title={showActualCol ? 'Bấm để ẩn cột số liệu Theo Nhập Liệu' : 'Bấm để hiện cột số liệu Theo Nhập Liệu'}
-                >
-                  {showActualCol ? <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3" /> : <EyeOff className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-slate-400" />}
-                  <span>Theo Nhập Liệu</span>
-                </button>
-              </div>
-            )}
 
             {/* Matrix Actions */}
             {viewMode === 'MATRIX' && (
@@ -418,40 +372,41 @@ export default function BudgetOverview({
                 <button
                   type="button"
                   onClick={() => setShowAddYearModal(true)}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-2xs sm:text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-all"
+                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-md text-3xs sm:text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-all"
                   title="Thêm một cột năm mới (ví dụ 2028)"
                 >
-                  <PlusCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                  <span>+ Thêm Cột</span>
+                  <PlusCircle className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
+                  <span className="hidden sm:inline">+ Thêm Cột</span>
+                  <span className="sm:hidden">+ Năm</span>
                 </button>
 
                 {!isEditingMatrix ? (
                   <button
                     type="button"
                     onClick={() => setIsEditingMatrix(true)}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-2xs sm:text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-all"
+                    className="inline-flex items-center gap-0.5 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md text-3xs sm:text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-all"
                   >
-                    <Edit3 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-500" />
-                    <span>Sửa Hạn Mức</span>
+                    <Edit3 className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-slate-500" />
+                    <span>Sửa</span>
                   </button>
                 ) : (
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5">
                     <button
                       type="button"
                       onClick={() => {
                         setEditedBudgets(budgets);
                         setIsEditingMatrix(false);
                       }}
-                      className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-2xs sm:text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                      className="px-1.5 py-0.5 rounded text-3xs sm:text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
                     >
                       Hủy
                     </button>
                     <button
                       type="button"
                       onClick={handleSaveMatrix}
-                      className="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-md sm:rounded-lg text-2xs sm:text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-all"
+                      className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-3xs sm:text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-all"
                     >
-                      <Save className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                      <Save className="w-2.5 h-2.5" />
                       <span>Lưu</span>
                     </button>
                   </div>
@@ -461,27 +416,27 @@ export default function BudgetOverview({
           </div>
         </div>
 
-        {/* Filter bar (shared): Slim row */}
-        <div className="grid grid-cols-2 sm:grid-cols-12 gap-1.5 sm:gap-2 pt-0.5">
+        {/* Row 2: Search, Filters & Comparison Column Toggles in compact grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-12 gap-1 sm:gap-2 items-center">
           {/* Search */}
           <div className="col-span-2 sm:col-span-5 relative">
-            <Search className="w-3 h-3 sm:w-3.5 sm:h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Tìm theo mã (627...), tên, quy mô..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-7 sm:pl-8 pr-2 py-1 sm:py-1.5 text-2xs sm:text-xs rounded-md sm:rounded-lg border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all"
+              className="w-full pl-6 sm:pl-7 pr-2 py-0.5 sm:py-1 text-2xs sm:text-xs rounded-md border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all"
             />
           </div>
 
           {/* Group */}
-          <div className="col-span-1 sm:col-span-4 relative">
-            <Layers className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
+          <div className="col-span-1 sm:col-span-3 relative">
+            <Layers className="w-2.5 h-2.5 absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
             <select
               value={selectedGroup}
               onChange={(e) => setSelectedGroup(e.target.value)}
-              className="w-full pl-6 sm:pl-7 pr-2 py-1 sm:py-1.5 text-3xs sm:text-xs rounded-md sm:rounded-lg border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all cursor-pointer truncate font-medium"
+              className="w-full pl-5 sm:pl-6 pr-1.5 py-0.5 sm:py-1 text-3xs sm:text-xs rounded-md border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all cursor-pointer truncate font-medium"
             >
               <option value="ALL">Tất cả nhóm</option>
               {groups.map((g) => (
@@ -492,19 +447,51 @@ export default function BudgetOverview({
             </select>
           </div>
 
-          {/* Status (only relevant in Progress view) */}
-          <div className="col-span-1 sm:col-span-3 relative">
-            <Filter className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full pl-6 sm:pl-7 pr-2 py-1 sm:py-1.5 text-3xs sm:text-xs rounded-md sm:rounded-lg border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all cursor-pointer truncate font-medium"
-            >
-              <option value="ALL">Tất cả trạng thái</option>
-              <option value="SAFE">An toàn (&lt; 80%)</option>
-              <option value="WARNING">Cảnh báo (80-100%)</option>
-              <option value="OVER">Vượt (&gt; 100%)</option>
-            </select>
+          {/* Status + Column Toggles combined in remaining space */}
+          <div className="col-span-1 sm:col-span-4 flex items-center gap-1">
+            <div className="relative flex-1">
+              <Filter className="w-2.5 h-2.5 absolute left-1.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full pl-5 sm:pl-6 pr-1 py-0.5 sm:py-1 text-3xs sm:text-xs rounded-md border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all cursor-pointer truncate font-medium"
+              >
+                <option value="ALL">Tất cả</option>
+                <option value="SAFE">An toàn (&lt;80%)</option>
+                <option value="WARNING">Cảnh báo (80-100%)</option>
+                <option value="OVER">Vượt (&gt;100%)</option>
+              </select>
+            </div>
+
+            {/* Compact Column Toggles right next to status */}
+            {viewMode === 'PROGRESS' && (
+              <div className="flex items-center gap-0.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowBravoCol((prev) => !prev)}
+                  className={`px-1 py-0.5 sm:px-1.5 sm:py-1 rounded text-3xs font-bold transition-all cursor-pointer ${
+                    showBravoCol
+                      ? 'bg-amber-500 text-white'
+                      : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
+                  }`}
+                  title={showBravoCol ? 'Ẩn cột Bravo' : 'Hiện cột Bravo'}
+                >
+                  Bravo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowActualCol((prev) => !prev)}
+                  className={`px-1 py-0.5 sm:px-1.5 sm:py-1 rounded text-3xs font-bold transition-all cursor-pointer ${
+                    showActualCol
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
+                  }`}
+                  title={showActualCol ? 'Ẩn cột Nhập liệu' : 'Hiện cột Nhập liệu'}
+                >
+                  Tổ KH
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -512,59 +499,64 @@ export default function BudgetOverview({
       {/* VIEW 1: PROGRESS VIEW (Tiến độ giải ngân 1 năm) */}
       {viewMode === 'PROGRESS' && (
         <>
-          {/* Quick Summary Bar: Slim compact horizontal strip */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-1 sm:gap-2 p-1 sm:p-2 bg-slate-50/80 border-b border-slate-200 text-xs">
-            <div className="p-1 sm:p-2 rounded-md sm:rounded-lg bg-white border border-slate-200/80 shadow-2xs">
-              <span className="text-[8.5px] sm:text-3xs font-semibold text-slate-500 uppercase tracking-wide">
+          {/* Quick Summary Bar: Single horizontal scrollable row on mobile, 5 cols on desktop */}
+          <div className="flex overflow-x-auto no-scrollbar lg:grid lg:grid-cols-5 gap-1 sm:gap-2 p-1 sm:p-1.5 bg-slate-50/80 border-b border-slate-200 text-xs">
+            {/* 1. Tổng duyệt */}
+            <div className="min-w-[105px] sm:min-w-[125px] lg:min-w-0 flex-1 shrink-0 p-1 sm:p-1.5 rounded-md sm:rounded-lg bg-white border border-slate-200/80 shadow-2xs">
+              <span className="text-[8px] sm:text-3xs font-semibold text-slate-500 uppercase tracking-wide block truncate">
                 1. Tổng Duyệt
               </span>
-              <p className="text-[11px] sm:text-xs font-extrabold text-slate-900 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight" title={formatVND(summary.totalApproved)}>
+              <p className="text-[10px] sm:text-xs font-extrabold text-slate-900 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight" title={formatVND(summary.totalApproved)}>
                 {formatVND(summary.totalApproved)}
               </p>
             </div>
 
+            {/* 2. Theo Bravo */}
             {showBravoCol && (
-              <div className="p-1 sm:p-2 rounded-md sm:rounded-lg bg-amber-50/70 border border-amber-200/80 shadow-2xs">
-                <span className="text-[8.5px] sm:text-3xs font-semibold text-amber-800 uppercase tracking-wide">
+              <div className="min-w-[105px] sm:min-w-[125px] lg:min-w-0 flex-1 shrink-0 p-1 sm:p-1.5 rounded-md sm:rounded-lg bg-amber-50/70 border border-amber-200/80 shadow-2xs">
+                <span className="text-[8px] sm:text-3xs font-semibold text-amber-800 uppercase tracking-wide block truncate">
                   2. Theo Bravo
                 </span>
-                <p className="text-[11px] sm:text-xs font-extrabold text-amber-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight" title={formatVND(summary.totalBravo)}>
+                <p className="text-[10px] sm:text-xs font-extrabold text-amber-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight" title={formatVND(summary.totalBravo)}>
                   {formatVND(summary.totalBravo)}
                 </p>
               </div>
             )}
 
+            {/* 3. Theo Nhập Liệu */}
             {showActualCol && (
-              <div className="p-1 sm:p-2 rounded-md sm:rounded-lg bg-blue-50/70 border border-blue-200/80 shadow-2xs">
-                <span className="text-[8.5px] sm:text-3xs font-semibold text-blue-800 uppercase tracking-wide">
+              <div className="min-w-[105px] sm:min-w-[125px] lg:min-w-0 flex-1 shrink-0 p-1 sm:p-1.5 rounded-md sm:rounded-lg bg-blue-50/70 border border-blue-200/80 shadow-2xs">
+                <span className="text-[8px] sm:text-3xs font-semibold text-blue-800 uppercase tracking-wide block truncate">
                   3. Theo Nhập Liệu
                 </span>
-                <p className="text-[11px] sm:text-xs font-extrabold text-blue-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight" title={formatVND(summary.totalLiveActual)}>
+                <p className="text-[10px] sm:text-xs font-extrabold text-blue-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight" title={formatVND(summary.totalLiveActual)}>
                   {formatVND(summary.totalLiveActual)}
                 </p>
               </div>
             )}
 
-            <div className="p-1 sm:p-2 rounded-md sm:rounded-lg bg-emerald-50/80 border border-emerald-200/90 shadow-2xs">
+            {/* 4. Thực Tế (MAX) */}
+            <div className="min-w-[105px] sm:min-w-[125px] lg:min-w-0 flex-1 shrink-0 p-1 sm:p-1.5 rounded-md sm:rounded-lg bg-emerald-50/80 border border-emerald-200/90 shadow-2xs">
               <div className="flex items-center justify-between">
-                <span className="text-[8.5px] sm:text-3xs font-bold text-emerald-800 uppercase tracking-wide truncate">
+                <span className="text-[8px] sm:text-3xs font-bold text-emerald-800 uppercase tracking-wide truncate">
                   Thực Tế (MAX)
                 </span>
-                <span className="text-[8px] sm:text-3xs font-mono font-bold px-1 py-0.2 bg-emerald-200 text-emerald-900 rounded">
+                <span className="text-[7.5px] sm:text-3xs font-mono font-bold px-0.5 py-0.2 bg-emerald-200 text-emerald-900 rounded">
                   MAX
                 </span>
               </div>
-              <p className="text-[11px] sm:text-xs font-extrabold text-emerald-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight" title={formatVND(summary.totalReportActual)}>
+              <p className="text-[10px] sm:text-xs font-extrabold text-emerald-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight" title={formatVND(summary.totalReportActual)}>
                 {formatVND(summary.totalReportActual)}
               </p>
             </div>
 
-            <div className="p-1 sm:p-2 rounded-md sm:rounded-lg bg-white border border-slate-200/80 shadow-2xs">
-              <span className="text-[8.5px] sm:text-3xs font-semibold text-slate-500 uppercase tracking-wide">
+            {/* 5. Còn lại */}
+            <div className="min-w-[105px] sm:min-w-[125px] lg:min-w-0 flex-1 shrink-0 p-1 sm:p-1.5 rounded-md sm:rounded-lg bg-white border border-slate-200/80 shadow-2xs">
+              <span className="text-[8px] sm:text-3xs font-semibold text-slate-500 uppercase tracking-wide block truncate">
                 Còn Lại (Khả Dụng)
               </span>
               <p
-                className={`text-[11px] sm:text-xs font-extrabold mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight ${
+                className={`text-[10px] sm:text-xs font-extrabold mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight ${
                   summary.totalRemaining < 0 ? 'text-rose-600' : 'text-slate-900'
                 }`}
                 title={formatVND(summary.totalRemaining)}
@@ -574,8 +566,8 @@ export default function BudgetOverview({
             </div>
           </div>
 
-          {/* Hint banner: ultra-slim */}
-          <div className="px-2.5 sm:px-4 py-0.5 sm:py-1 bg-blue-50/70 border-b border-blue-100 flex items-center justify-between text-[10px] sm:text-2xs text-blue-800 gap-1.5">
+          {/* Hint banner: ultra-slim, hidden on mobile screens to maximize table rows */}
+          <div className="hidden sm:flex px-2.5 sm:px-4 py-0.5 sm:py-1 bg-blue-50/70 border-b border-blue-100 items-center justify-between text-[10px] sm:text-2xs text-blue-800 gap-1.5">
             <div className="flex items-center gap-1.5 truncate">
               <span className="flex h-1.5 w-1.5 relative shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>

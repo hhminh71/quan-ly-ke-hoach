@@ -174,31 +174,38 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
             }}
             className="relative rounded-[48px] p-3 bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.8)] border-[5px] border-slate-700/80 ring-1 ring-white/20 select-none"
           >
-            {/* Dynamic Island / Top Notch (only in portrait phone mode) */}
-            {!isLandscape && device.type === 'phone' && (
-              <div className="absolute top-5 left-1/2 -translate-x-1/2 w-28 h-5 bg-black rounded-full z-30 pointer-events-none flex items-center justify-between px-2 shadow-sm border border-slate-800">
-                <div className="w-2.5 h-2.5 rounded-full bg-slate-900 border border-slate-800" />
-                <div className="w-2.5 h-2.5 rounded-full bg-slate-900/80" />
-              </div>
-            )}
-
             {/* Inner Phone Screen */}
             <div
               style={{
                 width: `${frameWidth}px`,
                 height: `${frameHeight}px`,
               }}
-              className="relative overflow-hidden rounded-[36px] bg-white border border-slate-900 shadow-inner"
+              className="relative overflow-hidden rounded-[36px] bg-white border border-slate-900 shadow-inner flex flex-col"
             >
+              {/* Native Mobile Status Bar (Prevents notch from blocking web header) */}
+              {!isLandscape && device.type === 'phone' && (
+                <div className="h-6 w-full bg-[#074780] text-white flex items-center justify-between px-5 text-[10px] font-semibold shrink-0 select-none relative z-20 border-b border-blue-900/40">
+                  <span className="font-mono text-[9px] tracking-tight">09:41</span>
+                  {/* Slim Dynamic Island Pill inside status bar */}
+                  <div className="w-20 h-3 bg-black rounded-full flex items-center justify-center border border-black/60 shadow-xs">
+                    <div className="w-1.5 h-1.5 rounded-full bg-slate-900 ml-auto mr-1.5" />
+                  </div>
+                  {/* Signal & Battery */}
+                  <div className="flex items-center gap-1 font-mono text-[8px] text-blue-100">
+                    <span>5G</span>
+                    <div className="w-3.5 h-2 border border-white/70 rounded-2xs p-0.2 flex items-center">
+                      <div className="w-2 h-1 bg-white rounded-3xs" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Iframe Viewport */}
               <iframe
                 key={iframeKey}
                 ref={iframeRef}
                 src={simulatorUrl}
-                style={{
-                  width: `${frameWidth}px`,
-                  height: `${frameHeight}px`,
-                }}
-                className="w-full h-full border-0 block bg-slate-50"
+                className="w-full flex-1 border-0 block bg-slate-50"
                 title="Khung xem trước điện thoại di động"
               />
             </div>
