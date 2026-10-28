@@ -147,29 +147,30 @@ export default function AccountLedgerModal({
           }
         }}
       >
+        {/* Modal Container: Compact, sleek, maximized visible vertical area for screenshots */}
         <div
-          className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+          className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-2xl w-full max-w-5xl max-h-[94vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
-          <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/70">
-            <div className="flex items-start sm:items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm shadow-blue-500/20 shrink-0">
-                <FileSpreadsheet className="w-5 h-5" />
+          {/* Header: Slim minimalist bar */}
+          <div className="px-3 py-2 sm:px-4 sm:py-2.5 border-b border-slate-100 flex items-center justify-between gap-2 bg-slate-50/80 shrink-0">
+            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-2xs shrink-0">
+                <FileSpreadsheet className="w-4 h-4" />
               </div>
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-xs font-bold text-blue-700 bg-blue-100/80 px-2.5 py-0.5 rounded-md border border-blue-200">
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                  <span className="font-mono text-2xs sm:text-xs font-bold text-blue-700 bg-blue-100/90 px-1.5 py-0.2 rounded border border-blue-200 shrink-0">
                     {account.code}
                   </span>
-                  <h3 className="text-base font-bold text-slate-900">
+                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
                     {account.name}
                   </h3>
-                  <span className="text-[11px] font-semibold text-slate-600 bg-slate-200/70 px-2 py-0.5 rounded-full">
+                  <span className="text-3xs sm:text-[10px] font-bold text-slate-600 bg-slate-200/80 px-1.5 py-0.2 rounded-full shrink-0">
                     Năm {selectedYear}
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-3xs sm:text-[11px] text-slate-500 leading-none mt-0.5 truncate">
                   <span className="font-medium text-slate-700">{account.scope || account.group}</span>
                   {' • '}
                   <span>
@@ -179,7 +180,7 @@ export default function AccountLedgerModal({
               </div>
             </div>
 
-            <div className="flex items-center gap-2 self-end sm:self-center">
+            <div className="flex items-center gap-1.5 shrink-0">
               {onNavigateToLedger && (
                 <button
                   type="button"
@@ -187,89 +188,67 @@ export default function AccountLedgerModal({
                     onClose();
                     onNavigateToLedger(account.code);
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors"
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-2xs sm:text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors"
                   title="Mở toàn màn hình trong tab Sổ Cái"
                 >
-                  <ArrowUpRight className="w-4 h-4" />
-                  <span className="hidden sm:inline">Mở Trong Tab Sổ Cái</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Mở Tab Sổ Cái</span>
                 </button>
               )}
               <button
                 type="button"
                 onClick={onClose}
-                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200/50 transition-colors"
+                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-200/50 transition-colors"
                 title="Đóng cửa sổ"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           </div>
 
-          {/* Top KPI Bar (Prominent Approved, Spent, Remaining) */}
-          <div className="p-4 sm:p-5 border-b border-slate-100 bg-gradient-to-b from-white to-slate-50/50 space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Top KPI Bar (Ultra-slim, minimalist height for screenshots) */}
+          <div className="px-3 py-1.5 sm:px-4 sm:py-2 border-b border-slate-100 bg-gradient-to-b from-white to-slate-50/50 space-y-1.5 shrink-0">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5">
               {/* 1. Tổng được duyệt */}
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">
-                    Tổng Được Duyệt
-                  </span>
-                  <span className="text-[10px] font-bold bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded">
+              <div className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-50 border border-slate-200 shadow-2xs">
+                <div className="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-500 font-semibold uppercase tracking-tight">
+                  <span>Duyệt {selectedYear}</span>
+                  <span className="font-bold bg-slate-200/90 text-slate-700 px-1 py-0.2 rounded text-3xs">
                     100%
                   </span>
                 </div>
-                <div className="text-base sm:text-lg font-extrabold text-slate-900 font-mono mt-1 truncate">
+                <div className="text-xs sm:text-sm font-extrabold text-slate-900 font-mono leading-tight mt-0.5 truncate">
                   {formatVND(approved)}
-                </div>
-                <div className="text-[11px] text-slate-500 font-medium">
-                  Hạn mức năm {selectedYear}
                 </div>
               </div>
 
               {/* 2. Chi phí thực tế (Báo cáo MAX) */}
-              <div className="p-3 rounded-xl bg-blue-50/80 border border-blue-200 shadow-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold text-blue-700 uppercase tracking-wide">
-                    Chi Phí Thực Tế
-                  </span>
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded text-white ${
+              <div className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-blue-50/80 border border-blue-200 shadow-2xs">
+                <div className="flex items-center justify-between text-[9px] sm:text-[10px] text-blue-700 font-semibold uppercase tracking-tight">
+                  <span className="truncate">Thực Tế</span>
+                  <span className={`font-bold px-1 py-0.2 rounded text-white text-3xs ${
                     isSeparated ? 'bg-indigo-600' : 'bg-blue-600'
                   }`}>
                     {spentPercent.toFixed(1)}%
                   </span>
                 </div>
-                <div className="text-base sm:text-lg font-extrabold text-blue-900 font-mono mt-1 truncate">
+                <div className="text-xs sm:text-sm font-extrabold text-blue-900 font-mono leading-tight mt-0.5 truncate">
                   {formatVND(reportActual)}
-                </div>
-                <div className="text-[11px] text-blue-700 font-medium truncate">
-                  {isSeparated ? (
-                    <span className="text-indigo-700 font-semibold">
-                      Chỉ tính SCTX nhập liệu (Đã tách SCTS riêng)
-                    </span>
-                  ) : bravoVal > spent ? (
-                    `Theo Bravo (${formatVND(bravoVal)}) > Phiếu chi (${formatVND(spent)})`
-                  ) : (
-                    `${accountTransactions.length} phiếu chi (${formatVND(spent)})`
-                  )}
                 </div>
               </div>
 
               {/* 3. Tổng còn lại */}
               <div
-                className={`p-3 rounded-xl border shadow-sm ${
+                className={`px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border shadow-2xs ${
                   remaining >= 0 ? 'bg-emerald-50/80 border-emerald-200' : 'bg-rose-50/80 border-rose-200'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`text-[11px] font-bold uppercase tracking-wide ${
-                      remaining >= 0 ? 'text-emerald-700' : 'text-rose-700'
-                    }`}
-                  >
-                    {remaining >= 0 ? 'Tổng Còn Lại' : 'Vượt Hạn Mức'}
+                <div className="flex items-center justify-between text-[9px] sm:text-[10px] font-semibold uppercase tracking-tight">
+                  <span className={remaining >= 0 ? 'text-emerald-700' : 'text-rose-700'}>
+                    {remaining >= 0 ? 'Còn Lại' : 'Vượt'}
                   </span>
                   <span
-                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded text-white ${
+                    className={`font-bold px-1 py-0.2 rounded text-white text-3xs ${
                       remaining >= 0 ? 'bg-emerald-600' : 'bg-rose-600'
                     }`}
                   >
@@ -277,25 +256,18 @@ export default function AccountLedgerModal({
                   </span>
                 </div>
                 <div
-                  className={`text-base sm:text-lg font-extrabold font-mono mt-1 truncate ${
+                  className={`text-xs sm:text-sm font-extrabold font-mono leading-tight mt-0.5 truncate ${
                     remaining >= 0 ? 'text-emerald-900' : 'text-rose-700'
                   }`}
                 >
                   {formatVND(remaining)}
                 </div>
-                <div
-                  className={`text-[11px] font-medium ${
-                    remaining >= 0 ? 'text-emerald-600' : 'text-rose-500'
-                  }`}
-                >
-                  {remaining >= 0 ? 'Dự trữ khả dụng' : 'Cảnh báo vượt định mức'}
-                </div>
               </div>
             </div>
 
-            {/* Visual Progress Bar */}
+            {/* Visual Progress Bar - Slim 1px line */}
             {approved > 0 && (
-              <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+              <div className="w-full bg-slate-100 rounded-full h-1 overflow-hidden">
                 <div
                   className={`h-full transition-all duration-500 rounded-full ${
                     spentPercent > 100
@@ -309,120 +281,105 @@ export default function AccountLedgerModal({
               </div>
             )}
 
-            {/* SCTS separation toggle / alert box */}
+            {/* SCTS separation toggle - Ultra-slim single line */}
             <div
-              className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3 rounded-xl border text-xs transition-colors ${
+              className={`flex items-center justify-between gap-2 px-2.5 py-1 rounded-lg border text-3xs sm:text-[11px] transition-colors ${
                 isSeparated
-                  ? 'bg-indigo-50/80 border-indigo-200 text-indigo-950'
-                  : 'bg-slate-50 border-slate-200 text-slate-700'
+                  ? 'bg-indigo-50/90 border-indigo-200 text-indigo-950'
+                  : 'bg-slate-50 border-slate-200/80 text-slate-700'
               }`}
             >
-              <div className="flex items-start sm:items-center gap-2.5">
-                <div
-                  className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
-                    isSeparated ? 'bg-indigo-600 text-white shadow-2xs' : 'bg-slate-200 text-slate-600'
-                  }`}
-                >
-                  <Shield className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-xs">
-                      {isSeparated
-                        ? 'Đã Tách Riêng Sửa Chữa Tài Sản (SCTS)'
-                        : 'Quy tắc Mặc định: So sánh gộp MAX(Bravo, Nhập liệu)'}
-                    </span>
-                    {isSeparated && (
-                      <span className="text-3xs font-bold bg-indigo-200/80 text-indigo-800 px-1.5 py-0.2 rounded-full">
-                        Đang kích hoạt
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-[11px] text-slate-500 mt-0.5 leading-snug">
-                    {isSeparated ? (
-                      <>
-                        Phần mềm Bravo ghi nhận gộp <strong>{formatVND(bravoVal)}</strong> (bao gồm cả dự án SCTS lớn do Tổng công ty giao). Hệ thống đã tự động tách riêng số liệu Bravo để <strong>chỉ theo dõi hạn mức SCTX của Cảng ({formatVND(spent)})</strong>.
-                      </>
-                    ) : (
-                      <>
-                        Nếu khoản mục này có dự án SCTS sửa chữa lớn hạch toán chung trên Bravo, bạn có thể bật nút bên cạnh để tách riêng SCTS và chỉ tính SCTX theo nhập liệu.
-                      </>
-                    )}
-                  </p>
-                </div>
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Shield className={`w-3.5 h-3.5 shrink-0 ${isSeparated ? 'text-indigo-600' : 'text-slate-400'}`} />
+                <span className="font-semibold truncate">
+                  {isSeparated
+                    ? `Đã tách riêng SCTS • Chỉ tính SCTX nhập liệu (${formatVND(spent)})`
+                    : `Quy tắc MAX(Bravo, Nhập liệu) • Bravo: ${formatVND(bravoVal)}`}
+                </span>
               </div>
 
               <button
                 type="button"
                 onClick={() => toggleSctsSeparation(account.code)}
-                className={`inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition-all shadow-2xs cursor-pointer ${
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-3xs sm:text-[10px] font-bold shrink-0 transition-all cursor-pointer ${
                   isSeparated
                     ? 'bg-indigo-600 hover:bg-indigo-700 text-white'
                     : 'bg-white hover:bg-slate-100 text-slate-700 border border-slate-300'
                 }`}
                 title="Bấm để bật/tắt chế độ tách riêng chi phí SCTS cho mã tài khoản này"
               >
-                {isSeparated ? '✓ Đang Tách SCTS (Nhấn để hủy)' : 'Tách Riêng SCTS Cho Mã Này'}
+                {isSeparated ? '✓ Đang Tách SCTS' : 'Tách Riêng SCTS'}
               </button>
             </div>
           </div>
 
-          {/* Search & Sort Controls inside Modal */}
-          <div className="p-3 sm:px-5 sm:py-3 border-b border-slate-100 bg-white flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div className="relative w-full sm:max-w-md">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          {/* Search & Sort Controls inside Modal: Slim bar */}
+          <div className="px-3 py-1.5 sm:px-4 sm:py-2 border-b border-slate-100 bg-white flex items-center justify-between gap-2 shrink-0">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Tìm phiếu chi theo người thực hiện, nội dung diễn giải..."
+                placeholder="Tìm người thực hiện, diễn giải..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+                className="w-full pl-8 pr-2.5 py-1 text-2xs sm:text-xs rounded-lg border border-slate-200 bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all"
               />
             </div>
 
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <div className="flex items-center gap-1.5 shrink-0">
               <div className="relative">
-                <ArrowUpDown className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <ArrowUpDown className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
                 <select
                   value={sortOrder}
                   onChange={(e) => setSortOrder(e.target.value)}
-                  className="pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer font-medium"
+                  className="pl-6 pr-2 py-1 text-2xs sm:text-xs rounded-lg border border-slate-200 bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all cursor-pointer font-medium"
                 >
                   <option value="newest">Ngày mới nhất</option>
                   <option value="oldest">Ngày cũ nhất</option>
-                  <option value="highest">Số tiền cao nhất</option>
-                  <option value="lowest">Số tiền thấp nhất</option>
+                  <option value="highest">Tiền cao nhất</option>
+                  <option value="lowest">Tiền thấp nhất</option>
                 </select>
               </div>
             </div>
           </div>
 
           {/* Ledger Table: Sổ cái chi tiết các phiếu chi */}
-          <div className="overflow-y-auto flex-1">
+          {/* USER SPECIFICATION:
+              1. Cột 'Người thực hiện' di chuyển ra cuối, trước cột 'Điều chỉnh' (Thao tác)
+                 -> Thứ tự: # | Ngày | Nội Dung Diễn Giải | Số Tiền (VNĐ) | Người Thực Hiện | Điều Chỉnh
+              2. Bóp nhỏ tối giản các cột, có thể xuống dòng nếu cần (break-words, whitespace-normal, padding py-1 sm:py-1.5)
+          */}
+          <div className="overflow-y-auto flex-1 min-h-0">
             {sortedTransactions.length === 0 ? (
-              <div className="text-center py-16 px-4">
-                <FileSpreadsheet className="w-12 h-12 text-slate-300 mx-auto mb-2" />
-                <p className="text-sm font-semibold text-slate-700">
+              <div className="text-center py-10 px-4">
+                <FileSpreadsheet className="w-10 h-10 text-slate-300 mx-auto mb-1.5" />
+                <p className="text-xs sm:text-sm font-semibold text-slate-700">
                   {searchTerm
                     ? 'Không tìm thấy phiếu chi nào khớp với từ khóa'
                     : `Chưa có phiếu chi nào phát sinh cho khoản mục này trong năm ${selectedYear}`}
                 </p>
-                <p className="text-xs text-slate-400 mt-1 max-w-md mx-auto">
+                <p className="text-3xs sm:text-xs text-slate-400 mt-0.5 max-w-md mx-auto">
                   {searchTerm
                     ? 'Thử thay đổi từ khóa hoặc xóa tìm kiếm để xem tất cả phiếu chi.'
                     : 'Các khoản chi mới phát sinh trên Webhook hoặc form nhập liệu sẽ tự động xuất hiện tại đây.'}
                 </p>
               </div>
             ) : (
-              <table className="w-full text-left border-collapse">
-                <thead className="sticky top-0 bg-slate-50 z-10 border-b border-slate-200 shadow-sm">
+              <table className="w-full text-left border-collapse table-auto">
+                <thead className="sticky top-0 bg-slate-50 z-10 border-b border-slate-200 shadow-2xs">
                   <tr className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                    <th className="py-2 px-2 sm:py-2.5 sm:px-3 w-10 text-center">#</th>
-                    <th className="py-2 px-2 sm:py-2.5 sm:px-3 w-24 sm:w-28">Ngày</th>
-                    <th className="py-2 px-2 sm:py-2.5 sm:px-3 w-32 sm:w-40">Người Thực Hiện</th>
-                    <th className="py-2 px-2 sm:py-2.5 sm:px-3 text-right w-28 sm:w-36">Số Tiền (VNĐ)</th>
-                    <th className="py-2 px-2 sm:py-2.5 sm:px-3 max-w-[180px] sm:max-w-xs">Nội Dung Diễn Giải</th>
-                    <th className="py-2 px-1.5 sm:py-2.5 sm:px-2 text-right w-16">Thao Tác</th>
+                    {/* 1. STT */}
+                    <th className="py-1.5 px-1.5 sm:px-2 w-8 sm:w-10 text-center">#</th>
+                    {/* 2. Ngày */}
+                    <th className="py-1.5 px-1.5 sm:px-2.5 w-20 sm:w-24 whitespace-nowrap">Ngày</th>
+                    {/* 3. Nội dung diễn giải (có thể xuống dòng linh hoạt) */}
+                    <th className="py-1.5 px-2 sm:px-3 min-w-[150px]">Nội Dung Diễn Giải</th>
+                    {/* 4. Số tiền */}
+                    <th className="py-1.5 px-2 sm:px-3 text-right w-24 sm:w-32 whitespace-nowrap">Số Tiền (VNĐ)</th>
+                    {/* 5. Người thực hiện (di chuyển ra cuối trước điều chỉnh) */}
+                    <th className="py-1.5 px-1.5 sm:px-2.5 w-24 sm:w-32">Người Thực Hiện</th>
+                    {/* 6. Điều chỉnh (Thao tác) */}
+                    <th className="py-1.5 px-1 text-center w-14 sm:w-16 whitespace-nowrap">Điều Chỉnh</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
@@ -431,52 +388,52 @@ export default function AccountLedgerModal({
                       key={item.id}
                       className="hover:bg-blue-50/50 transition-colors group"
                     >
-                      {/* STT */}
-                      <td className="py-2 px-2 sm:py-2.5 sm:px-3 text-center font-mono text-[11px] text-slate-400">
+                      {/* 1. STT: Bóp nhỏ tối giản */}
+                      <td className="py-1.5 px-1.5 sm:px-2 text-center font-mono text-[10px] sm:text-[11px] text-slate-400">
                         {index + 1}
                       </td>
 
-                      {/* Ngày */}
-                      <td className="py-2 px-2 sm:py-2.5 sm:px-3 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5 text-slate-700 font-medium">
-                          <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                      {/* 2. Ngày: Gọn gàng */}
+                      <td className="py-1.5 px-1.5 sm:px-2.5 whitespace-nowrap font-mono text-[11px] sm:text-xs text-slate-700 font-medium">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3 text-slate-400 shrink-0" />
                           <span>{formatDate(item.date)}</span>
                         </div>
                       </td>
 
-                      {/* Người thực hiện */}
-                      <td className="py-2 px-2 sm:py-2.5 sm:px-3 max-w-[120px] sm:max-w-[160px] truncate">
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-bold text-[9px] flex items-center justify-center shrink-0">
+                      {/* 3. Nội dung diễn giải: Xuống dòng tự nhiên, bóp nhỏ tối giản chiều ngang */}
+                      <td className="py-1.5 px-2 sm:px-3 text-slate-700 text-[11px] sm:text-xs break-words whitespace-normal leading-snug">
+                        {item.notes}
+                      </td>
+
+                      {/* 4. Số tiền: Phải canh phải, font mono đậm nét */}
+                      <td className="py-1.5 px-2 sm:px-3 text-right whitespace-nowrap font-mono font-bold text-slate-900 text-[11px] sm:text-xs">
+                        {formatVND(item.amount)}
+                      </td>
+
+                      {/* 5. Người thực hiện: Di chuyển ra trước cột điều chỉnh, có thể xuống dòng nếu dài */}
+                      <td className="py-1.5 px-1.5 sm:px-2.5 text-slate-700 text-[11px] sm:text-xs break-words">
+                        <div className="flex items-center gap-1">
+                          <div className="w-4 h-4 rounded-full bg-blue-100 text-blue-700 font-bold text-[8.5px] flex items-center justify-center shrink-0">
                             {String(item.employeeName || 'U').trim().charAt(0).toUpperCase() || 'U'}
                           </div>
-                          <span className="font-medium text-slate-800 truncate" title={item.employeeName}>
+                          <span className="font-medium text-slate-800 leading-tight">
                             {item.employeeName || 'Chưa ghi nhận'}
                           </span>
                         </div>
                       </td>
 
-                      {/* Số tiền */}
-                      <td className="py-2 px-2 sm:py-2.5 sm:px-3 text-right whitespace-nowrap font-mono font-bold text-slate-900 text-xs sm:text-sm">
-                        {formatVND(item.amount)}
-                      </td>
-
-                      {/* Nội dung diễn giải */}
-                      <td className="py-2 px-2 sm:py-2.5 sm:px-3 text-slate-600 max-w-[180px] sm:max-w-xs truncate" title={item.notes}>
-                        {item.notes}
-                      </td>
-
-                      {/* Thao tác: Chỉnh sửa & Xóa */}
-                      <td className="py-2 px-1.5 sm:py-2.5 sm:px-2 text-right whitespace-nowrap">
-                        <div className="flex items-center justify-end gap-1">
+                      {/* 6. Điều chỉnh: Chỉnh sửa & Xóa nhỏ gọn */}
+                      <td className="py-1.5 px-1 text-center whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-0.5">
                           {onUpdateTransaction && (
                             <button
                               type="button"
                               onClick={() => setEditingItem(item)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-70 group-hover:opacity-100"
+                              className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-75 group-hover:opacity-100"
                               title="Chỉnh sửa phiếu này"
                             >
-                              <Edit3 className="w-3.5 h-3.5" />
+                              <Edit3 className="w-3 h-3" />
                             </button>
                           )}
                           {onDeleteTransaction && (
@@ -487,10 +444,10 @@ export default function AccountLedgerModal({
                                   onDeleteTransaction(item.id);
                                 }
                               }}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-70 group-hover:opacity-100"
+                              className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-75 group-hover:opacity-100"
                               title="Xóa phiếu này"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-3 h-3" />
                             </button>
                           )}
                         </div>
@@ -502,23 +459,23 @@ export default function AccountLedgerModal({
             )}
           </div>
 
-          {/* Modal Footer */}
-          <div className="p-3 sm:p-4 border-t border-slate-100 bg-slate-50/70 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-            <div>
-              Hiển thị <strong className="text-slate-800">{sortedTransactions.length}</strong> / <strong className="text-slate-800">{accountTransactions.length}</strong> phiếu chi{' '}
+          {/* Modal Footer: Slim single-line footer */}
+          <div className="px-3 py-1.5 sm:px-4 sm:py-2 border-t border-slate-100 bg-slate-50/80 flex items-center justify-between gap-2 text-3xs sm:text-[11px] text-slate-500 shrink-0">
+            <div className="truncate">
+              Hiển thị <strong className="text-slate-800">{sortedTransactions.length}</strong> / <strong className="text-slate-800">{accountTransactions.length}</strong> phiếu{' '}
               {searchTerm && <span>(Khớp bộ lọc)</span>}
               {' • '}
-              Tổng tiền trang này:{' '}
+              Tổng cộng:{' '}
               <strong className="text-blue-700 font-mono font-bold">
                 {formatVND(currentTotalAmount)}
               </strong>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
+                className="px-2.5 py-1 rounded-lg border border-slate-200 text-2xs sm:text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
               >
                 Đóng
               </button>
