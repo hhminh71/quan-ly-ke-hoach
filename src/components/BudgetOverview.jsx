@@ -832,16 +832,16 @@ export default function BudgetOverview({
       {/* VIEW 2: MULTI-YEAR MATRIX VIEW (Bảng Ma Trận Các Cột Năm 2024, 2025, 2026, 2027...) */}
       {viewMode === 'MATRIX' && (
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full text-left border-collapse table-auto">
             <thead>
               <tr className="bg-slate-50/80 border-b border-slate-200 text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                <th className="py-2 px-2 sm:py-2.5 sm:px-3 sticky left-0 bg-slate-50 z-10 w-16 sm:w-20">Mã KH</th>
-                <th className="py-2 px-2 sm:py-2.5 sm:px-3 max-w-[220px] sm:max-w-[280px]">Tên Hạng Mục</th>
-                <th className="py-2 px-2 sm:py-2.5 sm:px-3 max-w-[140px]">Nhóm Chi Phí</th>
+                <th className="py-1.5 px-1.5 sm:px-2 sticky left-0 bg-slate-50 z-10 w-16 sm:w-20">Mã KH</th>
+                <th className="py-1.5 px-1.5 sm:px-2 max-w-[200px] sm:max-w-[260px]">Tên Hạng Mục</th>
+                <th className="py-1.5 px-1.5 sm:px-2 max-w-[130px]">Nhóm Chi Phí</th>
                 {matrixYears.map((yr) => (
                   <th
                     key={yr}
-                    className={`py-2 px-2.5 sm:py-2.5 sm:px-3 text-right whitespace-nowrap min-w-[110px] font-mono ${
+                    className={`py-1.5 px-1.5 sm:px-2 text-right whitespace-nowrap min-w-[100px] font-mono ${
                       yr === selectedYear
                         ? 'bg-blue-100/70 text-blue-900 font-bold border-x border-blue-200'
                         : ''
@@ -849,7 +849,7 @@ export default function BudgetOverview({
                   >
                     <span>Cột Năm {yr}</span>
                     {yr === selectedYear && (
-                      <span className="block text-[9px] font-sans text-blue-600 font-normal">
+                      <span className="block text-[8.5px] font-sans text-blue-600 font-normal">
                         (Đang chọn)
                       </span>
                     )}
@@ -866,19 +866,19 @@ export default function BudgetOverview({
                   title={!isEditingMatrix ? `Click để mở sổ cái chi tiết của [${item.code}] ${item.name}` : ''}
                 >
                   {/* Mã */}
-                  <td className="py-2 px-2 sm:py-2.5 sm:px-3 whitespace-nowrap sticky left-0 bg-white group-hover:bg-slate-50 z-10">
+                  <td className="py-1.5 px-1.5 sm:px-2 whitespace-nowrap sticky left-0 bg-white group-hover:bg-slate-50 z-10">
                     <span className="font-mono text-2xs sm:text-xs font-bold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
                       {item.code}
                     </span>
                   </td>
 
                   {/* Tên */}
-                  <td className="py-2 px-2 sm:py-2.5 sm:px-3 text-xs font-medium text-slate-800 max-w-[220px] sm:max-w-[280px] truncate" title={item.name}>
+                  <td className="py-1.5 px-1.5 sm:px-2 text-xs font-medium text-slate-800 max-w-[200px] sm:max-w-[260px] truncate" title={item.name}>
                     {item.name}
                   </td>
 
                   {/* Nhóm */}
-                  <td className="py-2 px-2 sm:py-2.5 sm:px-3 text-xs text-slate-500 max-w-[140px] truncate" title={item.group}>
+                  <td className="py-1.5 px-1.5 sm:px-2 text-xs text-slate-500 max-w-[130px] truncate" title={item.group}>
                     {item.group}
                   </td>
 
@@ -890,7 +890,7 @@ export default function BudgetOverview({
                     return (
                       <td
                         key={yr}
-                        className={`py-2 px-2.5 sm:py-2.5 sm:px-3 text-right whitespace-nowrap font-mono text-xs ${
+                        className={`py-1.5 px-1.5 sm:px-2 text-right whitespace-nowrap font-mono text-xs ${
                           isSelected ? 'bg-blue-50/50 border-x border-blue-100 font-bold text-blue-900' : 'text-slate-700'
                         }`}
                       >

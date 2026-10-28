@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import {
   X,
-  Calendar,
   Search,
   ArrowUpDown,
   Trash2,
@@ -13,6 +12,7 @@ import {
 } from 'lucide-react';
 import EditTransactionModal from './EditTransactionModal';
 import { matchesVietnameseSearch } from '../utils/searchUtils';
+import { formatDate } from '../utils/dateUtils';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
 import {
   getSctsSeparatedCodes,
@@ -108,16 +108,6 @@ export default function AccountLedgerModal({
 
   const formatVND = (num) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(num) || 0);
-  };
-
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    const str = String(dateStr).trim();
-    const parts = str.split('-');
-    if (parts.length === 3) {
-      return `${parts[2]}/${parts[1]}/${parts[0]}`;
-    }
-    return str;
   };
 
   // Live account stats defensively
@@ -369,17 +359,17 @@ export default function AccountLedgerModal({
                 <thead className="sticky top-0 bg-slate-50 z-10 border-b border-slate-200 shadow-2xs">
                   <tr className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
                     {/* 1. STT */}
-                    <th className="py-1.5 px-1.5 sm:px-2 w-8 sm:w-10 text-center">#</th>
-                    {/* 2. Ngày */}
-                    <th className="py-1.5 px-1.5 sm:px-2.5 w-20 sm:w-24 whitespace-nowrap">Ngày</th>
+                    <th className="py-1 px-1 w-6 sm:w-7 text-center">#</th>
+                    {/* 2. Ngày: dd/mm/yy không logo lịch, bóp siêu gọn */}
+                    <th className="py-1 px-1 sm:px-1.5 w-16 sm:w-18 text-center whitespace-nowrap">Ngày</th>
                     {/* 3. Nội dung diễn giải (có thể xuống dòng linh hoạt) */}
-                    <th className="py-1.5 px-2 sm:px-3 min-w-[150px]">Nội Dung Diễn Giải</th>
+                    <th className="py-1 px-1.5 sm:px-2 min-w-[120px]">Nội Dung Diễn Giải</th>
                     {/* 4. Số tiền */}
-                    <th className="py-1.5 px-2 sm:px-3 text-right w-24 sm:w-32 whitespace-nowrap">Số Tiền (VNĐ)</th>
+                    <th className="py-1 px-1 sm:px-2 text-right w-20 sm:w-28 whitespace-nowrap">Số Tiền (VNĐ)</th>
                     {/* 5. Người thực hiện (di chuyển ra cuối trước điều chỉnh) */}
-                    <th className="py-1.5 px-1.5 sm:px-2.5 w-24 sm:w-32">Người Thực Hiện</th>
+                    <th className="py-1 px-1 sm:px-1.5 w-20 sm:w-28">Người Thực Hiện</th>
                     {/* 6. Điều chỉnh (Thao tác) */}
-                    <th className="py-1.5 px-1 text-center w-14 sm:w-16 whitespace-nowrap">Điều Chỉnh</th>
+                    <th className="py-1 px-0.5 text-center w-12 sm:w-14 whitespace-nowrap">Điều Chỉnh</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
@@ -389,32 +379,29 @@ export default function AccountLedgerModal({
                       className="hover:bg-blue-50/50 transition-colors group"
                     >
                       {/* 1. STT: Bóp nhỏ tối giản */}
-                      <td className="py-1.5 px-1.5 sm:px-2 text-center font-mono text-[10px] sm:text-[11px] text-slate-400">
+                      <td className="py-1 px-1 text-center font-mono text-[10px] sm:text-[11px] text-slate-400">
                         {index + 1}
                       </td>
 
-                      {/* 2. Ngày: Gọn gàng */}
-                      <td className="py-1.5 px-1.5 sm:px-2.5 whitespace-nowrap font-mono text-[11px] sm:text-xs text-slate-700 font-medium">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3 text-slate-400 shrink-0" />
-                          <span>{formatDate(item.date)}</span>
-                        </div>
+                      {/* 2. Ngày: dd/mm/yy không logo lịch */}
+                      <td className="py-1 px-1 sm:px-1.5 text-center whitespace-nowrap font-mono text-2xs sm:text-xs text-slate-700 font-medium">
+                        {formatDate(item.date)}
                       </td>
 
                       {/* 3. Nội dung diễn giải: Xuống dòng tự nhiên, bóp nhỏ tối giản chiều ngang */}
-                      <td className="py-1.5 px-2 sm:px-3 text-slate-700 text-[11px] sm:text-xs break-words whitespace-normal leading-snug">
+                      <td className="py-1 px-1.5 sm:px-2 text-slate-700 text-2xs sm:text-xs break-words whitespace-normal leading-snug">
                         {item.notes}
                       </td>
 
                       {/* 4. Số tiền: Phải canh phải, font mono đậm nét */}
-                      <td className="py-1.5 px-2 sm:px-3 text-right whitespace-nowrap font-mono font-bold text-slate-900 text-[11px] sm:text-xs">
+                      <td className="py-1 px-1 sm:px-2 text-right whitespace-nowrap font-mono font-bold text-slate-900 text-2xs sm:text-xs">
                         {formatVND(item.amount)}
                       </td>
 
                       {/* 5. Người thực hiện: Di chuyển ra trước cột điều chỉnh, có thể xuống dòng nếu dài */}
-                      <td className="py-1.5 px-1.5 sm:px-2.5 text-slate-700 text-[11px] sm:text-xs break-words">
+                      <td className="py-1 px-1 sm:px-1.5 text-slate-700 text-2xs sm:text-xs break-words">
                         <div className="flex items-center gap-1">
-                          <div className="w-4 h-4 rounded-full bg-blue-100 text-blue-700 font-bold text-[8.5px] flex items-center justify-center shrink-0">
+                          <div className="w-3.5 h-3.5 rounded-full bg-blue-100 text-blue-700 font-bold text-[8px] flex items-center justify-center shrink-0">
                             {String(item.employeeName || 'U').trim().charAt(0).toUpperCase() || 'U'}
                           </div>
                           <span className="font-medium text-slate-800 leading-tight">
@@ -424,7 +411,7 @@ export default function AccountLedgerModal({
                       </td>
 
                       {/* 6. Điều chỉnh: Chỉnh sửa & Xóa nhỏ gọn */}
-                      <td className="py-1.5 px-1 text-center whitespace-nowrap">
+                      <td className="py-1 px-0.5 text-center whitespace-nowrap">
                         <div className="flex items-center justify-center gap-0.5">
                           {onUpdateTransaction && (
                             <button

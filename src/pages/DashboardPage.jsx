@@ -5,7 +5,6 @@ import TransactionList from '../components/TransactionList';
 import BudgetOverview from '../components/BudgetOverview';
 import SyncModal from '../components/SyncModal';
 import {
-  Calendar,
   Download,
   RefreshCw,
   LayoutDashboard,
@@ -14,7 +13,6 @@ import {
   Cloud,
   CheckCircle2,
   Settings,
-  CalendarDays,
   Sparkles,
   Scale,
 } from 'lucide-react';
