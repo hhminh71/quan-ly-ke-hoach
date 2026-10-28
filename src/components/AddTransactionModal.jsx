@@ -164,6 +164,7 @@ export default function AddTransactionModal({
 
     const newRecord = {
       id: Date.now(),
+      fiscalYear: (date && date.length >= 4) ? date.substring(0, 4) : selectedYear,
       accountCode: selectedAccount.code,
       category: selectedAccount.name,
       group: selectedAccount.group || 'Chi phí khác',

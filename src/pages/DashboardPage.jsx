@@ -35,12 +35,13 @@ export default function DashboardPage({ user }) {
   // Load saved transactions from localStorage or default to imported real data
   const [transactions, setTransactions] = useState(() => {
     try {
-      const saved = localStorage.getItem('app_transactions_v2');
+      const saved = localStorage.getItem('app_transactions_v3');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
           return parsed.map((t, idx) => ({
             id: t.id || idx + 1,
+            fiscalYear: String(t.fiscalYear || (t.date && t.date.length >= 4 ? t.date.substring(0, 4) : '')).trim(),
             date: String(t.date || '').trim(),
             accountCode: String(t.accountCode || '').trim(),
             category: String(t.category || '').trim(),
@@ -53,6 +54,9 @@ export default function DashboardPage({ user }) {
           }));
         }
       }
+      // Clean up legacy cache so user gets fresh normalized transaction data
+      localStorage.removeItem('app_transactions_v2');
+      localStorage.removeItem('app_transactions');
     } catch (e) {
       console.error(e);
     }
@@ -152,10 +156,8 @@ export default function DashboardPage({ user }) {
   const availableYears = useMemo(() => {
     const yearSet = new Set();
     transactions.forEach((t) => {
-      if (t.date && t.date.length >= 4) {
-        const y = t.date.substring(0, 4);
-        if (/^\d{4}$/.test(y)) yearSet.add(y);
-      }
+      const y = String(t.fiscalYear || (t.date && t.date.length >= 4 ? t.date.substring(0, 4) : '')).trim();
+      if (/^\d{4}$/.test(y)) yearSet.add(y);
     });
     // Add current and next year if not present
     const currentY = String(new Date().getFullYear());
@@ -167,13 +169,16 @@ export default function DashboardPage({ user }) {
   // Filter transactions strictly for the selected fiscal year
   const yearTransactions = useMemo(() => {
     if (selectedYear === 'ALL') return transactions;
-    return transactions.filter((t) => t.date && t.date.startsWith(selectedYear));
+    return transactions.filter((t) => {
+      const fy = String(t.fiscalYear || (t.date && t.date.length >= 4 ? t.date.substring(0, 4) : '')).trim();
+      return fy === String(selectedYear);
+    });
   }, [transactions, selectedYear]);
 
   // Sync transactions to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('app_transactions_v2', JSON.stringify(transactions));
+      localStorage.setItem('app_transactions_v3', JSON.stringify(transactions));
     } catch (e) {
       console.error('Storage full or error', e);
     }
@@ -240,13 +245,17 @@ export default function DashboardPage({ user }) {
   };
 
   const handleAddTransaction = (newRecord) => {
+    const recordWithYear = {
+      ...newRecord,
+      fiscalYear: String(newRecord.fiscalYear || (newRecord.date && newRecord.date.length >= 4 ? newRecord.date.substring(0, 4) : selectedYear)).trim(),
+    };
     // 1. Cập nhật state cục bộ ngay lập tức
-    setTransactions((prev) => [newRecord, ...prev]);
+    setTransactions((prev) => [recordWithYear, ...prev]);
 
     // 2. Gửi ngầm lên Google Sheet nếu đã kết nối
     const webhookUrl = getSavedWebhookUrl();
     if (webhookUrl) {
-      addTransactionToGoogleSheet(webhookUrl, newRecord);
+      addTransactionToGoogleSheet(webhookUrl, recordWithYear);
     }
   };
 
@@ -262,22 +271,28 @@ export default function DashboardPage({ user }) {
   };
 
   const handleUpdateTransaction = (updatedRecord) => {
+    const recordWithYear = {
+      ...updatedRecord,
+      fiscalYear: String(updatedRecord.fiscalYear || (updatedRecord.date && updatedRecord.date.length >= 4 ? updatedRecord.date.substring(0, 4) : selectedYear)).trim(),
+    };
     // 1. Cập nhật state cục bộ ngay lập tức
     setTransactions((prev) =>
-      prev.map((item) => (item.id === updatedRecord.id ? updatedRecord : item))
+      prev.map((item) => (item.id === recordWithYear.id ? recordWithYear : item))
     );
 
     // 2. Gửi ngầm cập nhật trực tiếp lên Google Sheet qua webhook
     const webhookUrl = getSavedWebhookUrl();
     if (webhookUrl) {
-      updateTransactionInGoogleSheet(webhookUrl, updatedRecord);
+      updateTransactionInGoogleSheet(webhookUrl, recordWithYear);
     }
   };
 
   const handleResetData = () => {
     if (confirm('Khôi phục toàn bộ danh sách 1.216 giao dịch thực tế (2024, 2025, 2026) từ file gốc?')) {
       setTransactions(initialTransactions);
+      localStorage.removeItem('app_transactions_v3');
       localStorage.removeItem('app_transactions_v2');
+      localStorage.removeItem('app_transactions');
     }
   };
 

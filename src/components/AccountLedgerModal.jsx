@@ -47,11 +47,15 @@ export default function AccountLedgerModal({
 
     return (transactions || []).filter((t) => {
       if (!t) return false;
+      if (selectedYear && selectedYear !== 'ALL') {
+        const fy = String(t.fiscalYear || (t.date && t.date.length >= 4 ? t.date.substring(0, 4) : '')).trim();
+        if (fy && fy !== String(selectedYear)) return false;
+      }
       const tCode = String(t.accountCode || '').trim();
       const tCat = String(t.category || '').trim();
       return (tCode && tCode === accCode) || (!tCode && tCat === accName);
     });
-  }, [isOpen, transactions, account]);
+  }, [isOpen, transactions, account, selectedYear]);
 
   const filteredTransactions = useMemo(() => {
     if (!isOpen || !account) return [];

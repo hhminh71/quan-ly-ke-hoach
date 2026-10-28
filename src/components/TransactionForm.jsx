@@ -106,6 +106,7 @@ export default function TransactionForm({ onAddTransaction, budgets = [], transa
 
     const newRecord = {
       id: Date.now(),
+      fiscalYear: (date && date.length >= 4) ? date.substring(0, 4) : selectedYear,
       accountCode,
       category: selectedBudget ? selectedBudget.name : 'Chi phí',
       group: selectedBudget ? selectedBudget.group : 'Chi phí khác',

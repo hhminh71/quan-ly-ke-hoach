@@ -98,6 +98,7 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
       // Đảm bảo mọi trường luôn có kiểu dữ liệu chuẩn, không bị crash bởi null/number
       return {
         id: rec.id || idx + 1,
+        fiscalYear: String(rec.fiscalYear || (rec.date && rec.date.length >= 4 ? rec.date.substring(0, 4) : '')).trim(),
         date: String(rec.date || '').trim(),
         accountCode: String(rec.accountCode || '').trim(),
         category: String(rec.category || '').trim(),

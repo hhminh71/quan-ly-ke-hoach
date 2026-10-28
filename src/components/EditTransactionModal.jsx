@@ -55,9 +55,11 @@ export default function EditTransactionModal({
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const cleanDate = String(editForm.date || '').trim();
     const updated = {
       ...transaction,
-      date: String(editForm.date || '').trim(),
+      date: cleanDate,
+      fiscalYear: cleanDate.length >= 4 ? cleanDate.substring(0, 4) : transaction.fiscalYear,
       accountCode: String(editForm.accountCode || '').trim(),
       category: String(editForm.category || '').trim(),
       group: String(editForm.group || '').trim(),
