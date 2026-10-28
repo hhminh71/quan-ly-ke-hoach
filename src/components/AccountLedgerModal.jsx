@@ -356,20 +356,20 @@ export default function AccountLedgerModal({
               </div>
             ) : (
               <table className="w-full text-left border-collapse table-auto">
-                <thead className="sticky top-0 bg-slate-50 z-10 border-b border-slate-200 shadow-2xs">
-                  <tr className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                <thead className="sticky top-0 bg-slate-100/95 backdrop-blur-xs z-20 border-b border-slate-200 shadow-2xs">
+                  <tr className="text-[8px] sm:text-[9.5px] font-bold text-slate-600 uppercase tracking-wider">
                     {/* 1. STT */}
-                    <th className="py-1 px-1 w-6 sm:w-7 text-center">#</th>
+                    <th className="py-0.5 px-1 w-6 sm:w-7 text-center leading-tight">#</th>
                     {/* 2. Ngày: dd/mm/yy không logo lịch, bóp siêu gọn */}
-                    <th className="py-1 px-1 sm:px-1.5 w-16 sm:w-18 text-center whitespace-nowrap">Ngày</th>
-                    {/* 3. Nội dung diễn giải (có thể xuống dòng linh hoạt) */}
-                    <th className="py-1 px-1.5 sm:px-2 min-w-[120px]">Nội Dung Diễn Giải</th>
+                    <th className="py-0.5 px-1 sm:px-1.5 w-14 sm:w-16 text-center whitespace-nowrap leading-tight">Ngày</th>
+                    {/* 3. Nội dung diễn giải */}
+                    <th className="py-0.5 px-1 sm:px-1.5 min-w-[110px] leading-tight">Nội Dung Diễn Giải</th>
                     {/* 4. Số tiền */}
-                    <th className="py-1 px-1 sm:px-2 text-right w-20 sm:w-28 whitespace-nowrap">Số Tiền (VNĐ)</th>
-                    {/* 5. Người thực hiện (di chuyển ra cuối trước điều chỉnh) */}
-                    <th className="py-1 px-1 sm:px-1.5 w-20 sm:w-28">Người Thực Hiện</th>
-                    {/* 6. Điều chỉnh (Thao tác) */}
-                    <th className="py-1 px-0.5 text-center w-12 sm:w-14 whitespace-nowrap">Điều Chỉnh</th>
+                    <th className="py-0.5 px-1 sm:px-1.5 text-right w-18 sm:w-24 whitespace-nowrap leading-tight">Số Tiền (VNĐ)</th>
+                    {/* 5. Người thực hiện */}
+                    <th className="py-0.5 px-1 sm:px-1.5 w-18 sm:w-24 leading-tight">Người Thực Hiện</th>
+                    {/* 6. Điều chỉnh */}
+                    <th className="py-0.5 px-0.5 text-center w-10 sm:w-12 whitespace-nowrap leading-tight">Điều Chỉnh</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
@@ -378,30 +378,30 @@ export default function AccountLedgerModal({
                       key={item.id}
                       className="hover:bg-blue-50/50 transition-colors group"
                     >
-                      {/* 1. STT: Bóp nhỏ tối giản */}
-                      <td className="py-1 px-1 text-center font-mono text-[10px] sm:text-[11px] text-slate-400">
+                      {/* 1. STT */}
+                      <td className="py-0.5 px-1 text-center font-mono text-[9px] sm:text-[10px] text-slate-400 leading-tight">
                         {index + 1}
                       </td>
 
-                      {/* 2. Ngày: dd/mm/yy không logo lịch */}
-                      <td className="py-1 px-1 sm:px-1.5 text-center whitespace-nowrap font-mono text-2xs sm:text-xs text-slate-700 font-medium">
+                      {/* 2. Ngày */}
+                      <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-center whitespace-nowrap font-mono text-[9px] sm:text-xs text-slate-700 font-medium leading-tight">
                         {formatDate(item.date)}
                       </td>
 
-                      {/* 3. Nội dung diễn giải: Xuống dòng tự nhiên, bóp nhỏ tối giản chiều ngang */}
-                      <td className="py-1 px-1.5 sm:px-2 text-slate-700 text-2xs sm:text-xs break-words whitespace-normal leading-snug">
+                      {/* 3. Nội dung diễn giải */}
+                      <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-slate-700 text-[9.5px] sm:text-xs break-words whitespace-normal leading-tight">
                         {item.notes}
                       </td>
 
-                      {/* 4. Số tiền: Phải canh phải, font mono đậm nét */}
-                      <td className="py-1 px-1 sm:px-2 text-right whitespace-nowrap font-mono font-bold text-slate-900 text-2xs sm:text-xs">
+                      {/* 4. Số tiền */}
+                      <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-right whitespace-nowrap font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight">
                         {formatVND(item.amount)}
                       </td>
 
-                      {/* 5. Người thực hiện: Di chuyển ra trước cột điều chỉnh, có thể xuống dòng nếu dài */}
-                      <td className="py-1 px-1 sm:px-1.5 text-slate-700 text-2xs sm:text-xs break-words">
+                      {/* 5. Người thực hiện */}
+                      <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-slate-700 text-[9.5px] sm:text-xs break-words leading-tight">
                         <div className="flex items-center gap-1">
-                          <div className="w-3.5 h-3.5 rounded-full bg-blue-100 text-blue-700 font-bold text-[8px] flex items-center justify-center shrink-0">
+                          <div className="w-3 h-3 rounded-full bg-blue-100 text-blue-700 font-bold text-[7.5px] flex items-center justify-center shrink-0">
                             {String(item.employeeName || 'U').trim().charAt(0).toUpperCase() || 'U'}
                           </div>
                           <span className="font-medium text-slate-800 leading-tight">
@@ -410,17 +410,17 @@ export default function AccountLedgerModal({
                         </div>
                       </td>
 
-                      {/* 6. Điều chỉnh: Chỉnh sửa & Xóa nhỏ gọn */}
-                      <td className="py-1 px-0.5 text-center whitespace-nowrap">
+                      {/* 6. Điều chỉnh */}
+                      <td className="py-0.5 px-0.5 text-center whitespace-nowrap leading-tight">
                         <div className="flex items-center justify-center gap-0.5">
                           {onUpdateTransaction && (
                             <button
                               type="button"
                               onClick={() => setEditingItem(item)}
-                              className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-75 group-hover:opacity-100"
+                              className="p-0.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-75 group-hover:opacity-100"
                               title="Chỉnh sửa phiếu này"
                             >
-                              <Edit3 className="w-3 h-3" />
+                              <Edit3 className="w-2.5 h-2.5" />
                             </button>
                           )}
                           {onDeleteTransaction && (
@@ -431,10 +431,10 @@ export default function AccountLedgerModal({
                                   onDeleteTransaction(item.id);
                                 }
                               }}
-                              className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-75 group-hover:opacity-100"
+                              className="p-0.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-75 group-hover:opacity-100"
                               title="Xóa phiếu này"
                             >
-                              <Trash2 className="w-3 h-3" />
+                              <Trash2 className="w-2.5 h-2.5" />
                             </button>
                           )}
                         </div>

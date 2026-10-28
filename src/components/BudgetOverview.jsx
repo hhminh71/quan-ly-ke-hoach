@@ -310,12 +310,12 @@ export default function BudgetOverview({
   return (
     <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden">
       {/* Header: Ultra-slim minimalist height and font */}
-      <div className="p-1 sm:p-2.5 border-b border-slate-100 space-y-1 sm:space-y-1.5">
+      <div className="p-0.5 sm:p-1.5 border-b border-slate-100 space-y-0.5 sm:space-y-1">
         {/* Row 1: Title + View Mode & Actions (Strict 1 line, no wrapping) */}
         <div className="flex items-center justify-between gap-1 flex-nowrap">
           <div className="flex items-center gap-1 min-w-0">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-600 ring-2 ring-blue-100 shrink-0"></span>
-            <h2 className="text-[10px] sm:text-sm font-bold text-slate-800 truncate">
+            <h2 className="text-[9.5px] sm:text-sm font-bold text-slate-800 truncate leading-none">
               {viewMode === 'PROGRESS' ? (
                 <>
                   Tiến Độ Kế Hoạch{' '}
@@ -341,7 +341,7 @@ export default function BudgetOverview({
               <button
                 type="button"
                 onClick={() => setViewMode('PROGRESS')}
-                className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[8px] sm:text-xs font-semibold transition-all ${
+                className={`inline-flex items-center gap-0.5 px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded text-[8px] sm:text-xs font-semibold transition-all ${
                   viewMode === 'PROGRESS'
                     ? 'bg-white text-blue-700 shadow-2xs font-bold'
                     : 'text-slate-600 hover:text-slate-900'
@@ -354,7 +354,7 @@ export default function BudgetOverview({
               <button
                 type="button"
                 onClick={() => setViewMode('MATRIX')}
-                className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[8px] sm:text-xs font-semibold transition-all ${
+                className={`inline-flex items-center gap-0.5 px-1.5 py-0.2 sm:px-2 sm:py-0.5 rounded text-[8px] sm:text-xs font-semibold transition-all ${
                   viewMode === 'MATRIX'
                     ? 'bg-white text-indigo-700 shadow-2xs font-bold'
                     : 'text-slate-600 hover:text-slate-900'
@@ -372,7 +372,7 @@ export default function BudgetOverview({
                 <button
                   type="button"
                   onClick={() => setShowAddYearModal(true)}
-                  className="inline-flex items-center gap-0.5 px-1 py-0.5 sm:px-2 sm:py-0.5 rounded text-[8px] sm:text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-all"
+                  className="inline-flex items-center gap-0.5 px-1 py-0.2 sm:px-2 sm:py-0.5 rounded text-[8px] sm:text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-all"
                   title="Thêm một cột năm mới (ví dụ 2028)"
                 >
                   <PlusCircle className="w-2.5 h-2.5" />
@@ -384,7 +384,7 @@ export default function BudgetOverview({
                   <button
                     type="button"
                     onClick={() => setIsEditingMatrix(true)}
-                    className="inline-flex items-center gap-0.5 px-1 py-0.5 sm:px-1.5 sm:py-0.5 rounded text-[8px] sm:text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-all"
+                    className="inline-flex items-center gap-0.5 px-1 py-0.2 sm:px-1.5 sm:py-0.5 rounded text-[8px] sm:text-xs font-semibold bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 shadow-2xs transition-all"
                   >
                     <Edit3 className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-slate-500" />
                     <span>Sửa</span>
@@ -397,14 +397,14 @@ export default function BudgetOverview({
                         setEditedBudgets(budgets);
                         setIsEditingMatrix(false);
                       }}
-                      className="px-1 py-0.5 rounded text-[8px] sm:text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
+                      className="px-1 py-0.2 rounded text-[8px] sm:text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-colors"
                     >
                       Hủy
                     </button>
                     <button
                       type="button"
                       onClick={handleSaveMatrix}
-                      className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] sm:text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-all"
+                      className="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded text-[8px] sm:text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-all"
                     >
                       <Save className="w-2 h-2" />
                       <span>Lưu</span>
@@ -417,7 +417,7 @@ export default function BudgetOverview({
         </div>
 
         {/* Row 2: Search, Filters & Comparison Column Toggles (Thực Tế & Bravo) */}
-        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1">
           {/* Search: Slim height and font */}
           <div className="relative flex-1">
             <Search className="w-2.5 h-2.5 absolute left-1.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -426,7 +426,7 @@ export default function BudgetOverview({
               placeholder="Tìm theo mã (627...), tên, quy mô..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-5.5 sm:h-6.5 pl-5 pr-1.5 py-0.5 text-[8.5px] sm:text-xs rounded border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all leading-tight"
+              className="w-full h-5 sm:h-6 pl-5 pr-1.5 py-0 text-[8px] sm:text-xs rounded border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all leading-tight"
             />
           </div>
 
@@ -437,7 +437,7 @@ export default function BudgetOverview({
               <select
                 value={selectedGroup}
                 onChange={(e) => setSelectedGroup(e.target.value)}
-                className="w-full h-5.5 sm:h-6.5 pl-1.5 pr-3 py-0.5 text-[8.5px] sm:text-xs rounded border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all cursor-pointer truncate font-medium leading-tight"
+                className="w-full h-5 sm:h-6 pl-1 pr-3 py-0 text-[8px] sm:text-xs rounded border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all cursor-pointer truncate font-medium leading-tight"
               >
                 <option value="ALL">Tất cả nhóm</option>
                 {groups.map((g) => (
@@ -453,7 +453,7 @@ export default function BudgetOverview({
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full h-5.5 sm:h-6.5 pl-1.5 pr-2 py-0.5 text-[8.5px] sm:text-xs rounded border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all cursor-pointer truncate font-medium leading-tight"
+                className="w-full h-5 sm:h-6 pl-1 pr-2 py-0 text-[8px] sm:text-xs rounded border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all cursor-pointer truncate font-medium leading-tight"
               >
                 <option value="ALL">Tất cả</option>
                 <option value="SAFE">An toàn (&lt;80%)</option>
@@ -468,7 +468,7 @@ export default function BudgetOverview({
                 <button
                   type="button"
                   onClick={() => setShowBravoCol((prev) => !prev)}
-                  className={`h-5.5 sm:h-6.5 px-1.5 py-0.2 rounded text-[8px] sm:text-[9.5px] font-bold transition-all cursor-pointer leading-tight ${
+                  className={`h-5 sm:h-6 px-1.5 py-0 rounded text-[7.5px] sm:text-[9px] font-bold transition-all cursor-pointer leading-tight ${
                     showBravoCol
                       ? 'bg-amber-500 text-white shadow-2xs'
                       : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
@@ -480,7 +480,7 @@ export default function BudgetOverview({
                 <button
                   type="button"
                   onClick={() => setShowActualCol((prev) => !prev)}
-                  className={`h-5.5 sm:h-6.5 px-1.5 py-0.2 rounded text-[8px] sm:text-[9.5px] font-bold transition-all cursor-pointer leading-tight ${
+                  className={`h-5 sm:h-6 px-1.5 py-0 rounded text-[7.5px] sm:text-[9px] font-bold transition-all cursor-pointer leading-tight ${
                     showActualCol
                       ? 'bg-blue-600 text-white shadow-2xs'
                       : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
@@ -498,25 +498,25 @@ export default function BudgetOverview({
       {/* VIEW 1: PROGRESS VIEW (Tiến độ giải ngân 1 năm) */}
       {viewMode === 'PROGRESS' && (
         <>
-          {/* Quick Summary Bar: Single horizontal scrollable row on mobile, 5 cols on desktop */}
-          <div className="flex overflow-x-auto no-scrollbar lg:grid lg:grid-cols-5 gap-1 sm:gap-2 p-1 sm:p-1.5 bg-slate-50/80 border-b border-slate-200 text-xs">
+          {/* Quick Summary Bar: Ultra-slim 1-line horizontal strip */}
+          <div className="flex overflow-x-auto no-scrollbar lg:grid lg:grid-cols-5 gap-0.5 sm:gap-1 p-0.5 sm:p-1 bg-slate-50/80 border-b border-slate-200 text-xs">
             {/* 1. Tổng duyệt */}
-            <div className="min-w-[105px] sm:min-w-[125px] lg:min-w-0 flex-1 shrink-0 p-1 sm:p-1.5 rounded-md sm:rounded-lg bg-white border border-slate-200/80 shadow-2xs">
-              <span className="text-[8px] sm:text-3xs font-semibold text-slate-500 uppercase tracking-wide block truncate">
+            <div className="min-w-[90px] sm:min-w-[115px] lg:min-w-0 flex-1 shrink-0 p-0.5 px-1 sm:p-1 sm:px-1.5 rounded bg-white border border-slate-200/80 shadow-2xs">
+              <span className="text-[7.5px] sm:text-[9px] font-semibold text-slate-500 uppercase tracking-tight block truncate leading-none">
                 1. Tổng Duyệt
               </span>
-              <p className="text-[10px] sm:text-xs font-extrabold text-slate-900 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight" title={formatVND(summary.totalApproved)}>
+              <p className="text-[9.5px] sm:text-xs font-extrabold text-slate-900 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight" title={formatVND(summary.totalApproved)}>
                 {formatVND(summary.totalApproved)}
               </p>
             </div>
 
             {/* 2. Theo Bravo */}
             {showBravoCol && (
-              <div className="min-w-[105px] sm:min-w-[125px] lg:min-w-0 flex-1 shrink-0 p-1 sm:p-1.5 rounded-md sm:rounded-lg bg-amber-50/70 border border-amber-200/80 shadow-2xs">
-                <span className="text-[8px] sm:text-3xs font-semibold text-amber-800 uppercase tracking-wide block truncate">
+              <div className="min-w-[90px] sm:min-w-[115px] lg:min-w-0 flex-1 shrink-0 p-0.5 px-1 sm:p-1 sm:px-1.5 rounded bg-amber-50/70 border border-amber-200/80 shadow-2xs">
+                <span className="text-[7.5px] sm:text-[9px] font-semibold text-amber-800 uppercase tracking-tight block truncate leading-none">
                   2. Theo Bravo
                 </span>
-                <p className="text-[10px] sm:text-xs font-extrabold text-amber-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight" title={formatVND(summary.totalBravo)}>
+                <p className="text-[9.5px] sm:text-xs font-extrabold text-amber-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight" title={formatVND(summary.totalBravo)}>
                   {formatVND(summary.totalBravo)}
                 </p>
               </div>
@@ -524,38 +524,38 @@ export default function BudgetOverview({
 
             {/* 3. Theo Thực Tế */}
             {showActualCol && (
-              <div className="min-w-[105px] sm:min-w-[125px] lg:min-w-0 flex-1 shrink-0 p-1 sm:p-1.5 rounded-md sm:rounded-lg bg-blue-50/70 border border-blue-200/80 shadow-2xs">
-                <span className="text-[8px] sm:text-3xs font-semibold text-blue-800 uppercase tracking-wide block truncate">
+              <div className="min-w-[90px] sm:min-w-[115px] lg:min-w-0 flex-1 shrink-0 p-0.5 px-1 sm:p-1 sm:px-1.5 rounded bg-blue-50/70 border border-blue-200/80 shadow-2xs">
+                <span className="text-[7.5px] sm:text-[9px] font-semibold text-blue-800 uppercase tracking-tight block truncate leading-none">
                   3. Theo Thực Tế
                 </span>
-                <p className="text-[10px] sm:text-xs font-extrabold text-blue-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight" title={formatVND(summary.totalLiveActual)}>
+                <p className="text-[9.5px] sm:text-xs font-extrabold text-blue-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight" title={formatVND(summary.totalLiveActual)}>
                   {formatVND(summary.totalLiveActual)}
                 </p>
               </div>
             )}
 
             {/* 4. Thực Tế (MAX) */}
-            <div className="min-w-[105px] sm:min-w-[125px] lg:min-w-0 flex-1 shrink-0 p-1 sm:p-1.5 rounded-md sm:rounded-lg bg-emerald-50/80 border border-emerald-200/90 shadow-2xs">
+            <div className="min-w-[90px] sm:min-w-[115px] lg:min-w-0 flex-1 shrink-0 p-0.5 px-1 sm:p-1 sm:px-1.5 rounded bg-emerald-50/80 border border-emerald-200/90 shadow-2xs">
               <div className="flex items-center justify-between">
-                <span className="text-[8px] sm:text-3xs font-bold text-emerald-800 uppercase tracking-wide truncate">
+                <span className="text-[7.5px] sm:text-[9px] font-bold text-emerald-800 uppercase tracking-tight truncate leading-none">
                   Thực Tế (MAX)
                 </span>
-                <span className="text-[7.5px] sm:text-3xs font-mono font-bold px-0.5 py-0.2 bg-emerald-200 text-emerald-900 rounded">
+                <span className="text-[7px] sm:text-3xs font-mono font-bold px-0.5 bg-emerald-200 text-emerald-900 rounded">
                   MAX
                 </span>
               </div>
-              <p className="text-[10px] sm:text-xs font-extrabold text-emerald-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight" title={formatVND(summary.totalReportActual)}>
+              <p className="text-[9.5px] sm:text-xs font-extrabold text-emerald-950 mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight" title={formatVND(summary.totalReportActual)}>
                 {formatVND(summary.totalReportActual)}
               </p>
             </div>
 
             {/* 5. Còn lại */}
-            <div className="min-w-[105px] sm:min-w-[125px] lg:min-w-0 flex-1 shrink-0 p-1 sm:p-1.5 rounded-md sm:rounded-lg bg-white border border-slate-200/80 shadow-2xs">
-              <span className="text-[8px] sm:text-3xs font-semibold text-slate-500 uppercase tracking-wide block truncate">
+            <div className="min-w-[90px] sm:min-w-[115px] lg:min-w-0 flex-1 shrink-0 p-0.5 px-1 sm:p-1 sm:px-1.5 rounded bg-white border border-slate-200/80 shadow-2xs">
+              <span className="text-[7.5px] sm:text-[9px] font-semibold text-slate-500 uppercase tracking-tight block truncate leading-none">
                 Còn Lại (Khả Dụng)
               </span>
               <p
-                className={`text-[10px] sm:text-xs font-extrabold mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight ${
+                className={`text-[9.5px] sm:text-xs font-extrabold mt-0.5 font-mono tracking-tight whitespace-nowrap truncate leading-tight ${
                   summary.totalRemaining < 0 ? 'text-rose-600' : 'text-slate-900'
                 }`}
                 title={formatVND(summary.totalRemaining)}
@@ -566,7 +566,7 @@ export default function BudgetOverview({
           </div>
 
           {/* Hint banner: ultra-slim, hidden on mobile screens to maximize table rows */}
-          <div className="hidden sm:flex px-2.5 sm:px-4 py-0.5 sm:py-1 bg-blue-50/70 border-b border-blue-100 items-center justify-between text-[10px] sm:text-2xs text-blue-800 gap-1.5">
+          <div className="hidden sm:flex px-2.5 sm:px-4 py-0.5 bg-blue-50/70 border-b border-blue-100 items-center justify-between text-[10px] sm:text-2xs text-blue-800 gap-1.5">
             <div className="flex items-center gap-1.5 truncate">
               <span className="flex h-1.5 w-1.5 relative shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
@@ -578,37 +578,38 @@ export default function BudgetOverview({
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Table Container: Fixed Sticky Header when scrolling down */}
+          <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-175px)] sm:max-h-[calc(100vh-210px)] relative">
             <table className="w-full text-left border-collapse table-auto">
-              <thead>
-                <tr className="bg-slate-50/90 border-b border-slate-200 text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                  <th className="py-1.5 px-1.5 sm:px-2.5 w-16 sm:w-20">Mã KH</th>
-                  <th className="py-1.5 px-1.5 sm:px-2.5 max-w-[200px] sm:max-w-[260px]">Tên Hạng Mục / Khoản Mục</th>
-                  <th className="py-1.5 px-1.5 sm:px-2 text-right whitespace-nowrap">Được Duyệt ({selectedYear})</th>
+              <thead className="sticky top-0 z-20 bg-slate-100/95 backdrop-blur-xs border-b border-slate-200 shadow-2xs">
+                <tr className="text-[8px] sm:text-[9.5px] font-bold text-slate-600 uppercase tracking-wider">
+                  <th className="py-0.5 px-1 sm:px-1.5 w-14 sm:w-18">Mã KH</th>
+                  <th className="py-0.5 px-1 sm:px-1.5 max-w-[180px] sm:max-w-[240px]">Tên Hạng Mục / Khoản Mục</th>
+                  <th className="py-0.5 px-1 sm:px-1.5 text-right whitespace-nowrap">Được Duyệt ({selectedYear})</th>
                   
                   {/* Cột Tùy Chọn: Theo Bravo */}
                   {showBravoCol && (
-                    <th className="py-1.5 px-1.5 sm:px-2 text-right whitespace-nowrap bg-amber-50/70 text-amber-900 border-l border-r border-amber-200/50">
+                    <th className="py-0.5 px-1 sm:px-1.5 text-right whitespace-nowrap bg-amber-50/90 text-amber-900 border-l border-r border-amber-200/50">
                       Theo Bravo
                     </th>
                   )}
 
                   {/* Cột Tùy Chọn: Theo Thực Tế */}
                   {showActualCol && (
-                    <th className="py-1.5 px-1.5 sm:px-2 text-right whitespace-nowrap bg-blue-50/70 text-blue-900 border-l border-r border-blue-200/50">
+                    <th className="py-0.5 px-1 sm:px-1.5 text-right whitespace-nowrap bg-blue-50/90 text-blue-900 border-l border-r border-blue-200/50">
                       Theo Thực Tế
                     </th>
                   )}
 
                   {/* Cột Chính: Chi Phí Thực Tế (MAX Báo Cáo) */}
-                  <th className="py-1.5 px-1.5 sm:px-2 text-right whitespace-nowrap bg-emerald-50/90 text-emerald-950 font-bold border-l border-r border-emerald-200/70">
+                  <th className="py-0.5 px-1 sm:px-1.5 text-right whitespace-nowrap bg-emerald-50/95 text-emerald-950 font-bold border-l border-r border-emerald-200/70">
                     Chi Phí Báo Cáo
-                    <span className="block text-3xs font-normal text-emerald-700">MAX(Bravo, Thực tế)</span>
+                    <span className="block text-[7px] sm:text-3xs font-normal text-emerald-700">MAX(Bravo, Thực tế)</span>
                   </th>
 
-                  <th className="py-1.5 px-1.5 sm:px-2 text-right whitespace-nowrap">Còn Lại</th>
-                  <th className="py-1.5 px-1.5 sm:px-2 whitespace-nowrap w-24 sm:w-28">Tiến Độ</th>
-                  <th className="py-1.5 px-1 sm:px-2 text-center w-20 whitespace-nowrap">Trạng Thái</th>
+                  <th className="py-0.5 px-1 sm:px-1.5 text-right whitespace-nowrap">Còn Lại</th>
+                  <th className="py-0.5 px-1 sm:px-1.5 whitespace-nowrap w-20 sm:w-24">Tiến Độ</th>
+                  <th className="py-0.5 px-0.5 sm:px-1 text-center w-16 sm:w-18 whitespace-nowrap">Trạng Thái</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
@@ -633,14 +634,14 @@ export default function BudgetOverview({
                         title={`Click để mở sổ cái chi tiết của [${item.code}] ${item.name}`}
                       >
                         {/* Mã */}
-                        <td className="py-1.5 px-1.5 sm:px-2.5 whitespace-nowrap">
-                          <div className="flex items-center gap-1">
-                            <span className="font-mono text-2xs sm:text-xs font-bold text-blue-700 bg-blue-50 group-hover:bg-blue-600 group-hover:text-white px-1.5 py-0.5 rounded border border-blue-200 group-hover:border-blue-600 transition-colors shadow-2xs">
+                        <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 whitespace-nowrap">
+                          <div className="flex items-center gap-0.5">
+                            <span className="font-mono text-[9px] sm:text-2xs font-bold text-blue-700 bg-blue-50 group-hover:bg-blue-600 group-hover:text-white px-1 py-0.2 rounded border border-blue-200 group-hover:border-blue-600 transition-colors shadow-2xs">
                               {item.code}
                             </span>
                             {count > 0 && (
                               <span
-                                className="text-3xs font-bold text-blue-700 bg-blue-100/80 group-hover:bg-white group-hover:text-blue-700 px-1 py-0.2 rounded-full border border-blue-200 transition-colors"
+                                className="text-[7.5px] sm:text-3xs font-bold text-blue-700 bg-blue-100/80 group-hover:bg-white group-hover:text-blue-700 px-1 py-0.2 rounded-full border border-blue-200 transition-colors"
                                 title={`${count} phiếu chi phát sinh trong năm ${selectedYear}`}
                               >
                                 {count}
@@ -650,28 +651,28 @@ export default function BudgetOverview({
                         </td>
 
                         {/* Tên & Nhóm */}
-                        <td className="py-1.5 px-1.5 sm:px-2.5 max-w-[200px] sm:max-w-[260px]">
-                          <div className="font-semibold text-slate-800 text-xs truncate leading-snug group-hover:text-blue-700 transition-colors" title={item.name}>
+                        <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 max-w-[180px] sm:max-w-[240px]">
+                          <div className="font-semibold text-slate-800 text-[10px] sm:text-xs truncate leading-tight group-hover:text-blue-700 transition-colors" title={item.name}>
                             {item.name}
                           </div>
-                          <div className="text-3xs text-slate-400 mt-0.5 truncate" title={item.scope || item.group}>
+                          <div className="text-[8px] sm:text-3xs text-slate-400 truncate leading-tight" title={item.scope || item.group}>
                             {item.scope ? item.scope : item.group}
                           </div>
                         </td>
 
                         {/* Được duyệt của năm đang chọn */}
-                        <td className="py-1.5 px-1.5 sm:px-2 text-right whitespace-nowrap font-mono text-2xs sm:text-xs text-slate-700 font-semibold">
+                        <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-right whitespace-nowrap font-mono text-[9.5px] sm:text-xs text-slate-700 font-semibold leading-tight">
                           {formatVND(item.selectedYearApproved)}
                         </td>
 
                         {/* Cột Tùy Chọn: Theo Bravo */}
                         {showBravoCol && (
-                          <td className="py-1.5 px-1.5 sm:px-2 text-right whitespace-nowrap font-mono text-2xs sm:text-xs font-semibold text-amber-900 bg-amber-50/20 border-l border-r border-amber-100/60">
+                          <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-right whitespace-nowrap font-mono text-[9.5px] sm:text-xs font-semibold text-amber-900 bg-amber-50/20 border-l border-r border-amber-100/60 leading-tight">
                             <div className="flex flex-col items-end">
                               <span>{formatVND(item.bravoVal)}</span>
                               {item.isSctsSeparated && (
                                 <span
-                                  className="inline-block text-3xs font-semibold text-amber-800 bg-amber-100/90 px-1 py-0.2 rounded mt-0.5 border border-amber-300"
+                                  className="inline-block text-[7.5px] sm:text-3xs font-semibold text-amber-800 bg-amber-100/90 px-1 py-0.2 rounded border border-amber-300"
                                   title="Bravo hạch toán gộp chung cả SCTX và SCTS (Sửa chữa lớn)"
                                 >
                                   Gộp SCTS & SCTX
@@ -681,41 +682,41 @@ export default function BudgetOverview({
                           </td>
                         )}
 
-                        {/* Cột Tùy Chọn: Theo Nhập Liệu */}
+                        {/* Cột Tùy Chọn: Theo Thực Tế */}
                         {showActualCol && (
-                          <td className="py-1.5 px-1.5 sm:px-2 text-right whitespace-nowrap font-mono text-2xs sm:text-xs font-semibold text-blue-700 bg-blue-50/20 border-l border-r border-blue-100/60">
+                          <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-right whitespace-nowrap font-mono text-[9.5px] sm:text-xs font-semibold text-blue-700 bg-blue-50/20 border-l border-r border-blue-100/60 leading-tight">
                             {formatVND(item.liveActual)}
                           </td>
                         )}
 
                         {/* Cột Chính: Chi Phí Thực Tế (MAX Báo Cáo) */}
-                        <td className="py-1.5 px-1.5 sm:px-2 text-right whitespace-nowrap font-mono text-2xs sm:text-xs font-bold text-emerald-950 bg-emerald-50/40 border-l border-r border-emerald-100">
+                        <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-right whitespace-nowrap font-mono text-[9.5px] sm:text-xs font-bold text-emerald-950 bg-emerald-50/40 border-l border-r border-emerald-100 leading-tight">
                           <div className="flex flex-col items-end">
                             <span className="font-bold">{formatVND(item.reportActual)}</span>
                             {item.isSctsSeparated ? (
                               <span
-                                className="inline-block text-3xs font-semibold text-indigo-800 bg-indigo-100/90 px-1 py-0.2 rounded mt-0.5 border border-indigo-200"
+                                className="inline-block text-[7.5px] sm:text-3xs font-semibold text-indigo-800 bg-indigo-100/90 px-1 py-0.2 rounded border border-indigo-200"
                                 title="Đã tách riêng Sửa chữa tài sản (SCTS) theo nghiệp vụ Cảng. Chi phí kế hoạch chỉ tính theo SCTX nhập liệu."
                               >
                                 SCTX (Đã tách SCTS)
                               </span>
                             ) : item.source === 'BRAVO' ? (
                               <span
-                                className="inline-block text-3xs font-semibold text-amber-800 bg-amber-100/90 px-1 py-0.2 rounded mt-0.5 border border-amber-200"
+                                className="inline-block text-[7.5px] sm:text-3xs font-semibold text-amber-800 bg-amber-100/90 px-1 py-0.2 rounded border border-amber-200"
                                 title={`Số này lấy theo BRAVO (${formatVND(item.bravoVal)}) vì lớn hơn số nhập liệu (${formatVND(item.liveActual)})`}
                               >
                                 (Theo Bravo)
                               </span>
                             ) : item.bravoVal > 0 && item.liveActual === item.bravoVal ? (
                               <span
-                                className="inline-block text-3xs font-semibold text-emerald-800 bg-emerald-100/90 px-1 py-0.2 rounded mt-0.5 border border-emerald-200"
+                                className="inline-block text-[7.5px] sm:text-3xs font-semibold text-emerald-800 bg-emerald-100/90 px-1 py-0.2 rounded border border-emerald-200"
                                 title="Bravo và Nhập liệu bằng nhau"
                               >
                                 (Khớp)
                               </span>
                             ) : (
                               <span
-                                className="inline-block text-3xs font-semibold text-blue-800 bg-blue-100/90 px-1 py-0.2 rounded mt-0.5 border border-blue-200"
+                                className="inline-block text-[7.5px] sm:text-3xs font-semibold text-blue-800 bg-blue-100/90 px-1 py-0.2 rounded border border-blue-200"
                                 title={`Số này lấy theo Nhập liệu phiếu chi (${formatVND(item.liveActual)})`}
                               >
                                 (Theo Nhập liệu)
@@ -726,7 +727,7 @@ export default function BudgetOverview({
 
                         {/* Còn lại */}
                         <td
-                          className={`py-1.5 px-1.5 sm:px-2 text-right whitespace-nowrap font-mono text-2xs sm:text-xs font-bold ${
+                          className={`py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-right whitespace-nowrap font-mono text-[9.5px] sm:text-xs font-bold leading-tight ${
                             item.liveRemaining < 0 ? 'text-rose-600' : 'text-emerald-700'
                           }`}
                         >
@@ -734,9 +735,9 @@ export default function BudgetOverview({
                         </td>
 
                         {/* Progress Bar */}
-                        <td className="py-1.5 px-1.5 sm:px-2 whitespace-nowrap w-24 sm:w-28">
-                          <div className="flex items-center gap-1.5">
-                            <div className="w-12 sm:w-16 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 whitespace-nowrap w-20 sm:w-24">
+                          <div className="flex items-center gap-1">
+                            <div className="w-10 sm:w-14 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                               <div
                                 className={`h-full rounded-full transition-all duration-300 ${
                                   item.livePercent >= 100
@@ -748,24 +749,24 @@ export default function BudgetOverview({
                                 style={{ width: `${percentClamped}%` }}
                               ></div>
                             </div>
-                            <span className="text-3xs font-mono font-bold text-slate-600 shrink-0">
+                            <span className="text-[8px] sm:text-3xs font-mono font-bold text-slate-600 shrink-0">
                               {item.livePercent.toFixed(0)}%
                             </span>
                           </div>
                         </td>
 
                         {/* Status Badge */}
-                        <td className="py-1.5 px-1 sm:px-2 text-center whitespace-nowrap w-20">
+                        <td className="py-0.5 px-0.5 sm:py-0.5 sm:px-1 text-center whitespace-nowrap w-16 sm:w-18">
                           {item.status === 'OVER' ? (
-                            <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-3xs font-semibold text-rose-700 bg-rose-50 border border-rose-200">
+                            <span className="inline-flex items-center px-1 py-0.2 rounded-full text-[7.5px] sm:text-3xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 leading-none">
                               Vượt
                             </span>
                           ) : item.status === 'WARNING' ? (
-                            <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-3xs font-semibold text-amber-700 bg-amber-50 border border-amber-200">
+                            <span className="inline-flex items-center px-1 py-0.2 rounded-full text-[7.5px] sm:text-3xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 leading-none">
                               Gần hết
                             </span>
                           ) : (
-                            <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-3xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200">
+                            <span className="inline-flex items-center px-1 py-0.2 rounded-full text-[7.5px] sm:text-3xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 leading-none">
                               An toàn
                             </span>
                           )}
@@ -822,25 +823,25 @@ export default function BudgetOverview({
 
       {/* VIEW 2: MULTI-YEAR MATRIX VIEW (Bảng Ma Trận Các Cột Năm 2024, 2025, 2026, 2027...) */}
       {viewMode === 'MATRIX' && (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-175px)] sm:max-h-[calc(100vh-210px)] relative">
           <table className="w-full text-left border-collapse table-auto">
-            <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                <th className="py-1.5 px-1.5 sm:px-2 sticky left-0 bg-slate-50 z-10 w-16 sm:w-20">Mã KH</th>
-                <th className="py-1.5 px-1.5 sm:px-2 max-w-[200px] sm:max-w-[260px]">Tên Hạng Mục</th>
-                <th className="py-1.5 px-1.5 sm:px-2 max-w-[130px]">Nhóm Chi Phí</th>
+            <thead className="sticky top-0 z-20 bg-slate-100/95 backdrop-blur-xs border-b border-slate-200 shadow-2xs">
+              <tr className="text-[8px] sm:text-[9.5px] font-bold text-slate-600 uppercase tracking-wider">
+                <th className="py-0.5 px-1 sm:px-1.5 sticky left-0 bg-slate-100 z-30 w-14 sm:w-18">Mã KH</th>
+                <th className="py-0.5 px-1 sm:px-1.5 max-w-[180px] sm:max-w-[240px]">Tên Hạng Mục</th>
+                <th className="py-0.5 px-1 sm:px-1.5 max-w-[110px]">Nhóm Chi Phí</th>
                 {matrixYears.map((yr) => (
                   <th
                     key={yr}
-                    className={`py-1.5 px-1.5 sm:px-2 text-right whitespace-nowrap min-w-[100px] font-mono ${
+                    className={`py-0.5 px-1 sm:px-1.5 text-right whitespace-nowrap min-w-[90px] font-mono ${
                       yr === selectedYear
-                        ? 'bg-blue-100/70 text-blue-900 font-bold border-x border-blue-200'
+                        ? 'bg-blue-100/80 text-blue-900 font-bold border-x border-blue-200'
                         : ''
                     }`}
                   >
                     <span>Cột Năm {yr}</span>
                     {yr === selectedYear && (
-                      <span className="block text-[8.5px] font-sans text-blue-600 font-normal">
+                      <span className="block text-[7.5px] font-sans text-blue-600 font-normal">
                         (Đang chọn)
                       </span>
                     )}
@@ -857,19 +858,19 @@ export default function BudgetOverview({
                   title={!isEditingMatrix ? `Click để mở sổ cái chi tiết của [${item.code}] ${item.name}` : ''}
                 >
                   {/* Mã */}
-                  <td className="py-1.5 px-1.5 sm:px-2 whitespace-nowrap sticky left-0 bg-white group-hover:bg-slate-50 z-10">
-                    <span className="font-mono text-2xs sm:text-xs font-bold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                  <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 whitespace-nowrap sticky left-0 bg-white group-hover:bg-slate-50 z-10">
+                    <span className="font-mono text-[9px] sm:text-2xs font-bold text-slate-800 bg-slate-100 px-1 py-0.2 rounded border border-slate-200">
                       {item.code}
                     </span>
                   </td>
 
                   {/* Tên */}
-                  <td className="py-1.5 px-1.5 sm:px-2 text-xs font-medium text-slate-800 max-w-[200px] sm:max-w-[260px] truncate" title={item.name}>
+                  <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-[10px] sm:text-xs font-medium text-slate-800 max-w-[180px] sm:max-w-[240px] truncate leading-tight" title={item.name}>
                     {item.name}
                   </td>
 
                   {/* Nhóm */}
-                  <td className="py-1.5 px-1.5 sm:px-2 text-xs text-slate-500 max-w-[130px] truncate" title={item.group}>
+                  <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-[8.5px] sm:text-xs text-slate-500 max-w-[110px] truncate leading-tight" title={item.group}>
                     {item.group}
                   </td>
 
@@ -881,7 +882,7 @@ export default function BudgetOverview({
                     return (
                       <td
                         key={yr}
-                        className={`py-1.5 px-1.5 sm:px-2 text-right whitespace-nowrap font-mono text-xs ${
+                        className={`py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-right whitespace-nowrap font-mono text-[9.5px] sm:text-xs leading-tight ${
                           isSelected ? 'bg-blue-50/50 border-x border-blue-100 font-bold text-blue-900' : 'text-slate-700'
                         }`}
                       >
@@ -890,7 +891,7 @@ export default function BudgetOverview({
                             type="text"
                             value={val ? val.toLocaleString('vi-VN') : '0'}
                             onChange={(e) => handleMatrixCellChange(item.code, yr, e.target.value)}
-                            className="w-full text-right px-2 py-1 rounded border border-indigo-300 bg-white text-xs font-mono font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                            className="w-full text-right px-1.5 py-0.5 rounded border border-indigo-300 bg-white text-xs font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-300"
                           />
                         ) : (
                           <span>{formatVND(val)}</span>

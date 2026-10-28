@@ -199,16 +199,16 @@ export default function TransactionList({
       )}
 
       {/* Header & Controls: Slim minimalist height */}
-      <div className="p-1.5 sm:p-3 border-b border-slate-100 space-y-1.5 sm:space-y-2.5">
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-1.5 sm:gap-3">
+      <div className="p-0.5 sm:p-1.5 border-b border-slate-100 space-y-0.5 sm:space-y-1">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-1 sm:gap-2">
           <div>
-            <div className="flex items-center justify-between gap-1.5 sm:gap-2">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-emerald-100"></span>
-                <h2 className="text-2xs sm:text-base font-bold text-slate-800">
+            <div className="flex items-center justify-between gap-1 sm:gap-2">
+              <div className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ring-2 ring-emerald-100"></span>
+                <h2 className="text-[9.5px] sm:text-sm font-bold text-slate-800 leading-none">
                   Sổ Cái Phiếu Chi{' '}
                   <span className="text-emerald-700 font-extrabold">
-                    ({selectedYear === 'ALL' ? 'Tất Cả' : `Năm ${selectedYear}`})
+                    ({selectedYear === 'ALL' ? 'Tất Cả' : selectedYear})
                   </span>
                 </h2>
               </div>
@@ -217,15 +217,15 @@ export default function TransactionList({
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(true)}
-                  className="inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-2xs transition-all"
+                  className="inline-flex items-center gap-0.5 px-1 py-0.2 sm:px-2 sm:py-0.5 rounded text-[8px] sm:text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-2xs transition-all"
                   title="Thêm mới phiếu chi và đồng bộ trực tiếp lên Google Sheet"
                 >
-                  <PlusCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                  <PlusCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                   <span>+ Thêm Phiếu</span>
                 </button>
               )}
             </div>
-            <p className="hidden sm:block text-3xs sm:text-xs text-slate-500 mt-0.5">
+            <p className="hidden sm:block text-[8px] sm:text-3xs text-slate-500 mt-0.5">
               Hiển thị {sorted.length.toLocaleString('vi-VN')} giao dịch phát sinh trong{' '}
               {selectedYear === 'ALL' ? 'toàn bộ lịch sử' : `năm tài chính ${selectedYear}`}
               {selectedCategory !== 'ALL' && (
@@ -237,47 +237,47 @@ export default function TransactionList({
           </div>
 
           {/* 3 KPI Summary Cards: Ultra-slim horizontal tiles */}
-          <div className="grid grid-cols-3 gap-1 sm:gap-2 bg-slate-50/90 p-0.5 sm:p-1 rounded-lg border border-slate-200/80 shadow-2xs">
+          <div className="grid grid-cols-3 gap-0.5 sm:gap-1 bg-slate-50/90 p-0.5 sm:p-1 rounded border border-slate-200/80 shadow-2xs">
             {/* 1. Tổng được duyệt */}
-            <div className="px-1.5 py-0.5 rounded-md bg-white border border-slate-200/70 shadow-2xs text-left">
-              <div className="flex items-center justify-between text-[8px] sm:text-[9.5px] text-slate-500 font-semibold uppercase tracking-tight">
+            <div className="px-1 py-0.5 rounded bg-white border border-slate-200/70 shadow-2xs text-left">
+              <div className="flex items-center justify-between text-[7px] sm:text-[8.5px] text-slate-500 font-semibold uppercase tracking-tight leading-none">
                 <span>Được duyệt</span>
-                <span className="hidden sm:inline-block font-bold text-slate-500 bg-slate-100 px-1 py-0.2 rounded text-3xs">
+                <span className="hidden sm:inline-block font-bold text-slate-500 bg-slate-100 px-1 rounded text-3xs">
                   100%
                 </span>
               </div>
-              <div className="text-[9.5px] sm:text-xs font-extrabold text-slate-800 font-mono mt-0.5 truncate leading-tight" title={formatVND(budgetStats.approved)}>
+              <div className="text-[9px] sm:text-xs font-extrabold text-slate-800 font-mono mt-0.5 truncate leading-tight" title={formatVND(budgetStats.approved)}>
                 {formatVND(budgetStats.approved)}
               </div>
             </div>
 
             {/* 2. Tổng phát sinh (số tiền và %) */}
-            <div className="px-1.5 py-0.5 rounded-md bg-blue-50/80 border border-blue-200 shadow-2xs text-left">
-              <div className="flex items-center justify-between text-[8px] sm:text-[9.5px] text-blue-700 font-semibold uppercase tracking-tight">
+            <div className="px-1 py-0.5 rounded bg-blue-50/80 border border-blue-200 shadow-2xs text-left">
+              <div className="flex items-center justify-between text-[7px] sm:text-[8.5px] text-blue-700 font-semibold uppercase tracking-tight leading-none">
                 <span>Phát sinh</span>
-                <span className="text-[7.5px] sm:text-[9px] font-bold bg-blue-600 text-white px-1 py-0.2 rounded">
+                <span className="text-[7px] sm:text-[8.5px] font-bold bg-blue-600 text-white px-0.5 rounded">
                   {budgetStats.spentPercent.toFixed(0)}%
                 </span>
               </div>
-              <div className="text-[9.5px] sm:text-xs font-extrabold text-blue-900 font-mono mt-0.5 truncate leading-tight" title={formatVND(budgetStats.spent)}>
+              <div className="text-[9px] sm:text-xs font-extrabold text-blue-900 font-mono mt-0.5 truncate leading-tight" title={formatVND(budgetStats.spent)}>
                 {formatVND(budgetStats.spent)}
               </div>
             </div>
 
             {/* 3. Tổng còn lại (số tiền và %) */}
             <div
-              className={`px-1.5 py-0.5 rounded-md border shadow-2xs text-left ${
+              className={`px-1 py-0.5 rounded border shadow-2xs text-left ${
                 budgetStats.remaining >= 0
                   ? 'bg-emerald-50/80 border-emerald-200'
                   : 'bg-rose-50/80 border-rose-200'
               }`}
             >
-              <div className="flex items-center justify-between text-[8px] sm:text-[9.5px] font-semibold uppercase tracking-tight">
+              <div className="flex items-center justify-between text-[7px] sm:text-[8.5px] font-semibold uppercase tracking-tight leading-none">
                 <span className={budgetStats.remaining >= 0 ? 'text-emerald-700' : 'text-rose-700'}>
                   {budgetStats.remaining >= 0 ? 'Còn lại' : 'Vượt'}
                 </span>
                 <span
-                  className={`text-[7.5px] sm:text-[9px] font-bold px-1 py-0.2 rounded text-white ${
+                  className={`text-[7px] sm:text-[8.5px] font-bold px-0.5 rounded text-white ${
                     budgetStats.remaining >= 0 ? 'bg-emerald-600' : 'bg-rose-600'
                   }`}
                 >
@@ -285,7 +285,7 @@ export default function TransactionList({
                 </span>
               </div>
               <div
-                className={`text-[9.5px] sm:text-xs font-extrabold font-mono mt-0.5 truncate leading-tight ${
+                className={`text-[9px] sm:text-xs font-extrabold font-mono mt-0.5 truncate leading-tight ${
                   budgetStats.remaining >= 0 ? 'text-emerald-900' : 'text-rose-700'
                 }`}
                 title={formatVND(budgetStats.remaining)}
@@ -312,11 +312,11 @@ export default function TransactionList({
           </div>
         )}
 
-        {/* Search, Filter & Sort Bar: 2 selects side-by-side on mobile */}
-        <div className="grid grid-cols-2 sm:grid-cols-12 gap-1 sm:gap-2 pt-0.5">
+        {/* Search, Filter & Sort Bar: Ultra-slim 1-line controls */}
+        <div className="grid grid-cols-2 sm:grid-cols-12 gap-0.5 sm:gap-1.5 pt-0.5">
           {/* Search Input */}
           <div className="col-span-2 sm:col-span-5 relative">
-            <Search className="w-3 h-3 sm:w-3.5 sm:h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-2.5 h-2.5 sm:w-3 sm:h-3 absolute left-1.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Tìm theo nhân viên, nội dung, mã (627...)..."
@@ -325,13 +325,13 @@ export default function TransactionList({
                 setSearchTerm(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-6 sm:pl-7 pr-2 py-0.5 sm:py-1 text-2xs sm:text-xs rounded-md border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-100 focus:border-blue-500 transition-all"
+              className="w-full h-5 sm:h-6 pl-5 pr-1.5 py-0 text-[8px] sm:text-xs rounded border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-100 focus:border-blue-500 transition-all leading-tight"
             />
           </div>
 
           {/* Category Filter */}
           <div className="col-span-1 sm:col-span-4 relative">
-            <Layers className="w-3 h-3 absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Layers className="w-2.5 h-2.5 absolute left-1.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <select
               value={selectedCategory}
               onChange={(e) => {
@@ -340,7 +340,7 @@ export default function TransactionList({
                 if (onSelectCategory) onSelectCategory(val);
                 setCurrentPage(1);
               }}
-              className="w-full pl-5 sm:pl-6 pr-1.5 py-0.5 sm:py-1 text-2xs sm:text-xs rounded-md border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer truncate"
+              className="w-full h-5 sm:h-6 pl-4.5 pr-1 py-0 text-[8px] sm:text-xs rounded border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer truncate leading-tight"
             >
               <option value="ALL">Tất cả tài khoản ({categories.length})</option>
               {categories.map((c) => (
@@ -353,11 +353,11 @@ export default function TransactionList({
 
           {/* Sort Order */}
           <div className="col-span-1 sm:col-span-3 relative">
-            <ArrowUpDown className="w-3 h-3 absolute left-1.5 sm:left-2 top-1/2 -translate-y-1/2 text-slate-400" />
+            <ArrowUpDown className="w-2.5 h-2.5 absolute left-1.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
-              className="w-full pl-5 sm:pl-6 pr-1.5 py-0.5 sm:py-1 text-2xs sm:text-xs rounded-md border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer truncate font-medium"
+              className="w-full h-5 sm:h-6 pl-4.5 pr-1 py-0 text-[8px] sm:text-xs rounded border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer truncate font-medium leading-tight"
             >
               <option value="newest">Mới nhất trước</option>
               <option value="oldest">Cũ nhất trước</option>
@@ -396,54 +396,54 @@ export default function TransactionList({
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-175px)] sm:max-h-[calc(100vh-210px)] relative">
           <table className="w-full text-left border-collapse table-auto">
-            <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200 text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+            <thead className="sticky top-0 z-20 bg-slate-100/95 backdrop-blur-xs border-b border-slate-200 shadow-2xs">
+              <tr className="text-[8px] sm:text-[9.5px] font-bold text-slate-600 uppercase tracking-wider">
                 {/* 1. Ngày: dd/mm/yy không icon, bóp siêu gọn */}
                 <th
                   onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
-                  className="py-1 px-1 sm:px-1.5 w-16 sm:w-18 cursor-pointer hover:text-blue-600 transition-colors select-none whitespace-nowrap text-center"
+                  className="py-0.5 px-1 sm:px-1.5 w-14 sm:w-16 cursor-pointer hover:text-blue-600 transition-colors select-none whitespace-nowrap text-center leading-tight"
                   title="Click để đổi thứ tự ngày"
                 >
                   <div className="flex items-center justify-center gap-0.5">
                     <span>Ngày</span>
-                    <ArrowUpDown className="w-2.5 h-2.5 text-slate-400" />
+                    <ArrowUpDown className="w-2 h-2 text-slate-400" />
                   </div>
                 </th>
 
                 {/* 2. Khoản mục & Nhóm */}
                 <th
                   onClick={() => setSortOrder(sortOrder === 'account_asc' ? 'account_desc' : 'account_asc')}
-                  className="py-1 px-1 sm:px-1.5 w-28 sm:w-36 cursor-pointer hover:text-blue-600 transition-colors select-none whitespace-nowrap"
+                  className="py-0.5 px-1 sm:px-1.5 w-24 sm:w-32 cursor-pointer hover:text-blue-600 transition-colors select-none whitespace-nowrap leading-tight"
                   title="Click để sort theo Mã khoản mục"
                 >
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5">
                     <span>Khoản mục</span>
-                    <ArrowUpDown className="w-2.5 h-2.5 text-slate-400" />
+                    <ArrowUpDown className="w-2 h-2 text-slate-400" />
                   </div>
                 </th>
 
-                {/* 3. Nội dung diễn giải (có thể xuống dòng, tối giản chiều ngang) */}
-                <th className="py-1 px-1.5 sm:px-2 min-w-[120px]">Nội dung diễn giải</th>
+                {/* 3. Nội dung diễn giải */}
+                <th className="py-0.5 px-1 sm:px-1.5 min-w-[110px] leading-tight">Nội dung diễn giải</th>
 
                 {/* 4. Số tiền (VNĐ) */}
                 <th
                   onClick={() => setSortOrder(sortOrder === 'highest' ? 'lowest' : 'highest')}
-                  className="py-1 px-1 sm:px-2 text-right w-20 sm:w-28 cursor-pointer hover:text-blue-600 transition-colors select-none whitespace-nowrap"
+                  className="py-0.5 px-1 sm:px-1.5 text-right w-18 sm:w-24 cursor-pointer hover:text-blue-600 transition-colors select-none whitespace-nowrap leading-tight"
                   title="Click để đổi thứ tự số tiền"
                 >
                   <div className="flex items-center justify-end gap-0.5">
                     <span>Số tiền (VNĐ)</span>
-                    <ArrowUpDown className="w-2.5 h-2.5 text-slate-400" />
+                    <ArrowUpDown className="w-2 h-2 text-slate-400" />
                   </div>
                 </th>
 
                 {/* 5. Người thực hiện (di chuyển ra trước cột điều chỉnh) */}
-                <th className="py-1 px-1 sm:px-1.5 w-20 sm:w-28">Người thực hiện</th>
+                <th className="py-0.5 px-1 sm:px-1.5 w-18 sm:w-24 leading-tight">Người thực hiện</th>
 
                 {/* 6. Điều chỉnh (Thao tác) */}
-                <th className="py-1 px-0.5 text-center w-12 sm:w-14 whitespace-nowrap">Điều chỉnh</th>
+                <th className="py-0.5 px-0.5 text-center w-10 sm:w-12 whitespace-nowrap leading-tight">Điều chỉnh</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">
@@ -453,38 +453,38 @@ export default function TransactionList({
                   className="hover:bg-slate-50/70 transition-colors group"
                 >
                   {/* 1. Ngày: dd/mm/yy không logo lịch */}
-                  <td className="py-1 px-1 sm:px-1.5 text-center whitespace-nowrap font-mono text-2xs sm:text-xs text-slate-700 font-medium">
+                  <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-center whitespace-nowrap font-mono text-[9px] sm:text-xs text-slate-700 font-medium leading-tight">
                     {formatDate(item.date)}
                   </td>
 
                   {/* 2. Khoản mục & Mã */}
-                  <td className="py-1 px-1 sm:px-1.5 whitespace-nowrap">
-                    <div className="flex items-center gap-1">
+                  <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 whitespace-nowrap leading-tight">
+                    <div className="flex items-center gap-0.5">
                       {item.accountCode && (
-                        <span className="font-mono text-3xs sm:text-[10px] font-bold px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                        <span className="font-mono text-[8px] sm:text-[9.5px] font-bold px-1 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200">
                           {item.accountCode}
                         </span>
                       )}
-                      <span className="font-semibold text-2xs sm:text-xs text-slate-800 max-w-[105px] sm:max-w-[140px] truncate" title={item.category}>
+                      <span className="font-semibold text-[9.5px] sm:text-xs text-slate-800 max-w-[95px] sm:max-w-[130px] truncate" title={item.category}>
                         {item.category}
                       </span>
                     </div>
                   </td>
 
-                  {/* 3. Nội dung diễn giải: Xuống dòng tự nhiên, bóp nhỏ tối giản */}
-                  <td className="py-1 px-1.5 sm:px-2 text-2xs sm:text-xs text-slate-700 break-words whitespace-normal leading-snug" title={item.notes}>
+                  {/* 3. Nội dung diễn giải */}
+                  <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-[9.5px] sm:text-xs text-slate-700 break-words whitespace-normal leading-tight" title={item.notes}>
                     {item.notes}
                   </td>
 
-                  {/* 4. Số tiền: Phải canh phải, font mono đậm nét */}
-                  <td className="py-1 px-1 sm:px-2 text-right whitespace-nowrap font-mono font-bold text-slate-900 text-2xs sm:text-xs">
+                  {/* 4. Số tiền */}
+                  <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-right whitespace-nowrap font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight">
                     {formatVND(item.amount)}
                   </td>
 
-                  {/* 5. Người thực hiện: Di chuyển ra trước cột điều chỉnh */}
-                  <td className="py-1 px-1 sm:px-1.5 text-2xs sm:text-xs text-slate-700 break-words">
+                  {/* 5. Người thực hiện */}
+                  <td className="py-0.5 px-1 sm:py-0.5 sm:px-1.5 text-[9.5px] sm:text-xs text-slate-700 break-words leading-tight">
                     <div className="flex items-center gap-1">
-                      <div className="w-3.5 h-3.5 rounded-full bg-slate-100 text-slate-700 font-bold text-[8px] flex items-center justify-center shrink-0">
+                      <div className="w-3 h-3 rounded-full bg-slate-100 text-slate-700 font-bold text-[7.5px] flex items-center justify-center shrink-0">
                         {String(item.employeeName || 'U').trim().charAt(0).toUpperCase() || 'U'}
                       </div>
                       <span className="font-medium text-slate-700 leading-tight">
@@ -493,16 +493,16 @@ export default function TransactionList({
                     </div>
                   </td>
 
-                  {/* 6. Điều chỉnh: Chỉnh sửa & Xóa nhỏ gọn */}
-                  <td className="py-1 px-0.5 text-center whitespace-nowrap">
+                  {/* 6. Điều chỉnh */}
+                  <td className="py-0.5 px-0.5 text-center whitespace-nowrap leading-tight">
                     <div className="flex items-center justify-center gap-0.5">
                       <button
                         type="button"
                         onClick={() => handleStartEdit(item)}
-                        className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-75 group-hover:opacity-100"
+                        className="p-0.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-75 group-hover:opacity-100"
                         title="Chỉnh sửa nội dung phiếu này"
                       >
-                        <Edit3 className="w-3 h-3" />
+                        <Edit3 className="w-2.5 h-2.5" />
                       </button>
                       <button
                         type="button"
@@ -511,10 +511,10 @@ export default function TransactionList({
                             onDeleteTransaction(item.id);
                           }
                         }}
-                        className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-75 group-hover:opacity-100"
+                        className="p-0.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-75 group-hover:opacity-100"
                         title="Xóa phiếu này"
                       >
-                        <Trash2 className="w-3 h-3" />
+                        <Trash2 className="w-2.5 h-2.5" />
                       </button>
                     </div>
                   </td>
