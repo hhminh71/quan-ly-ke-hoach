@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import EditTransactionModal from './EditTransactionModal';
 import AddTransactionModal from './AddTransactionModal';
-import { useResizableColumns, ColumnResizeHandle } from '../hooks/useResizableColumns';
+import { useResizableColumns, ColumnResizeHandle, ColumnVisibilityDropdown } from '../hooks/useResizableColumns';
 import { matchesVietnameseSearch } from '../utils/searchUtils';
 import { formatDate } from '../utils/dateUtils';
 
@@ -48,8 +48,16 @@ export default function TransactionList({
   const [showEditToast, setShowEditToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
-  // Resizable columns hook (drag handles with localStorage persistence)
-  const { columnWidths, handleResizeStart, resetColumnWidth, totalTableWidth } = useResizableColumns({
+  // Resizable columns hook (drag handles + column visibility with localStorage persistence)
+  const {
+    columnWidths,
+    handleResizeStart,
+    resetColumnWidth,
+    totalTableWidth,
+    isColumnVisible,
+    toggleColumnVisibility,
+    showAllColumns,
+  } = useResizableColumns({
     storageKey: 'tbl_cols_transactions_v2',
     initialWidths: {
       date: 72,
@@ -68,6 +76,18 @@ export default function TransactionList({
       actions: 40,
     },
   });
+
+  const transactionTableColumns = useMemo(
+    () => [
+      { key: 'date', label: 'Ngày' },
+      { key: 'account', label: 'Khoản mục' },
+      { key: 'notes', label: 'Nội dung diễn giải' },
+      { key: 'amount', label: 'Số tiền (VNĐ)' },
+      { key: 'employee', label: 'Người thực hiện' },
+      { key: 'actions', label: 'Điều chỉnh' },
+    ],
+    []
+  );
 
   // Sync selectedCategory when prop changes
   useEffect(() => {
@@ -257,21 +277,30 @@ export default function TransactionList({
                 </h2>
               </div>
 
-              {onAddTransaction && (
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(true)}
-                  className="inline-flex items-center gap-0.5 px-1 py-0.2 sm:px-2 sm:py-0.5 rounded text-[8px] sm:text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-2xs transition-all"
-                  title={
-                    activeFilteredAccountCode
-                      ? `Thêm mới hạng mục cho mã [${activeFilteredAccountCode}] và đồng bộ trực tiếp lên Google Sheet`
-                      : 'Thêm mới hạng mục và đồng bộ trực tiếp lên Google Sheet'
-                  }
-                >
-                  <PlusCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                  <span>+ Thêm Hạng Mục</span>
-                </button>
-              )}
+              <div className="flex items-center gap-1">
+                <ColumnVisibilityDropdown
+                  columns={transactionTableColumns}
+                  isColumnVisible={isColumnVisible}
+                  onToggleColumn={toggleColumnVisibility}
+                  onShowAll={showAllColumns}
+                />
+
+                {onAddTransaction && (
+                  <button
+                    type="button"
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="inline-flex items-center gap-0.5 px-1 py-0.2 sm:px-2 sm:py-0.5 rounded text-[8px] sm:text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-2xs transition-all"
+                    title={
+                      activeFilteredAccountCode
+                        ? `Thêm mới hạng mục cho mã [${activeFilteredAccountCode}] và đồng bộ trực tiếp lên Google Sheet`
+                        : 'Thêm mới hạng mục và đồng bộ trực tiếp lên Google Sheet'
+                    }
+                  >
+                    <PlusCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
+                    <span>+ Thêm Hạng Mục</span>
+                  </button>
+                )}
+              </div>
             </div>
             <p className="hidden sm:block text-[8px] sm:text-3xs text-slate-500 mt-0.5">
               Hiển thị {sorted.length.toLocaleString('vi-VN')} giao dịch phát sinh trong{' '}
@@ -455,77 +484,89 @@ export default function TransactionList({
           >
             <thead className="sticky top-0 z-20 bg-slate-100/95 backdrop-blur-xs border-b border-slate-200 shadow-2xs">
               <tr className="text-[8px] sm:text-[9.5px] font-bold text-slate-600 uppercase tracking-wider">
-                {/* 1. Ngày: dd/mm/yy không icon, tùy biến kéo giãn */}
-                <th
-                  onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
-                  style={{ width: `${columnWidths.date}px` }}
-                  className="relative py-0.5 px-0.5 sm:px-1 cursor-pointer hover:text-blue-600 transition-colors select-none text-center leading-tight break-words"
-                  title="Click để đổi thứ tự ngày • Kéo mép phải để giãn cột"
-                >
-                  <div className="flex items-center justify-center gap-0.5 pr-1">
-                    <span>Ngày</span>
-                    <ArrowUpDown className="w-2 h-2 text-slate-400 shrink-0" />
-                  </div>
-                  <ColumnResizeHandle colKey="date" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
-                </th>
+                {/* 1. Ngày: dd/mm/yy không icon, tùy biến kéo giãn, tiêu đề căn giữa */}
+                {isColumnVisible('date') && (
+                  <th
+                    onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
+                    style={{ width: `${columnWidths.date}px` }}
+                    className="relative py-0.5 px-0.5 sm:px-1 cursor-pointer hover:text-blue-600 transition-colors select-none text-center leading-tight break-words"
+                    title="Click để đổi thứ tự ngày • Kéo mép phải để giãn cột"
+                  >
+                    <div className="flex items-center justify-center gap-0.5 pr-1 text-center">
+                      <span>Ngày</span>
+                      <ArrowUpDown className="w-2 h-2 text-slate-400 shrink-0" />
+                    </div>
+                    <ColumnResizeHandle colKey="date" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
+                  </th>
+                )}
 
-                {/* 2. Khoản mục & Nhóm: tùy biến kéo giãn */}
-                <th
-                  onClick={() => setSortOrder(sortOrder === 'account_asc' ? 'account_desc' : 'account_asc')}
-                  style={{ width: `${columnWidths.account}px` }}
-                  className="relative py-0.5 px-0.5 sm:px-1 cursor-pointer hover:text-blue-600 transition-colors select-none leading-tight break-words"
-                  title="Click để sort theo Mã khoản mục • Kéo mép phải để giãn cột"
-                >
-                  <div className="flex items-center gap-0.5 pr-1">
-                    <span>Khoản mục</span>
-                    <ArrowUpDown className="w-2 h-2 text-slate-400 shrink-0" />
-                  </div>
-                  <ColumnResizeHandle colKey="account" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
-                </th>
+                {/* 2. Khoản mục & Nhóm: tùy biến kéo giãn, tiêu đề căn giữa */}
+                {isColumnVisible('account') && (
+                  <th
+                    onClick={() => setSortOrder(sortOrder === 'account_asc' ? 'account_desc' : 'account_asc')}
+                    style={{ width: `${columnWidths.account}px` }}
+                    className="relative py-0.5 px-0.5 sm:px-1 cursor-pointer hover:text-blue-600 transition-colors select-none text-center leading-tight break-words"
+                    title="Click để sort theo Mã khoản mục • Kéo mép phải để giãn cột"
+                  >
+                    <div className="flex items-center justify-center gap-0.5 pr-1 text-center">
+                      <span>Khoản mục</span>
+                      <ArrowUpDown className="w-2 h-2 text-slate-400 shrink-0" />
+                    </div>
+                    <ColumnResizeHandle colKey="account" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
+                  </th>
+                )}
 
-                {/* 3. Nội dung diễn giải: tùy biến kéo giãn */}
-                <th
-                  style={{ width: `${columnWidths.notes}px` }}
-                  className="relative py-0.5 px-0.5 sm:px-1 leading-tight break-words"
-                  title="Nội dung diễn giải • Kéo mép phải để giãn cột"
-                >
-                  <span className="pr-1">Nội dung diễn giải</span>
-                  <ColumnResizeHandle colKey="notes" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
-                </th>
+                {/* 3. Nội dung diễn giải: tùy biến kéo giãn, tiêu đề căn giữa */}
+                {isColumnVisible('notes') && (
+                  <th
+                    style={{ width: `${columnWidths.notes}px` }}
+                    className="relative py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words"
+                    title="Nội dung diễn giải • Kéo mép phải để giãn cột"
+                  >
+                    <div className="text-center w-full pr-1">Nội dung diễn giải</div>
+                    <ColumnResizeHandle colKey="notes" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
+                  </th>
+                )}
 
-                {/* 4. Số tiền (VNĐ): tùy biến kéo giãn */}
-                <th
-                  onClick={() => setSortOrder(sortOrder === 'highest' ? 'lowest' : 'highest')}
-                  style={{ width: `${columnWidths.amount}px` }}
-                  className="relative py-0.5 px-0.5 sm:px-1 text-right cursor-pointer hover:text-blue-600 transition-colors select-none leading-tight break-words"
-                  title="Click để đổi thứ tự số tiền • Kéo mép phải để giãn cột"
-                >
-                  <div className="flex items-center justify-end gap-0.5 pr-1">
-                    <span>Số tiền (VNĐ)</span>
-                    <ArrowUpDown className="w-2 h-2 text-slate-400 shrink-0" />
-                  </div>
-                  <ColumnResizeHandle colKey="amount" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
-                </th>
+                {/* 4. Số tiền (VNĐ): tùy biến kéo giãn, tiêu đề căn giữa */}
+                {isColumnVisible('amount') && (
+                  <th
+                    onClick={() => setSortOrder(sortOrder === 'highest' ? 'lowest' : 'highest')}
+                    style={{ width: `${columnWidths.amount}px` }}
+                    className="relative py-0.5 px-0.5 sm:px-1 text-center cursor-pointer hover:text-blue-600 transition-colors select-none leading-tight break-words"
+                    title="Click để đổi thứ tự số tiền • Kéo mép phải để giãn cột"
+                  >
+                    <div className="flex items-center justify-center gap-0.5 pr-1 text-center">
+                      <span>Số tiền (VNĐ)</span>
+                      <ArrowUpDown className="w-2 h-2 text-slate-400 shrink-0" />
+                    </div>
+                    <ColumnResizeHandle colKey="amount" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
+                  </th>
+                )}
 
                 {/* 5. Người thực hiện: căn giữa, tùy biến kéo giãn */}
-                <th
-                  style={{ width: `${columnWidths.employee}px` }}
-                  className="relative py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words"
-                  title="Người thực hiện • Kéo mép phải để giãn cột"
-                >
-                  <span className="pr-1">Người thực hiện</span>
-                  <ColumnResizeHandle colKey="employee" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
-                </th>
+                {isColumnVisible('employee') && (
+                  <th
+                    style={{ width: `${columnWidths.employee}px` }}
+                    className="relative py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words"
+                    title="Người thực hiện • Kéo mép phải để giãn cột"
+                  >
+                    <div className="text-center w-full pr-1">Người thực hiện</div>
+                    <ColumnResizeHandle colKey="employee" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
+                  </th>
+                )}
 
-                {/* 6. Điều chỉnh (Thao tác): tùy biến kéo giãn */}
-                <th
-                  style={{ width: `${columnWidths.actions}px` }}
-                  className="relative py-0.5 px-0.5 text-center leading-tight break-words"
-                  title="Thao tác"
-                >
-                  <span>Điều chỉnh</span>
-                  <ColumnResizeHandle colKey="actions" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
-                </th>
+                {/* 6. Điều chỉnh (Thao tác): tùy biến kéo giãn, tiêu đề căn giữa */}
+                {isColumnVisible('actions') && (
+                  <th
+                    style={{ width: `${columnWidths.actions}px` }}
+                    className="relative py-0.5 px-0.5 text-center leading-tight break-words"
+                    title="Thao tác"
+                  >
+                    <div className="text-center w-full">Điều chỉnh</div>
+                    <ColumnResizeHandle colKey="actions" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">
@@ -535,66 +576,78 @@ export default function TransactionList({
                   className="hover:bg-slate-50/70 transition-colors group"
                 >
                   {/* 1. Ngày: dd/mm/yy không logo lịch */}
-                  <td className="py-0.5 px-0.5 sm:px-1 text-center font-mono text-[9px] sm:text-xs text-slate-700 font-medium leading-tight break-words">
-                    {formatDate(item.date)}
-                  </td>
+                  {isColumnVisible('date') && (
+                    <td className="py-0.5 px-0.5 sm:px-1 text-center font-mono text-[9px] sm:text-xs text-slate-700 font-medium leading-tight break-words">
+                      {formatDate(item.date)}
+                    </td>
+                  )}
 
                   {/* 2. Khoản mục & Mã: Xuống dòng tự nhiên khi hẹp, không bị cắt dấu 3 chấm */}
-                  <td className="py-0.5 px-0.5 sm:px-1 leading-tight break-words">
-                    <div className="flex flex-wrap items-baseline gap-0.5">
-                      {item.accountCode && (
-                        <span className="font-mono text-[8px] sm:text-[9.5px] font-bold px-1 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
-                          {item.accountCode}
+                  {isColumnVisible('account') && (
+                    <td className="py-0.5 px-0.5 sm:px-1 leading-tight break-words">
+                      <div className="flex flex-wrap items-baseline gap-0.5">
+                        {item.accountCode && (
+                          <span className="font-mono text-[8px] sm:text-[9.5px] font-bold px-1 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
+                            {item.accountCode}
+                          </span>
+                        )}
+                        <span className="font-semibold text-[9.5px] sm:text-xs text-slate-800 leading-tight" title={item.category}>
+                          {item.category}
                         </span>
-                      )}
-                      <span className="font-semibold text-[9.5px] sm:text-xs text-slate-800 leading-tight" title={item.category}>
-                        {item.category}
-                      </span>
-                    </div>
-                  </td>
+                      </div>
+                    </td>
+                  )}
 
                   {/* 3. Nội dung diễn giải: Xuống dòng tự nhiên, khoảng cách dòng mảnh */}
-                  <td className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs text-slate-700 break-words whitespace-normal leading-tight" title={item.notes}>
-                    {item.notes}
-                  </td>
+                  {isColumnVisible('notes') && (
+                    <td className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs text-slate-700 break-words whitespace-normal leading-tight" title={item.notes}>
+                      {item.notes}
+                    </td>
+                  )}
 
                   {/* 4. Số tiền: Xuống dòng nếu quá hẹp */}
-                  <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight break-words">
-                    {formatVND(item.amount)}
-                  </td>
+                  {isColumnVisible('amount') && (
+                    <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight break-words">
+                      {formatVND(item.amount)}
+                    </td>
+                  )}
 
                   {/* 5. Người thực hiện: Căn giữa, xuống dòng nếu hẹp */}
-                  <td className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs text-slate-700 text-center leading-tight break-words">
-                    <span className="font-medium text-slate-700 leading-tight">
-                      {item.employeeName || 'Chưa ghi nhận'}
-                    </span>
-                  </td>
+                  {isColumnVisible('employee') && (
+                    <td className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs text-slate-700 text-center leading-tight break-words">
+                      <span className="font-medium text-slate-700 leading-tight">
+                        {item.employeeName || 'Chưa ghi nhận'}
+                      </span>
+                    </td>
+                  )}
 
                   {/* 6. Điều chỉnh */}
-                  <td className="py-0.5 px-0.5 text-center leading-tight">
-                    <div className="flex items-center justify-center gap-0.5">
-                      <button
-                        type="button"
-                        onClick={() => handleStartEdit(item)}
-                        className="p-0.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-75 group-hover:opacity-100"
-                        title="Chỉnh sửa nội dung hạng mục này"
-                      >
-                        <Edit3 className="w-2.5 h-2.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (confirm(`Bạn có chắc muốn xóa hạng mục "${item.notes}" không?`)) {
-                            onDeleteTransaction(item.id);
-                          }
-                        }}
-                        className="p-0.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-75 group-hover:opacity-100"
-                        title="Xóa hạng mục này"
-                      >
-                        <Trash2 className="w-2.5 h-2.5" />
-                      </button>
-                    </div>
-                  </td>
+                  {isColumnVisible('actions') && (
+                    <td className="py-0.5 px-0.5 text-center leading-tight">
+                      <div className="flex items-center justify-center gap-0.5">
+                        <button
+                          type="button"
+                          onClick={() => handleStartEdit(item)}
+                          className="p-0.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-75 group-hover:opacity-100"
+                          title="Chỉnh sửa nội dung hạng mục này"
+                        >
+                          <Edit3 className="w-2.5 h-2.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm(`Bạn có chắc muốn xóa hạng mục "${item.notes}" không?`)) {
+                              onDeleteTransaction(item.id);
+                            }
+                          }}
+                          className="p-0.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-75 group-hover:opacity-100"
+                          title="Xóa hạng mục này"
+                        >
+                          <Trash2 className="w-2.5 h-2.5" />
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

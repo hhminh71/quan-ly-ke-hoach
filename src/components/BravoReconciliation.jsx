@@ -24,7 +24,7 @@ import bravoInfoData from '../data/bravoInfo.json';
 import AccountLedgerModal from './AccountLedgerModal';
 import { matchesVietnameseSearch } from '../utils/searchUtils';
 import { getSctsSeparatedCodes, calculateReportActual, isSctsSeparated } from '../utils/sctsConfig';
-import { useResizableColumns, ColumnResizeHandle } from '../hooks/useResizableColumns';
+import { useResizableColumns, ColumnResizeHandle, ColumnVisibilityDropdown } from '../hooks/useResizableColumns';
 
 export default function BravoReconciliation({
   budgets = [],
@@ -63,6 +63,9 @@ export default function BravoReconciliation({
     handleResizeStart: handleReconResizeStart,
     resetColumnWidth: resetReconColumnWidth,
     totalTableWidth: totalReconWidth,
+    isColumnVisible: isReconColVisible,
+    toggleColumnVisibility: toggleReconCol,
+    showAllColumns: showAllReconCols,
   } = useResizableColumns({
     storageKey: 'tbl_cols_bravo_recon_v2',
     initialWidths: {
@@ -95,12 +98,33 @@ export default function BravoReconciliation({
     },
   });
 
+  const reconTableColumns = useMemo(
+    () => [
+      { key: 'stt', label: 'STT' },
+      { key: 'code', label: 'Mã TK' },
+      { key: 'name', label: 'Khoản Mục & Quy Mô' },
+      { key: 'group', label: 'Nhóm' },
+      { key: 'approved', label: 'Hạn Mức Duyệt' },
+      { key: 'actual', label: 'Thực Tế Tổ KH' },
+      { key: 'bravo', label: 'Hạch Toán BRAVO' },
+      { key: 'diff', label: 'Chênh Lệch (±)' },
+      { key: 'maxActual', label: 'MAX Quản Lý' },
+      { key: 'remaining', label: 'Còn Lại' },
+      { key: 'percent', label: 'Tỷ Lệ' },
+      { key: 'ledger', label: 'Sổ Cái' },
+    ],
+    []
+  );
+
   // Resizable columns hook for Sheet INFO 152 items Table
   const {
     columnWidths: macroWidths,
     handleResizeStart: handleMacroResizeStart,
     resetColumnWidth: resetMacroColumnWidth,
     totalTableWidth: totalMacroWidth,
+    isColumnVisible: isMacroColVisible,
+    toggleColumnVisibility: toggleMacroCol,
+    showAllColumns: showAllMacroCols,
   } = useResizableColumns({
     storageKey: 'tbl_cols_bravo_macro_v2',
     initialWidths: {
@@ -126,6 +150,21 @@ export default function BravoReconciliation({
       reason: 80,
     },
   });
+
+  const macroTableColumns = useMemo(
+    () => [
+      { key: 'row', label: 'Dòng' },
+      { key: 'code', label: 'Mã TK' },
+      { key: 'name', label: 'Tên Hạng Mục / Khoản Mục' },
+      { key: 'category', label: 'Nhóm Danh Mục' },
+      { key: 'approved', label: 'Hạn Mức Duyệt' },
+      { key: 'bravo', label: 'Đã Ghi Sổ BRAVO' },
+      { key: 'rate', label: 'Tỷ Lệ' },
+      { key: 'owner', label: 'Đơn Vị Quản Lý' },
+      { key: 'reason', label: 'Giải Trình & Lý Do' },
+    ],
+    []
+  );
 
   useEffect(() => {
     const handleUpdate = () => {
@@ -702,6 +741,14 @@ export default function BravoReconciliation({
                 <option value="approved_desc">Hạn mức duyệt cao nhất</option>
               </select>
 
+              {/* Column Visibility Dropdown */}
+              <ColumnVisibilityDropdown
+                columns={reconTableColumns}
+                isColumnVisible={isReconColVisible}
+                onToggleColumn={toggleReconCol}
+                onShowAll={showAllReconCols}
+              />
+
               {/* Export CSV Button */}
               <button
                 type="button"
@@ -741,138 +788,162 @@ export default function BravoReconciliation({
               >
                 <thead>
                   <tr className="bg-slate-50/80 text-slate-600 font-semibold border-b border-slate-200 text-2xs uppercase tracking-wider">
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
-                      style={{ width: `${reconWidths.stt}px`, minWidth: `${reconWidths.stt}px` }}
-                    >
-                      <div className="truncate">STT</div>
-                      <ColumnResizeHandle
-                        colKey="stt"
-                        onResizeStart={handleReconResizeStart}
-                        onResetWidth={resetReconColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 relative select-none"
-                      style={{ width: `${reconWidths.code}px`, minWidth: `${reconWidths.code}px` }}
-                    >
-                      <div className="truncate">Mã TK</div>
-                      <ColumnResizeHandle
-                        colKey="code"
-                        onResizeStart={handleReconResizeStart}
-                        onResetWidth={resetReconColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 relative select-none"
-                      style={{ width: `${reconWidths.name}px`, minWidth: `${reconWidths.name}px` }}
-                    >
-                      <div className="truncate">Khoản Mục & Quy Mô</div>
-                      <ColumnResizeHandle
-                        colKey="name"
-                        onResizeStart={handleReconResizeStart}
-                        onResetWidth={resetReconColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 relative select-none"
-                      style={{ width: `${reconWidths.group}px`, minWidth: `${reconWidths.group}px` }}
-                    >
-                      <div className="truncate">Nhóm</div>
-                      <ColumnResizeHandle
-                        colKey="group"
-                        onResizeStart={handleReconResizeStart}
-                        onResetWidth={resetReconColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 text-right relative select-none"
-                      style={{ width: `${reconWidths.approved}px`, minWidth: `${reconWidths.approved}px` }}
-                    >
-                      <div className="truncate">Hạn Mức Duyệt</div>
-                      <ColumnResizeHandle
-                        colKey="approved"
-                        onResizeStart={handleReconResizeStart}
-                        onResetWidth={resetReconColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 text-right bg-blue-50/40 text-blue-900 relative select-none"
-                      style={{ width: `${reconWidths.actual}px`, minWidth: `${reconWidths.actual}px` }}
-                    >
-                      <div className="truncate">Thực Tế Tổ KH</div>
-                      <ColumnResizeHandle
-                        colKey="actual"
-                        onResizeStart={handleReconResizeStart}
-                        onResetWidth={resetReconColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 text-right bg-amber-50/40 text-amber-900 relative select-none"
-                      style={{ width: `${reconWidths.bravo}px`, minWidth: `${reconWidths.bravo}px` }}
-                    >
-                      <div className="truncate">Hạch Toán BRAVO</div>
-                      <ColumnResizeHandle
-                        colKey="bravo"
-                        onResizeStart={handleReconResizeStart}
-                        onResetWidth={resetReconColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
-                      style={{ width: `${reconWidths.diff}px`, minWidth: `${reconWidths.diff}px` }}
-                    >
-                      <div className="truncate">Chênh Lệch (±)</div>
-                      <ColumnResizeHandle
-                        colKey="diff"
-                        onResizeStart={handleReconResizeStart}
-                        onResetWidth={resetReconColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 text-right bg-emerald-50/40 text-emerald-950 font-bold relative select-none"
-                      style={{ width: `${reconWidths.maxActual}px`, minWidth: `${reconWidths.maxActual}px` }}
-                    >
-                      <div className="truncate">MAX Quản Lý</div>
-                      <ColumnResizeHandle
-                        colKey="maxActual"
-                        onResizeStart={handleReconResizeStart}
-                        onResetWidth={resetReconColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 text-right relative select-none"
-                      style={{ width: `${reconWidths.remaining}px`, minWidth: `${reconWidths.remaining}px` }}
-                    >
-                      <div className="truncate">Còn Lại</div>
-                      <ColumnResizeHandle
-                        colKey="remaining"
-                        onResizeStart={handleReconResizeStart}
-                        onResetWidth={resetReconColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
-                      style={{ width: `${reconWidths.percent}px`, minWidth: `${reconWidths.percent}px` }}
-                    >
-                      <div className="truncate">Tỷ Lệ</div>
-                      <ColumnResizeHandle
-                        colKey="percent"
-                        onResizeStart={handleReconResizeStart}
-                        onResetWidth={resetReconColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
-                      style={{ width: `${reconWidths.ledger}px`, minWidth: `${reconWidths.ledger}px` }}
-                    >
-                      <div className="truncate">Sổ Cái</div>
-                      <ColumnResizeHandle
-                        colKey="ledger"
-                        onResizeStart={handleReconResizeStart}
-                        onResetWidth={resetReconColumnWidth}
-                      />
-                    </th>
+                    {isReconColVisible('stt') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${reconWidths.stt}px`, minWidth: `${reconWidths.stt}px` }}
+                      >
+                        <div className="truncate text-center w-full">STT</div>
+                        <ColumnResizeHandle
+                          colKey="stt"
+                          onResizeStart={handleReconResizeStart}
+                          onResetWidth={resetReconColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isReconColVisible('code') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${reconWidths.code}px`, minWidth: `${reconWidths.code}px` }}
+                      >
+                        <div className="truncate text-center w-full">Mã TK</div>
+                        <ColumnResizeHandle
+                          colKey="code"
+                          onResizeStart={handleReconResizeStart}
+                          onResetWidth={resetReconColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isReconColVisible('name') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${reconWidths.name}px`, minWidth: `${reconWidths.name}px` }}
+                      >
+                        <div className="truncate text-center w-full">Khoản Mục & Quy Mô</div>
+                        <ColumnResizeHandle
+                          colKey="name"
+                          onResizeStart={handleReconResizeStart}
+                          onResetWidth={resetReconColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isReconColVisible('group') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${reconWidths.group}px`, minWidth: `${reconWidths.group}px` }}
+                      >
+                        <div className="truncate text-center w-full">Nhóm</div>
+                        <ColumnResizeHandle
+                          colKey="group"
+                          onResizeStart={handleReconResizeStart}
+                          onResetWidth={resetReconColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isReconColVisible('approved') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${reconWidths.approved}px`, minWidth: `${reconWidths.approved}px` }}
+                      >
+                        <div className="truncate text-center w-full">Hạn Mức Duyệt</div>
+                        <ColumnResizeHandle
+                          colKey="approved"
+                          onResizeStart={handleReconResizeStart}
+                          onResetWidth={resetReconColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isReconColVisible('actual') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center bg-blue-50/40 text-blue-900 relative select-none"
+                        style={{ width: `${reconWidths.actual}px`, minWidth: `${reconWidths.actual}px` }}
+                      >
+                        <div className="truncate text-center w-full">Thực Tế Tổ KH</div>
+                        <ColumnResizeHandle
+                          colKey="actual"
+                          onResizeStart={handleReconResizeStart}
+                          onResetWidth={resetReconColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isReconColVisible('bravo') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center bg-amber-50/40 text-amber-900 relative select-none"
+                        style={{ width: `${reconWidths.bravo}px`, minWidth: `${reconWidths.bravo}px` }}
+                      >
+                        <div className="truncate text-center w-full">Hạch Toán BRAVO</div>
+                        <ColumnResizeHandle
+                          colKey="bravo"
+                          onResizeStart={handleReconResizeStart}
+                          onResetWidth={resetReconColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isReconColVisible('diff') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${reconWidths.diff}px`, minWidth: `${reconWidths.diff}px` }}
+                      >
+                        <div className="truncate text-center w-full">Chênh Lệch (±)</div>
+                        <ColumnResizeHandle
+                          colKey="diff"
+                          onResizeStart={handleReconResizeStart}
+                          onResetWidth={resetReconColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isReconColVisible('maxActual') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center bg-emerald-50/40 text-emerald-950 font-bold relative select-none"
+                        style={{ width: `${reconWidths.maxActual}px`, minWidth: `${reconWidths.maxActual}px` }}
+                      >
+                        <div className="truncate text-center w-full">MAX Quản Lý</div>
+                        <ColumnResizeHandle
+                          colKey="maxActual"
+                          onResizeStart={handleReconResizeStart}
+                          onResetWidth={resetReconColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isReconColVisible('remaining') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${reconWidths.remaining}px`, minWidth: `${reconWidths.remaining}px` }}
+                      >
+                        <div className="truncate text-center w-full">Còn Lại</div>
+                        <ColumnResizeHandle
+                          colKey="remaining"
+                          onResizeStart={handleReconResizeStart}
+                          onResetWidth={resetReconColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isReconColVisible('percent') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${reconWidths.percent}px`, minWidth: `${reconWidths.percent}px` }}
+                      >
+                        <div className="truncate text-center w-full">Tỷ Lệ</div>
+                        <ColumnResizeHandle
+                          colKey="percent"
+                          onResizeStart={handleReconResizeStart}
+                          onResetWidth={resetReconColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isReconColVisible('ledger') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${reconWidths.ledger}px`, minWidth: `${reconWidths.ledger}px` }}
+                      >
+                        <div className="truncate text-center w-full">Sổ Cái</div>
+                        <ColumnResizeHandle
+                          colKey="ledger"
+                          onResizeStart={handleReconResizeStart}
+                          onResetWidth={resetReconColumnWidth}
+                        />
+                      </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
@@ -895,169 +966,193 @@ export default function BravoReconciliation({
                           onClick={() => setSelectedDetailCode(item.code)}
                         >
                           {/* STT */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 text-center text-slate-400 text-2xs font-mono leading-tight break-words"
-                            style={{ width: `${reconWidths.stt}px`, minWidth: `${reconWidths.stt}px` }}
-                          >
-                            {item.stt}
-                          </td>
+                          {isReconColVisible('stt') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 text-center text-slate-400 text-2xs font-mono leading-tight break-words"
+                              style={{ width: `${reconWidths.stt}px`, minWidth: `${reconWidths.stt}px` }}
+                            >
+                              {item.stt}
+                            </td>
+                          )}
 
                           {/* Account Code */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 leading-tight break-words"
-                            style={{ width: `${reconWidths.code}px`, minWidth: `${reconWidths.code}px` }}
-                          >
-                            <span className="inline-block px-1 py-0.2 rounded font-mono text-[9px] sm:text-2xs font-bold bg-slate-100 text-slate-800 border border-slate-200/80 group-hover:border-blue-400 group-hover:bg-blue-50 group-hover:text-blue-700 transition-colors break-all">
-                              {item.code}
-                            </span>
-                          </td>
+                          {isReconColVisible('code') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 leading-tight break-words"
+                              style={{ width: `${reconWidths.code}px`, minWidth: `${reconWidths.code}px` }}
+                            >
+                              <span className="inline-block px-1 py-0.2 rounded font-mono text-[9px] sm:text-2xs font-bold bg-slate-100 text-slate-800 border border-slate-200/80 group-hover:border-blue-400 group-hover:bg-blue-50 group-hover:text-blue-700 transition-colors break-all">
+                                {item.code}
+                              </span>
+                            </td>
+                          )}
 
                           {/* Name & Scope */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 leading-tight break-words whitespace-normal"
-                            style={{ width: `${reconWidths.name}px`, minWidth: `${reconWidths.name}px` }}
-                          >
-                            <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors flex items-center gap-1 text-[9.5px] sm:text-xs leading-tight">
-                              <span>{item.name}</span>
-                              <ArrowUpRight className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 text-blue-500 transition-opacity shrink-0" />
-                            </div>
-                            {item.scope && (
-                              <p className="text-[7.5px] sm:text-3xs text-slate-400 mt-0.5 leading-tight break-words" title={item.scope}>
-                                {item.scope}
-                              </p>
-                            )}
-                          </td>
+                          {isReconColVisible('name') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 leading-tight break-words whitespace-normal"
+                              style={{ width: `${reconWidths.name}px`, minWidth: `${reconWidths.name}px` }}
+                            >
+                              <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors flex items-center gap-1 text-[9.5px] sm:text-xs leading-tight">
+                                <span>{item.name}</span>
+                                <ArrowUpRight className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 text-blue-500 transition-opacity shrink-0" />
+                              </div>
+                              {item.scope && (
+                                <p className="text-[7.5px] sm:text-3xs text-slate-400 mt-0.5 leading-tight break-words" title={item.scope}>
+                                  {item.scope}
+                                </p>
+                              )}
+                            </td>
+                          )}
 
                           {/* Group */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 text-slate-500 text-[8px] sm:text-3xs leading-tight break-words whitespace-normal"
-                            style={{ width: `${reconWidths.group}px`, minWidth: `${reconWidths.group}px` }}
-                          >
-                            <span className="inline-block px-1 py-0.2 bg-slate-100 rounded text-slate-600" title={item.group}>
-                              {item.group}
-                            </span>
-                          </td>
+                          {isReconColVisible('group') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 text-slate-500 text-[8px] sm:text-3xs leading-tight break-words whitespace-normal"
+                              style={{ width: `${reconWidths.group}px`, minWidth: `${reconWidths.group}px` }}
+                            >
+                              <span className="inline-block px-1 py-0.2 bg-slate-100 rounded text-slate-600" title={item.group}>
+                                {item.group}
+                              </span>
+                            </td>
+                          )}
 
                           {/* Approved Budget */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-slate-900 font-mono text-[9px] sm:text-xs leading-tight break-words"
-                            style={{ width: `${reconWidths.approved}px`, minWidth: `${reconWidths.approved}px` }}
-                          >
-                            {formatVND(item.approved)}
-                          </td>
+                          {isReconColVisible('approved') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-slate-900 font-mono text-[9px] sm:text-xs leading-tight break-words"
+                              style={{ width: `${reconWidths.approved}px`, minWidth: `${reconWidths.approved}px` }}
+                            >
+                              {formatVND(item.approved)}
+                            </td>
+                          )}
 
                           {/* Actual Spent (Planning) */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-blue-900 bg-blue-50/20 font-mono text-[9px] sm:text-xs leading-tight break-words"
-                            style={{ width: `${reconWidths.actual}px`, minWidth: `${reconWidths.actual}px` }}
-                          >
-                            {formatVND(item.actual)}
-                          </td>
+                          {isReconColVisible('actual') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-blue-900 bg-blue-50/20 font-mono text-[9px] sm:text-xs leading-tight break-words"
+                              style={{ width: `${reconWidths.actual}px`, minWidth: `${reconWidths.actual}px` }}
+                            >
+                              {formatVND(item.actual)}
+                            </td>
+                          )}
 
                           {/* BRAVO Recorded Spent */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-amber-900 bg-amber-50/20 font-mono text-[9px] sm:text-xs leading-tight break-words"
-                            style={{ width: `${reconWidths.bravo}px`, minWidth: `${reconWidths.bravo}px` }}
-                          >
-                            {formatVND(item.bravo)}
-                          </td>
+                          {isReconColVisible('bravo') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-amber-900 bg-amber-50/20 font-mono text-[9px] sm:text-xs leading-tight break-words"
+                              style={{ width: `${reconWidths.bravo}px`, minWidth: `${reconWidths.bravo}px` }}
+                            >
+                              {formatVND(item.bravo)}
+                            </td>
+                          )}
 
                           {/* Discrepancy (BRAVO - Thực tế) */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words"
-                            style={{ width: `${reconWidths.diff}px`, minWidth: `${reconWidths.diff}px` }}
-                          >
-                            {item.isSctsSeparated ? (
-                              <div className="inline-flex flex-col items-center">
-                                <span
-                                  className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200"
-                                  title="Khoản mục này đã được tách riêng SCTS do Bravo hạch toán gộp cả dự án lớn của TCT"
-                                >
-                                  Đã tách SCTS
+                          {isReconColVisible('diff') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words"
+                              style={{ width: `${reconWidths.diff}px`, minWidth: `${reconWidths.diff}px` }}
+                            >
+                              {item.isSctsSeparated ? (
+                                <div className="inline-flex flex-col items-center">
+                                  <span
+                                    className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200"
+                                    title="Khoản mục này đã được tách riêng SCTS do Bravo hạch toán gộp cả dự án lớn của TCT"
+                                  >
+                                    Đã tách SCTS
+                                  </span>
+                                  <span className="text-[7px] sm:text-3xs text-slate-500 font-normal mt-0.5" title="Chênh lệch gộp Bravo">
+                                    Bravo: +{formatCompactVND(item.diff)}
+                                  </span>
+                                </div>
+                              ) : isBravoHigh ? (
+                                <div className="inline-flex flex-col items-center">
+                                  <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                    +{formatCompactVND(item.diff)}
+                                  </span>
+                                  <span className="text-[7px] sm:text-3xs text-amber-600 font-normal mt-0.5">
+                                    BRAVO &gt; KH
+                                  </span>
+                                </div>
+                              ) : isActualHigh ? (
+                                <div className="inline-flex flex-col items-center">
+                                  <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-purple-100 text-purple-800 border border-purple-200">
+                                    {formatCompactVND(item.diff)}
+                                  </span>
+                                  <span className="text-[7px] sm:text-3xs text-purple-600 font-normal mt-0.5">
+                                    KH &gt; BRAVO
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                  <CheckCircle2 className="w-2.5 h-2.5" /> Khớp 100%
                                 </span>
-                                <span className="text-[7px] sm:text-3xs text-slate-500 font-normal mt-0.5" title="Chênh lệch gộp Bravo">
-                                  Bravo: +{formatCompactVND(item.diff)}
-                                </span>
-                              </div>
-                            ) : isBravoHigh ? (
-                              <div className="inline-flex flex-col items-center">
-                                <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                                  +{formatCompactVND(item.diff)}
-                                </span>
-                                <span className="text-[7px] sm:text-3xs text-amber-600 font-normal mt-0.5">
-                                  BRAVO &gt; KH
-                                </span>
-                              </div>
-                            ) : isActualHigh ? (
-                              <div className="inline-flex flex-col items-center">
-                                <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-purple-100 text-purple-800 border border-purple-200">
-                                  {formatCompactVND(item.diff)}
-                                </span>
-                                <span className="text-[7px] sm:text-3xs text-purple-600 font-normal mt-0.5">
-                                  KH &gt; BRAVO
-                                </span>
-                              </div>
-                            ) : (
-                              <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                                <CheckCircle2 className="w-2.5 h-2.5" /> Khớp 100%
-                              </span>
-                            )}
-                          </td>
+                              )}
+                            </td>
+                          )}
 
                           {/* Max Actual Spent */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 text-right font-bold text-emerald-950 bg-emerald-50/30 font-mono text-[9px] sm:text-xs leading-tight break-words"
-                            style={{ width: `${reconWidths.maxActual}px`, minWidth: `${reconWidths.maxActual}px` }}
-                          >
-                            <div>{formatVND(item.maxActual)}</div>
-                            {item.isSctsSeparated && (
-                              <span className="text-[7px] sm:text-3xs font-medium text-indigo-700 bg-indigo-50 px-1 py-0.2 rounded border border-indigo-200 inline-block mt-0.5" title="Chỉ lấy theo số nhập liệu SCTX của Cảng">
-                                SCTX Nhập liệu
-                              </span>
-                            )}
-                          </td>
+                          {isReconColVisible('maxActual') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 text-right font-bold text-emerald-950 bg-emerald-50/30 font-mono text-[9px] sm:text-xs leading-tight break-words"
+                              style={{ width: `${reconWidths.maxActual}px`, minWidth: `${reconWidths.maxActual}px` }}
+                            >
+                              <div>{formatVND(item.maxActual)}</div>
+                              {item.isSctsSeparated && (
+                                <span className="text-[7px] sm:text-3xs font-medium text-indigo-700 bg-indigo-50 px-1 py-0.2 rounded border border-indigo-200 inline-block mt-0.5" title="Chỉ lấy theo số nhập liệu SCTX của Cảng">
+                                  SCTX Nhập liệu
+                                </span>
+                              )}
+                            </td>
+                          )}
 
                           {/* Remaining */}
-                          <td
-                            className={`py-0.5 px-0.5 sm:px-1 text-right font-semibold font-mono text-[9px] sm:text-xs leading-tight break-words ${isOver ? 'text-rose-600' : 'text-slate-700'}`}
-                            style={{ width: `${reconWidths.remaining}px`, minWidth: `${reconWidths.remaining}px` }}
-                          >
-                            {formatVND(item.remaining)}
-                          </td>
+                          {isReconColVisible('remaining') && (
+                            <td
+                              className={`py-0.5 px-0.5 sm:px-1 text-right font-semibold font-mono text-[9px] sm:text-xs leading-tight break-words ${isOver ? 'text-rose-600' : 'text-slate-700'}`}
+                              style={{ width: `${reconWidths.remaining}px`, minWidth: `${reconWidths.remaining}px` }}
+                            >
+                              {formatVND(item.remaining)}
+                            </td>
+                          )}
 
                           {/* Percent */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words"
-                            style={{ width: `${reconWidths.percent}px`, minWidth: `${reconWidths.percent}px` }}
-                          >
-                            <span
-                              className={`px-1 py-0.2 rounded text-[7.5px] sm:text-3xs font-bold ${
-                                item.percent >= 100
-                                  ? 'bg-rose-100 text-rose-800'
-                                  : item.percent >= 80
-                                  ? 'bg-amber-100 text-amber-800'
-                                  : 'bg-emerald-100 text-emerald-800'
-                              }`}
+                          {isReconColVisible('percent') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words"
+                              style={{ width: `${reconWidths.percent}px`, minWidth: `${reconWidths.percent}px` }}
                             >
-                              {item.percent.toFixed(1)}%
-                            </span>
-                          </td>
+                              <span
+                                className={`px-1 py-0.2 rounded text-[7.5px] sm:text-3xs font-bold ${
+                                  item.percent >= 100
+                                    ? 'bg-rose-100 text-rose-800'
+                                    : item.percent >= 80
+                                    ? 'bg-amber-100 text-amber-800'
+                                    : 'bg-emerald-100 text-emerald-800'
+                                }`}
+                              >
+                                {item.percent.toFixed(1)}%
+                              </span>
+                            </td>
+                          )}
 
                           {/* Action Button: View Ledger */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words"
-                            style={{ width: `${reconWidths.ledger}px`, minWidth: `${reconWidths.ledger}px` }}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <button
-                              type="button"
-                              onClick={() => setSelectedDetailCode(item.code)}
-                              className="p-0.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
-                              title="Xem chi tiết các hạng mục của khoản mục này"
+                          {isReconColVisible('ledger') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words"
+                              style={{ width: `${reconWidths.ledger}px`, minWidth: `${reconWidths.ledger}px` }}
+                              onClick={(e) => e.stopPropagation()}
                             >
-                              <FileSpreadsheet className="w-3 h-3" />
-                            </button>
-                          </td>
+                              <button
+                                type="button"
+                                onClick={() => setSelectedDetailCode(item.code)}
+                                className="p-0.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
+                                title="Xem chi tiết các hạng mục của khoản mục này"
+                              >
+                                <FileSpreadsheet className="w-3 h-3" />
+                              </button>
+                            </td>
+                          )}
                         </tr>
                       );
                     })
@@ -1170,6 +1265,14 @@ export default function BravoReconciliation({
                 ))}
               </select>
 
+              {/* Column Visibility Dropdown */}
+              <ColumnVisibilityDropdown
+                columns={macroTableColumns}
+                isColumnVisible={isMacroColVisible}
+                onToggleColumn={toggleMacroCol}
+                onShowAll={showAllMacroCols}
+              />
+
               {/* Export Button */}
               <button
                 type="button"
@@ -1192,105 +1295,123 @@ export default function BravoReconciliation({
               >
                 <thead>
                   <tr className="bg-slate-50/80 text-slate-600 font-semibold border-b border-slate-200 text-2xs uppercase tracking-wider">
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
-                      style={{ width: `${macroWidths.row}px`, minWidth: `${macroWidths.row}px` }}
-                    >
-                      <div className="truncate">Dòng</div>
-                      <ColumnResizeHandle
-                        colKey="row"
-                        onResizeStart={handleMacroResizeStart}
-                        onResetWidth={resetMacroColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 relative select-none"
-                      style={{ width: `${macroWidths.code}px`, minWidth: `${macroWidths.code}px` }}
-                    >
-                      <div className="truncate">Mã TK</div>
-                      <ColumnResizeHandle
-                        colKey="code"
-                        onResizeStart={handleMacroResizeStart}
-                        onResetWidth={resetMacroColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 relative select-none"
-                      style={{ width: `${macroWidths.name}px`, minWidth: `${macroWidths.name}px` }}
-                    >
-                      <div className="truncate">Tên Hạng Mục / Khoản Mục</div>
-                      <ColumnResizeHandle
-                        colKey="name"
-                        onResizeStart={handleMacroResizeStart}
-                        onResetWidth={resetMacroColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 relative select-none"
-                      style={{ width: `${macroWidths.category}px`, minWidth: `${macroWidths.category}px` }}
-                    >
-                      <div className="truncate">Nhóm Danh Mục</div>
-                      <ColumnResizeHandle
-                        colKey="category"
-                        onResizeStart={handleMacroResizeStart}
-                        onResetWidth={resetMacroColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 text-right relative select-none"
-                      style={{ width: `${macroWidths.approved}px`, minWidth: `${macroWidths.approved}px` }}
-                    >
-                      <div className="truncate">Hạn Mức Duyệt</div>
-                      <ColumnResizeHandle
-                        colKey="approved"
-                        onResizeStart={handleMacroResizeStart}
-                        onResetWidth={resetMacroColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 text-right bg-amber-50/40 text-amber-900 relative select-none"
-                      style={{ width: `${macroWidths.bravo}px`, minWidth: `${macroWidths.bravo}px` }}
-                    >
-                      <div className="truncate">Đã Ghi Sổ BRAVO</div>
-                      <ColumnResizeHandle
-                        colKey="bravo"
-                        onResizeStart={handleMacroResizeStart}
-                        onResetWidth={resetMacroColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
-                      style={{ width: `${macroWidths.rate}px`, minWidth: `${macroWidths.rate}px` }}
-                    >
-                      <div className="truncate">Tỷ Lệ</div>
-                      <ColumnResizeHandle
-                        colKey="rate"
-                        onResizeStart={handleMacroResizeStart}
-                        onResetWidth={resetMacroColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
-                      style={{ width: `${macroWidths.owner}px`, minWidth: `${macroWidths.owner}px` }}
-                    >
-                      <div className="truncate">Đơn Vị Quản Lý</div>
-                      <ColumnResizeHandle
-                        colKey="owner"
-                        onResizeStart={handleMacroResizeStart}
-                        onResetWidth={resetMacroColumnWidth}
-                      />
-                    </th>
-                    <th
-                      className="py-0.5 px-0.5 sm:px-1 relative select-none"
-                      style={{ width: `${macroWidths.reason}px`, minWidth: `${macroWidths.reason}px` }}
-                    >
-                      <div className="truncate">Giải Trình & Lý Do Chênh Lệch</div>
-                      <ColumnResizeHandle
-                        colKey="reason"
-                        onResizeStart={handleMacroResizeStart}
-                        onResetWidth={resetMacroColumnWidth}
-                      />
-                    </th>
+                    {isMacroColVisible('row') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${macroWidths.row}px`, minWidth: `${macroWidths.row}px` }}
+                      >
+                        <div className="truncate text-center w-full">Dòng</div>
+                        <ColumnResizeHandle
+                          colKey="row"
+                          onResizeStart={handleMacroResizeStart}
+                          onResetWidth={resetMacroColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isMacroColVisible('code') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${macroWidths.code}px`, minWidth: `${macroWidths.code}px` }}
+                      >
+                        <div className="truncate text-center w-full">Mã TK</div>
+                        <ColumnResizeHandle
+                          colKey="code"
+                          onResizeStart={handleMacroResizeStart}
+                          onResetWidth={resetMacroColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isMacroColVisible('name') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${macroWidths.name}px`, minWidth: `${macroWidths.name}px` }}
+                      >
+                        <div className="truncate text-center w-full">Tên Hạng Mục / Khoản Mục</div>
+                        <ColumnResizeHandle
+                          colKey="name"
+                          onResizeStart={handleMacroResizeStart}
+                          onResetWidth={resetMacroColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isMacroColVisible('category') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${macroWidths.category}px`, minWidth: `${macroWidths.category}px` }}
+                      >
+                        <div className="truncate text-center w-full">Nhóm Danh Mục</div>
+                        <ColumnResizeHandle
+                          colKey="category"
+                          onResizeStart={handleMacroResizeStart}
+                          onResetWidth={resetMacroColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isMacroColVisible('approved') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${macroWidths.approved}px`, minWidth: `${macroWidths.approved}px` }}
+                      >
+                        <div className="truncate text-center w-full">Hạn Mức Duyệt</div>
+                        <ColumnResizeHandle
+                          colKey="approved"
+                          onResizeStart={handleMacroResizeStart}
+                          onResetWidth={resetMacroColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isMacroColVisible('bravo') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center bg-amber-50/40 text-amber-900 relative select-none"
+                        style={{ width: `${macroWidths.bravo}px`, minWidth: `${macroWidths.bravo}px` }}
+                      >
+                        <div className="truncate text-center w-full">Đã Ghi Sổ BRAVO</div>
+                        <ColumnResizeHandle
+                          colKey="bravo"
+                          onResizeStart={handleMacroResizeStart}
+                          onResetWidth={resetMacroColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isMacroColVisible('rate') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${macroWidths.rate}px`, minWidth: `${macroWidths.rate}px` }}
+                      >
+                        <div className="truncate text-center w-full">Tỷ Lệ</div>
+                        <ColumnResizeHandle
+                          colKey="rate"
+                          onResizeStart={handleMacroResizeStart}
+                          onResetWidth={resetMacroColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isMacroColVisible('owner') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${macroWidths.owner}px`, minWidth: `${macroWidths.owner}px` }}
+                      >
+                        <div className="truncate text-center w-full">Đơn Vị Quản Lý</div>
+                        <ColumnResizeHandle
+                          colKey="owner"
+                          onResizeStart={handleMacroResizeStart}
+                          onResetWidth={resetMacroColumnWidth}
+                        />
+                      </th>
+                    )}
+                    {isMacroColVisible('reason') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        style={{ width: `${macroWidths.reason}px`, minWidth: `${macroWidths.reason}px` }}
+                      >
+                        <div className="truncate text-center w-full">Giải Trình & Lý Do Chênh Lệch</div>
+                        <ColumnResizeHandle
+                          colKey="reason"
+                          onResizeStart={handleMacroResizeStart}
+                          onResetWidth={resetMacroColumnWidth}
+                        />
+                      </th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
@@ -1308,62 +1429,80 @@ export default function BravoReconciliation({
                       if (isHeaderGroup) {
                         return (
                           <tr key={`header-${item.row}`} className="bg-slate-100/70 font-bold text-slate-900">
-                            <td
-                              className="py-0.5 px-0.5 sm:px-1 text-center text-2xs text-slate-400 leading-tight break-words"
-                              style={{ width: `${macroWidths.row}px`, minWidth: `${macroWidths.row}px` }}
-                            >
-                              {item.row}
-                            </td>
-                            <td
-                              className="py-0.5 px-0.5 sm:px-1 font-mono text-slate-400 leading-tight break-words"
-                              style={{ width: `${macroWidths.code}px`, minWidth: `${macroWidths.code}px` }}
-                            >
-                              —
-                            </td>
-                            <td
-                              className="py-0.5 px-0.5 sm:px-1 text-blue-900 font-bold uppercase tracking-wide text-[9.5px] sm:text-xs leading-tight break-words whitespace-normal"
-                              style={{ width: `${macroWidths.name}px`, minWidth: `${macroWidths.name}px` }}
-                            >
-                              {item.name}
-                            </td>
-                            <td
-                              className="py-0.5 px-0.5 sm:px-1 text-slate-400 leading-tight break-words"
-                              style={{ width: `${macroWidths.category}px`, minWidth: `${macroWidths.category}px` }}
-                            >
-                              —
-                            </td>
-                            <td
-                              className="py-0.5 px-0.5 sm:px-1 text-right text-slate-900 font-mono text-[9px] sm:text-xs leading-tight break-words"
-                              style={{ width: `${macroWidths.approved}px`, minWidth: `${macroWidths.approved}px` }}
-                            >
-                              {formatVND(item.approvedAmount)}
-                            </td>
-                            <td
-                              className="py-0.5 px-0.5 sm:px-1 text-right text-amber-900 bg-amber-100/40 font-mono text-[9px] sm:text-xs leading-tight break-words"
-                              style={{ width: `${macroWidths.bravo}px`, minWidth: `${macroWidths.bravo}px` }}
-                            >
-                              {formatVND(item.bravoAmount)}
-                            </td>
-                            <td
-                              className="py-0.5 px-0.5 sm:px-1 text-center text-slate-800 text-[9px] sm:text-xs leading-tight break-words"
-                              style={{ width: `${macroWidths.rate}px`, minWidth: `${macroWidths.rate}px` }}
-                            >
-                              {item.rate.toFixed(1)}%
-                            </td>
-                            <td
-                              className="py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words"
-                              style={{ width: `${macroWidths.owner}px`, minWidth: `${macroWidths.owner}px` }}
-                            >
-                              <span className="px-1 py-0.2 rounded text-[7.5px] sm:text-3xs font-bold uppercase bg-slate-200 text-slate-700">
-                                Nhóm Lớn
-                              </span>
-                            </td>
-                            <td
-                              className="py-0.5 px-0.5 sm:px-1 text-3xs text-slate-500 italic leading-tight break-words whitespace-normal"
-                              style={{ width: `${macroWidths.reason}px`, minWidth: `${macroWidths.reason}px` }}
-                            >
-                              Tổng cộng nhóm danh mục
-                            </td>
+                            {isMacroColVisible('row') && (
+                              <td
+                                className="py-0.5 px-0.5 sm:px-1 text-center text-2xs text-slate-400 leading-tight break-words"
+                                style={{ width: `${macroWidths.row}px`, minWidth: `${macroWidths.row}px` }}
+                              >
+                                {item.row}
+                              </td>
+                            )}
+                            {isMacroColVisible('code') && (
+                              <td
+                                className="py-0.5 px-0.5 sm:px-1 font-mono text-slate-400 leading-tight break-words text-center"
+                                style={{ width: `${macroWidths.code}px`, minWidth: `${macroWidths.code}px` }}
+                              >
+                                —
+                              </td>
+                            )}
+                            {isMacroColVisible('name') && (
+                              <td
+                                className="py-0.5 px-0.5 sm:px-1 text-blue-900 font-bold uppercase tracking-wide text-[9.5px] sm:text-xs leading-tight break-words whitespace-normal"
+                                style={{ width: `${macroWidths.name}px`, minWidth: `${macroWidths.name}px` }}
+                              >
+                                {item.name}
+                              </td>
+                            )}
+                            {isMacroColVisible('category') && (
+                              <td
+                                className="py-0.5 px-0.5 sm:px-1 text-slate-400 leading-tight break-words text-center"
+                                style={{ width: `${macroWidths.category}px`, minWidth: `${macroWidths.category}px` }}
+                              >
+                                —
+                              </td>
+                            )}
+                            {isMacroColVisible('approved') && (
+                              <td
+                                className="py-0.5 px-0.5 sm:px-1 text-right text-slate-900 font-mono text-[9px] sm:text-xs leading-tight break-words"
+                                style={{ width: `${macroWidths.approved}px`, minWidth: `${macroWidths.approved}px` }}
+                              >
+                                {formatVND(item.approvedAmount)}
+                              </td>
+                            )}
+                            {isMacroColVisible('bravo') && (
+                              <td
+                                className="py-0.5 px-0.5 sm:px-1 text-right text-amber-900 bg-amber-100/40 font-mono text-[9px] sm:text-xs leading-tight break-words"
+                                style={{ width: `${macroWidths.bravo}px`, minWidth: `${macroWidths.bravo}px` }}
+                              >
+                                {formatVND(item.bravoAmount)}
+                              </td>
+                            )}
+                            {isMacroColVisible('rate') && (
+                              <td
+                                className="py-0.5 px-0.5 sm:px-1 text-center text-slate-800 text-[9px] sm:text-xs leading-tight break-words"
+                                style={{ width: `${macroWidths.rate}px`, minWidth: `${macroWidths.rate}px` }}
+                              >
+                                {item.rate.toFixed(1)}%
+                              </td>
+                            )}
+                            {isMacroColVisible('owner') && (
+                              <td
+                                className="py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words"
+                                style={{ width: `${macroWidths.owner}px`, minWidth: `${macroWidths.owner}px` }}
+                              >
+                                <span className="px-1 py-0.2 rounded text-[7.5px] sm:text-3xs font-bold uppercase bg-slate-200 text-slate-700">
+                                  Nhóm Lớn
+                                </span>
+                              </td>
+                            )}
+                            {isMacroColVisible('reason') && (
+                              <td
+                                className="py-0.5 px-0.5 sm:px-1 text-3xs text-slate-500 italic leading-tight break-words whitespace-normal"
+                                style={{ width: `${macroWidths.reason}px`, minWidth: `${macroWidths.reason}px` }}
+                              >
+                                Tổng cộng nhóm danh mục
+                              </td>
+                            )}
                           </tr>
                         );
                       }
@@ -1376,104 +1515,122 @@ export default function BravoReconciliation({
                           }`}
                         >
                           {/* Row */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 text-center text-slate-400 text-3xs font-mono leading-tight break-words"
-                            style={{ width: `${macroWidths.row}px`, minWidth: `${macroWidths.row}px` }}
-                          >
-                            {item.row}
-                          </td>
+                          {isMacroColVisible('row') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 text-center text-slate-400 text-3xs font-mono leading-tight break-words"
+                              style={{ width: `${macroWidths.row}px`, minWidth: `${macroWidths.row}px` }}
+                            >
+                              {item.row}
+                            </td>
+                          )}
 
                           {/* Code */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 leading-tight break-words"
-                            style={{ width: `${macroWidths.code}px`, minWidth: `${macroWidths.code}px` }}
-                          >
-                            <span className="font-mono text-[9px] sm:text-2xs font-bold text-slate-800 break-all">
-                              {item.code}
-                            </span>
-                          </td>
+                          {isMacroColVisible('code') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 leading-tight break-words"
+                              style={{ width: `${macroWidths.code}px`, minWidth: `${macroWidths.code}px` }}
+                            >
+                              <span className="font-mono text-[9px] sm:text-2xs font-bold text-slate-800 break-all">
+                                {item.code}
+                              </span>
+                            </td>
+                          )}
 
                           {/* Name */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 font-medium text-slate-900 text-[9.5px] sm:text-xs leading-tight break-words whitespace-normal"
-                            style={{ width: `${macroWidths.name}px`, minWidth: `${macroWidths.name}px` }}
-                          >
-                            {item.name}
-                          </td>
+                          {isMacroColVisible('name') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 font-medium text-slate-900 text-[9.5px] sm:text-xs leading-tight break-words whitespace-normal"
+                              style={{ width: `${macroWidths.name}px`, minWidth: `${macroWidths.name}px` }}
+                            >
+                              {item.name}
+                            </td>
+                          )}
 
                           {/* Category */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 text-[8px] sm:text-3xs text-slate-500 leading-tight break-words whitespace-normal"
-                            style={{ width: `${macroWidths.category}px`, minWidth: `${macroWidths.category}px` }}
-                          >
-                            {item.category}
-                          </td>
+                          {isMacroColVisible('category') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 text-[8px] sm:text-3xs text-slate-500 leading-tight break-words whitespace-normal"
+                              style={{ width: `${macroWidths.category}px`, minWidth: `${macroWidths.category}px` }}
+                            >
+                              {item.category}
+                            </td>
+                          )}
 
                           {/* Approved */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 text-right text-slate-800 font-mono text-[9px] sm:text-xs leading-tight break-words"
-                            style={{ width: `${macroWidths.approved}px`, minWidth: `${macroWidths.approved}px` }}
-                          >
-                            {formatVND(item.approvedAmount)}
-                          </td>
+                          {isMacroColVisible('approved') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 text-right text-slate-800 font-mono text-[9px] sm:text-xs leading-tight break-words"
+                              style={{ width: `${macroWidths.approved}px`, minWidth: `${macroWidths.approved}px` }}
+                            >
+                              {formatVND(item.approvedAmount)}
+                            </td>
+                          )}
 
                           {/* BRAVO Amount */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-amber-900 bg-amber-50/20 font-mono text-[9px] sm:text-xs leading-tight break-words"
-                            style={{ width: `${macroWidths.bravo}px`, minWidth: `${macroWidths.bravo}px` }}
-                          >
-                            {formatVND(item.bravoAmount)}
-                          </td>
+                          {isMacroColVisible('bravo') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-amber-900 bg-amber-50/20 font-mono text-[9px] sm:text-xs leading-tight break-words"
+                              style={{ width: `${macroWidths.bravo}px`, minWidth: `${macroWidths.bravo}px` }}
+                            >
+                              {formatVND(item.bravoAmount)}
+                            </td>
+                          )}
 
                           {/* Rate */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 text-center text-3xs leading-tight break-words"
-                            style={{ width: `${macroWidths.rate}px`, minWidth: `${macroWidths.rate}px` }}
-                          >
-                            <span
-                              className={`px-1 py-0.2 rounded font-bold text-[7.5px] sm:text-3xs ${
-                                item.rate > 100
-                                  ? 'bg-rose-100 text-rose-800'
-                                  : item.rate >= 80
-                                  ? 'bg-amber-100 text-amber-800'
-                                  : 'bg-emerald-100 text-emerald-800'
-                              }`}
+                          {isMacroColVisible('rate') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 text-center text-3xs leading-tight break-words"
+                              style={{ width: `${macroWidths.rate}px`, minWidth: `${macroWidths.rate}px` }}
                             >
-                              {item.rate.toFixed(1)}%
-                            </span>
-                          </td>
+                              <span
+                                className={`px-1 py-0.2 rounded font-bold text-[7.5px] sm:text-3xs ${
+                                  item.rate > 100
+                                    ? 'bg-rose-100 text-rose-800'
+                                    : item.rate >= 80
+                                    ? 'bg-amber-100 text-amber-800'
+                                    : 'bg-emerald-100 text-emerald-800'
+                                }`}
+                              >
+                                {item.rate.toFixed(1)}%
+                              </span>
+                            </td>
+                          )}
 
                           {/* Owner Badge */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words whitespace-normal"
-                            style={{ width: `${macroWidths.owner}px`, minWidth: `${macroWidths.owner}px` }}
-                          >
-                            {isPlanning ? (
-                              <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-blue-100 text-blue-800">
-                                <CheckCircle2 className="w-2.5 h-2.5" /> Tổ Kế Hoạch
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-slate-200 text-slate-700">
-                                Kế Toán / TCT
-                              </span>
-                            )}
-                          </td>
+                          {isMacroColVisible('owner') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words whitespace-normal"
+                              style={{ width: `${macroWidths.owner}px`, minWidth: `${macroWidths.owner}px` }}
+                            >
+                              {isPlanning ? (
+                                <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-blue-100 text-blue-800">
+                                  <CheckCircle2 className="w-2.5 h-2.5" /> Tổ Kế Hoạch
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-slate-200 text-slate-700">
+                                  Kế Toán / TCT
+                                </span>
+                              )}
+                            </td>
+                          )}
 
                           {/* Reason */}
-                          <td
-                            className="py-0.5 px-0.5 sm:px-1 text-[7.5px] sm:text-3xs text-slate-500 leading-tight break-words whitespace-normal"
-                            style={{ width: `${macroWidths.reason}px`, minWidth: `${macroWidths.reason}px` }}
-                          >
-                            {isPlanning ? (
-                              <span className="text-emerald-700 font-medium">
-                                Tổ KH theo dõi định mức và kiểm soát từng hạng mục
-                              </span>
-                            ) : (
-                              <span className="text-slate-600">
-                                {item.nonPlanningReason || 'Hạch toán trực tiếp từ phòng Kế toán / TCT'}
-                              </span>
-                            )}
-                          </td>
+                          {isMacroColVisible('reason') && (
+                            <td
+                              className="py-0.5 px-0.5 sm:px-1 text-[7.5px] sm:text-3xs text-slate-500 leading-tight break-words whitespace-normal"
+                              style={{ width: `${macroWidths.reason}px`, minWidth: `${macroWidths.reason}px` }}
+                            >
+                              {isPlanning ? (
+                                <span className="text-emerald-700 font-medium">
+                                  Tổ KH theo dõi định mức và kiểm soát từng hạng mục
+                                </span>
+                              ) : (
+                                <span className="text-slate-600">
+                                  {item.nonPlanningReason || 'Hạch toán trực tiếp từ phòng Kế toán / TCT'}
+                                </span>
+                              )}
+                            </td>
+                          )}
                         </tr>
                       );
                     })

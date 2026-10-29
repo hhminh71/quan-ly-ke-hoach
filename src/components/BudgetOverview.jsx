@@ -20,7 +20,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import AccountLedgerModal from './AccountLedgerModal';
-import { useResizableColumns, ColumnResizeHandle } from '../hooks/useResizableColumns';
+import { useResizableColumns, ColumnResizeHandle, ColumnVisibilityDropdown } from '../hooks/useResizableColumns';
 import { matchesVietnameseSearch } from '../utils/searchUtils';
 import { calculateReportActual, getSctsSeparatedCodes, saveSctsSeparatedCodes, isSctsSeparated } from '../utils/sctsConfig';
 
@@ -130,6 +130,9 @@ export default function BudgetOverview({
     handleResizeStart: handleProgResizeStart,
     resetColumnWidth: resetProgColumnWidth,
     totalTableWidth: totalProgWidth,
+    isColumnVisible: isProgColVisible,
+    toggleColumnVisibility: toggleProgCol,
+    showAllColumns: showAllProgCols,
   } = useResizableColumns({
     storageKey: 'tbl_cols_budget_overview_v2',
     initialWidths: {
@@ -156,6 +159,21 @@ export default function BudgetOverview({
     },
   });
 
+  const progressTableColumns = useMemo(
+    () => [
+      { key: 'code', label: 'Mã KH' },
+      { key: 'name', label: 'Khoản Mục Chi Phí' },
+      { key: 'approved', label: 'Hạn Mức Duyệt' },
+      ...(showBravoCol ? [{ key: 'bravo', label: 'Theo Bravo' }] : []),
+      ...(showActualCol ? [{ key: 'actual', label: 'Theo Thực Tế' }] : []),
+      { key: 'reportActual', label: 'Chi Phí Báo Cáo' },
+      { key: 'remaining', label: 'Còn Lại' },
+      { key: 'percent', label: 'Tiến Độ (%)' },
+      { key: 'status', label: 'Trạng Thái' },
+    ],
+    [showBravoCol, showActualCol]
+  );
+
   // Resizable columns hook for Matrix Table (Ma trận các năm)
   const matrixInitialWidths = useMemo(() => {
     const base = { code: 65, name: 220, group: 110 };
@@ -170,6 +188,9 @@ export default function BudgetOverview({
     handleResizeStart: handleMatrixResizeStart,
     resetColumnWidth: resetMatrixColumnWidth,
     totalTableWidth: totalMatrixWidth,
+    isColumnVisible: isMatrixColVisible,
+    toggleColumnVisibility: toggleMatrixCol,
+    showAllColumns: showAllMatrixCols,
   } = useResizableColumns({
     storageKey: 'tbl_cols_budget_matrix_v2',
     initialWidths: matrixInitialWidths,
@@ -180,6 +201,19 @@ export default function BudgetOverview({
     },
     defaultMinWidth: 55,
   });
+
+  const matrixTableColumns = useMemo(
+    () => [
+      { key: 'code', label: 'Mã KH' },
+      { key: 'name', label: 'Tên Hạng Mục' },
+      { key: 'group', label: 'Nhóm Chi Phí' },
+      ...(matrixYears || []).map((yr) => ({
+        key: `yr_${yr}`,
+        label: `Cột Năm ${yr}`,
+      })),
+    ],
+    [matrixYears]
+  );
 
   // Compute live actual spent per account strictly from the passed year's transactions
   const liveActualsByCode = useMemo(() => {
@@ -425,6 +459,14 @@ export default function BudgetOverview({
               </button>
             </div>
 
+            {/* Check/Uncheck Column Visibility Dropdown */}
+            <ColumnVisibilityDropdown
+              columns={viewMode === 'PROGRESS' ? progressTableColumns : matrixTableColumns}
+              isColumnVisible={viewMode === 'PROGRESS' ? isProgColVisible : isMatrixColVisible}
+              onToggleColumn={viewMode === 'PROGRESS' ? toggleProgCol : toggleMatrixCol}
+              onShowAll={viewMode === 'PROGRESS' ? showAllProgCols : showAllMatrixCols}
+            />
+
             {/* Matrix Actions */}
             {viewMode === 'MATRIX' && (
               <>
@@ -645,103 +687,123 @@ export default function BudgetOverview({
             >
               <thead className="sticky top-0 z-20 bg-slate-100/95 backdrop-blur-xs border-b border-slate-200 shadow-2xs">
                 <tr className="text-[8px] sm:text-[9.5px] font-bold text-slate-600 uppercase tracking-wider">
-                  <th
-                    style={{ width: `${progWidths.code}px` }}
-                    className="relative py-0.5 px-0.5 sm:px-1 select-none leading-tight break-words"
-                    title="Mã kế hoạch • Kéo mép phải để giãn cột"
-                  >
-                    <span className="pr-1">Mã KH</span>
-                    <ColumnResizeHandle colKey="code" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
-                  </th>
+                  {/* Mã KH */}
+                  {isProgColVisible('code') && (
+                    <th
+                      style={{ width: `${progWidths.code}px` }}
+                      className="relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words"
+                      title="Mã kế hoạch • Kéo mép phải để giãn cột"
+                    >
+                      <div className="text-center w-full pr-1">Mã KH</div>
+                      <ColumnResizeHandle colKey="code" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
+                    </th>
+                  )}
 
-                  <th
-                    style={{ width: `${progWidths.name}px` }}
-                    className="relative py-0.5 px-0.5 sm:px-1 select-none leading-tight break-words"
-                    title="Tên Hạng Mục • Kéo mép phải để giãn cột"
-                  >
-                    <span className="pr-1">Tên Hạng Mục</span>
-                    <ColumnResizeHandle colKey="name" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
-                  </th>
+                  {/* Tên Hạng Mục */}
+                  {isProgColVisible('name') && (
+                    <th
+                      style={{ width: `${progWidths.name}px` }}
+                      className="relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words"
+                      title="Tên Hạng Mục • Kéo mép phải để giãn cột"
+                    >
+                      <div className="text-center w-full pr-1">Tên Hạng Mục</div>
+                      <ColumnResizeHandle colKey="name" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
+                    </th>
+                  )}
 
-                  <th
-                    style={{ width: `${progWidths.approved}px` }}
-                    className="relative py-0.5 px-0.5 sm:px-1 text-right select-none leading-tight break-words"
-                    title={`Được duyệt (${selectedYear}) • Kéo mép phải để giãn cột`}
-                  >
-                    <span className="pr-1">Được Duyệt ({selectedYear})</span>
-                    <ColumnResizeHandle colKey="approved" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
-                  </th>
+                  {/* Được duyệt */}
+                  {isProgColVisible('approved') && (
+                    <th
+                      style={{ width: `${progWidths.approved}px` }}
+                      className="relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words"
+                      title={`Được duyệt (${selectedYear}) • Kéo mép phải để giãn cột`}
+                    >
+                      <div className="text-center w-full pr-1">Được Duyệt ({selectedYear})</div>
+                      <ColumnResizeHandle colKey="approved" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
+                    </th>
+                  )}
                   
                   {/* Cột Tùy Chọn: Theo Bravo */}
-                  {showBravoCol && (
+                  {showBravoCol && isProgColVisible('bravo') && (
                     <th
                       style={{ width: `${progWidths.bravo}px` }}
-                      className="relative py-0.5 px-0.5 sm:px-1 text-right bg-amber-50/90 text-amber-900 border-l border-r border-amber-200/50 select-none leading-tight break-words"
+                      className="relative py-0.5 px-0.5 sm:px-1 text-center bg-amber-50/90 text-amber-900 border-l border-r border-amber-200/50 select-none leading-tight break-words"
                       title="Theo Bravo • Kéo mép phải để giãn cột"
                     >
-                      <span className="pr-1">Theo Bravo</span>
+                      <div className="text-center w-full pr-1">Theo Bravo</div>
                       <ColumnResizeHandle colKey="bravo" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
                     </th>
                   )}
 
                   {/* Cột Tùy Chọn: Theo Thực Tế */}
-                  {showActualCol && (
+                  {showActualCol && isProgColVisible('actual') && (
                     <th
                       style={{ width: `${progWidths.actual}px` }}
-                      className="relative py-0.5 px-0.5 sm:px-1 text-right bg-blue-50/90 text-blue-900 border-l border-r border-blue-200/50 select-none leading-tight break-words"
+                      className="relative py-0.5 px-0.5 sm:px-1 text-center bg-blue-50/90 text-blue-900 border-l border-r border-blue-200/50 select-none leading-tight break-words"
                       title="Theo Thực Tế • Kéo mép phải để giãn cột"
                     >
-                      <span className="pr-1">Theo Thực Tế</span>
+                      <div className="text-center w-full pr-1">Theo Thực Tế</div>
                       <ColumnResizeHandle colKey="actual" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
                     </th>
                   )}
 
                   {/* Cột Chính: Chi Phí Thực Tế (MAX Báo Cáo) */}
-                  <th
-                    style={{ width: `${progWidths.reportActual}px` }}
-                    className="relative py-0.5 px-0.5 sm:px-1 text-right bg-emerald-50/95 text-emerald-950 font-bold border-l border-r border-emerald-200/70 select-none leading-tight break-words"
-                    title="Chi Phí Báo Cáo MAX(Bravo, Thực tế) • Kéo mép phải để giãn cột"
-                  >
-                    <div className="pr-1">
-                      <span>Chi Phí Báo Cáo</span>
-                      <span className="block text-[6.5px] sm:text-[7.5px] font-normal text-emerald-700">MAX(Bravo, Thực tế)</span>
-                    </div>
-                    <ColumnResizeHandle colKey="reportActual" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
-                  </th>
+                  {isProgColVisible('reportActual') && (
+                    <th
+                      style={{ width: `${progWidths.reportActual}px` }}
+                      className="relative py-0.5 px-0.5 sm:px-1 text-center bg-emerald-50/95 text-emerald-950 font-bold border-l border-r border-emerald-200/70 select-none leading-tight break-words"
+                      title="Chi Phí Báo Cáo MAX(Bravo, Thực tế) • Kéo mép phải để giãn cột"
+                    >
+                      <div className="text-center w-full pr-1">
+                        <span>Chi Phí Báo Cáo</span>
+                        <span className="block text-[6.5px] sm:text-[7.5px] font-normal text-emerald-700">MAX(Bravo, Thực tế)</span>
+                      </div>
+                      <ColumnResizeHandle colKey="reportActual" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
+                    </th>
+                  )}
 
-                  <th
-                    style={{ width: `${progWidths.remaining}px` }}
-                    className="relative py-0.5 px-0.5 sm:px-1 text-right select-none leading-tight break-words"
-                    title="Còn Lại • Kéo mép phải để giãn cột"
-                  >
-                    <span className="pr-1">Còn Lại</span>
-                    <ColumnResizeHandle colKey="remaining" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
-                  </th>
+                  {/* Còn Lại */}
+                  {isProgColVisible('remaining') && (
+                    <th
+                      style={{ width: `${progWidths.remaining}px` }}
+                      className="relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words"
+                      title="Còn Lại • Kéo mép phải để giãn cột"
+                    >
+                      <div className="text-center w-full pr-1">Còn Lại</div>
+                      <ColumnResizeHandle colKey="remaining" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
+                    </th>
+                  )}
 
-                  <th
-                    style={{ width: `${progWidths.percent}px` }}
-                    className="relative py-0.5 px-0.5 sm:px-1 select-none leading-tight break-words"
-                    title="Tiến Độ • Kéo mép phải để giãn cột"
-                  >
-                    <span className="pr-1">Tiến Độ</span>
-                    <ColumnResizeHandle colKey="percent" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
-                  </th>
+                  {/* Tiến Độ */}
+                  {isProgColVisible('percent') && (
+                    <th
+                      style={{ width: `${progWidths.percent}px` }}
+                      className="relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words"
+                      title="Tiến Độ • Kéo mép phải để giãn cột"
+                    >
+                      <div className="text-center w-full pr-1">Tiến Độ</div>
+                      <ColumnResizeHandle colKey="percent" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
+                    </th>
+                  )}
 
-                  <th
-                    style={{ width: `${progWidths.status}px` }}
-                    className="relative py-0.5 px-0.5 text-center select-none leading-tight break-words"
-                    title="Trạng Thái • Kéo mép phải để giãn cột"
-                  >
-                    <span>Trạng Thái</span>
-                    <ColumnResizeHandle colKey="status" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
-                  </th>
+                  {/* Trạng Thái */}
+                  {isProgColVisible('status') && (
+                    <th
+                      style={{ width: `${progWidths.status}px` }}
+                      className="relative py-0.5 px-0.5 text-center select-none leading-tight break-words"
+                      title="Trạng Thái • Kéo mép phải để giãn cột"
+                    >
+                      <div className="text-center w-full">Trạng Thái</div>
+                      <ColumnResizeHandle colKey="status" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
                 {filtered.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={5 + (showBravoCol ? 1 : 0) + (showActualCol ? 1 : 0)}
+                      colSpan={9}
                       className="text-center py-10 text-slate-400 text-xs"
                     >
                       Không tìm thấy khoản mục kế hoạch phù hợp
@@ -759,39 +821,45 @@ export default function BudgetOverview({
                         title={`Click để mở sổ cái chi tiết của [${item.code}] ${item.name}`}
                       >
                         {/* Mã */}
-                        <td className="py-0.5 px-0.5 sm:px-1 leading-tight break-words">
-                          <div className="flex flex-wrap items-center gap-0.5">
-                            <span className="font-mono text-[9px] sm:text-2xs font-bold text-blue-700 bg-blue-50 group-hover:bg-blue-600 group-hover:text-white px-1 py-0.2 rounded border border-blue-200 group-hover:border-blue-600 transition-colors shadow-2xs shrink-0">
-                              {item.code}
-                            </span>
-                            {count > 0 && (
-                              <span
-                                className="text-[7.5px] sm:text-3xs font-bold text-blue-700 bg-blue-100/80 group-hover:bg-white group-hover:text-blue-700 px-0.5 py-0.2 rounded-full border border-blue-200 transition-colors shrink-0"
-                                title={`${count} hạng mục phát sinh trong năm ${selectedYear}`}
-                              >
-                                {count}
+                        {isProgColVisible('code') && (
+                          <td className="py-0.5 px-0.5 sm:px-1 leading-tight break-words">
+                            <div className="flex flex-wrap items-center gap-0.5">
+                              <span className="font-mono text-[9px] sm:text-2xs font-bold text-blue-700 bg-blue-50 group-hover:bg-blue-600 group-hover:text-white px-1 py-0.2 rounded border border-blue-200 group-hover:border-blue-600 transition-colors shadow-2xs shrink-0">
+                                {item.code}
                               </span>
-                            )}
-                          </div>
-                        </td>
+                              {count > 0 && (
+                                <span
+                                  className="text-[7.5px] sm:text-3xs font-bold text-blue-700 bg-blue-100/80 group-hover:bg-white group-hover:text-blue-700 px-0.5 py-0.2 rounded-full border border-blue-200 transition-colors shrink-0"
+                                  title={`${count} hạng mục phát sinh trong năm ${selectedYear}`}
+                                >
+                                  {count}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        )}
 
                         {/* Tên & Nhóm: Xuống dòng tự nhiên khi bóp nhỏ, line-height mảnh */}
-                        <td className="py-0.5 px-0.5 sm:px-1 leading-tight break-words">
-                          <div className="font-semibold text-slate-800 text-[9.5px] sm:text-xs leading-tight group-hover:text-blue-700 transition-colors" title={item.name}>
-                            {item.name}
-                          </div>
-                          <div className="text-[7.5px] sm:text-3xs text-slate-400 leading-tight mt-0.5" title={item.scope || item.group}>
-                            {item.scope ? item.scope : item.group}
-                          </div>
-                        </td>
+                        {isProgColVisible('name') && (
+                          <td className="py-0.5 px-0.5 sm:px-1 leading-tight break-words">
+                            <div className="font-semibold text-slate-800 text-[9.5px] sm:text-xs leading-tight group-hover:text-blue-700 transition-colors" title={item.name}>
+                              {item.name}
+                            </div>
+                            <div className="text-[7.5px] sm:text-3xs text-slate-400 leading-tight mt-0.5" title={item.scope || item.group}>
+                              {item.scope ? item.scope : item.group}
+                            </div>
+                          </td>
+                        )}
 
                         {/* Được duyệt của năm đang chọn */}
-                        <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs text-slate-700 font-semibold leading-tight break-words">
-                          {formatVND(item.selectedYearApproved)}
-                        </td>
+                        {isProgColVisible('approved') && (
+                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs text-slate-700 font-semibold leading-tight break-words">
+                            {formatVND(item.selectedYearApproved)}
+                          </td>
+                        )}
 
                         {/* Cột Tùy Chọn: Theo Bravo */}
-                        {showBravoCol && (
+                        {showBravoCol && isProgColVisible('bravo') && (
                           <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-semibold text-amber-900 bg-amber-50/20 border-l border-r border-amber-100/60 leading-tight break-words">
                             <div className="flex flex-col items-end">
                               <span>{formatVND(item.bravoVal)}</span>
@@ -808,94 +876,102 @@ export default function BudgetOverview({
                         )}
 
                         {/* Cột Tùy Chọn: Theo Thực Tế */}
-                        {showActualCol && (
+                        {showActualCol && isProgColVisible('actual') && (
                           <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-semibold text-blue-700 bg-blue-50/20 border-l border-r border-blue-100/60 leading-tight break-words">
                             {formatVND(item.liveActual)}
                           </td>
                         )}
 
                         {/* Cột Chính: Chi Phí Thực Tế (MAX Báo Cáo) */}
-                        <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-bold text-emerald-950 bg-emerald-50/40 border-l border-r border-emerald-100 leading-tight break-words">
-                          <div className="flex flex-col items-end">
-                            <span className="font-bold">{formatVND(item.reportActual)}</span>
-                            {item.isSctsSeparated ? (
-                              <span
-                                className="inline-block text-[7px] sm:text-3xs font-semibold text-indigo-800 bg-indigo-100/90 px-0.5 py-0.2 rounded border border-indigo-200"
-                                title="Đã tách riêng Sửa chữa tài sản (SCTS) theo nghiệp vụ Cảng. Chi phí kế hoạch chỉ tính theo SCTX nhập liệu."
-                              >
-                                SCTX (Đã tách SCTS)
-                              </span>
-                            ) : item.source === 'BRAVO' ? (
-                              <span
-                                className="inline-block text-[7px] sm:text-3xs font-semibold text-amber-800 bg-amber-100/90 px-0.5 py-0.2 rounded border border-amber-200"
-                                title={`Số này lấy theo BRAVO (${formatVND(item.bravoVal)}) vì lớn hơn số nhập liệu (${formatVND(item.liveActual)})`}
-                              >
-                                (Theo Bravo)
-                              </span>
-                            ) : item.bravoVal > 0 && item.liveActual === item.bravoVal ? (
-                              <span
-                                className="inline-block text-[7px] sm:text-3xs font-semibold text-emerald-800 bg-emerald-100/90 px-0.5 py-0.2 rounded border border-emerald-200"
-                                title="Bravo và Nhập liệu bằng nhau"
-                              >
-                                (Khớp)
-                              </span>
-                            ) : (
-                              <span
-                                className="inline-block text-[7px] sm:text-3xs font-semibold text-blue-800 bg-blue-100/90 px-0.5 py-0.2 rounded border border-blue-200"
-                                title={`Số này lấy theo Nhập liệu hạng mục (${formatVND(item.liveActual)})`}
-                              >
-                                (Theo Nhập liệu)
-                              </span>
-                            )}
-                          </div>
-                        </td>
+                        {isProgColVisible('reportActual') && (
+                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-bold text-emerald-950 bg-emerald-50/40 border-l border-r border-emerald-100 leading-tight break-words">
+                            <div className="flex flex-col items-end">
+                              <span className="font-bold">{formatVND(item.reportActual)}</span>
+                              {item.isSctsSeparated ? (
+                                <span
+                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-indigo-800 bg-indigo-100/90 px-0.5 py-0.2 rounded border border-indigo-200"
+                                  title="Đã tách riêng Sửa chữa tài sản (SCTS) theo nghiệp vụ Cảng. Chi phí kế hoạch chỉ tính theo SCTX nhập liệu."
+                                >
+                                  SCTX (Đã tách SCTS)
+                                </span>
+                              ) : item.source === 'BRAVO' ? (
+                                <span
+                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-amber-800 bg-amber-100/90 px-0.5 py-0.2 rounded border border-amber-200"
+                                  title={`Số này lấy theo BRAVO (${formatVND(item.bravoVal)}) vì lớn hơn số nhập liệu (${formatVND(item.liveActual)})`}
+                                >
+                                  (Theo Bravo)
+                                </span>
+                              ) : item.bravoVal > 0 && item.liveActual === item.bravoVal ? (
+                                <span
+                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-emerald-800 bg-emerald-100/90 px-0.5 py-0.2 rounded border border-emerald-200"
+                                  title="Bravo và Nhập liệu bằng nhau"
+                                >
+                                  (Khớp)
+                                </span>
+                              ) : (
+                                <span
+                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-blue-800 bg-blue-100/90 px-0.5 py-0.2 rounded border border-blue-200"
+                                  title={`Số này lấy theo Nhập liệu hạng mục (${formatVND(item.liveActual)})`}
+                                >
+                                  (Theo Nhập liệu)
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        )}
 
                         {/* Còn lại */}
-                        <td
-                          className={`py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-bold leading-tight break-words ${
-                            item.liveRemaining < 0 ? 'text-rose-600' : 'text-emerald-700'
-                          }`}
-                        >
-                          {formatVND(item.liveRemaining)}
-                        </td>
+                        {isProgColVisible('remaining') && (
+                          <td
+                            className={`py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-bold leading-tight break-words ${
+                              item.liveRemaining < 0 ? 'text-rose-600' : 'text-emerald-700'
+                            }`}
+                          >
+                            {formatVND(item.liveRemaining)}
+                          </td>
+                        )}
 
                         {/* Progress Bar */}
-                        <td className="py-0.5 px-0.5 sm:px-1 leading-tight break-words">
-                          <div className="flex flex-wrap items-center gap-0.5">
-                            <div className="w-8 sm:w-10 h-1.5 bg-slate-100 rounded-full overflow-hidden shrink-0">
-                              <div
-                                className={`h-full rounded-full transition-all duration-300 ${
-                                  item.livePercent >= 100
-                                    ? 'bg-rose-500'
-                                    : item.livePercent >= 80
-                                    ? 'bg-amber-500'
-                                    : 'bg-emerald-500'
-                                }`}
-                                style={{ width: `${percentClamped}%` }}
-                              ></div>
+                        {isProgColVisible('percent') && (
+                          <td className="py-0.5 px-0.5 sm:px-1 leading-tight break-words">
+                            <div className="flex flex-wrap items-center gap-0.5">
+                              <div className="w-8 sm:w-10 h-1.5 bg-slate-100 rounded-full overflow-hidden shrink-0">
+                                <div
+                                  className={`h-full rounded-full transition-all duration-300 ${
+                                    item.livePercent >= 100
+                                      ? 'bg-rose-500'
+                                      : item.livePercent >= 80
+                                      ? 'bg-amber-500'
+                                      : 'bg-emerald-500'
+                                  }`}
+                                  style={{ width: `${percentClamped}%` }}
+                                ></div>
+                              </div>
+                              <span className="text-[7.5px] sm:text-3xs font-mono font-bold text-slate-600 shrink-0">
+                                {item.livePercent.toFixed(0)}%
+                              </span>
                             </div>
-                            <span className="text-[7.5px] sm:text-3xs font-mono font-bold text-slate-600 shrink-0">
-                              {item.livePercent.toFixed(0)}%
-                            </span>
-                          </div>
-                        </td>
+                          </td>
+                        )}
 
                         {/* Status Badge */}
-                        <td className="py-0.5 px-0.5 text-center leading-tight break-words">
-                          {item.status === 'OVER' ? (
-                            <span className="inline-flex items-center px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 leading-none">
-                              Vượt
-                            </span>
-                          ) : item.status === 'WARNING' ? (
-                            <span className="inline-flex items-center px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 leading-none">
-                              Gần hết
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 leading-none">
-                              An toàn
-                            </span>
-                          )}
-                        </td>
+                        {isProgColVisible('status') && (
+                          <td className="py-0.5 px-0.5 text-center leading-tight break-words">
+                            {item.status === 'OVER' ? (
+                              <span className="inline-flex items-center px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 leading-none">
+                                Vượt
+                              </span>
+                            ) : item.status === 'WARNING' ? (
+                              <span className="inline-flex items-center px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 leading-none">
+                                Gần hết
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 leading-none">
+                                An toàn
+                              </span>
+                            )}
+                          </td>
+                        )}
                       </tr>
                     );
                   })
@@ -906,38 +982,55 @@ export default function BudgetOverview({
               {filtered.length > 0 && (
                 <tfoot className="bg-slate-100/90 font-bold text-slate-800 border-t-2 border-slate-300 text-[9px] sm:text-xs">
                   <tr>
-                    <td colSpan="2" className="py-1 px-1 sm:px-1.5 leading-tight break-words">
-                      Tổng cộng ({filtered.length} khoản mục)
-                    </td>
-                    <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-slate-900 leading-tight break-words">
-                      {formatVND(summary.totalApproved)}
-                    </td>
-                    {showBravoCol && (
+                    {isProgColVisible('code') && (
+                      <td className="py-1 px-0.5 sm:px-1 leading-tight break-words text-center">
+                        Tổng
+                      </td>
+                    )}
+                    {isProgColVisible('name') && (
+                      <td className="py-1 px-1 sm:px-1.5 leading-tight break-words">
+                        {filtered.length} khoản mục
+                      </td>
+                    )}
+                    {isProgColVisible('approved') && (
+                      <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-slate-900 leading-tight break-words">
+                        {formatVND(summary.totalApproved)}
+                      </td>
+                    )}
+                    {showBravoCol && isProgColVisible('bravo') && (
                       <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-amber-900 bg-amber-100/50 border-l border-r border-amber-200 leading-tight break-words">
                         {formatVND(summary.totalBravo)}
                       </td>
                     )}
-                    {showActualCol && (
+                    {showActualCol && isProgColVisible('actual') && (
                       <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-blue-900 bg-blue-100/50 border-l border-r border-blue-200 leading-tight break-words">
                         {formatVND(summary.totalLiveActual)}
                       </td>
                     )}
-                    <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-emerald-950 bg-emerald-100/70 border-l border-r border-emerald-300 leading-tight break-words">
-                      {formatVND(summary.totalReportActual)}
-                    </td>
-                    <td
-                      className={`py-1 px-0.5 sm:px-1 text-right font-mono leading-tight break-words ${
-                        summary.totalRemaining < 0 ? 'text-rose-600' : 'text-emerald-700'
-                      }`}
-                    >
-                      {formatVND(summary.totalRemaining)}
-                    </td>
-                    <td className="py-1 px-0.5 sm:px-1 text-center font-mono text-slate-700 leading-tight break-words">
-                      {summary.avgPercent.toFixed(1)}%
-                    </td>
-                    <td className="py-1 px-0.5 text-center text-3xs text-slate-500 leading-tight break-words">
-                      {summary.overCount > 0 ? `${summary.overCount} vượt` : '100% OK'}
-                    </td>
+                    {isProgColVisible('reportActual') && (
+                      <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-emerald-950 bg-emerald-100/70 border-l border-r border-emerald-300 leading-tight break-words">
+                        {formatVND(summary.totalReportActual)}
+                      </td>
+                    )}
+                    {isProgColVisible('remaining') && (
+                      <td
+                        className={`py-1 px-0.5 sm:px-1 text-right font-mono leading-tight break-words ${
+                          summary.totalRemaining < 0 ? 'text-rose-600' : 'text-emerald-700'
+                        }`}
+                      >
+                        {formatVND(summary.totalRemaining)}
+                      </td>
+                    )}
+                    {isProgColVisible('percent') && (
+                      <td className="py-1 px-0.5 sm:px-1 text-center font-mono text-slate-700 leading-tight break-words">
+                        {summary.avgPercent.toFixed(1)}%
+                      </td>
+                    )}
+                    {isProgColVisible('status') && (
+                      <td className="py-1 px-0.5 text-center text-3xs text-slate-500 leading-tight break-words">
+                        {summary.overCount > 0 ? `${summary.overCount} vượt` : '100% OK'}
+                      </td>
+                    )}
                   </tr>
                 </tfoot>
               )}
@@ -955,67 +1048,77 @@ export default function BudgetOverview({
           >
             <thead className="sticky top-0 z-20 bg-slate-100/95 backdrop-blur-xs border-b border-slate-200 shadow-2xs">
               <tr className="text-[8px] sm:text-[9.5px] font-bold text-slate-600 uppercase tracking-wider">
-                <th
-                  className="py-0.5 px-0.5 sm:px-1 sticky left-0 bg-slate-100 z-30 relative select-none"
-                  style={{ width: `${matrixWidths.code}px`, minWidth: `${matrixWidths.code}px` }}
-                >
-                  <div className="truncate">Mã KH</div>
-                  <ColumnResizeHandle
-                    colKey="code"
-                    onResizeStart={handleMatrixResizeStart}
-                    onResetWidth={resetMatrixColumnWidth}
-                  />
-                </th>
-                <th
-                  className="py-0.5 px-0.5 sm:px-1 relative select-none"
-                  style={{ width: `${matrixWidths.name}px`, minWidth: `${matrixWidths.name}px` }}
-                >
-                  <div className="truncate">Tên Hạng Mục</div>
-                  <ColumnResizeHandle
-                    colKey="name"
-                    onResizeStart={handleMatrixResizeStart}
-                    onResetWidth={resetMatrixColumnWidth}
-                  />
-                </th>
-                <th
-                  className="py-0.5 px-0.5 sm:px-1 relative select-none"
-                  style={{ width: `${matrixWidths.group}px`, minWidth: `${matrixWidths.group}px` }}
-                >
-                  <div className="truncate">Nhóm Chi Phí</div>
-                  <ColumnResizeHandle
-                    colKey="group"
-                    onResizeStart={handleMatrixResizeStart}
-                    onResetWidth={resetMatrixColumnWidth}
-                  />
-                </th>
-                {matrixYears.map((yr) => (
+                {isMatrixColVisible('code') && (
                   <th
-                    key={yr}
-                    className={`py-0.5 px-0.5 sm:px-1 text-right relative select-none font-mono ${
-                      yr === selectedYear
-                        ? 'bg-blue-100/80 text-blue-900 font-bold border-x border-blue-200'
-                        : ''
-                    }`}
-                    style={{
-                      width: `${matrixWidths[`yr_${yr}`] || 95}px`,
-                      minWidth: `${matrixWidths[`yr_${yr}`] || 95}px`,
-                    }}
+                    className="py-0.5 px-0.5 sm:px-1 sticky left-0 bg-slate-100 z-30 relative select-none text-center"
+                    style={{ width: `${matrixWidths.code}px`, minWidth: `${matrixWidths.code}px` }}
                   >
-                    <div className="truncate">
-                      <span>Cột Năm {yr}</span>
-                      {yr === selectedYear && (
-                        <span className="block text-[6.5px] sm:text-[7.5px] font-sans text-blue-600 font-normal">
-                          (Đang chọn)
-                        </span>
-                      )}
-                    </div>
+                    <div className="truncate text-center w-full">Mã KH</div>
                     <ColumnResizeHandle
-                      colKey={`yr_${yr}`}
+                      colKey="code"
                       onResizeStart={handleMatrixResizeStart}
                       onResetWidth={resetMatrixColumnWidth}
                     />
                   </th>
-                ))}
+                )}
+                {isMatrixColVisible('name') && (
+                  <th
+                    className="py-0.5 px-0.5 sm:px-1 relative select-none text-center"
+                    style={{ width: `${matrixWidths.name}px`, minWidth: `${matrixWidths.name}px` }}
+                  >
+                    <div className="truncate text-center w-full">Tên Hạng Mục</div>
+                    <ColumnResizeHandle
+                      colKey="name"
+                      onResizeStart={handleMatrixResizeStart}
+                      onResetWidth={resetMatrixColumnWidth}
+                    />
+                  </th>
+                )}
+                {isMatrixColVisible('group') && (
+                  <th
+                    className="py-0.5 px-0.5 sm:px-1 relative select-none text-center"
+                    style={{ width: `${matrixWidths.group}px`, minWidth: `${matrixWidths.group}px` }}
+                  >
+                    <div className="truncate text-center w-full">Nhóm Chi Phí</div>
+                    <ColumnResizeHandle
+                      colKey="group"
+                      onResizeStart={handleMatrixResizeStart}
+                      onResetWidth={resetMatrixColumnWidth}
+                    />
+                  </th>
+                )}
+                {matrixYears.map((yr) => {
+                  const yrKey = `yr_${yr}`;
+                  if (!isMatrixColVisible(yrKey)) return null;
+                  return (
+                    <th
+                      key={yr}
+                      className={`py-0.5 px-0.5 sm:px-1 text-center relative select-none font-mono ${
+                        yr === selectedYear
+                          ? 'bg-blue-100/80 text-blue-900 font-bold border-x border-blue-200'
+                          : ''
+                      }`}
+                      style={{
+                        width: `${matrixWidths[yrKey] || 95}px`,
+                        minWidth: `${matrixWidths[yrKey] || 95}px`,
+                      }}
+                    >
+                      <div className="truncate text-center w-full">
+                        <span>Cột Năm {yr}</span>
+                        {yr === selectedYear && (
+                          <span className="block text-[6.5px] sm:text-[7.5px] font-sans text-blue-600 font-normal">
+                            (Đang chọn)
+                          </span>
+                        )}
+                      </div>
+                      <ColumnResizeHandle
+                        colKey={yrKey}
+                        onResizeStart={handleMatrixResizeStart}
+                        onResetWidth={resetMatrixColumnWidth}
+                      />
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
@@ -1027,35 +1130,43 @@ export default function BudgetOverview({
                   title={!isEditingMatrix ? `Click để mở sổ cái chi tiết của [${item.code}] ${item.name}` : ''}
                 >
                   {/* Mã */}
-                  <td
-                    className="py-0.5 px-0.5 sm:px-1 sticky left-0 bg-white group-hover:bg-slate-50 z-10 leading-tight break-words"
-                    style={{ width: `${matrixWidths.code}px`, minWidth: `${matrixWidths.code}px` }}
-                  >
-                    <span className="font-mono text-[9px] sm:text-2xs font-bold text-slate-800 bg-slate-100 px-1 py-0.2 rounded border border-slate-200 inline-block break-all">
-                      {item.code}
-                    </span>
-                  </td>
+                  {isMatrixColVisible('code') && (
+                    <td
+                      className="py-0.5 px-0.5 sm:px-1 sticky left-0 bg-white group-hover:bg-slate-50 z-10 leading-tight break-words"
+                      style={{ width: `${matrixWidths.code}px`, minWidth: `${matrixWidths.code}px` }}
+                    >
+                      <span className="font-mono text-[9px] sm:text-2xs font-bold text-slate-800 bg-slate-100 px-1 py-0.2 rounded border border-slate-200 inline-block break-all">
+                        {item.code}
+                      </span>
+                    </td>
+                  )}
 
                   {/* Tên */}
-                  <td
-                    className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs font-medium text-slate-800 leading-tight break-words whitespace-normal"
-                    style={{ width: `${matrixWidths.name}px`, minWidth: `${matrixWidths.name}px` }}
-                    title={item.name}
-                  >
-                    {item.name}
-                  </td>
+                  {isMatrixColVisible('name') && (
+                    <td
+                      className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs font-medium text-slate-800 leading-tight break-words whitespace-normal"
+                      style={{ width: `${matrixWidths.name}px`, minWidth: `${matrixWidths.name}px` }}
+                      title={item.name}
+                    >
+                      {item.name}
+                    </td>
+                  )}
 
                   {/* Nhóm */}
-                  <td
-                    className="py-0.5 px-0.5 sm:px-1 text-[8px] sm:text-3xs text-slate-500 leading-tight break-words whitespace-normal"
-                    style={{ width: `${matrixWidths.group}px`, minWidth: `${matrixWidths.group}px` }}
-                    title={item.group}
-                  >
-                    {item.group}
-                  </td>
+                  {isMatrixColVisible('group') && (
+                    <td
+                      className="py-0.5 px-0.5 sm:px-1 text-[8px] sm:text-3xs text-slate-500 leading-tight break-words whitespace-normal"
+                      style={{ width: `${matrixWidths.group}px`, minWidth: `${matrixWidths.group}px` }}
+                      title={item.group}
+                    >
+                      {item.group}
+                    </td>
+                  )}
 
                   {/* Các cột năm tài chính */}
                   {matrixYears.map((yr) => {
+                    const yrKey = `yr_${yr}`;
+                    if (!isMatrixColVisible(yrKey)) return null;
                     const val = (item.yearlyApproved && item.yearlyApproved[yr]) || 0;
                     const isSelected = yr === selectedYear;
 
@@ -1066,8 +1177,8 @@ export default function BudgetOverview({
                           isSelected ? 'bg-blue-50/50 border-x border-blue-100 font-bold text-blue-900' : 'text-slate-700'
                         }`}
                         style={{
-                          width: `${matrixWidths[`yr_${yr}`] || 95}px`,
-                          minWidth: `${matrixWidths[`yr_${yr}`] || 95}px`,
+                          width: `${matrixWidths[yrKey] || 95}px`,
+                          minWidth: `${matrixWidths[yrKey] || 95}px`,
                         }}
                       >
                         {isEditingMatrix ? (
