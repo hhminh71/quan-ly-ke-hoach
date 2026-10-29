@@ -18,6 +18,9 @@ import {
   Eye,
   EyeOff,
   SlidersHorizontal,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 import AccountLedgerModal from './AccountLedgerModal';
 import { useResizableColumns, ColumnResizeHandle, ColumnVisibilityDropdown } from '../hooks/useResizableColumns';
@@ -78,6 +81,24 @@ export default function BudgetOverview({
       return false;
     }
   });
+
+  // Sort state for Progress table (mặc định null: theo thứ tự danh mục ban đầu)
+  const [sortField, setSortField] = useState(null); // 'percent' | 'approved' | 'reportActual' | 'remaining' | 'code' | null
+  const [sortDirection, setSortDirection] = useState('desc'); // 'asc' | 'desc'
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      if (sortDirection === 'desc') {
+        setSortDirection('asc');
+      } else {
+        setSortField(null);
+        setSortDirection('desc');
+      }
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
 
   useEffect(() => {
     try {
@@ -302,9 +323,9 @@ export default function BudgetOverview({
     );
   }, [selectedDetailCode, enhancedBudgets, budgets]);
 
-  // Filtered
+  // Filtered & Sorted
   const filtered = useMemo(() => {
-    return enhancedBudgets.filter((b) => {
+    const list = enhancedBudgets.filter((b) => {
       const matchSearch = matchesVietnameseSearch(
         [b.code, b.name, b.scope, b.group],
         searchTerm
@@ -315,7 +336,37 @@ export default function BudgetOverview({
 
       return matchSearch && matchGroup && matchStatus;
     });
-  }, [enhancedBudgets, searchTerm, selectedGroup, statusFilter]);
+
+    if (!sortField) return list;
+
+    return [...list].sort((a, b) => {
+      let valA, valB;
+      if (sortField === 'percent') {
+        valA = Number(a.livePercent) || 0;
+        valB = Number(b.livePercent) || 0;
+      } else if (sortField === 'approved') {
+        valA = Number(a.selectedYearApproved) || 0;
+        valB = Number(b.selectedYearApproved) || 0;
+      } else if (sortField === 'reportActual') {
+        valA = Number(a.reportActual) || 0;
+        valB = Number(b.reportActual) || 0;
+      } else if (sortField === 'remaining') {
+        valA = Number(a.liveRemaining) || 0;
+        valB = Number(b.liveRemaining) || 0;
+      } else if (sortField === 'code') {
+        valA = String(a.code || '');
+        valB = String(b.code || '');
+        return sortDirection === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+      } else {
+        valA = a[sortField] || 0;
+        valB = b[sortField] || 0;
+      }
+
+      if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }, [enhancedBudgets, searchTerm, selectedGroup, statusFilter, sortField, sortDirection]);
 
   // Totals for filtered
   const summary = useMemo(() => {
@@ -563,6 +614,58 @@ export default function BudgetOverview({
               </select>
             </div>
 
+            {/* Sắp xếp nhanh (Chỉ hiện trong view Tiến độ) */}
+            {viewMode === 'PROGRESS' && (
+              <div className="relative flex-1 sm:flex-none sm:w-28">
+                <select
+                  value={
+                    sortField === 'percent'
+                      ? sortDirection === 'desc'
+                        ? 'percent_desc'
+                        : 'percent_asc'
+                      : sortField === 'reportActual'
+                      ? 'actual_desc'
+                      : sortField === 'remaining'
+                      ? 'remaining_asc'
+                      : sortField === 'approved'
+                      ? 'approved_desc'
+                      : 'default'
+                  }
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === 'percent_desc') {
+                      setSortField('percent');
+                      setSortDirection('desc');
+                    } else if (val === 'percent_asc') {
+                      setSortField('percent');
+                      setSortDirection('asc');
+                    } else if (val === 'actual_desc') {
+                      setSortField('reportActual');
+                      setSortDirection('desc');
+                    } else if (val === 'remaining_asc') {
+                      setSortField('remaining');
+                      setSortDirection('asc');
+                    } else if (val === 'approved_desc') {
+                      setSortField('approved');
+                      setSortDirection('desc');
+                    } else {
+                      setSortField(null);
+                      setSortDirection('desc');
+                    }
+                  }}
+                  className="w-full h-5 sm:h-6 pl-1 pr-2 py-0 text-[8px] sm:text-xs rounded border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all cursor-pointer truncate font-medium leading-tight"
+                  title="Sắp xếp danh sách kế hoạch"
+                >
+                  <option value="default">Xếp: Mặc định</option>
+                  <option value="percent_desc">Tiến độ: Cao ➔ Thấp</option>
+                  <option value="percent_asc">Tiến độ: Thấp ➔ Cao</option>
+                  <option value="actual_desc">Chi phí: Cao ➔ Thấp</option>
+                  <option value="remaining_asc">Còn lại: Ít ➔ Nhiều</option>
+                  <option value="approved_desc">Hạn mức: Cao ➔ Thấp</option>
+                </select>
+              </div>
+            )}
+
             {/* Compact Bravo & Thực Tế Buttons: small font, sleek pills */}
             {viewMode === 'PROGRESS' && (
               <div className="flex items-center gap-0.5 shrink-0">
@@ -691,10 +794,24 @@ export default function BudgetOverview({
                   {isProgColVisible('code') && (
                     <th
                       style={{ width: `${progWidths.code}px` }}
-                      className="relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words"
-                      title="Mã kế hoạch • Kéo mép phải để giãn cột"
+                      onClick={() => handleSort('code')}
+                      className={`relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words cursor-pointer transition-colors group/sort ${
+                        sortField === 'code' ? 'bg-blue-100 text-blue-900 font-extrabold' : 'hover:bg-slate-200/80 hover:text-blue-700'
+                      }`}
+                      title="Mã kế hoạch • Bấm để sắp xếp"
                     >
-                      <div className="text-center w-full pr-1">Mã KH</div>
+                      <div className="inline-flex items-center justify-center gap-0.5 w-full pr-1">
+                        <span>Mã KH</span>
+                        {sortField === 'code' ? (
+                          sortDirection === 'desc' ? (
+                            <ArrowDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-700 shrink-0" />
+                          ) : (
+                            <ArrowUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-700 shrink-0" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-slate-400 opacity-40 group-hover/sort:opacity-100 shrink-0" />
+                        )}
+                      </div>
                       <ColumnResizeHandle colKey="code" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
                     </th>
                   )}
@@ -715,10 +832,24 @@ export default function BudgetOverview({
                   {isProgColVisible('approved') && (
                     <th
                       style={{ width: `${progWidths.approved}px` }}
-                      className="relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words"
-                      title={`Được duyệt (${selectedYear}) • Kéo mép phải để giãn cột`}
+                      onClick={() => handleSort('approved')}
+                      className={`relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words cursor-pointer transition-colors group/sort ${
+                        sortField === 'approved' ? 'bg-blue-100 text-blue-900 font-extrabold' : 'hover:bg-slate-200/80 hover:text-blue-700'
+                      }`}
+                      title={`Được duyệt (${selectedYear}) • Bấm để sắp xếp`}
                     >
-                      <div className="text-center w-full pr-1">Được Duyệt ({selectedYear})</div>
+                      <div className="inline-flex items-center justify-center gap-0.5 w-full pr-1">
+                        <span>Được Duyệt ({selectedYear})</span>
+                        {sortField === 'approved' ? (
+                          sortDirection === 'desc' ? (
+                            <ArrowDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-700 shrink-0" />
+                          ) : (
+                            <ArrowUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-700 shrink-0" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-slate-400 opacity-40 group-hover/sort:opacity-100 shrink-0" />
+                        )}
+                      </div>
                       <ColumnResizeHandle colKey="approved" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
                     </th>
                   )}
@@ -751,11 +882,27 @@ export default function BudgetOverview({
                   {isProgColVisible('reportActual') && (
                     <th
                       style={{ width: `${progWidths.reportActual}px` }}
-                      className="relative py-0.5 px-0.5 sm:px-1 text-center bg-emerald-50/95 text-emerald-950 font-bold border-l border-r border-emerald-200/70 select-none leading-tight break-words"
-                      title="Chi Phí Báo Cáo MAX(Bravo, Thực tế) • Kéo mép phải để giãn cột"
+                      onClick={() => handleSort('reportActual')}
+                      className={`relative py-0.5 px-0.5 sm:px-1 text-center border-l border-r select-none leading-tight break-words cursor-pointer transition-colors group/sort ${
+                        sortField === 'reportActual'
+                          ? 'bg-emerald-100 text-emerald-950 font-extrabold border-emerald-300'
+                          : 'bg-emerald-50/95 text-emerald-950 font-bold border-emerald-200/70 hover:bg-emerald-100/70'
+                      }`}
+                      title="Chi Phí Báo Cáo MAX(Bravo, Thực tế) • Bấm để sắp xếp"
                     >
                       <div className="text-center w-full pr-1">
-                        <span>Chi Phí Báo Cáo</span>
+                        <div className="inline-flex items-center justify-center gap-0.5">
+                          <span>Chi Phí Báo Cáo</span>
+                          {sortField === 'reportActual' ? (
+                            sortDirection === 'desc' ? (
+                              <ArrowDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-800 shrink-0" />
+                            ) : (
+                              <ArrowUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-emerald-800 shrink-0" />
+                            )
+                          ) : (
+                            <ArrowUpDown className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-emerald-600 opacity-50 group-hover/sort:opacity-100 shrink-0" />
+                          )}
+                        </div>
                         <span className="block text-[6.5px] sm:text-[7.5px] font-normal text-emerald-700">MAX(Bravo, Thực tế)</span>
                       </div>
                       <ColumnResizeHandle colKey="reportActual" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
@@ -766,10 +913,24 @@ export default function BudgetOverview({
                   {isProgColVisible('remaining') && (
                     <th
                       style={{ width: `${progWidths.remaining}px` }}
-                      className="relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words"
-                      title="Còn Lại • Kéo mép phải để giãn cột"
+                      onClick={() => handleSort('remaining')}
+                      className={`relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words cursor-pointer transition-colors group/sort ${
+                        sortField === 'remaining' ? 'bg-blue-100 text-blue-900 font-extrabold' : 'hover:bg-slate-200/80 hover:text-blue-700'
+                      }`}
+                      title="Còn Lại • Bấm để sắp xếp"
                     >
-                      <div className="text-center w-full pr-1">Còn Lại</div>
+                      <div className="inline-flex items-center justify-center gap-0.5 w-full pr-1">
+                        <span>Còn Lại</span>
+                        {sortField === 'remaining' ? (
+                          sortDirection === 'desc' ? (
+                            <ArrowDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-700 shrink-0" />
+                          ) : (
+                            <ArrowUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-700 shrink-0" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-slate-400 opacity-40 group-hover/sort:opacity-100 shrink-0" />
+                        )}
+                      </div>
                       <ColumnResizeHandle colKey="remaining" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
                     </th>
                   )}
@@ -778,10 +939,32 @@ export default function BudgetOverview({
                   {isProgColVisible('percent') && (
                     <th
                       style={{ width: `${progWidths.percent}px` }}
-                      className="relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words"
-                      title="Tiến Độ • Kéo mép phải để giãn cột"
+                      onClick={() => handleSort('percent')}
+                      className={`relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words cursor-pointer transition-colors group/sort ${
+                        sortField === 'percent'
+                          ? 'bg-blue-100/90 text-blue-900 font-extrabold'
+                          : 'hover:bg-slate-200/80 hover:text-blue-700'
+                      }`}
+                      title={`Tiến Độ • Nhấp để sắp xếp theo tiến độ (${
+                        sortField === 'percent'
+                          ? sortDirection === 'desc'
+                            ? 'Đang xếp: Cao nhất ➔ Thấp nhất'
+                            : 'Đang xếp: Thấp nhất ➔ Cao nhất'
+                          : 'Bấm để sắp xếp'
+                      })`}
                     >
-                      <div className="text-center w-full pr-1">Tiến Độ</div>
+                      <div className="inline-flex items-center justify-center gap-0.5 w-full pr-1">
+                        <span>Tiến Độ</span>
+                        {sortField === 'percent' ? (
+                          sortDirection === 'desc' ? (
+                            <ArrowDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-700 shrink-0" />
+                          ) : (
+                            <ArrowUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-700 shrink-0" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-slate-400 opacity-60 group-hover/sort:opacity-100 shrink-0" />
+                        )}
+                      </div>
                       <ColumnResizeHandle colKey="percent" onResizeStart={handleProgResizeStart} onReset={resetProgColumnWidth} />
                     </th>
                   )}

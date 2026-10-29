@@ -4,6 +4,8 @@ import {
   Search,
   Filter,
   ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
   Download,
   AlertTriangle,
   CheckCircle2,
@@ -290,6 +292,8 @@ export default function BravoReconciliation({
         if (planningSort === 'diff_asc') return a.diff - b.diff;
         if (planningSort === 'code_asc') return a.code.localeCompare(b.code);
         if (planningSort === 'approved_desc') return b.approved - a.approved;
+        if (planningSort === 'percent_desc') return b.percent - a.percent;
+        if (planningSort === 'percent_asc') return a.percent - b.percent;
         return 0;
       });
   }, [reconItems, planningSearch, planningGroupFilter, discrepancyFilter, planningSort]);
@@ -739,6 +743,8 @@ export default function BravoReconciliation({
                 <option value="diff_asc">KH &gt; BRAVO nhiều nhất</option>
                 <option value="code_asc">Mã khoản mục A - Z</option>
                 <option value="approved_desc">Hạn mức duyệt cao nhất</option>
+                <option value="percent_desc">Tỷ lệ tiến độ cao nhất</option>
+                <option value="percent_asc">Tỷ lệ tiến độ thấp nhất</option>
               </select>
 
               {/* Column Visibility Dropdown */}
@@ -920,10 +926,35 @@ export default function BravoReconciliation({
                     )}
                     {isReconColVisible('percent') && (
                       <th
-                        className="py-0.5 px-0.5 sm:px-1 text-center relative select-none"
+                        onClick={() =>
+                          setPlanningSort((prev) =>
+                            prev === 'percent_desc' ? 'percent_asc' : 'percent_desc'
+                          )
+                        }
+                        className={`py-0.5 px-0.5 sm:px-1 text-center relative select-none cursor-pointer transition-colors group/sort ${
+                          planningSort === 'percent_desc' || planningSort === 'percent_asc'
+                            ? 'bg-blue-100 text-blue-900 font-extrabold'
+                            : 'hover:bg-slate-200/80 hover:text-blue-700'
+                        }`}
                         style={{ width: `${reconWidths.percent}px`, minWidth: `${reconWidths.percent}px` }}
+                        title={`Tỷ lệ tiến độ • Bấm để sắp xếp (${
+                          planningSort === 'percent_desc'
+                            ? 'Đang xếp: Cao nhất ➔ Thấp nhất'
+                            : planningSort === 'percent_asc'
+                            ? 'Đang xếp: Thấp nhất ➔ Cao nhất'
+                            : 'Bấm để xếp'
+                        })`}
                       >
-                        <div className="truncate text-center w-full">Tỷ Lệ</div>
+                        <div className="inline-flex items-center justify-center gap-0.5 w-full pr-1">
+                          <span>Tỷ Lệ</span>
+                          {planningSort === 'percent_desc' ? (
+                            <ArrowDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-700 shrink-0" />
+                          ) : planningSort === 'percent_asc' ? (
+                            <ArrowUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-700 shrink-0" />
+                          ) : (
+                            <ArrowUpDown className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-slate-400 opacity-60 group-hover/sort:opacity-100 shrink-0" />
+                          )}
+                        </div>
                         <ColumnResizeHandle
                           colKey="percent"
                           onResizeStart={handleReconResizeStart}
