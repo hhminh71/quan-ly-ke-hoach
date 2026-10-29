@@ -121,7 +121,7 @@ const getExcelHtmlWrapper = (sheetName, bodyHtml) => {
       text-align: right;
     }
     .num-percent {
-      mso-number-format: "0\\.0%";
+      mso-number-format: "0\\.0\\%";
       text-align: center;
       font-weight: bold;
     }
@@ -268,6 +268,7 @@ export const exportProgressReportExcel = ({
     const remaining = Number(item.liveRemaining) || (approved - report);
     const percent = approved > 0 ? (report / approved) : 0;
     const pctNumber = percent * 100;
+    const pctFormatted = approved > 0 ? `${pctNumber.toFixed(1)}%` : (report > 0 ? '100%' : '0%');
 
     let statusText = 'An toàn';
     let statusClass = 'status-safe';
@@ -290,7 +291,7 @@ export const exportProgressReportExcel = ({
         <td class="table-td num-currency">${actual}</td>
         <td class="table-td num-currency font-bold" style="color: #0d9488;">${report}</td>
         <td class="table-td num-currency font-bold" style="color: ${remaining < 0 ? '#b91c1c' : '#15803d'};">${remaining}</td>
-        <td class="table-td num-percent">${percent}</td>
+        <td class="table-td num-percent">${pctFormatted}</td>
         <td class="table-td text-center ${statusClass}">${statusText}</td>
         <td class="table-td text-left" style="font-size: 8.5pt; color: #475569;">${item.scope || item.notes || ''}</td>
       </tr>
@@ -298,6 +299,7 @@ export const exportProgressReportExcel = ({
   });
 
   // Dòng TỔNG CỘNG
+  const totalAvgPercentFormatted = `${avgPercent.toFixed(1)}%`;
   bodyHtml += `
       <tr class="row-total">
         <td class="table-td text-center font-bold" colspan="2">TỔNG CỘNG</td>
@@ -307,7 +309,7 @@ export const exportProgressReportExcel = ({
         <td class="table-td num-currency font-bold">${totalActual}</td>
         <td class="table-td num-currency font-bold" style="color: #0d9488;">${totalReport}</td>
         <td class="table-td num-currency font-bold" style="color: ${totalRemaining < 0 ? '#b91c1c' : '#15803d'};">${totalRemaining}</td>
-        <td class="table-td num-percent font-bold">${totalApproved > 0 ? (totalReport / totalApproved) : 0}</td>
+        <td class="table-td num-percent font-bold" style="color: #4f46e5;">${totalAvgPercentFormatted}</td>
         <td class="table-td text-center font-bold" colspan="2">
           ${avgPercent >= 100 ? 'VƯỢT KẾ HOẠCH' : avgPercent >= 80 ? 'CẢNH BÁO CAO' : 'TIẾN ĐỘ AN TOÀN'}
         </td>
@@ -506,7 +508,7 @@ export const exportProgressReportCSV = ({
       actual,
       report,
       remaining,
-      percent,
+      `"${percent}%"`,
       `"${item.status || 'SAFE'}"`,
       `"${(item.scope || item.notes || '').replace(/"/g, '""')}"`,
     ].join(',');
