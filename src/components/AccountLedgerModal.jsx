@@ -40,6 +40,8 @@ export default function AccountLedgerModal({
   const [sortOrder, setSortOrder] = useState('newest'); // 'newest', 'oldest', 'highest', 'lowest'
   const [editingItem, setEditingItem] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [showBravo, setShowBravo] = useState(true);
+  const [showActual, setShowActual] = useState(true);
 
   // Sync with browser history for mobile hardware/gesture Back button
   useModalBackHandler(isOpen && Boolean(account), onClose, 'account-ledger');
@@ -171,6 +173,8 @@ export default function AccountLedgerModal({
   const { reportActual, source } = calculateReportActual(spent, bravoVal, account.code, sctsCodes);
   const remaining = approved - reportActual;
   const spentPercent = approved > 0 ? (reportActual / approved) * 100 : 0;
+  const liveActualPercent = approved > 0 ? (spent / approved) * 100 : 0;
+  const bravoPercent = approved > 0 ? (bravoVal / approved) * 100 : 0;
   const remainingPercent = approved > 0 ? (remaining / approved) * 100 : 0;
 
   return (
@@ -255,48 +259,78 @@ export default function AccountLedgerModal({
 
           {/* Top KPI Bar (Ultra-slim, minimalist height for screenshots) */}
           <div className="px-3 py-1.5 sm:px-4 sm:py-2 border-b border-slate-100 bg-gradient-to-b from-white to-slate-50/50 space-y-1.5 shrink-0">
-            <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5">
+            <div className="flex flex-wrap sm:flex-nowrap gap-1 sm:gap-2 [&>*]:flex-1 [&>*]:min-w-[85px] sm:[&>*]:min-w-0">
               {/* 1. Tổng được duyệt */}
-              <div className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-50 border border-slate-200 shadow-2xs">
-                <div className="flex items-center justify-between text-[9px] sm:text-[10px] text-slate-500 font-semibold uppercase tracking-tight">
-                  <span>Duyệt {selectedYear}</span>
+              <div className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-50 border border-slate-200 shadow-2xs shrink-0 sm:shrink">
+                <div className="flex items-center justify-between text-[8px] sm:text-[10px] text-slate-500 font-semibold uppercase tracking-tight">
+                  <span className="truncate">Duyệt {selectedYear}</span>
                   <span className="font-bold bg-slate-200/90 text-slate-700 px-1 py-0.2 rounded text-3xs">
                     100%
                   </span>
                 </div>
-                <div className="text-xs sm:text-sm font-extrabold text-slate-900 font-mono leading-tight mt-0.5 truncate">
+                <div className="text-xs sm:text-sm font-extrabold text-slate-900 font-mono leading-tight mt-0.5 truncate" title={formatVND(approved)}>
                   {formatVND(approved)}
                 </div>
               </div>
 
-              {/* 2. Chi phí thực tế (Báo cáo MAX) */}
-              <div className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-blue-50/80 border border-blue-200 shadow-2xs">
-                <div className="flex items-center justify-between text-[9px] sm:text-[10px] text-blue-700 font-semibold uppercase tracking-tight">
-                  <span className="truncate">Thực Tế</span>
+              {/* 2. Theo Bravo (hiển thị khi showBravo = true) */}
+              {showBravo && (
+                <div className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-amber-50/80 border border-amber-200 shadow-2xs shrink-0 sm:shrink">
+                  <div className="flex items-center justify-between text-[8px] sm:text-[10px] text-amber-800 font-semibold uppercase tracking-tight">
+                    <span className="truncate">Theo Bravo</span>
+                    <span className="font-bold px-1 py-0.2 rounded text-white bg-amber-500 text-3xs">
+                      {bravoPercent.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="text-xs sm:text-sm font-extrabold text-amber-950 font-mono leading-tight mt-0.5 truncate" title={formatVND(bravoVal)}>
+                    {formatVND(bravoVal)}
+                  </div>
+                </div>
+              )}
+
+              {/* 3. Theo Thực Tế (hiển thị khi showActual = true) */}
+              {showActual && (
+                <div className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-blue-50/80 border border-blue-200 shadow-2xs shrink-0 sm:shrink">
+                  <div className="flex items-center justify-between text-[8px] sm:text-[10px] text-blue-800 font-semibold uppercase tracking-tight">
+                    <span className="truncate">Theo Thực Tế</span>
+                    <span className="font-bold px-1 py-0.2 rounded text-white bg-blue-600 text-3xs">
+                      {liveActualPercent.toFixed(1)}%
+                    </span>
+                  </div>
+                  <div className="text-xs sm:text-sm font-extrabold text-blue-950 font-mono leading-tight mt-0.5 truncate" title={formatVND(spent)}>
+                    {formatVND(spent)}
+                  </div>
+                </div>
+              )}
+
+              {/* 4. Chi phí thực tế báo cáo (MAX) */}
+              <div className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-emerald-50/80 border border-emerald-200 shadow-2xs shrink-0 sm:shrink">
+                <div className="flex items-center justify-between text-[8px] sm:text-[10px] text-emerald-800 font-semibold uppercase tracking-tight">
+                  <span className="truncate">{isSeparated ? 'SCTX Nhập Liệu' : 'Báo Cáo (MAX)'}</span>
                   <span className={`font-bold px-1 py-0.2 rounded text-white text-3xs ${
-                    isSeparated ? 'bg-indigo-600' : 'bg-blue-600'
+                    isSeparated ? 'bg-indigo-600' : 'bg-emerald-600'
                   }`}>
                     {spentPercent.toFixed(1)}%
                   </span>
                 </div>
-                <div className="text-xs sm:text-sm font-extrabold text-blue-900 font-mono leading-tight mt-0.5 truncate">
+                <div className="text-xs sm:text-sm font-extrabold text-emerald-950 font-mono leading-tight mt-0.5 truncate" title={formatVND(reportActual)}>
                   {formatVND(reportActual)}
                 </div>
               </div>
 
-              {/* 3. Tổng còn lại */}
+              {/* 5. Còn lại / Vượt */}
               <div
-                className={`px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border shadow-2xs ${
-                  remaining >= 0 ? 'bg-emerald-50/80 border-emerald-200' : 'bg-rose-50/80 border-rose-200'
+                className={`px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border shadow-2xs shrink-0 sm:shrink ${
+                  remaining >= 0 ? 'bg-slate-50 border-slate-200' : 'bg-rose-50/80 border-rose-200'
                 }`}
               >
-                <div className="flex items-center justify-between text-[9px] sm:text-[10px] font-semibold uppercase tracking-tight">
-                  <span className={remaining >= 0 ? 'text-emerald-700' : 'text-rose-700'}>
+                <div className="flex items-center justify-between text-[8px] sm:text-[10px] font-semibold uppercase tracking-tight">
+                  <span className={remaining >= 0 ? 'text-slate-600' : 'text-rose-700'}>
                     {remaining >= 0 ? 'Còn Lại' : 'Vượt'}
                   </span>
                   <span
                     className={`font-bold px-1 py-0.2 rounded text-white text-3xs ${
-                      remaining >= 0 ? 'bg-emerald-600' : 'bg-rose-600'
+                      remaining >= 0 ? 'bg-slate-600' : 'bg-rose-600'
                     }`}
                   >
                     {remainingPercent.toFixed(1)}%
@@ -304,8 +338,9 @@ export default function AccountLedgerModal({
                 </div>
                 <div
                   className={`text-xs sm:text-sm font-extrabold font-mono leading-tight mt-0.5 truncate ${
-                    remaining >= 0 ? 'text-emerald-900' : 'text-rose-700'
+                    remaining >= 0 ? 'text-slate-900' : 'text-rose-700'
                   }`}
+                  title={formatVND(remaining)}
                 >
                   {formatVND(remaining)}
                 </div>
@@ -341,7 +376,7 @@ export default function AccountLedgerModal({
                 <span className="font-semibold truncate">
                   {isSeparated
                     ? `Đã tách riêng SCTS • Chỉ tính SCTX nhập liệu (${formatVND(spent)})`
-                    : `Quy tắc MAX(Bravo, Nhập liệu) • Bravo: ${formatVND(bravoVal)}`}
+                    : `Quy tắc MAX(Bravo, Thực Tế) • Bravo: ${formatVND(bravoVal)} • Thực tế: ${formatVND(spent)}`}
                 </span>
               </div>
 
@@ -373,7 +408,35 @@ export default function AccountLedgerModal({
               />
             </div>
 
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+              {/* Nút Ẩn/Hiện Theo Bravo và Theo Thực Tế */}
+              <div className="flex items-center gap-0.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowBravo((prev) => !prev)}
+                  className={`h-5 sm:h-6 px-1.5 py-0 rounded text-[7.5px] sm:text-[9px] font-bold transition-all cursor-pointer leading-tight ${
+                    showBravo
+                      ? 'bg-amber-500 text-white shadow-2xs'
+                      : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
+                  }`}
+                  title={showBravo ? 'Ẩn Theo Bravo' : 'Hiện Theo Bravo'}
+                >
+                  Bravo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowActual((prev) => !prev)}
+                  className={`h-5 sm:h-6 px-1.5 py-0 rounded text-[7.5px] sm:text-[9px] font-bold transition-all cursor-pointer leading-tight ${
+                    showActual
+                      ? 'bg-blue-600 text-white shadow-2xs'
+                      : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
+                  }`}
+                  title={showActual ? 'Ẩn Theo Thực Tế' : 'Hiện Theo Thực Tế'}
+                >
+                  Thực Tế
+                </button>
+              </div>
+
               <ColumnVisibilityDropdown
                 columns={ledgerTableColumns}
                 isColumnVisible={isColumnVisible}
@@ -404,7 +467,7 @@ export default function AccountLedgerModal({
               2. Kéo giãn các cột tùy biến, xuống dòng tự nhiên, khoảng cách dòng tối giản mảnh
           */}
           <div className="overflow-y-auto overflow-x-auto flex-1 min-h-0">
-            {sortedTransactions.length === 0 ? (
+            {sortedTransactions.length === 0 && (!showBravo || bravoVal === 0) ? (
               <div className="text-center py-10 px-4">
                 <FileSpreadsheet className="w-10 h-10 text-slate-300 mx-auto mb-1.5" />
                 <p className="text-xs sm:text-sm font-semibold text-slate-700">
@@ -517,99 +580,178 @@ export default function AccountLedgerModal({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
-                  {sortedTransactions.map((item, index) => (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-blue-50/50 transition-colors group"
-                    >
-                      {/* 1. STT */}
+                  {showActual &&
+                    sortedTransactions.map((item, index) => (
+                      <tr
+                        key={item.id}
+                        className="hover:bg-blue-50/50 transition-colors group"
+                      >
+                        {/* 1. STT */}
+                        {isColumnVisible('stt') && (
+                          <td
+                            className="py-0.5 px-0.5 text-center font-mono text-[9px] sm:text-[10px] text-slate-400 leading-tight break-words"
+                            style={{ width: `${columnWidths.stt}px`, minWidth: `${columnWidths.stt}px` }}
+                          >
+                            {index + 1}
+                          </td>
+                        )}
+
+                        {/* 2. Ngày */}
+                        {isColumnVisible('date') && (
+                          <td
+                            className="py-0.5 px-0.5 sm:px-1 text-center font-mono text-[9px] sm:text-xs text-slate-700 font-medium leading-tight break-words whitespace-normal"
+                            style={{ width: `${columnWidths.date}px`, minWidth: `${columnWidths.date}px` }}
+                          >
+                            {formatDate(item.date)}
+                          </td>
+                        )}
+
+                        {/* 3. Nội dung diễn giải */}
+                        {isColumnVisible('notes') && (
+                          <td
+                            className="py-0.5 px-0.5 sm:px-1 text-slate-700 text-[9.5px] sm:text-xs break-words whitespace-normal leading-tight"
+                            style={{ width: `${columnWidths.notes}px`, minWidth: `${columnWidths.notes}px` }}
+                          >
+                            {item.notes}
+                          </td>
+                        )}
+
+                        {/* 4. Số tiền */}
+                        {isColumnVisible('amount') && (
+                          <td
+                            className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight break-words"
+                            style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
+                          >
+                            {formatVND(item.amount)}
+                          </td>
+                        )}
+
+                        {/* 5. Người thực hiện: Căn giữa, bỏ chữ viết tắt phía trước */}
+                        {isColumnVisible('employee') && (
+                          <td
+                            className="py-0.5 px-0.5 sm:px-1 text-slate-700 text-[9.5px] sm:text-xs text-center leading-tight break-words whitespace-normal"
+                            style={{ width: `${columnWidths.employee}px`, minWidth: `${columnWidths.employee}px` }}
+                          >
+                            <span className="font-medium text-slate-800 leading-tight">
+                              {item.employeeName || 'Chưa ghi nhận'}
+                            </span>
+                          </td>
+                        )}
+
+                        {/* 6. Điều chỉnh */}
+                        {isColumnVisible('actions') && (
+                          <td
+                            className="py-0.5 px-0.5 text-center leading-tight break-words"
+                            style={{ width: `${columnWidths.actions}px`, minWidth: `${columnWidths.actions}px` }}
+                          >
+                            <div className="flex items-center justify-center gap-0.5">
+                              {onUpdateTransaction && (
+                                <button
+                                  type="button"
+                                  onClick={() => setEditingItem(item)}
+                                  className="p-0.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-75 group-hover:opacity-100"
+                                  title="Chỉnh sửa hạng mục này"
+                                >
+                                  <Edit3 className="w-2.5 h-2.5" />
+                                </button>
+                              )}
+                              {onDeleteTransaction && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (confirm(`Bạn có chắc muốn xóa hạng mục "${item.notes}" (${formatVND(item.amount)})?`)) {
+                                      onDeleteTransaction(item.id);
+                                    }
+                                  }}
+                                  className="p-0.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-75 group-hover:opacity-100"
+                                  title="Xóa hạng mục này"
+                                >
+                                  <Trash2 className="w-2.5 h-2.5" />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+
+                  {/* Khi người dùng ẩn danh sách Thực Tế */}
+                  {!showActual && sortedTransactions.length > 0 && (
+                    <tr className="bg-slate-50/70 text-slate-400 italic">
+                      <td colSpan={6} className="py-2.5 px-3 text-center text-3xs sm:text-xs">
+                        Danh sách hạng mục Thực Tế (nhập liệu) đang tạm ẩn. Bấm nút <strong>Thực Tế</strong> phía trên để hiển thị lại.
+                      </td>
+                    </tr>
+                  )}
+
+                  {/* Dòng hạch toán hệ thống Bravo khi showBravo = true */}
+                  {showBravo && bravoVal > 0 && (
+                    <tr className="bg-amber-50/70 border-t-2 border-amber-200/90 hover:bg-amber-100/70 transition-colors">
                       {isColumnVisible('stt') && (
                         <td
-                          className="py-0.5 px-0.5 text-center font-mono text-[9px] sm:text-[10px] text-slate-400 leading-tight break-words"
+                          className="py-0.5 px-0.5 text-center font-mono text-[8.5px] sm:text-[9.5px] font-bold text-amber-700 leading-tight"
                           style={{ width: `${columnWidths.stt}px`, minWidth: `${columnWidths.stt}px` }}
                         >
-                          {index + 1}
+                          BRAVO
                         </td>
                       )}
-
-                      {/* 2. Ngày */}
                       {isColumnVisible('date') && (
                         <td
-                          className="py-0.5 px-0.5 sm:px-1 text-center font-mono text-[9px] sm:text-xs text-slate-700 font-medium leading-tight break-words whitespace-normal"
+                          className="py-0.5 px-0.5 sm:px-1 text-center font-mono text-[8.5px] sm:text-xs text-amber-800 font-semibold leading-tight whitespace-normal break-words"
                           style={{ width: `${columnWidths.date}px`, minWidth: `${columnWidths.date}px` }}
                         >
-                          {formatDate(item.date)}
+                          {selectedYear}
                         </td>
                       )}
-
-                      {/* 3. Nội dung diễn giải */}
                       {isColumnVisible('notes') && (
                         <td
-                          className="py-0.5 px-0.5 sm:px-1 text-slate-700 text-[9.5px] sm:text-xs break-words whitespace-normal leading-tight"
+                          className="py-0.5 px-0.5 sm:px-1 text-amber-900 text-[9px] sm:text-xs leading-tight whitespace-normal break-words"
                           style={{ width: `${columnWidths.notes}px`, minWidth: `${columnWidths.notes}px` }}
                         >
-                          {item.notes}
+                          <span className="font-bold text-amber-800">Số liệu hạch toán hệ thống BRAVO</span>
+                          {bravoVal > currentTotalAmount ? (
+                            <span className="text-amber-700 text-3xs sm:text-[10px] ml-1 sm:ml-1.5 font-medium">
+                              (Chênh lệch chưa lập chứng từ chi tiết: +{formatVND(bravoVal - currentTotalAmount)})
+                            </span>
+                          ) : bravoVal < currentTotalAmount ? (
+                            <span className="text-blue-700 text-3xs sm:text-[10px] ml-1 sm:ml-1.5 font-medium">
+                              (Nhập liệu thực tế đang cao hơn Bravo {formatVND(currentTotalAmount - bravoVal)})
+                            </span>
+                          ) : (
+                            <span className="text-emerald-700 text-3xs sm:text-[10px] ml-1 sm:ml-1.5 font-medium">
+                              (Khớp 100% với nhập liệu thực tế)
+                            </span>
+                          )}
                         </td>
                       )}
-
-                      {/* 4. Số tiền */}
                       {isColumnVisible('amount') && (
                         <td
-                          className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight break-words"
+                          className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-extrabold text-amber-900 text-[9px] sm:text-xs leading-tight break-words"
                           style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
                         >
-                          {formatVND(item.amount)}
+                          {formatVND(bravoVal)}
                         </td>
                       )}
-
-                      {/* 5. Người thực hiện: Căn giữa, bỏ chữ viết tắt phía trước */}
                       {isColumnVisible('employee') && (
                         <td
-                          className="py-0.5 px-0.5 sm:px-1 text-slate-700 text-[9.5px] sm:text-xs text-center leading-tight break-words whitespace-normal"
+                          className="py-0.5 px-0.5 sm:px-1 text-center text-amber-800 text-[9px] sm:text-xs leading-tight font-medium break-words"
                           style={{ width: `${columnWidths.employee}px`, minWidth: `${columnWidths.employee}px` }}
                         >
-                          <span className="font-medium text-slate-800 leading-tight">
-                            {item.employeeName || 'Chưa ghi nhận'}
-                          </span>
+                          Hệ thống BRAVO
                         </td>
                       )}
-
-                      {/* 6. Điều chỉnh */}
                       {isColumnVisible('actions') && (
                         <td
                           className="py-0.5 px-0.5 text-center leading-tight break-words"
                           style={{ width: `${columnWidths.actions}px`, minWidth: `${columnWidths.actions}px` }}
                         >
-                          <div className="flex items-center justify-center gap-0.5">
-                            {onUpdateTransaction && (
-                              <button
-                                type="button"
-                                onClick={() => setEditingItem(item)}
-                                className="p-0.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-75 group-hover:opacity-100"
-                                title="Chỉnh sửa hạng mục này"
-                              >
-                                <Edit3 className="w-2.5 h-2.5" />
-                              </button>
-                            )}
-                            {onDeleteTransaction && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  if (confirm(`Bạn có chắc muốn xóa hạng mục "${item.notes}" (${formatVND(item.amount)})?`)) {
-                                    onDeleteTransaction(item.id);
-                                  }
-                                }}
-                                className="p-0.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-75 group-hover:opacity-100"
-                                title="Xóa hạng mục này"
-                              >
-                                <Trash2 className="w-2.5 h-2.5" />
-                              </button>
-                            )}
-                          </div>
+                          <span className="text-[7.5px] sm:text-[8.5px] font-bold px-1 py-0.2 bg-amber-200/80 text-amber-800 rounded">
+                            Tự động
+                          </span>
                         </td>
                       )}
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             )}
@@ -618,12 +760,27 @@ export default function AccountLedgerModal({
           {/* Modal Footer: Slim single-line footer */}
           <div className="px-3 py-1.5 sm:px-4 sm:py-2 border-t border-slate-100 bg-slate-50/80 flex items-center justify-between gap-2 text-3xs sm:text-[11px] text-slate-500 shrink-0">
             <div className="truncate">
-              Hiển thị <strong className="text-slate-800">{sortedTransactions.length}</strong> / <strong className="text-slate-800">{accountTransactions.length}</strong> hạng mục{' '}
+              Hiển thị <strong className="text-slate-800">{showActual ? sortedTransactions.length : 0}</strong> / <strong className="text-slate-800">{accountTransactions.length}</strong> hạng mục thực tế{' '}
               {searchTerm && <span>(Khớp bộ lọc)</span>}
-              {' • '}
-              Tổng cộng:{' '}
-              <strong className="text-blue-700 font-mono font-bold">
-                {formatVND(currentTotalAmount)}
+              {showActual && (
+                <>
+                  {' • '}Thực Tế:{' '}
+                  <strong className="text-blue-700 font-mono font-bold">
+                    {formatVND(currentTotalAmount)}
+                  </strong>
+                </>
+              )}
+              {showBravo && bravoVal > 0 && (
+                <>
+                  {' • '}Bravo:{' '}
+                  <strong className="text-amber-700 font-mono font-bold">
+                    {formatVND(bravoVal)}
+                  </strong>
+                </>
+              )}
+              {' • '}Báo Cáo (MAX):{' '}
+              <strong className="text-emerald-700 font-mono font-bold">
+                {formatVND(reportActual)}
               </strong>
             </div>
 
