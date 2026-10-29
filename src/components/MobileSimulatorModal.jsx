@@ -45,6 +45,7 @@ const DEVICES = [
 export default function MobileSimulatorModal({ isOpen, onClose }) {
   const [selectedDeviceId, setSelectedDeviceId] = useState('iphone_duo_both');
   const [isLandscape, setIsLandscape] = useState(false);
+  const [landscapeHingePos, setLandscapeHingePos] = useState('bottom'); // 'bottom' or 'top'
   const [scale, setScale] = useState(1);
   const [iframeKey, setIframeKey] = useState(0);
 
@@ -111,46 +112,85 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
   };
 
   // Render Cover Screen (Màn hình phụ bên ngoài 5.4"):
-  // 2 góc trái KHÔNG bo cong (vuông 90 độ), 2 góc phải bo cong, camera nốt ruồi ở góc phải trên
-  const renderCoverScreen = (keySuffix) => (
-    <div className="flex flex-col items-center">
-      <span className="text-[11px] font-bold text-amber-300 mb-2 px-3 py-0.5 rounded-full bg-slate-900/95 border border-amber-400/40 shadow-sm shrink-0">
-        📱 Màn Phụ Ngoài 5.4" (Gập • {coverW}×{coverH}px)
-      </span>
+  // Lưu ý quan trọng: 2 góc vuông VÀ bản lề kim loại LUÔN LUÔN ĐI THEO CẠNH DÀI (626px):
+  // - Khi màn hình DỌC: Cạnh dài là cạnh dọc bên trái (626px) -> 2 góc vuông ở bên trái (top-left & bottom-left)
+  // - Khi màn hình NGANG: Cạnh dài là cạnh ngang (626px) -> 2 góc vuông ở cạnh ngang (bottom hoặc top)!
+  const renderCoverScreen = (keySuffix) => {
+    let shellCornerClasses = '';
+    let shellBorderClasses = '';
+    let screenCornerClasses = '';
+    let cameraClasses = '';
 
-      <div
-        style={{
-          width: `${coverW + 20}px`,
-          height: `${coverH + 20}px`,
-        }}
-        className="relative rounded-tl-none rounded-bl-none rounded-tr-[44px] rounded-br-[44px] p-2.5 bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] border-[4px] border-slate-700/90 border-l-[8px] border-l-slate-500/90 ring-1 ring-white/20 select-none flex flex-col justify-center items-center"
-      >
-        {/* Left metallic spine hinge line */}
-        <div className="absolute top-4 bottom-4 -left-1 w-[3px] bg-gradient-to-b from-slate-400 via-slate-300 to-slate-500 rounded-full opacity-60 pointer-events-none" />
+    if (!isLandscape) {
+      // DỌC: Cạnh dài (626px) nằm ở bên TRÁI -> 2 góc vuông ở TRÁI
+      shellCornerClasses = 'rounded-tl-none rounded-bl-none rounded-tr-[44px] rounded-br-[44px]';
+      shellBorderClasses = 'border-l-[8px] border-l-slate-500/90';
+      screenCornerClasses = 'rounded-tl-none rounded-bl-none rounded-tr-[36px] rounded-br-[36px]';
+      cameraClasses = 'top-2 right-4';
+    } else if (landscapeHingePos === 'bottom') {
+      // NGANG (Hinge ở DƯỚI): Cạnh dài (626px) nằm ở DƯỚI -> 2 góc vuông ở DƯỚI theo cạnh dài
+      shellCornerClasses = 'rounded-bl-none rounded-br-none rounded-tl-[44px] rounded-tr-[44px]';
+      shellBorderClasses = 'border-b-[8px] border-b-slate-500/90';
+      screenCornerClasses = 'rounded-bl-none rounded-br-none rounded-tl-[36px] rounded-tr-[36px]';
+      cameraClasses = 'top-2 right-4';
+    } else {
+      // NGANG (Hinge ở TRÊN): Cạnh dài (626px) nằm ở TRÊN -> 2 góc vuông ở TRÊN theo cạnh dài
+      shellCornerClasses = 'rounded-tl-none rounded-tr-none rounded-bl-[44px] rounded-br-[44px]';
+      shellBorderClasses = 'border-t-[8px] border-t-slate-500/90';
+      screenCornerClasses = 'rounded-tl-none rounded-tr-none rounded-bl-[36px] rounded-br-[36px]';
+      cameraClasses = 'top-3 right-4';
+    }
 
-        {/* Side buttons on right chassis */}
-        <div className="absolute top-28 -right-[6px] w-[3px] h-12 bg-slate-600 rounded-r-xs pointer-events-none" />
+    return (
+      <div className="flex flex-col items-center">
+        <span className="text-[11px] font-bold text-amber-300 mb-2 px-3 py-0.5 rounded-full bg-slate-900/95 border border-amber-400/40 shadow-sm shrink-0">
+          📱 Màn Phụ Ngoài 5.4" (Gập • {coverW}×{coverH}px {isLandscape ? `• Bản lề cạnh dài ${landscapeHingePos === 'bottom' ? 'dưới' : 'trên'}` : ''})
+        </span>
 
-        {/* Inner Screen: 2 góc bên trái vuông 90 độ, 2 góc bên phải bo cong */}
         <div
           style={{
-            width: `${coverW}px`,
-            height: `${coverH}px`,
+            width: `${coverW + 20}px`,
+            height: `${coverH + 20}px`,
           }}
-          className="relative overflow-hidden rounded-tl-none rounded-bl-none rounded-tr-[36px] rounded-br-[36px] bg-white border border-slate-900 shadow-inner flex flex-col shrink-0"
+          className={`relative p-2.5 bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] border-[4px] border-slate-700/90 ring-1 ring-white/20 select-none flex flex-col justify-center items-center ${shellCornerClasses} ${shellBorderClasses}`}
         >
-          {/* Status Bar */}
-          {!isLandscape && (
+          {/* Metallic hinge spine line (always along the long 626px edge) */}
+          {!isLandscape ? (
+            <div className="absolute top-4 bottom-4 -left-1 w-[3px] bg-gradient-to-b from-slate-400 via-slate-300 to-slate-500 rounded-full opacity-60 pointer-events-none" />
+          ) : landscapeHingePos === 'bottom' ? (
+            <div className="absolute left-6 right-6 -bottom-1 h-[3px] bg-gradient-to-r from-slate-400 via-slate-300 to-slate-500 rounded-full opacity-60 pointer-events-none" />
+          ) : (
+            <div className="absolute left-6 right-6 -top-1 h-[3px] bg-gradient-to-r from-slate-400 via-slate-300 to-slate-500 rounded-full opacity-60 pointer-events-none" />
+          )}
+
+          {/* Side buttons on chassis */}
+          {!isLandscape ? (
+            <div className="absolute top-28 -right-[6px] w-[3px] h-12 bg-slate-600 rounded-r-xs pointer-events-none" />
+          ) : landscapeHingePos === 'bottom' ? (
+            <div className="absolute -top-[6px] left-28 h-[3px] w-12 bg-slate-600 rounded-t-xs pointer-events-none" />
+          ) : (
+            <div className="absolute -bottom-[6px] left-28 h-[3px] w-12 bg-slate-600 rounded-b-xs pointer-events-none" />
+          )}
+
+          {/* Inner Screen */}
+          <div
+            style={{
+              width: `${coverW}px`,
+              height: `${coverH}px`,
+            }}
+            className={`relative overflow-hidden bg-white border border-slate-900 shadow-inner flex flex-col shrink-0 ${screenCornerClasses}`}
+          >
+            {/* Status Bar */}
             <div className="h-7 w-full bg-[#074780] text-white flex items-center justify-between px-3.5 text-[10px] font-semibold shrink-0 select-none relative z-20 border-b border-blue-900/40">
               <span className="font-mono text-[9px] tracking-tight pl-1">09:41</span>
 
-              {/* Punch-hole camera dot at TOP RIGHT (Exact position from user reference photo) */}
-              <div className="absolute top-2 right-4 w-4 h-4 rounded-full bg-black/95 border border-slate-700/80 shadow-inner flex items-center justify-center pointer-events-none z-30">
+              {/* Punch-hole camera dot at outer edge (exact camera positioning) */}
+              <div className={`absolute w-4 h-4 rounded-full bg-black/95 border border-slate-700/80 shadow-inner flex items-center justify-center pointer-events-none z-30 ${cameraClasses}`}>
                 <div className="w-1.5 h-1.5 rounded-full bg-slate-900 border border-slate-800" />
                 <div className="w-0.5 h-0.5 rounded-full bg-blue-400/40 absolute top-0.5 right-0.5" />
               </div>
 
-              {/* Status Icons on Right (offset with right padding to clear punch-hole camera) */}
+              {/* Status Icons */}
               <div className="flex items-center gap-1 font-mono text-[8px] text-blue-100 pr-9">
                 <span>5G</span>
                 <div className="w-3.5 h-2 border border-white/70 rounded-2xs p-0.2 flex items-center">
@@ -158,29 +198,27 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
                 </div>
               </div>
             </div>
-          )}
 
-          {/* Iframe Viewport */}
-          <iframe
-            key={`${iframeKey}-${keySuffix}`}
-            src={simulatorUrl}
-            className="w-full flex-1 border-0 block bg-slate-50"
-            title="Khung xem trước Màn Phụ Ngoài 5.4 inch"
-          />
+            {/* Iframe Viewport */}
+            <iframe
+              key={`${iframeKey}-${keySuffix}`}
+              src={simulatorUrl}
+              className="w-full flex-1 border-0 block bg-slate-50"
+              title="Khung xem trước Màn Phụ Ngoài 5.4 inch"
+            />
 
-          {/* Bottom Home Indicator Bar */}
-          {!isLandscape && (
+            {/* Bottom Home Indicator Bar */}
             <div className="h-3.5 w-full bg-white/95 border-t border-slate-200/50 flex items-center justify-center shrink-0">
               <div className="w-24 h-1 bg-slate-400 rounded-full" />
             </div>
-          )}
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Render Inner Screen (Màn hình chính bên trong 7.6" Unfolded):
-  // 4 góc bo cong đều, bản lề gập ở giữa, màn hình liền mạch tràn viền
+  // 4 góc bo cong đều, nếp gấp bản lề ở giữa theo chiều gập
   const renderInnerScreen = (keySuffix) => (
     <div className="flex flex-col items-center">
       <span className="text-[11px] font-bold text-emerald-300 mb-2 px-3 py-0.5 rounded-full bg-slate-900/95 border border-emerald-400/40 shadow-sm shrink-0">
@@ -194,14 +232,27 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
         }}
         className="relative rounded-[36px] p-2.5 bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] border-[4px] border-slate-700/90 ring-1 ring-white/20 select-none flex flex-col justify-center items-center"
       >
-        {/* Center top & bottom hinge crease notches */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3.5 h-1 bg-slate-600 rounded-b-sm pointer-events-none z-30" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3.5 h-1 bg-slate-600 rounded-t-sm pointer-events-none z-30" />
+        {/* Hinge crease notches (vertical when book-mode, horizontal when rotated) */}
+        {!isLandscape ? (
+          <>
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3.5 h-1 bg-slate-600 rounded-b-sm pointer-events-none z-30" />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3.5 h-1 bg-slate-600 rounded-t-sm pointer-events-none z-30" />
+          </>
+        ) : (
+          <>
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 h-3.5 w-1 bg-slate-600 rounded-r-sm pointer-events-none z-30" />
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 h-3.5 w-1 bg-slate-600 rounded-l-sm pointer-events-none z-30" />
+          </>
+        )}
 
-        {/* Side power button on right chassis */}
-        <div className="absolute top-28 -right-[6px] w-[3px] h-10 bg-slate-600 rounded-r-xs pointer-events-none" />
+        {/* Side power button on chassis */}
+        {!isLandscape ? (
+          <div className="absolute top-28 -right-[6px] w-[3px] h-10 bg-slate-600 rounded-r-xs pointer-events-none" />
+        ) : (
+          <div className="absolute -top-[6px] left-28 h-[3px] w-10 bg-slate-600 rounded-t-xs pointer-events-none" />
+        )}
 
-        {/* Inner Screen: 4 góc bo cong đều */}
+        {/* Inner Screen */}
         <div
           style={{
             width: `${innerW}px`,
@@ -210,25 +261,25 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
           className="relative overflow-hidden rounded-[28px] bg-white border border-slate-900 shadow-inner flex flex-col shrink-0"
         >
           {/* Status Bar */}
-          {!isLandscape && (
-            <div className="h-7 w-full bg-[#074780] text-white flex items-center justify-between px-5 text-[10px] font-semibold shrink-0 select-none relative z-20 border-b border-blue-900/40">
-              <span className="font-mono text-[9px] tracking-tight">09:41</span>
+          <div className="h-7 w-full bg-[#074780] text-white flex items-center justify-between px-5 text-[10px] font-semibold shrink-0 select-none relative z-20 border-b border-blue-900/40">
+            <span className="font-mono text-[9px] tracking-tight">09:41</span>
 
-              {/* Center subtle crease fold mark */}
+            {/* Fold line indicator in status bar */}
+            {!isLandscape && (
               <div className="w-1 h-3 bg-white/20 rounded-full" />
+            )}
 
-              {/* Status Bar Indicators */}
-              <div className="flex items-center gap-1.5 font-mono text-[8px] text-blue-100">
-                <span className="px-1.5 py-0.2 rounded-full bg-blue-950/60 border border-blue-800/40 text-[7px] text-emerald-300 font-sans">
-                  120Hz OLED
-                </span>
-                <span>5G</span>
-                <div className="w-3.5 h-2 border border-white/70 rounded-2xs p-0.2 flex items-center">
-                  <div className="w-2 h-1 bg-white rounded-3xs" />
-                </div>
+            {/* Status Bar Indicators */}
+            <div className="flex items-center gap-1.5 font-mono text-[8px] text-blue-100">
+              <span className="px-1.5 py-0.2 rounded-full bg-blue-950/60 border border-blue-800/40 text-[7px] text-emerald-300 font-sans">
+                120Hz OLED
+              </span>
+              <span>5G</span>
+              <div className="w-3.5 h-2 border border-white/70 rounded-2xs p-0.2 flex items-center">
+                <div className="w-2 h-1 bg-white rounded-3xs" />
               </div>
             </div>
-          )}
+          </div>
 
           {/* Iframe Viewport */}
           <iframe
@@ -239,11 +290,9 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
           />
 
           {/* Bottom Home Indicator Bar */}
-          {!isLandscape && (
-            <div className="h-3.5 w-full bg-white/95 border-t border-slate-200/50 flex items-center justify-center shrink-0">
-              <div className="w-40 h-1 bg-slate-400 rounded-full" />
-            </div>
-          )}
+          <div className="h-3.5 w-full bg-white/95 border-t border-slate-200/50 flex items-center justify-center shrink-0">
+            <div className="w-40 h-1 bg-slate-400 rounded-full" />
+          </div>
         </div>
       </div>
     </div>
@@ -324,7 +373,7 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
             </h3>
             <p className="text-[10px] text-slate-400 hidden sm:block">
               {isDuoBoth
-                ? 'Chuẩn tỉ lệ ảnh iPhone Duo: Màn ngoài 5.4" (2 góc trái phẳng) & Màn chính trong 7.6" mở rộng'
+                ? 'Chuẩn tỉ lệ iPhone Duo: 2 góc vuông bản lề luôn đi theo cạnh dài (626px)'
                 : 'Mô phỏng chính xác giao diện thực tế như khi mở web trên điện thoại'}
             </p>
           </div>
@@ -361,6 +410,19 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
           >
             <RotateCw className="w-4 h-4" />
           </button>
+
+          {/* When in Landscape: Toggle Hinge Position along the long 626px edge (Bottom vs Top) */}
+          {isLandscape && (selectedDeviceId.includes('iphone_duo')) && (
+            <button
+              type="button"
+              onClick={() => setLandscapeHingePos((pos) => pos === 'bottom' ? 'top' : 'bottom')}
+              className="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-[10px] font-bold transition-all flex items-center gap-1"
+              title="Đổi cạnh dài bản lề (ở dưới hoặc ở trên)"
+            >
+              <span className="text-slate-400">Bản lề:</span>
+              <span className="text-amber-400 font-mono uppercase">{landscapeHingePos === 'bottom' ? 'Dưới' : 'Trên'}</span>
+            </button>
+          )}
 
           {/* Reload Iframe */}
           <button
@@ -450,7 +512,7 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
 
       {/* Footer hint */}
       <div className="text-center text-[11px] text-slate-400 py-1 shrink-0">
-        💡 {isDuoBoth ? 'iPhone Duo: Màn ngoài 5.4" (2 góc trái phẳng gắn bản lề, camera nốt ruồi góc phải) & Màn chính trong 7.6" mở rộng. ' : 'Bạn có thể thao tác vuốt cuộn và bấm thử mọi chức năng bên trong chiếc điện thoại này y như trên máy thật. '}Nhấn nút % để Auto-Fit hoặc phím <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px] border border-slate-700">ESC</kbd> để thoát.
+        💡 {isDuoBoth ? 'iPhone Duo: Bản lề và 2 góc vuông luôn nằm trên cạnh dài (626px) ở cả chế độ dọc và xoay ngang. ' : 'Bạn có thể thao tác vuốt cuộn và bấm thử mọi chức năng bên trong chiếc điện thoại này y như trên máy thật. '}Nhấn nút % để Auto-Fit hoặc phím <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px] border border-slate-700">ESC</kbd> để thoát.
       </div>
     </div>
   );
