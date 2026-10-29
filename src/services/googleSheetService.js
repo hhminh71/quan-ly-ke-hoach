@@ -236,8 +236,40 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
     });
   }
 
-  // Tự động lưu và cập nhật danh sách người dùng phân quyền từ sheet QUAN_TRI_USER
+  // Tự động làm sạch và chuẩn hóa danh sách người dùng phân quyền từ sheet QUAN_TRI_USER
   if (Array.isArray(result.users) && result.users.length > 0) {
+    result.users = result.users.map((u) => {
+      const email = String(u.email || '').toLowerCase().trim();
+      const defaultMatch = DEFAULT_USERS.find((d) => d.email.toLowerCase() === email);
+
+      let scope = u.expenseScope;
+      if (!scope || scope === 'ALL') {
+        if (defaultMatch?.expenseScope && defaultMatch.expenseScope !== 'ALL') {
+          scope = defaultMatch.expenseScope;
+        } else if (email.includes('xaydung') || String(u.department || '').toLowerCase().includes('xây dựng') || String(u.name || '').toLowerCase().includes('xây dựng')) {
+          scope = 'XAY_DUNG';
+        } else if (email.includes('kythuat') || String(u.department || '').toLowerCase().includes('kỹ thuật') || String(u.name || '').toLowerCase().includes('kỹ thuật')) {
+          scope = 'KY_THUAT';
+        } else if (email.includes('daotao') || String(u.department || '').toLowerCase().includes('đào tạo') || String(u.name || '').toLowerCase().includes('đào tạo')) {
+          scope = 'DAO_TAO';
+        } else if (email.includes('hanhchinh') || String(u.department || '').toLowerCase().includes('hành chính')) {
+          scope = 'HANH_CHINH';
+        } else if (email.includes('anninh') || String(u.department || '').toLowerCase().includes('an ninh')) {
+          scope = 'AN_NINH';
+        } else {
+          scope = 'ALL';
+        }
+      }
+
+      return {
+        ...u,
+        email: email,
+        password: u.password || defaultMatch?.password || '123456',
+        expenseScope: scope,
+        allowedCodes: Array.isArray(u.allowedCodes) && u.allowedCodes.length > 0 ? u.allowedCodes : (defaultMatch?.allowedCodes || []),
+      };
+    });
+
     saveSavedUsers(result.users);
   }
 

@@ -183,8 +183,8 @@ export const normalizeExpenseScope = (scopeStr) => {
   if (!scopeStr) return 'ALL';
   const str = String(scopeStr).toUpperCase().trim();
   if (EXPENSE_SCOPES[str]) return str;
-  if (str.includes('KỸ THUẬT') || str.includes('KY_THUAT') || str.includes('MÁY MÓC') || str.includes('PHƯƠNG TIỆN')) return 'KY_THUAT';
-  if (str.includes('XÂY DỰNG') || str.includes('XAY_DUNG') || str.includes('HẠ TẦNG')) return 'XAY_DUNG';
+  if (str.includes('KỸ THUẬT') || str.includes('KY_THUAT') || str.includes('MÁY MÓC') || str.includes('PHƯƠNG TIỆN') || str.includes('THIẾT BỊ')) return 'KY_THUAT';
+  if (str.includes('XÂY DỰNG') || str.includes('XAY_DUNG') || str.includes('HẠ TẦNG') || str.includes('KCHTHK')) return 'XAY_DUNG';
   if (str.includes('ĐÀO TẠO') || str.includes('DAO_TAO') || str.includes('HUẤN LUYỆN')) return 'DAO_TAO';
   if (str.includes('HÀNH CHÍNH') || str.includes('HANH_CHINH') || str.includes('VĂN PHÒNG')) return 'HANH_CHINH';
   if (str.includes('AN NINH') || str.includes('AN_NINH') || str.includes('PCCC')) return 'AN_NINH';
@@ -193,13 +193,51 @@ export const normalizeExpenseScope = (scopeStr) => {
 };
 
 /**
+ * Tự động nhận diện phạm vi chi phí chuẩn xác nhất của User
+ * (Kể cả khi Google Sheet chưa có cột Scope hoặc khi bị thiếu dữ liệu)
+ */
+export const resolveUserScope = (user) => {
+  if (!user) return 'ALL';
+  if (normalizeRole(user.role) === ROLES.ADMIN) return 'ALL';
+
+  const explicit = user.expenseScope;
+  if (explicit && explicit !== 'ALL' && explicit !== '*') {
+    return normalizeExpenseScope(explicit);
+  }
+
+  // Tự động nhận diện thông minh theo email, tên hoặc phòng ban
+  const email = String(user.email || '').toLowerCase();
+  const dept = String(user.department || '').toLowerCase();
+  const name = String(user.name || '').toLowerCase();
+  const notes = String(user.notes || '').toLowerCase();
+
+  if (email.includes('xaydung') || dept.includes('xây dựng') || dept.includes('hạ tầng') || name.includes('xây dựng') || notes.includes('hạ tầng')) {
+    return 'XAY_DUNG';
+  }
+  if (email.includes('kythuat') || dept.includes('kỹ thuật') || dept.includes('máy móc') || name.includes('kỹ thuật') || notes.includes('máy móc')) {
+    return 'KY_THUAT';
+  }
+  if (email.includes('daotao') || dept.includes('đào tạo') || dept.includes('huấn luyện') || name.includes('đào tạo') || notes.includes('đào tạo')) {
+    return 'DAO_TAO';
+  }
+  if (email.includes('hanhchinh') || dept.includes('hành chính') || dept.includes('văn phòng')) {
+    return 'HANH_CHINH';
+  }
+  if (email.includes('anninh') || dept.includes('an ninh') || dept.includes('pccc')) {
+    return 'AN_NINH';
+  }
+
+  return normalizeExpenseScope(explicit);
+};
+
+/**
  * Lấy thông tin hiển thị phạm vi chi phí của User
  */
 export const getUserScopeInfo = (user) => {
-  if (!user || user.role === ROLES.ADMIN) {
+  if (!user || normalizeRole(user.role) === ROLES.ADMIN) {
     return EXPENSE_SCOPES.ALL;
   }
-  const scopeKey = normalizeExpenseScope(user.expenseScope);
+  const scopeKey = resolveUserScope(user);
   return EXPENSE_SCOPES[scopeKey] || EXPENSE_SCOPES.ALL;
 };
 
@@ -211,7 +249,7 @@ export const isAccountCodeAllowedForUser = (accountCode, user) => {
   // Admin luôn có toàn quyền xem tất cả
   if (normalizeRole(user.role) === ROLES.ADMIN) return true;
 
-  const scopeKey = normalizeExpenseScope(user.expenseScope);
+  const scopeKey = resolveUserScope(user);
   // Nếu là ALL thì xem được toàn bộ
   if (scopeKey === 'ALL') return true;
 
@@ -254,7 +292,7 @@ export const isAccountCodeAllowedForUser = (accountCode, user) => {
 export const filterBudgetsForUser = (budgets, user) => {
   if (!Array.isArray(budgets)) return [];
   if (!user || normalizeRole(user.role) === ROLES.ADMIN) return budgets;
-  if (normalizeExpenseScope(user.expenseScope) === 'ALL') return budgets;
+  if (resolveUserScope(user) === 'ALL') return budgets;
 
   return budgets.filter((b) => isAccountCodeAllowedForUser(b.code, user));
 };
@@ -265,7 +303,7 @@ export const filterBudgetsForUser = (budgets, user) => {
 export const filterTransactionsForUser = (transactions, user) => {
   if (!Array.isArray(transactions)) return [];
   if (!user || normalizeRole(user.role) === ROLES.ADMIN) return transactions;
-  if (normalizeExpenseScope(user.expenseScope) === 'ALL') return transactions;
+  if (resolveUserScope(user) === 'ALL') return transactions;
 
   return transactions.filter((t) => isAccountCodeAllowedForUser(t.accountCode, user));
 };
@@ -276,7 +314,7 @@ export const filterTransactionsForUser = (transactions, user) => {
 export const filterBravoInfoForUser = (bravoInfo, user) => {
   if (!Array.isArray(bravoInfo)) return [];
   if (!user || normalizeRole(user.role) === ROLES.ADMIN) return bravoInfo;
-  if (normalizeExpenseScope(user.expenseScope) === 'ALL') return bravoInfo;
+  if (resolveUserScope(user) === 'ALL') return bravoInfo;
 
   return bravoInfo.filter((item) => {
     if (!item.code) return true; // Giữ lại tiêu đề nhóm cha

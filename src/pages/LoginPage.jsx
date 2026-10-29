@@ -16,7 +16,7 @@ import {
   getSavedWebhookUrl,
   fetchFromGoogleSheet,
 } from '../services/googleSheetService';
-import { ROLES, normalizeRole, ROLE_INFO } from '../utils/permissions';
+import { ROLES, normalizeRole, ROLE_INFO, resolveUserScope } from '../utils/permissions';
 
 export default function LoginPage({ onLogin }) {
   const [emailInput, setEmailInput] = useState('admin@company.vn');
@@ -27,7 +27,7 @@ export default function LoginPage({ onLogin }) {
   const [hint, setHint] = useState('');
 
   // Xử lý Đăng nhập bằng Tài khoản & Mật khẩu
-  const handleLogin = async (userEmail, userPass) => {
+  const handleLogin = async (userEmail, userPass, forcedScope) => {
     setError('');
     setHint('');
     const cleanEmail = (userEmail || emailInput).trim().toLowerCase();
@@ -76,6 +76,12 @@ export default function LoginPage({ onLogin }) {
             ? 'admin123'
             : matched.email.includes('ketoan')
             ? 'ketoan123'
+            : matched.email.includes('kythuat')
+            ? 'kythuat123'
+            : matched.email.includes('xaydung')
+            ? 'xaydung123'
+            : matched.email.includes('daotao')
+            ? 'daotao123'
             : '123456');
 
         if (cleanPass !== expectedPassword) {
@@ -86,11 +92,12 @@ export default function LoginPage({ onLogin }) {
         }
 
         const role = normalizeRole(matched.role);
+        const effectiveScope = forcedScope || resolveUserScope(matched);
         onLogin({
           name: matched.name || cleanEmail.split('@')[0],
           email: matched.email,
           role: role,
-          expenseScope: matched.expenseScope || 'ALL',
+          expenseScope: effectiveScope,
           allowedCodes: matched.allowedCodes || [],
           department: matched.department || 'Phòng TC-KH',
           provider: 'credentials',
@@ -130,10 +137,10 @@ export default function LoginPage({ onLogin }) {
     handleLogin(emailInput, password);
   };
 
-  const handleSelectRoleDemo = (email, pass) => {
+  const handleSelectRoleDemo = (email, pass, defaultScope) => {
     setEmailInput(email);
     setPassword(pass);
-    handleLogin(email, pass);
+    handleLogin(email, pass, defaultScope);
   };
 
   return (
@@ -284,7 +291,7 @@ export default function LoginPage({ onLogin }) {
             <div className="grid grid-cols-3 gap-1.5">
               <button
                 type="button"
-                onClick={() => handleSelectRoleDemo('admin@company.vn', 'admin123')}
+                onClick={() => handleSelectRoleDemo('admin@company.vn', 'admin123', 'ALL')}
                 className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-amber-500/20 border border-amber-400/40 text-left transition-all cursor-pointer group"
                 title="Email: admin@company.vn • Pass: admin123"
               >
@@ -301,7 +308,7 @@ export default function LoginPage({ onLogin }) {
 
               <button
                 type="button"
-                onClick={() => handleSelectRoleDemo('ketoan@company.vn', 'ketoan123')}
+                onClick={() => handleSelectRoleDemo('ketoan@company.vn', 'ketoan123', 'ALL')}
                 className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-sky-500/20 border border-sky-400/40 text-left transition-all cursor-pointer group"
                 title="Email: ketoan@company.vn • Pass: ketoan123"
               >
@@ -318,7 +325,7 @@ export default function LoginPage({ onLogin }) {
 
               <button
                 type="button"
-                onClick={() => handleSelectRoleDemo('viewer@company.vn', 'viewer123')}
+                onClick={() => handleSelectRoleDemo('viewer@company.vn', 'viewer123', 'ALL')}
                 className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-slate-500/20 border border-slate-400/40 text-left transition-all cursor-pointer group"
                 title="Email: viewer@company.vn • Pass: viewer123"
               >
@@ -338,7 +345,7 @@ export default function LoginPage({ onLogin }) {
             <div className="grid grid-cols-3 gap-1.5">
               <button
                 type="button"
-                onClick={() => handleSelectRoleDemo('kythuat@company.vn', 'kythuat123')}
+                onClick={() => handleSelectRoleDemo('kythuat@company.vn', 'kythuat123', 'KY_THUAT')}
                 className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-blue-500/20 border border-blue-400/40 text-left transition-all cursor-pointer group"
                 title="Email: kythuat@company.vn • Pass: kythuat123 • SCTX Máy móc & Phương tiện"
               >
@@ -355,7 +362,7 @@ export default function LoginPage({ onLogin }) {
 
               <button
                 type="button"
-                onClick={() => handleSelectRoleDemo('xaydung@company.vn', 'xaydung123')}
+                onClick={() => handleSelectRoleDemo('xaydung@company.vn', 'xaydung123', 'XAY_DUNG')}
                 className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-amber-500/20 border border-amber-400/40 text-left transition-all cursor-pointer group"
                 title="Email: xaydung@company.vn • Pass: xaydung123 • SCTX Cơ sở hạ tầng"
               >
@@ -372,7 +379,7 @@ export default function LoginPage({ onLogin }) {
 
               <button
                 type="button"
-                onClick={() => handleSelectRoleDemo('daotao@company.vn', 'daotao123')}
+                onClick={() => handleSelectRoleDemo('daotao@company.vn', 'daotao123', 'DAO_TAO')}
                 className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-purple-500/20 border border-purple-400/40 text-left transition-all cursor-pointer group"
                 title="Email: daotao@company.vn • Pass: daotao123 • Chi phí Đào tạo"
               >

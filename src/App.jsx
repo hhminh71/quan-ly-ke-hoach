@@ -13,7 +13,23 @@ export default function App() {
   // Current logged in user; default to demo user for instant preview, or null to force login
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('demo_user');
-    return saved ? JSON.parse(saved) : null;
+    if (!saved) return null;
+    try {
+      const u = JSON.parse(saved);
+      if (u) {
+        const email = String(u.email || '').toLowerCase();
+        if (email.includes('xaydung') && u.expenseScope !== 'XAY_DUNG') {
+          u.expenseScope = 'XAY_DUNG';
+        } else if (email.includes('kythuat') && u.expenseScope !== 'KY_THUAT') {
+          u.expenseScope = 'KY_THUAT';
+        } else if (email.includes('daotao') && u.expenseScope !== 'DAO_TAO') {
+          u.expenseScope = 'DAO_TAO';
+        }
+      }
+      return u;
+    } catch {
+      return null;
+    }
   });
 
   const handleLogin = (userData) => {
