@@ -774,19 +774,6 @@ export default function BudgetOverview({
             </div>
           </div>
 
-          {/* Hint banner: ultra-slim, hidden on mobile screens to maximize table rows */}
-          <div className="hidden sm:flex px-2.5 sm:px-4 py-0.5 bg-blue-50/70 border-b border-blue-100 items-center justify-between text-[10px] sm:text-2xs text-blue-800 gap-1.5">
-            <div className="flex items-center gap-1.5 truncate">
-              <span className="flex h-1.5 w-1.5 relative shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-600"></span>
-              </span>
-              <span className="truncate">
-                💡 <strong>Quy tắc báo cáo:</strong> Chi Phí Thực Tế = <strong>MAX(Bravo, Thực Tế)</strong>. <span className="hidden sm:inline">Click vào dòng để xem sổ cái chi tiết.</span>
-              </span>
-            </div>
-          </div>
-
           {/* Table Container: Fixed Sticky Header when scrolling down */}
           <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-175px)] sm:max-h-[calc(100vh-210px)] relative">
             <table
