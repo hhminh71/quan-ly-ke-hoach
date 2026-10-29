@@ -55,6 +55,28 @@ export default function TransactionList({
     }
   }, [selectedCategoryProp]);
 
+  // Derive default account code from current filter (selectedCategory or searchTerm)
+  const activeFilteredAccountCode = useMemo(() => {
+    // 1. If category dropdown is selected (not 'ALL')
+    if (selectedCategory && selectedCategory !== 'ALL') {
+      const cat = String(selectedCategory).trim();
+      const byCode = budgets.find((b) => String(b.code || '').trim() === cat);
+      if (byCode) return byCode.code;
+      const byName = budgets.find((b) => String(b.name || '').trim() === cat);
+      if (byName) return byName.code;
+      return cat;
+    }
+    // 2. If search term matches an account code
+    if (searchTerm && searchTerm.trim()) {
+      const term = searchTerm.trim().toLowerCase();
+      const exactCodeMatch = budgets.find(
+        (b) => String(b.code || '').trim().toLowerCase() === term
+      );
+      if (exactCodeMatch) return exactCodeMatch.code;
+    }
+    return null;
+  }, [selectedCategory, searchTerm, budgets]);
+
   const formatVND = (num) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num || 0);
   };
@@ -218,7 +240,11 @@ export default function TransactionList({
                   type="button"
                   onClick={() => setIsAddModalOpen(true)}
                   className="inline-flex items-center gap-0.5 px-1 py-0.2 sm:px-2 sm:py-0.5 rounded text-[8px] sm:text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-2xs transition-all"
-                  title="Thêm mới hạng mục và đồng bộ trực tiếp lên Google Sheet"
+                  title={
+                    activeFilteredAccountCode
+                      ? `Thêm mới hạng mục cho mã [${activeFilteredAccountCode}] và đồng bộ trực tiếp lên Google Sheet`
+                      : 'Thêm mới hạng mục và đồng bộ trực tiếp lên Google Sheet'
+                  }
                 >
                   <PlusCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                   <span>+ Thêm Hạng Mục</span>
@@ -375,7 +401,11 @@ export default function TransactionList({
                 type="button"
                 onClick={() => setIsAddModalOpen(true)}
                 className="w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-sm shadow-blue-500/25 transition-all"
-                title="Tạo hạng mục mới theo mã khoản mục"
+                title={
+                  activeFilteredAccountCode
+                    ? `Thêm mới hạng mục cho mã [${activeFilteredAccountCode}]`
+                    : 'Tạo hạng mục mới theo mã khoản mục'
+                }
               >
                 <PlusCircle className="w-4 h-4 shrink-0" />
                 <span className="truncate">Thêm Hạng Mục</span>
@@ -598,6 +628,7 @@ export default function TransactionList({
           budgets={budgets}
           transactions={transactions}
           selectedYear={selectedYear}
+          defaultAccountCode={activeFilteredAccountCode}
           onAddTransaction={(newRec) => {
             if (onAddTransaction) {
               onAddTransaction(newRec);

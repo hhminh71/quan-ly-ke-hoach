@@ -64,8 +64,11 @@ export default function AddTransactionModal({
       // Select default account if provided, or first budget account
       if (budgets.length > 0) {
         if (defaultAccountCode) {
+          const target = String(defaultAccountCode).trim().toLowerCase();
           const match = budgets.find(
-            (b) => String(b.code || '').trim() === String(defaultAccountCode).trim()
+            (b) =>
+              String(b.code || '').trim().toLowerCase() === target ||
+              String(b.name || '').trim().toLowerCase() === target
           );
           if (match) {
             setSelectedAccount(match);
