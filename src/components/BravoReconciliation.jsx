@@ -68,6 +68,7 @@ export default function BravoReconciliation({
     isColumnVisible: isReconColVisible,
     toggleColumnVisibility: toggleReconCol,
     showAllColumns: showAllReconCols,
+    isRecentlyResized: isReconRecentlyResized,
   } = useResizableColumns({
     storageKey: 'tbl_cols_bravo_recon_v2',
     initialWidths: {
@@ -926,26 +927,30 @@ export default function BravoReconciliation({
                     )}
                     {isReconColVisible('percent') && (
                       <th
-                        onClick={() =>
-                          setPlanningSort((prev) =>
-                            prev === 'percent_desc' ? 'percent_asc' : 'percent_desc'
-                          )
-                        }
-                        className={`py-0.5 px-0.5 sm:px-1 text-center relative select-none cursor-pointer transition-colors group/sort ${
+                        className={`py-0.5 px-0.5 sm:px-1 text-center relative select-none transition-colors ${
                           planningSort === 'percent_desc' || planningSort === 'percent_asc'
-                            ? 'bg-blue-100 text-blue-900 font-extrabold'
-                            : 'hover:bg-slate-200/80 hover:text-blue-700'
+                            ? 'bg-blue-100/90 text-blue-900 font-extrabold'
+                            : ''
                         }`}
                         style={{ width: `${reconWidths.percent}px`, minWidth: `${reconWidths.percent}px` }}
-                        title={`Tỷ lệ tiến độ • Bấm để sắp xếp (${
-                          planningSort === 'percent_desc'
-                            ? 'Đang xếp: Cao nhất ➔ Thấp nhất'
-                            : planningSort === 'percent_asc'
-                            ? 'Đang xếp: Thấp nhất ➔ Cao nhất'
-                            : 'Bấm để xếp'
-                        })`}
                       >
-                        <div className="inline-flex items-center justify-center gap-0.5 w-full pr-1">
+                        <div
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (isReconRecentlyResized && isReconRecentlyResized()) return;
+                            setPlanningSort((prev) =>
+                              prev === 'percent_desc' ? 'percent_asc' : 'percent_desc'
+                            );
+                          }}
+                          className="inline-flex items-center justify-center gap-0.5 w-full pr-1 cursor-pointer hover:text-blue-700 py-0.5 group/sort"
+                          title={`Tỷ lệ tiến độ • Bấm để sắp xếp (${
+                            planningSort === 'percent_desc'
+                              ? 'Đang xếp: Cao nhất ➔ Thấp nhất'
+                              : planningSort === 'percent_asc'
+                              ? 'Đang xếp: Thấp nhất ➔ Cao nhất'
+                              : 'Bấm để xếp'
+                          })`}
+                        >
                           <span>Tỷ Lệ</span>
                           {planningSort === 'percent_desc' ? (
                             <ArrowDown className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-700 shrink-0" />

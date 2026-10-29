@@ -41,6 +41,13 @@ export function useResizableColumns({
   widthsRef.current = columnWidths;
 
   const dragStateRef = useRef(null);
+  const isResizingRef = useRef(false);
+  const lastResizeEndTimeRef = useRef(0);
+
+  // Check if a column was recently resized within 250ms (prevents trailing click from triggering sorting)
+  const isRecentlyResized = useCallback(() => {
+    return isResizingRef.current || Date.now() - lastResizeEndTimeRef.current < 250;
+  }, []);
 
   // Column Visibility State (key -> boolean)
   const visibilityStorageKey = storageKey ? `${storageKey}_vis` : null;
@@ -118,6 +125,7 @@ export function useResizableColumns({
       const isTouch = e.type === 'touchstart';
       const clientX = isTouch ? e.touches[0].clientX : e.clientX;
       const currentWidth = widthsRef.current[colKey] || initialWidths[colKey] || 80;
+      let hasMoved = false;
 
       dragStateRef.current = {
         colKey,
@@ -136,6 +144,11 @@ export function useResizableColumns({
           : moveEvent.clientX;
 
         const deltaX = currentX - dragStateRef.current.startX;
+        if (Math.abs(deltaX) > 2) {
+          hasMoved = true;
+          isResizingRef.current = true;
+        }
+
         const minW = minWidths[colKey] || defaultMinWidth;
         const newWidth = Math.max(minW, Math.round(dragStateRef.current.startWidth + deltaX));
 
@@ -159,6 +172,22 @@ export function useResizableColumns({
         dragStateRef.current = null;
         document.body.style.cursor = '';
         document.body.style.userSelect = '';
+
+        if (hasMoved) {
+          lastResizeEndTimeRef.current = Date.now();
+          // Kill any synthetic click event triggered by mouseup on parent <th>
+          const suppressClick = (clickEvent) => {
+            clickEvent.stopPropagation();
+            clickEvent.preventDefault();
+          };
+          window.addEventListener('click', suppressClick, { capture: true, once: true });
+          setTimeout(() => {
+            window.removeEventListener('click', suppressClick, { capture: true });
+            isResizingRef.current = false;
+          }, 300);
+        } else {
+          isResizingRef.current = false;
+        }
 
         window.removeEventListener('mousemove', handleMove);
         window.removeEventListener('mouseup', handleEnd);
@@ -224,6 +253,7 @@ export function useResizableColumns({
     resetColumnWidth,
     resetAllWidths,
     totalTableWidth,
+    isRecentlyResized,
     // Visibility
     visibleColumns,
     isColumnVisible,
@@ -247,10 +277,22 @@ export function ColumnResizeHandle({
     <div
       role="separator"
       aria-orientation="vertical"
-      onMouseDown={(e) => onResizeStart(colKey, e)}
-      onTouchStart={(e) => onResizeStart(colKey, e)}
-      onDoubleClick={(e) => onReset && onReset(colKey, e)}
-      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => {
+        e.stopPropagation();
+        onResizeStart(colKey, e);
+      }}
+      onTouchStart={(e) => {
+        e.stopPropagation();
+        onResizeStart(colKey, e);
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        onReset && onReset(colKey, e);
+      }}
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}
       className="absolute top-0 bottom-0 right-0 w-2.5 sm:w-2 cursor-col-resize select-none touch-none z-20 group/resize flex items-center justify-center hover:bg-blue-500/30 active:bg-blue-600 transition-colors"
       title={title}
     >

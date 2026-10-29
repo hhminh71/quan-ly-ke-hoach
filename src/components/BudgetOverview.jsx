@@ -82,24 +82,6 @@ export default function BudgetOverview({
     }
   });
 
-  // Sort state for Progress table (mặc định null: theo thứ tự danh mục ban đầu)
-  const [sortField, setSortField] = useState(null); // 'percent' | 'approved' | 'reportActual' | 'remaining' | 'code' | null
-  const [sortDirection, setSortDirection] = useState('desc'); // 'asc' | 'desc'
-
-  const handleSort = (field) => {
-    if (sortField === field) {
-      if (sortDirection === 'desc') {
-        setSortDirection('asc');
-      } else {
-        setSortField(null);
-        setSortDirection('desc');
-      }
-    } else {
-      setSortField(field);
-      setSortDirection('desc');
-    }
-  };
-
   useEffect(() => {
     try {
       localStorage.setItem('app_col_show_bravo', JSON.stringify(showBravoCol));
@@ -154,6 +136,7 @@ export default function BudgetOverview({
     isColumnVisible: isProgColVisible,
     toggleColumnVisibility: toggleProgCol,
     showAllColumns: showAllProgCols,
+    isRecentlyResized: isProgRecentlyResized,
   } = useResizableColumns({
     storageKey: 'tbl_cols_budget_overview_v2',
     initialWidths: {
@@ -179,6 +162,28 @@ export default function BudgetOverview({
       status: 40,
     },
   });
+
+  // Sort state for Progress table (mặc định null: theo thứ tự danh mục ban đầu)
+  const [sortField, setSortField] = useState(null); // 'percent' | 'approved' | 'reportActual' | 'remaining' | 'code' | null
+  const [sortDirection, setSortDirection] = useState('desc'); // 'asc' | 'desc'
+
+  const handleSort = (field) => {
+    // Chặn hoàn toàn sự kiện sắp xếp nếu người dùng vừa thực hiện thao tác kéo thả co giãn cột
+    if (isProgRecentlyResized && isProgRecentlyResized()) {
+      return;
+    }
+    if (sortField === field) {
+      if (sortDirection === 'desc') {
+        setSortDirection('asc');
+      } else {
+        setSortField(null);
+        setSortDirection('desc');
+      }
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+  };
 
   const progressTableColumns = useMemo(
     () => [
@@ -794,13 +799,18 @@ export default function BudgetOverview({
                   {isProgColVisible('code') && (
                     <th
                       style={{ width: `${progWidths.code}px` }}
-                      onClick={() => handleSort('code')}
-                      className={`relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words cursor-pointer transition-colors group/sort ${
-                        sortField === 'code' ? 'bg-blue-100 text-blue-900 font-extrabold' : 'hover:bg-slate-200/80 hover:text-blue-700'
+                      className={`relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words transition-colors ${
+                        sortField === 'code' ? 'bg-blue-100/90 text-blue-900 font-extrabold' : ''
                       }`}
-                      title="Mã kế hoạch • Bấm để sắp xếp"
                     >
-                      <div className="inline-flex items-center justify-center gap-0.5 w-full pr-1">
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSort('code');
+                        }}
+                        className="inline-flex items-center justify-center gap-0.5 w-full pr-1 cursor-pointer hover:text-blue-700 py-0.5 group/sort"
+                        title="Mã kế hoạch • Bấm để sắp xếp"
+                      >
                         <span>Mã KH</span>
                         {sortField === 'code' ? (
                           sortDirection === 'desc' ? (
@@ -832,13 +842,18 @@ export default function BudgetOverview({
                   {isProgColVisible('approved') && (
                     <th
                       style={{ width: `${progWidths.approved}px` }}
-                      onClick={() => handleSort('approved')}
-                      className={`relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words cursor-pointer transition-colors group/sort ${
-                        sortField === 'approved' ? 'bg-blue-100 text-blue-900 font-extrabold' : 'hover:bg-slate-200/80 hover:text-blue-700'
+                      className={`relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words transition-colors ${
+                        sortField === 'approved' ? 'bg-blue-100/90 text-blue-900 font-extrabold' : ''
                       }`}
-                      title={`Được duyệt (${selectedYear}) • Bấm để sắp xếp`}
                     >
-                      <div className="inline-flex items-center justify-center gap-0.5 w-full pr-1">
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSort('approved');
+                        }}
+                        className="inline-flex items-center justify-center gap-0.5 w-full pr-1 cursor-pointer hover:text-blue-700 py-0.5 group/sort"
+                        title={`Được duyệt (${selectedYear}) • Bấm để sắp xếp`}
+                      >
                         <span>Được Duyệt ({selectedYear})</span>
                         {sortField === 'approved' ? (
                           sortDirection === 'desc' ? (
@@ -882,15 +897,20 @@ export default function BudgetOverview({
                   {isProgColVisible('reportActual') && (
                     <th
                       style={{ width: `${progWidths.reportActual}px` }}
-                      onClick={() => handleSort('reportActual')}
-                      className={`relative py-0.5 px-0.5 sm:px-1 text-center border-l border-r select-none leading-tight break-words cursor-pointer transition-colors group/sort ${
+                      className={`relative py-0.5 px-0.5 sm:px-1 text-center border-l border-r select-none leading-tight break-words transition-colors ${
                         sortField === 'reportActual'
                           ? 'bg-emerald-100 text-emerald-950 font-extrabold border-emerald-300'
-                          : 'bg-emerald-50/95 text-emerald-950 font-bold border-emerald-200/70 hover:bg-emerald-100/70'
+                          : 'bg-emerald-50/95 text-emerald-950 font-bold border-emerald-200/70'
                       }`}
-                      title="Chi Phí Báo Cáo MAX(Bravo, Thực tế) • Bấm để sắp xếp"
                     >
-                      <div className="text-center w-full pr-1">
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSort('reportActual');
+                        }}
+                        className="text-center w-full pr-1 cursor-pointer hover:text-emerald-800 py-0.5 group/sort"
+                        title="Chi Phí Báo Cáo MAX(Bravo, Thực tế) • Bấm để sắp xếp"
+                      >
                         <div className="inline-flex items-center justify-center gap-0.5">
                           <span>Chi Phí Báo Cáo</span>
                           {sortField === 'reportActual' ? (
@@ -913,13 +933,18 @@ export default function BudgetOverview({
                   {isProgColVisible('remaining') && (
                     <th
                       style={{ width: `${progWidths.remaining}px` }}
-                      onClick={() => handleSort('remaining')}
-                      className={`relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words cursor-pointer transition-colors group/sort ${
-                        sortField === 'remaining' ? 'bg-blue-100 text-blue-900 font-extrabold' : 'hover:bg-slate-200/80 hover:text-blue-700'
+                      className={`relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words transition-colors ${
+                        sortField === 'remaining' ? 'bg-blue-100/90 text-blue-900 font-extrabold' : ''
                       }`}
-                      title="Còn Lại • Bấm để sắp xếp"
                     >
-                      <div className="inline-flex items-center justify-center gap-0.5 w-full pr-1">
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSort('remaining');
+                        }}
+                        className="inline-flex items-center justify-center gap-0.5 w-full pr-1 cursor-pointer hover:text-blue-700 py-0.5 group/sort"
+                        title="Còn Lại • Bấm để sắp xếp"
+                      >
                         <span>Còn Lại</span>
                         {sortField === 'remaining' ? (
                           sortDirection === 'desc' ? (
@@ -939,21 +964,26 @@ export default function BudgetOverview({
                   {isProgColVisible('percent') && (
                     <th
                       style={{ width: `${progWidths.percent}px` }}
-                      onClick={() => handleSort('percent')}
-                      className={`relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words cursor-pointer transition-colors group/sort ${
+                      className={`relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words transition-colors ${
                         sortField === 'percent'
                           ? 'bg-blue-100/90 text-blue-900 font-extrabold'
-                          : 'hover:bg-slate-200/80 hover:text-blue-700'
+                          : ''
                       }`}
-                      title={`Tiến Độ • Nhấp để sắp xếp theo tiến độ (${
-                        sortField === 'percent'
-                          ? sortDirection === 'desc'
-                            ? 'Đang xếp: Cao nhất ➔ Thấp nhất'
-                            : 'Đang xếp: Thấp nhất ➔ Cao nhất'
-                          : 'Bấm để sắp xếp'
-                      })`}
                     >
-                      <div className="inline-flex items-center justify-center gap-0.5 w-full pr-1">
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSort('percent');
+                        }}
+                        className="inline-flex items-center justify-center gap-0.5 w-full pr-1 cursor-pointer hover:text-blue-700 py-0.5 group/sort"
+                        title={`Tiến Độ • Nhấp để sắp xếp theo tiến độ (${
+                          sortField === 'percent'
+                            ? sortDirection === 'desc'
+                              ? 'Đang xếp: Cao nhất ➔ Thấp nhất'
+                              : 'Đang xếp: Thấp nhất ➔ Cao nhất'
+                            : 'Bấm để sắp xếp'
+                        })`}
+                      >
                         <span>Tiến Độ</span>
                         {sortField === 'percent' ? (
                           sortDirection === 'desc' ? (
