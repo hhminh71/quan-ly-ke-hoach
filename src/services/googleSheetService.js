@@ -4,13 +4,15 @@
 
 const STORAGE_KEY_WEBHOOK_URL = 'app_google_sheet_webhook_url';
 const STORAGE_KEY_LAST_SYNC = 'app_last_sync_time';
-const STORAGE_KEY_USERS = 'app_users_list_v1';
+const STORAGE_KEY_USERS = 'app_users_list_v2';
+const STORAGE_KEY_GOOGLE_CLIENT_ID = 'app_google_client_id';
 
 export const DEFAULT_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbypvdO6D1QW4K_PgKlIRAoUFfWnRyC4Wkn3oYU4Tbz5GOyX5gd3zpIhx93715PKUp8A/exec';
 
 export const DEFAULT_USERS = [
   {
     email: 'admin@company.vn',
+    password: 'admin123',
     name: 'Quản trị viên trưởng',
     department: 'Phòng TC-KH',
     role: 'ADMIN',
@@ -20,6 +22,7 @@ export const DEFAULT_USERS = [
   },
   {
     email: 'ketoan@company.vn',
+    password: 'ketoan123',
     name: 'Nguyễn Thị Lan (Kế toán)',
     department: 'Tổ Kế toán chi phí',
     role: 'EDITOR',
@@ -29,6 +32,7 @@ export const DEFAULT_USERS = [
   },
   {
     email: 'viewer@company.vn',
+    password: 'viewer123',
     name: 'Trần Văn Bình (Ban Giám Đốc)',
     department: 'Ban Giám Đốc Cảng',
     role: 'VIEWER',
@@ -37,6 +41,18 @@ export const DEFAULT_USERS = [
     notes: 'Tra cứu & xem báo cáo số liệu',
   },
 ];
+
+export const getGoogleClientId = () => {
+  return localStorage.getItem(STORAGE_KEY_GOOGLE_CLIENT_ID) || import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+};
+
+export const saveGoogleClientId = (clientId) => {
+  if (clientId) {
+    localStorage.setItem(STORAGE_KEY_GOOGLE_CLIENT_ID, clientId.trim());
+  } else {
+    localStorage.removeItem(STORAGE_KEY_GOOGLE_CLIENT_ID);
+  }
+};
 
 export const getSavedWebhookUrl = () => {
   return localStorage.getItem(STORAGE_KEY_WEBHOOK_URL) || DEFAULT_WEBHOOK_URL;
@@ -63,7 +79,12 @@ export const getSavedUsers = () => {
     const raw = localStorage.getItem(STORAGE_KEY_USERS);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed.map((u) => ({
+          ...u,
+          password: u.password || (u.email.includes('admin') ? 'admin123' : u.email.includes('ketoan') ? 'ketoan123' : '123456'),
+        }));
+      }
     }
   } catch (e) {
     console.error(e);

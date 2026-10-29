@@ -43,6 +43,7 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
 
   // Form states for Add / Edit
   const [formEmail, setFormEmail] = useState('');
+  const [formPassword, setFormPassword] = useState('123456');
   const [formName, setFormName] = useState('');
   const [formDept, setFormDept] = useState('Phòng TC-KH');
   const [formRole, setFormRole] = useState(ROLES.VIEWER);
@@ -82,6 +83,7 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
   const handleOpenAdd = () => {
     setEditingUser(null);
     setFormEmail('');
+    setFormPassword('123456');
     setFormName('');
     setFormDept('Phòng TC-KH');
     setFormRole(ROLES.VIEWER);
@@ -94,6 +96,7 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
   const handleOpenEdit = (u) => {
     setEditingUser(u);
     setFormEmail(u.email);
+    setFormPassword(u.password || '123456');
     setFormName(u.name || '');
     setFormDept(u.department || 'Phòng TC-KH');
     setFormRole(normalizeRole(u.role));
@@ -129,6 +132,7 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
 
     const userData = {
       email: cleanEmail,
+      password: formPassword.trim() || '123456',
       name: formName.trim() || cleanEmail.split('@')[0],
       department: formDept.trim() || 'Phòng TC-KH',
       role: formRole,
@@ -353,7 +357,14 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
                                   </span>
                                 )}
                               </p>
-                              <p className="text-[11px] font-mono text-slate-500 truncate">{u.email}</p>
+                              <p className="text-[11px] font-mono text-slate-500 truncate flex items-center gap-1.5 flex-wrap">
+                                <span>{u.email}</span>
+                                {u.password && (
+                                  <span className="text-[9.5px] text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200" title="Mật khẩu đăng nhập">
+                                    Pass: {u.password}
+                                  </span>
+                                )}
+                              </p>
                             </div>
                           </div>
                         </td>
@@ -500,6 +511,21 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
                   placeholder="ví dụ: Nguyễn Văn A"
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Mật khẩu đăng nhập <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={formPassword}
+                  onChange={(e) => setFormPassword(e.target.value)}
+                  placeholder="Mật khẩu truy cập (mặc định: 123456)"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono font-medium"
+                  required
+                />
+                <p className="text-[10px] text-slate-500 mt-0.5">Dùng để đăng nhập khi sử dụng tài khoản Email.</p>
               </div>
 
               <div>
