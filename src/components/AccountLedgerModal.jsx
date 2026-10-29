@@ -16,6 +16,7 @@ import AddTransactionModal from './AddTransactionModal';
 import { matchesVietnameseSearch } from '../utils/searchUtils';
 import { formatDate } from '../utils/dateUtils';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
+import { useResizableColumns, ColumnResizeHandle } from '../hooks/useResizableColumns';
 import {
   getSctsSeparatedCodes,
   isSctsSeparated,
@@ -98,6 +99,32 @@ export default function AccountLedgerModal({
   }, [isOpen, account, sortedTransactions]);
 
   const [sctsCodes, setSctsCodes] = useState(getSctsSeparatedCodes);
+
+  // Resizable columns hook for Account Ledger Detail table
+  const {
+    columnWidths,
+    handleResizeStart,
+    resetColumnWidth,
+    totalTableWidth,
+  } = useResizableColumns({
+    storageKey: 'tbl_cols_account_ledger_v2',
+    initialWidths: {
+      stt: 36,
+      date: 72,
+      notes: 300,
+      amount: 110,
+      employee: 110,
+      actions: 60,
+    },
+    minWidths: {
+      stt: 28,
+      date: 50,
+      notes: 90,
+      amount: 65,
+      employee: 60,
+      actions: 45,
+    },
+  });
 
   useEffect(() => {
     const handleUpdate = () => {
@@ -352,9 +379,9 @@ export default function AccountLedgerModal({
           {/* USER SPECIFICATION:
               1. Cột 'Người thực hiện' di chuyển ra cuối, trước cột 'Điều chỉnh' (Thao tác), căn giữa và bỏ chữ cái viết tắt phía trước
                  -> Thứ tự: # | Ngày | Nội Dung Diễn Giải | Số Tiền (VNĐ) | Người Thực Hiện | Điều Chỉnh
-              2. Bóp nhỏ tối giản các cột, có thể xuống dòng nếu cần (break-words, whitespace-normal, padding py-1 sm:py-1.5)
+              2. Kéo giãn các cột tùy biến, xuống dòng tự nhiên, khoảng cách dòng tối giản mảnh
           */}
-          <div className="overflow-y-auto flex-1 min-h-0">
+          <div className="overflow-y-auto overflow-x-auto flex-1 min-h-0">
             {sortedTransactions.length === 0 ? (
               <div className="text-center py-10 px-4">
                 <FileSpreadsheet className="w-10 h-10 text-slate-300 mx-auto mb-1.5" />
@@ -370,21 +397,89 @@ export default function AccountLedgerModal({
                 </p>
               </div>
             ) : (
-              <table className="w-full text-left border-collapse table-auto">
+              <table
+                className="w-full text-left border-collapse table-fixed"
+                style={{ minWidth: `${totalTableWidth}px` }}
+              >
                 <thead className="sticky top-0 bg-slate-100/95 backdrop-blur-xs z-20 border-b border-slate-200 shadow-2xs">
                   <tr className="text-[8px] sm:text-[9.5px] font-bold text-slate-600 uppercase tracking-wider">
                     {/* 1. STT */}
-                    <th className="py-0.5 px-0.5 w-5 sm:w-6 text-center leading-tight">#</th>
+                    <th
+                      className="py-0.5 px-0.5 text-center leading-tight relative select-none"
+                      style={{ width: `${columnWidths.stt}px`, minWidth: `${columnWidths.stt}px` }}
+                    >
+                      <div className="truncate">#</div>
+                      <ColumnResizeHandle
+                        colKey="stt"
+                        onResizeStart={handleResizeStart}
+                        onResetWidth={resetColumnWidth}
+                      />
+                    </th>
+
                     {/* 2. Ngày: dd/mm/yy không logo lịch, bóp siêu gọn */}
-                    <th className="py-0.5 px-0.5 sm:px-1 w-12 sm:w-14 text-center whitespace-nowrap leading-tight">Ngày</th>
+                    <th
+                      className="py-0.5 px-0.5 sm:px-1 text-center leading-tight relative select-none"
+                      style={{ width: `${columnWidths.date}px`, minWidth: `${columnWidths.date}px` }}
+                    >
+                      <div className="truncate">Ngày</div>
+                      <ColumnResizeHandle
+                        colKey="date"
+                        onResizeStart={handleResizeStart}
+                        onResetWidth={resetColumnWidth}
+                      />
+                    </th>
+
                     {/* 3. Nội dung diễn giải */}
-                    <th className="py-0.5 px-0.5 sm:px-1 min-w-[95px] leading-tight">Nội Dung Diễn Giải</th>
+                    <th
+                      className="py-0.5 px-0.5 sm:px-1 leading-tight relative select-none"
+                      style={{ width: `${columnWidths.notes}px`, minWidth: `${columnWidths.notes}px` }}
+                    >
+                      <div className="truncate">Nội Dung Diễn Giải</div>
+                      <ColumnResizeHandle
+                        colKey="notes"
+                        onResizeStart={handleResizeStart}
+                        onResetWidth={resetColumnWidth}
+                      />
+                    </th>
+
                     {/* 4. Số tiền */}
-                    <th className="py-0.5 px-0.5 sm:px-1 text-right w-18 sm:w-22 whitespace-nowrap leading-tight">Số Tiền (VNĐ)</th>
+                    <th
+                      className="py-0.5 px-0.5 sm:px-1 text-right leading-tight relative select-none"
+                      style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
+                    >
+                      <div className="truncate">Số Tiền (VNĐ)</div>
+                      <ColumnResizeHandle
+                        colKey="amount"
+                        onResizeStart={handleResizeStart}
+                        onResetWidth={resetColumnWidth}
+                      />
+                    </th>
+
                     {/* 5. Người thực hiện: Căn giữa */}
-                    <th className="py-0.5 px-0.5 sm:px-1 w-16 sm:w-22 text-center leading-tight">Người Thực Hiện</th>
+                    <th
+                      className="py-0.5 px-0.5 sm:px-1 text-center leading-tight relative select-none"
+                      style={{ width: `${columnWidths.employee}px`, minWidth: `${columnWidths.employee}px` }}
+                    >
+                      <div className="truncate">Người Thực Hiện</div>
+                      <ColumnResizeHandle
+                        colKey="employee"
+                        onResizeStart={handleResizeStart}
+                        onResetWidth={resetColumnWidth}
+                      />
+                    </th>
+
                     {/* 6. Điều chỉnh */}
-                    <th className="py-0.5 px-0.5 text-center w-8 sm:w-10 whitespace-nowrap leading-tight">Điều Chỉnh</th>
+                    <th
+                      className="py-0.5 px-0.5 text-center leading-tight relative select-none"
+                      style={{ width: `${columnWidths.actions}px`, minWidth: `${columnWidths.actions}px` }}
+                    >
+                      <div className="truncate">Điều Chỉnh</div>
+                      <ColumnResizeHandle
+                        colKey="actions"
+                        onResizeStart={handleResizeStart}
+                        onResetWidth={resetColumnWidth}
+                      />
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs">
@@ -394,34 +489,52 @@ export default function AccountLedgerModal({
                       className="hover:bg-blue-50/50 transition-colors group"
                     >
                       {/* 1. STT */}
-                      <td className="py-0.5 px-0.5 text-center font-mono text-[9px] sm:text-[10px] text-slate-400 leading-tight">
+                      <td
+                        className="py-0.5 px-0.5 text-center font-mono text-[9px] sm:text-[10px] text-slate-400 leading-tight break-words"
+                        style={{ width: `${columnWidths.stt}px`, minWidth: `${columnWidths.stt}px` }}
+                      >
                         {index + 1}
                       </td>
 
                       {/* 2. Ngày */}
-                      <td className="py-0.5 px-0.5 sm:px-1 text-center whitespace-nowrap font-mono text-[9px] sm:text-xs text-slate-700 font-medium leading-tight">
+                      <td
+                        className="py-0.5 px-0.5 sm:px-1 text-center font-mono text-[9px] sm:text-xs text-slate-700 font-medium leading-tight break-words whitespace-normal"
+                        style={{ width: `${columnWidths.date}px`, minWidth: `${columnWidths.date}px` }}
+                      >
                         {formatDate(item.date)}
                       </td>
 
                       {/* 3. Nội dung diễn giải */}
-                      <td className="py-0.5 px-0.5 sm:px-1 text-slate-700 text-[9.5px] sm:text-xs break-words whitespace-normal leading-tight">
+                      <td
+                        className="py-0.5 px-0.5 sm:px-1 text-slate-700 text-[9.5px] sm:text-xs break-words whitespace-normal leading-tight"
+                        style={{ width: `${columnWidths.notes}px`, minWidth: `${columnWidths.notes}px` }}
+                      >
                         {item.notes}
                       </td>
 
                       {/* 4. Số tiền */}
-                      <td className="py-0.5 px-0.5 sm:px-1 text-right whitespace-nowrap font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight">
+                      <td
+                        className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight break-words"
+                        style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
+                      >
                         {formatVND(item.amount)}
                       </td>
 
                       {/* 5. Người thực hiện: Căn giữa, bỏ chữ viết tắt phía trước */}
-                      <td className="py-0.5 px-0.5 sm:px-1 text-slate-700 text-[9.5px] sm:text-xs text-center leading-tight">
+                      <td
+                        className="py-0.5 px-0.5 sm:px-1 text-slate-700 text-[9.5px] sm:text-xs text-center leading-tight break-words whitespace-normal"
+                        style={{ width: `${columnWidths.employee}px`, minWidth: `${columnWidths.employee}px` }}
+                      >
                         <span className="font-medium text-slate-800 leading-tight">
                           {item.employeeName || 'Chưa ghi nhận'}
                         </span>
                       </td>
 
                       {/* 6. Điều chỉnh */}
-                      <td className="py-0.5 px-0.5 text-center whitespace-nowrap leading-tight">
+                      <td
+                        className="py-0.5 px-0.5 text-center leading-tight break-words"
+                        style={{ width: `${columnWidths.actions}px`, minWidth: `${columnWidths.actions}px` }}
+                      >
                         <div className="flex items-center justify-center gap-0.5">
                           {onUpdateTransaction && (
                             <button

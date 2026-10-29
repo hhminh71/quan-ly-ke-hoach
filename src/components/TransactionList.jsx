@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import EditTransactionModal from './EditTransactionModal';
 import AddTransactionModal from './AddTransactionModal';
+import { useResizableColumns, ColumnResizeHandle } from '../hooks/useResizableColumns';
 import { matchesVietnameseSearch } from '../utils/searchUtils';
 import { formatDate } from '../utils/dateUtils';
 
@@ -46,6 +47,27 @@ export default function TransactionList({
   const [editingItem, setEditingItem] = useState(null);
   const [showEditToast, setShowEditToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+
+  // Resizable columns hook (drag handles with localStorage persistence)
+  const { columnWidths, handleResizeStart, resetColumnWidth, totalTableWidth } = useResizableColumns({
+    storageKey: 'tbl_cols_transactions_v2',
+    initialWidths: {
+      date: 72,
+      account: 180,
+      notes: 320,
+      amount: 110,
+      employee: 110,
+      actions: 55,
+    },
+    minWidths: {
+      date: 45,
+      account: 65,
+      notes: 80,
+      amount: 60,
+      employee: 55,
+      actions: 40,
+    },
+  });
 
   // Sync selectedCategory when prop changes
   useEffect(() => {
@@ -427,53 +449,83 @@ export default function TransactionList({
         </div>
       ) : (
         <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-175px)] sm:max-h-[calc(100vh-210px)] relative">
-          <table className="w-full text-left border-collapse table-auto">
+          <table
+            className="w-full text-left border-collapse table-fixed"
+            style={{ minWidth: `${totalTableWidth}px` }}
+          >
             <thead className="sticky top-0 z-20 bg-slate-100/95 backdrop-blur-xs border-b border-slate-200 shadow-2xs">
               <tr className="text-[8px] sm:text-[9.5px] font-bold text-slate-600 uppercase tracking-wider">
-                {/* 1. Ngày: dd/mm/yy không icon, bóp siêu gọn */}
+                {/* 1. Ngày: dd/mm/yy không icon, tùy biến kéo giãn */}
                 <th
                   onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
-                  className="py-0.5 px-0.5 sm:px-1 w-12 sm:w-14 cursor-pointer hover:text-blue-600 transition-colors select-none whitespace-nowrap text-center leading-tight"
-                  title="Click để đổi thứ tự ngày"
+                  style={{ width: `${columnWidths.date}px` }}
+                  className="relative py-0.5 px-0.5 sm:px-1 cursor-pointer hover:text-blue-600 transition-colors select-none text-center leading-tight break-words"
+                  title="Click để đổi thứ tự ngày • Kéo mép phải để giãn cột"
                 >
-                  <div className="flex items-center justify-center gap-0.5">
+                  <div className="flex items-center justify-center gap-0.5 pr-1">
                     <span>Ngày</span>
-                    <ArrowUpDown className="w-2 h-2 text-slate-400" />
+                    <ArrowUpDown className="w-2 h-2 text-slate-400 shrink-0" />
                   </div>
+                  <ColumnResizeHandle colKey="date" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
                 </th>
 
-                {/* 2. Khoản mục & Nhóm */}
+                {/* 2. Khoản mục & Nhóm: tùy biến kéo giãn */}
                 <th
                   onClick={() => setSortOrder(sortOrder === 'account_asc' ? 'account_desc' : 'account_asc')}
-                  className="py-0.5 px-0.5 sm:px-1 w-20 sm:w-28 cursor-pointer hover:text-blue-600 transition-colors select-none whitespace-nowrap leading-tight"
-                  title="Click để sort theo Mã khoản mục"
+                  style={{ width: `${columnWidths.account}px` }}
+                  className="relative py-0.5 px-0.5 sm:px-1 cursor-pointer hover:text-blue-600 transition-colors select-none leading-tight break-words"
+                  title="Click để sort theo Mã khoản mục • Kéo mép phải để giãn cột"
                 >
-                  <div className="flex items-center gap-0.5">
+                  <div className="flex items-center gap-0.5 pr-1">
                     <span>Khoản mục</span>
-                    <ArrowUpDown className="w-2 h-2 text-slate-400" />
+                    <ArrowUpDown className="w-2 h-2 text-slate-400 shrink-0" />
                   </div>
+                  <ColumnResizeHandle colKey="account" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
                 </th>
 
-                {/* 3. Nội dung diễn giải */}
-                <th className="py-0.5 px-0.5 sm:px-1 min-w-[95px] leading-tight">Nội dung diễn giải</th>
+                {/* 3. Nội dung diễn giải: tùy biến kéo giãn */}
+                <th
+                  style={{ width: `${columnWidths.notes}px` }}
+                  className="relative py-0.5 px-0.5 sm:px-1 leading-tight break-words"
+                  title="Nội dung diễn giải • Kéo mép phải để giãn cột"
+                >
+                  <span className="pr-1">Nội dung diễn giải</span>
+                  <ColumnResizeHandle colKey="notes" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
+                </th>
 
-                {/* 4. Số tiền (VNĐ) */}
+                {/* 4. Số tiền (VNĐ): tùy biến kéo giãn */}
                 <th
                   onClick={() => setSortOrder(sortOrder === 'highest' ? 'lowest' : 'highest')}
-                  className="py-0.5 px-0.5 sm:px-1 text-right w-18 sm:w-22 cursor-pointer hover:text-blue-600 transition-colors select-none whitespace-nowrap leading-tight"
-                  title="Click để đổi thứ tự số tiền"
+                  style={{ width: `${columnWidths.amount}px` }}
+                  className="relative py-0.5 px-0.5 sm:px-1 text-right cursor-pointer hover:text-blue-600 transition-colors select-none leading-tight break-words"
+                  title="Click để đổi thứ tự số tiền • Kéo mép phải để giãn cột"
                 >
-                  <div className="flex items-center justify-end gap-0.5">
+                  <div className="flex items-center justify-end gap-0.5 pr-1">
                     <span>Số tiền (VNĐ)</span>
-                    <ArrowUpDown className="w-2 h-2 text-slate-400" />
+                    <ArrowUpDown className="w-2 h-2 text-slate-400 shrink-0" />
                   </div>
+                  <ColumnResizeHandle colKey="amount" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
                 </th>
 
-                {/* 5. Người thực hiện (di chuyển ra trước cột điều chỉnh, căn giữa và bỏ chữ cái viết tắt phía trước) */}
-                <th className="py-0.5 px-0.5 sm:px-1 w-16 sm:w-22 text-center leading-tight">Người thực hiện</th>
+                {/* 5. Người thực hiện: căn giữa, tùy biến kéo giãn */}
+                <th
+                  style={{ width: `${columnWidths.employee}px` }}
+                  className="relative py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words"
+                  title="Người thực hiện • Kéo mép phải để giãn cột"
+                >
+                  <span className="pr-1">Người thực hiện</span>
+                  <ColumnResizeHandle colKey="employee" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
+                </th>
 
-                {/* 6. Điều chỉnh (Thao tác) */}
-                <th className="py-0.5 px-0.5 text-center w-8 sm:w-10 whitespace-nowrap leading-tight">Điều chỉnh</th>
+                {/* 6. Điều chỉnh (Thao tác): tùy biến kéo giãn */}
+                <th
+                  style={{ width: `${columnWidths.actions}px` }}
+                  className="relative py-0.5 px-0.5 text-center leading-tight break-words"
+                  title="Thao tác"
+                >
+                  <span>Điều chỉnh</span>
+                  <ColumnResizeHandle colKey="actions" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">
@@ -483,43 +535,43 @@ export default function TransactionList({
                   className="hover:bg-slate-50/70 transition-colors group"
                 >
                   {/* 1. Ngày: dd/mm/yy không logo lịch */}
-                  <td className="py-0.5 px-0.5 sm:px-1 text-center whitespace-nowrap font-mono text-[9px] sm:text-xs text-slate-700 font-medium leading-tight">
+                  <td className="py-0.5 px-0.5 sm:px-1 text-center font-mono text-[9px] sm:text-xs text-slate-700 font-medium leading-tight break-words">
                     {formatDate(item.date)}
                   </td>
 
-                  {/* 2. Khoản mục & Mã */}
-                  <td className="py-0.5 px-0.5 sm:px-1 whitespace-nowrap leading-tight">
-                    <div className="flex items-center gap-0.5">
+                  {/* 2. Khoản mục & Mã: Xuống dòng tự nhiên khi hẹp, không bị cắt dấu 3 chấm */}
+                  <td className="py-0.5 px-0.5 sm:px-1 leading-tight break-words">
+                    <div className="flex flex-wrap items-baseline gap-0.5">
                       {item.accountCode && (
-                        <span className="font-mono text-[8px] sm:text-[9.5px] font-bold px-1 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200">
+                        <span className="font-mono text-[8px] sm:text-[9.5px] font-bold px-1 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
                           {item.accountCode}
                         </span>
                       )}
-                      <span className="font-semibold text-[9.5px] sm:text-xs text-slate-800 max-w-[95px] sm:max-w-[130px] truncate" title={item.category}>
+                      <span className="font-semibold text-[9.5px] sm:text-xs text-slate-800 leading-tight" title={item.category}>
                         {item.category}
                       </span>
                     </div>
                   </td>
 
-                  {/* 3. Nội dung diễn giải */}
+                  {/* 3. Nội dung diễn giải: Xuống dòng tự nhiên, khoảng cách dòng mảnh */}
                   <td className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs text-slate-700 break-words whitespace-normal leading-tight" title={item.notes}>
                     {item.notes}
                   </td>
 
-                  {/* 4. Số tiền */}
-                  <td className="py-0.5 px-0.5 sm:px-1 text-right whitespace-nowrap font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight">
+                  {/* 4. Số tiền: Xuống dòng nếu quá hẹp */}
+                  <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight break-words">
                     {formatVND(item.amount)}
                   </td>
 
-                  {/* 5. Người thực hiện: Căn giữa, bỏ chữ viết tắt phía trước */}
-                  <td className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs text-slate-700 text-center leading-tight">
+                  {/* 5. Người thực hiện: Căn giữa, xuống dòng nếu hẹp */}
+                  <td className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs text-slate-700 text-center leading-tight break-words">
                     <span className="font-medium text-slate-700 leading-tight">
                       {item.employeeName || 'Chưa ghi nhận'}
                     </span>
                   </td>
 
                   {/* 6. Điều chỉnh */}
-                  <td className="py-0.5 px-0.5 text-center whitespace-nowrap leading-tight">
+                  <td className="py-0.5 px-0.5 text-center leading-tight">
                     <div className="flex items-center justify-center gap-0.5">
                       <button
                         type="button"
