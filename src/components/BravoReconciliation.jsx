@@ -1123,7 +1123,7 @@ export default function BravoReconciliation({
                               style={{ width: `${reconWidths.percent}px`, minWidth: `${reconWidths.percent}px` }}
                             >
                               <span
-                                className={`px-1 py-0.2 rounded text-[7.5px] sm:text-3xs font-bold ${
+                                className={`inline-flex items-center justify-center px-1 py-0.2 rounded text-[7.5px] sm:text-3xs font-bold ${
                                   item.percent >= 100
                                     ? 'bg-rose-100 text-rose-800'
                                     : item.percent >= 80
@@ -1583,7 +1583,7 @@ export default function BravoReconciliation({
                               style={{ width: `${macroWidths.rate}px`, minWidth: `${macroWidths.rate}px` }}
                             >
                               <span
-                                className={`px-1 py-0.2 rounded font-bold text-[7.5px] sm:text-3xs ${
+                                className={`inline-flex items-center justify-center px-1 py-0.2 rounded font-bold text-[7.5px] sm:text-3xs ${
                                   item.rate > 100
                                     ? 'bg-rose-100 text-rose-800'
                                     : item.rate >= 80

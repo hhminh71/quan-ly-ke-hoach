@@ -933,9 +933,9 @@ export default function BudgetOverview({
 
                         {/* Progress Bar */}
                         {isProgColVisible('percent') && (
-                          <td className="py-0.5 px-0.5 sm:px-1 leading-tight break-words">
-                            <div className="flex flex-wrap items-center gap-0.5">
-                              <div className="w-8 sm:w-10 h-1.5 bg-slate-100 rounded-full overflow-hidden shrink-0">
+                          <td className="py-0.5 px-0.5 sm:px-1 leading-tight break-words text-center">
+                            <div className="flex items-center justify-center gap-1 mx-auto w-full">
+                              <div className="w-7 sm:w-9 h-1.5 bg-slate-100 rounded-full overflow-hidden shrink-0">
                                 <div
                                   className={`h-full rounded-full transition-all duration-300 ${
                                     item.livePercent >= 100
@@ -947,7 +947,7 @@ export default function BudgetOverview({
                                   style={{ width: `${percentClamped}%` }}
                                 ></div>
                               </div>
-                              <span className="text-[7.5px] sm:text-3xs font-mono font-bold text-slate-600 shrink-0">
+                              <span className="text-[7.5px] sm:text-3xs font-mono font-bold text-slate-700 shrink-0">
                                 {item.livePercent.toFixed(0)}%
                               </span>
                             </div>
