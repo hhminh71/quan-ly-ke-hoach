@@ -8,6 +8,7 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
+  Clock,
 } from 'lucide-react';
 import aviationBg from '../assets/aviation-bg.jpg';
 import {
@@ -16,6 +17,10 @@ import {
   fetchFromGoogleSheet,
 } from '../services/googleSheetService';
 import { ROLES, normalizeRole, resolveUserScope } from '../utils/permissions';
+import {
+  getSessionExpiredMessage,
+  clearSessionExpiredMessage,
+} from '../hooks/useAutoLogout';
 
 export default function LoginPage({ onLogin }) {
   const [emailInput, setEmailInput] = useState('');
@@ -24,6 +29,14 @@ export default function LoginPage({ onLogin }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [hint, setHint] = useState('');
+  const [sessionNotice, setSessionNotice] = useState(() => {
+    const msg = getSessionExpiredMessage();
+    if (msg) {
+      clearSessionExpiredMessage();
+      return msg;
+    }
+    return '';
+  });
 
   // Xử lý Đăng nhập bằng Tài khoản & Mật khẩu
   const handleLogin = async (userEmail, userPass) => {
@@ -187,6 +200,16 @@ export default function LoginPage({ onLogin }) {
               Đăng nhập tài khoản được cấp quyền để tiếp tục
             </p>
           </div>
+
+          {sessionNotice && (
+            <div className="mb-4 p-3 rounded-xl bg-amber-500/15 border border-amber-400/40 text-amber-200 text-xs flex items-start gap-2.5 shadow-sm">
+              <Clock className="w-4 h-4 shrink-0 text-amber-400 mt-0.5" />
+              <div className="space-y-0.5">
+                <p className="font-bold text-amber-300">Thông báo hết hạn phiên</p>
+                <p className="text-[11px] text-amber-200/90 leading-relaxed">{sessionNotice}</p>
+              </div>
+            </div>
+          )}
 
           {error && (
             <div className="mb-4 p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-200 text-xs space-y-1">

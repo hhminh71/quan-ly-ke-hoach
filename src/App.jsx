@@ -1,19 +1,37 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import Navbar from './components/Navbar';
 import ErrorBoundary from './components/ErrorBoundary';
 import MobileSimulatorModal from './components/MobileSimulatorModal';
+import SessionTimeoutModal from './components/SessionTimeoutModal';
 import { Smartphone } from 'lucide-react';
+import {
+  useAutoLogout,
+  recordActivityTimestamp,
+  isSessionValid,
+  setSessionExpiredMessage,
+} from './hooks/useAutoLogout';
 
 export default function App() {
   const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
 
-  // Current logged in user; default to demo user for instant preview, or null to force login
+  // Khởi tạo người dùng đăng nhập; kiểm tra hiệu lực phiên (tối đa 30 phút không hoạt động)
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('demo_user');
     if (!saved) return null;
+
+    // Nếu đã quá 30 phút không hoạt động kể từ phiên trước -> Hết hạn phiên
+    if (!isSessionValid()) {
+      localStorage.removeItem('demo_user');
+      localStorage.removeItem('last_active_timestamp');
+      setSessionExpiredMessage(
+        'Phiên làm việc trước đó đã hết hạn do không có hoạt động trong 30 phút. Vui lòng đăng nhập lại.'
+      );
+      return null;
+    }
+
     try {
       const u = JSON.parse(saved);
       if (u) {
@@ -35,12 +53,20 @@ export default function App() {
   const handleLogin = (userData) => {
     setUser(userData);
     localStorage.setItem('demo_user', JSON.stringify(userData));
+    recordActivityTimestamp();
   };
 
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('demo_user');
+    localStorage.removeItem('last_active_timestamp');
   };
+
+  // Giám sát tự động đăng xuất sau 30 phút không hoạt động
+  const { showWarning, remainingSeconds, extendSession, performTimeoutLogout } = useAutoLogout({
+    user,
+    onLogout: handleLogout,
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
@@ -81,6 +107,14 @@ export default function App() {
           <MobileSimulatorModal
             isOpen={isSimulatorOpen}
             onClose={() => setIsSimulatorOpen(false)}
+          />
+
+          {/* Cảnh báo tự động đăng xuất do không hoạt động (sau 28 phút) */}
+          <SessionTimeoutModal
+            isOpen={showWarning}
+            remainingSeconds={remainingSeconds}
+            onExtend={extendSession}
+            onLogout={performTimeoutLogout}
           />
         </ErrorBoundary>
       )}
