@@ -21,8 +21,10 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  FileSpreadsheet,
 } from 'lucide-react';
 import AccountLedgerModal from './AccountLedgerModal';
+import ExportReportModal from './ExportReportModal';
 import { useResizableColumns, ColumnResizeHandle, ColumnVisibilityDropdown } from '../hooks/useResizableColumns';
 import { matchesVietnameseSearch } from '../utils/searchUtils';
 import { calculateReportActual, getSctsSeparatedCodes, saveSctsSeparatedCodes, isSctsSeparated } from '../utils/sctsConfig';
@@ -31,6 +33,7 @@ export default function BudgetOverview({
   budgets = [],
   transactions = [],
   selectedYear = '2026',
+  user = null,
   onUpdateBudgets,
   onAddTransaction,
   onUpdateTransaction,
@@ -43,6 +46,7 @@ export default function BudgetOverview({
   
   // View mode: 'PROGRESS' (Tiến độ giải ngân 1 năm) or 'MATRIX' (Ma trận các cột năm 2024, 2025, 2026, 2027...)
   const [viewMode, setViewMode] = useState('PROGRESS');
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   // Drill-down Detail Modal State (Click row to see ledger)
   const [selectedDetailCode, setSelectedDetailCode] = useState(null);
@@ -522,6 +526,18 @@ export default function BudgetOverview({
               onToggleColumn={viewMode === 'PROGRESS' ? toggleProgCol : toggleMatrixCol}
               onShowAll={viewMode === 'PROGRESS' ? showAllProgCols : showAllMatrixCols}
             />
+
+            {/* Export Report Button (Excel .xls / Google Sheet standard) */}
+            <button
+              type="button"
+              onClick={() => setIsExportModalOpen(true)}
+              className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 py-0.2 sm:px-2.5 sm:py-0.5 rounded text-[8px] sm:text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 shadow-2xs transition-all cursor-pointer border border-emerald-600 shrink-0"
+              title="Xuất bảng kế hoạch và tiến độ ra file Excel chuẩn định dạng Google Sheet / Kế toán ACV"
+            >
+              <FileSpreadsheet className="w-2 h-2 sm:w-3 sm:h-3 text-emerald-100" />
+              <span className="hidden sm:inline">Xuất Báo Cáo</span>
+              <span className="sm:hidden">Xuất Excel</span>
+            </button>
 
             {/* Matrix Actions (Chỉ hiển thị khi có quyền onUpdateBudgets - Admin) */}
             {viewMode === 'MATRIX' && onUpdateBudgets && (
@@ -1475,6 +1491,19 @@ export default function BudgetOverview({
           </div>
         </div>
       )}
+
+      {/* Modal Xuất Báo Cáo Chuẩn Excel / Google Sheet */}
+      <ExportReportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        budgets={enhancedBudgets}
+        filteredBudgets={filtered}
+        summary={summary}
+        selectedYear={selectedYear}
+        matrixYears={matrixYears}
+        user={user}
+        currentViewMode={viewMode}
+      />
     </div>
   );
 }

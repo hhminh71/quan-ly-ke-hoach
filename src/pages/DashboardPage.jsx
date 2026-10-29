@@ -472,6 +472,7 @@ export default function DashboardPage({ user }) {
           budgets={scopedBudgets}
           transactions={scopedYearTransactions}
           selectedYear={selectedYear}
+          user={user}
           onUpdateBudgets={canEditBudgetsPlan ? (newBudgets) => {
             setBudgets(newBudgets);
             localStorage.setItem('app_budgets_v3', JSON.stringify(newBudgets));
