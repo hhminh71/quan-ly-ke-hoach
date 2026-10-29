@@ -1,10 +1,12 @@
 /**
  * TIỆN ÍCH XUẤT BÁO CÁO EXCEL CHUẨN DOANH NGHIỆP
- * (Chuẩn định dạng bảng Google Sheet / MS Excel hỗ trợ tiếng Việt có dấu, kẻ bảng, màu sắc & công thức)
+ * (Chuẩn định dạng bảng Google Sheet / MS Excel hỗ trợ tiếng Việt có dấu, kẻ bảng, phân cách hàng nghìn bằng dấu chấm)
  */
 
-const formatNumber = (num) => {
-  return Number(num || 0).toLocaleString('vi-VN');
+export const formatVndNumber = (num) => {
+  if (num === null || num === undefined || isNaN(num)) return '0';
+  const val = Math.round(Number(num));
+  return val.toLocaleString('vi-VN');
 };
 
 const formatDateNow = () => {
@@ -75,27 +77,6 @@ const getExcelHtmlWrapper = (sheetName, bodyHtml) => {
       text-align: center;
       padding-bottom: 8px;
     }
-    .kpi-table {
-      margin-bottom: 15px;
-      border: 1.5pt solid #0f4c81;
-    }
-    .kpi-th {
-      background-color: #0f4c81;
-      color: #ffffff;
-      font-size: 9.5pt;
-      font-weight: bold;
-      text-align: center;
-      padding: 6px;
-      border: 0.5pt solid #cbd5e1;
-    }
-    .kpi-td {
-      background-color: #f8fafc;
-      font-size: 11pt;
-      font-weight: bold;
-      text-align: center;
-      padding: 6px;
-      border: 0.5pt solid #cbd5e1;
-    }
     th.table-th {
       background-color: #15803d; /* Màu xanh lá chuẩn Google Sheet */
       color: #ffffff;
@@ -117,8 +98,8 @@ const getExcelHtmlWrapper = (sheetName, bodyHtml) => {
     .text-right { text-align: right; }
     .font-bold { font-weight: bold; }
     .num-currency {
-      mso-number-format: "\\#\\,\\#\\#0";
       text-align: right;
+      font-weight: 500;
     }
     .num-percent {
       mso-number-format: "0\\.0\\%";
@@ -193,52 +174,32 @@ export const exportProgressReportExcel = ({
   <!-- HEADER CƠ QUAN / ĐƠN VỊ -->
   <table>
     <tr>
-      <td colspan="4" class="header-corp">TỔNG CÔNG TY CẢNG HÀNG KHÔNG VIỆT NAM - CTCP</td>
-      <td colspan="4" class="header-motto">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</td>
+      <td colspan="6" class="header-corp">TỔNG CÔNG TY CẢNG HÀNG KHÔNG VIỆT NAM - CTCP</td>
+      <td colspan="6" class="header-motto">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</td>
     </tr>
     <tr>
-      <td colspan="4" class="header-dept">CẢNG HÀNG KHÔNG QUỐC TẾ CẦN THƠ - PHÒNG TC-KH</td>
-      <td colspan="4" class="header-motto" style="font-weight: normal; font-style: italic;">Độc lập - Tự do - Hạnh phúc</td>
+      <td colspan="6" class="header-dept">CẢNG HÀNG KHÔNG QUỐC TẾ CẦN THƠ - PHÒNG TC-KH</td>
+      <td colspan="6" class="header-motto" style="font-weight: normal; font-style: italic;">Độc lập - Tự do - Hạnh phúc</td>
     </tr>
-    <tr><td colspan="8">&nbsp;</td></tr>
+    <tr><td colspan="12">&nbsp;</td></tr>
 
     <!-- TIÊU ĐỀ BÁO CÁO -->
     <tr>
-      <td colspan="8" class="title-report">BÁO CÁO TIẾN ĐỘ THỰC HIỆN KẾ HOẠCH NGÂN SÁCH NĂM ${selectedYear}</td>
+      <td colspan="12" class="title-report">BÁO CÁO TIẾN ĐỘ THỰC HIỆN KẾ HOẠCH NGÂN SÁCH NĂM ${selectedYear}</td>
     </tr>
     <tr>
-      <td colspan="8" class="subtitle-report">
+      <td colspan="12" class="subtitle-report">
         (Phạm vi: ${scopeLabel} • Xuất lúc: ${exportTime} • Người xuất: ${userName})
       </td>
     </tr>
     <tr>
-      <td colspan="8" class="text-right" style="font-size: 9pt; font-style: italic; padding-bottom: 6px;">
+      <td colspan="12" class="text-right" style="font-size: 9pt; font-style: italic; padding-bottom: 6px;">
         Đơn vị tính: Đồng Việt Nam (VNĐ)
       </td>
     </tr>
   </table>
 
-  <!-- KHỐI TỔNG HỢP NHANH (KPI METRICS) -->
-  <table class="kpi-table" style="margin-bottom: 12px;">
-    <tr>
-      <th class="kpi-th" style="background-color: #1e3a8a;">1. TỔNG HẠN MỨC ĐƯỢC DUYỆT</th>
-      <th class="kpi-th" style="background-color: #b45309;">2. THEO PHẦN MỀM BRAVO</th>
-      <th class="kpi-th" style="background-color: #0284c7;">3. THEO THỰC TẾ NHẬP LIỆU</th>
-      <th class="kpi-th" style="background-color: #0d9488;">4. CHI PHÍ BÁO CÁO (MAX)</th>
-      <th class="kpi-th" style="background-color: #15803d;">5. CÒN LẠI (KHẢ DỤNG)</th>
-      <th class="kpi-th" style="background-color: #4f46e5;">6. TỶ LỆ TIẾN ĐỘ</th>
-    </tr>
-    <tr>
-      <td class="kpi-td" style="color: #1e3a8a;">${formatNumber(totalApproved)} đ</td>
-      <td class="kpi-td" style="color: #b45309;">${formatNumber(totalBravo)} đ</td>
-      <td class="kpi-td" style="color: #0284c7;">${formatNumber(totalActual)} đ</td>
-      <td class="kpi-td" style="color: #0d9488;">${formatNumber(totalReport)} đ</td>
-      <td class="kpi-td" style="color: #15803d;">${formatNumber(totalRemaining)} đ</td>
-      <td class="kpi-td" style="color: #4f46e5;">${avgPercent.toFixed(1)}%</td>
-    </tr>
-  </table>
-
-  <!-- BẢNG CHI TIẾT CÁC KHOẢN MỤC -->
+  <!-- BẢNG CHI TIẾT CÁC KHOẢN MỤC (ĐI TRỰC TIẾP VÀO BẢNG) -->
   <table>
     <thead>
       <tr>
@@ -259,7 +220,7 @@ export const exportProgressReportExcel = ({
     <tbody>
   `;
 
-  // Render từng dòng dữ liệu
+  // Render từng dòng dữ liệu với số có dấu chấm phân cách hàng nghìn
   items.forEach((item, index) => {
     const approved = Number(item.selectedYearApproved) || 0;
     const bravo = Number(item.bravoVal) || 0;
@@ -286,11 +247,11 @@ export const exportProgressReportExcel = ({
         <td class="table-td text-center font-bold" style="mso-number-format:'\\@';">${item.code || ''}</td>
         <td class="table-td text-left font-bold">${item.name || ''}</td>
         <td class="table-td text-left" style="font-size: 8.5pt; color: #475569;">${item.group || 'SỬA CHỮA THƯỜNG XUYÊN'}</td>
-        <td class="table-td num-currency font-bold">${approved}</td>
-        <td class="table-td num-currency">${bravo}</td>
-        <td class="table-td num-currency">${actual}</td>
-        <td class="table-td num-currency font-bold" style="color: #0d9488;">${report}</td>
-        <td class="table-td num-currency font-bold" style="color: ${remaining < 0 ? '#b91c1c' : '#15803d'};">${remaining}</td>
+        <td class="table-td num-currency font-bold">${formatVndNumber(approved)}</td>
+        <td class="table-td num-currency">${formatVndNumber(bravo)}</td>
+        <td class="table-td num-currency">${formatVndNumber(actual)}</td>
+        <td class="table-td num-currency font-bold" style="color: #0d9488;">${formatVndNumber(report)}</td>
+        <td class="table-td num-currency font-bold" style="color: ${remaining < 0 ? '#b91c1c' : '#15803d'};">${formatVndNumber(remaining)}</td>
         <td class="table-td num-percent">${pctFormatted}</td>
         <td class="table-td text-center ${statusClass}">${statusText}</td>
         <td class="table-td text-left" style="font-size: 8.5pt; color: #475569;">${item.scope || item.notes || ''}</td>
@@ -304,11 +265,11 @@ export const exportProgressReportExcel = ({
       <tr class="row-total">
         <td class="table-td text-center font-bold" colspan="2">TỔNG CỘNG</td>
         <td class="table-td text-left font-bold" colspan="2">${totalItems} KHOẢN MỤC CHI PHÍ</td>
-        <td class="table-td num-currency font-bold">${totalApproved}</td>
-        <td class="table-td num-currency font-bold">${totalBravo}</td>
-        <td class="table-td num-currency font-bold">${totalActual}</td>
-        <td class="table-td num-currency font-bold" style="color: #0d9488;">${totalReport}</td>
-        <td class="table-td num-currency font-bold" style="color: ${totalRemaining < 0 ? '#b91c1c' : '#15803d'};">${totalRemaining}</td>
+        <td class="table-td num-currency font-bold">${formatVndNumber(totalApproved)}</td>
+        <td class="table-td num-currency font-bold">${formatVndNumber(totalBravo)}</td>
+        <td class="table-td num-currency font-bold">${formatVndNumber(totalActual)}</td>
+        <td class="table-td num-currency font-bold" style="color: #0d9488;">${formatVndNumber(totalReport)}</td>
+        <td class="table-td num-currency font-bold" style="color: ${totalRemaining < 0 ? '#b91c1c' : '#15803d'};">${formatVndNumber(totalRemaining)}</td>
         <td class="table-td num-percent font-bold" style="color: #4f46e5;">${totalAvgPercentFormatted}</td>
         <td class="table-td text-center font-bold" colspan="2">
           ${avgPercent >= 100 ? 'VƯỢT KẾ HOẠCH' : avgPercent >= 80 ? 'CẢNH BÁO CAO' : 'TIẾN ĐỘ AN TOÀN'}
@@ -320,28 +281,28 @@ export const exportProgressReportExcel = ({
   <!-- KHỐI CHỮ KÝ XÁC NHẬN CHUẨN KẾ TOÁN -->
   <table style="margin-top: 30px;">
     <tr>
-      <td colspan="4">&nbsp;</td>
-      <td colspan="4" class="text-center" style="font-style: italic; font-size: 10pt;">
+      <td colspan="6">&nbsp;</td>
+      <td colspan="6" class="text-center" style="font-style: italic; font-size: 10pt;">
         Cần Thơ, ngày ..... tháng ..... năm 2026
       </td>
     </tr>
     <tr>
-      <td colspan="2" class="signature-title">NGƯỜI LẬP BIỂU</td>
-      <td colspan="2" class="signature-title">KẾ TOÁN CHI PHÍ</td>
-      <td colspan="2" class="signature-title">TRƯỞNG PHÒNG TC-KH</td>
-      <td colspan="2" class="signature-title">GIÁM ĐỐC CẢNG</td>
+      <td colspan="3" class="signature-title">NGƯỜI LẬP BIỂU</td>
+      <td colspan="3" class="signature-title">KẾ TOÁN CHI PHÍ</td>
+      <td colspan="3" class="signature-title">TRƯỞNG PHÒNG TC-KH</td>
+      <td colspan="3" class="signature-title">GIÁM ĐỐC CẢNG</td>
     </tr>
     <tr>
-      <td colspan="2" class="signature-note">(Ký, ghi rõ họ tên)</td>
-      <td colspan="2" class="signature-note">(Ký, ghi rõ họ tên)</td>
-      <td colspan="2" class="signature-note">(Ký, ghi rõ họ tên)</td>
-      <td colspan="2" class="signature-note">(Ký, đóng dấu)</td>
+      <td colspan="3" class="signature-note">(Ký, ghi rõ họ tên)</td>
+      <td colspan="3" class="signature-note">(Ký, ghi rõ họ tên)</td>
+      <td colspan="3" class="signature-note">(Ký, ghi rõ họ tên)</td>
+      <td colspan="3" class="signature-note">(Ký, đóng dấu)</td>
     </tr>
     <tr>
-      <td colspan="2" class="text-center font-bold">${userName}</td>
-      <td colspan="2" class="text-center font-bold">&nbsp;</td>
-      <td colspan="2" class="text-center font-bold">&nbsp;</td>
-      <td colspan="2" class="text-center font-bold">&nbsp;</td>
+      <td colspan="3" class="text-center font-bold">${userName}</td>
+      <td colspan="3" class="text-center font-bold">&nbsp;</td>
+      <td colspan="3" class="text-center font-bold">&nbsp;</td>
+      <td colspan="3" class="text-center font-bold">&nbsp;</td>
     </tr>
   </table>
   `;
@@ -423,7 +384,7 @@ export const exportMatrixReportExcel = ({
         ${matrixYears
           .map((yr) => {
             const val = (item.yearlyApproved && item.yearlyApproved[yr]) !== undefined ? item.yearlyApproved[yr] : (yr === '2026' ? item.approvedAmount : 0);
-            return `<td class="table-td num-currency font-bold">${Number(val) || 0}</td>`;
+            return `<td class="table-td num-currency font-bold">${formatVndNumber(val)}</td>`;
           })
           .join('')}
         <td class="table-td text-left" style="font-size: 8.5pt; color: #475569;">${item.scope || item.notes || ''}</td>
@@ -436,7 +397,7 @@ export const exportMatrixReportExcel = ({
       <tr class="row-total">
         <td class="table-td text-center font-bold" colspan="2">TỔNG CỘNG</td>
         <td class="table-td text-left font-bold" colspan="2">${items.length} KHOẢN MỤC KẾ HOẠCH</td>
-        ${matrixYears.map((yr) => `<td class="table-td num-currency font-bold" style="color: #047857;">${yearTotals[yr]}</td>`).join('')}
+        ${matrixYears.map((yr) => `<td class="table-td num-currency font-bold" style="color: #047857;">${formatVndNumber(yearTotals[yr])}</td>`).join('')}
         <td class="table-td font-bold text-center">TOÀN BỘ DANH MỤC ĐƯỢC DUYỆT</td>
       </tr>
     </tbody>
@@ -503,11 +464,11 @@ export const exportProgressReportCSV = ({
       `"${item.code || ''}"`,
       `"${(item.name || '').replace(/"/g, '""')}"`,
       `"${(item.group || '').replace(/"/g, '""')}"`,
-      approved,
-      bravo,
-      actual,
-      report,
-      remaining,
+      `"${formatVndNumber(approved)}"`,
+      `"${formatVndNumber(bravo)}"`,
+      `"${formatVndNumber(actual)}"`,
+      `"${formatVndNumber(report)}"`,
+      `"${formatVndNumber(remaining)}"`,
       `"${percent}%"`,
       `"${item.status || 'SAFE'}"`,
       `"${(item.scope || item.notes || '').replace(/"/g, '""')}"`,
