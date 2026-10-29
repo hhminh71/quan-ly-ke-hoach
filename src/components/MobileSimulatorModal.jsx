@@ -16,24 +16,24 @@ const DEVICES = [
     id: 'iphone_duo_both',
     name: 'iPhone Duo (Cả 2 Màn Hình: Ngoài 5.4" & Trong 7.6")',
     type: 'duo_both',
-    coverWidth: 466,
-    coverHeight: 678,
-    innerWidth: 626,
-    innerHeight: 890,
-  },
-  {
-    id: 'iphone_duo_inner',
-    name: 'iPhone Duo - Màn Chính Trong 7.6" (1878×2670 px)',
-    width: 626,
-    height: 890,
-    type: 'inner_screen',
+    coverWidth: 446,
+    coverHeight: 626,
+    innerWidth: 872,
+    innerHeight: 626,
   },
   {
     id: 'iphone_duo_cover',
-    name: 'iPhone Duo - Màn Phụ Ngoài 5.4" (1398×2034 px)',
-    width: 466,
-    height: 678,
+    name: 'iPhone Duo - Màn Phụ Ngoài 5.4" (Gập • 446×626 px)',
+    width: 446,
+    height: 626,
     type: 'cover_screen',
+  },
+  {
+    id: 'iphone_duo_inner',
+    name: 'iPhone Duo - Màn Chính Trong 7.6" (Mở • 872×626 px)',
+    width: 872,
+    height: 626,
+    type: 'inner_screen',
   },
   { id: 'iphone14', name: 'iPhone 14 / 15 (390×844 px)', width: 390, height: 844, type: 'phone' },
   { id: 'galaxy', name: 'Galaxy S22 (360×800 px)', width: 360, height: 800, type: 'phone' },
@@ -54,15 +54,15 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
   const device = DEVICES.find((d) => d.id === selectedDeviceId) || DEVICES[0];
   const isDuoBoth = device.type === 'duo_both';
 
-  // For Duo Both dimensions (CSS points based on Apple standard Retina @3x from 1398x2034 & 1878x2670)
-  const coverW = isLandscape ? (device.coverHeight || 678) : (device.coverWidth || 466);
-  const coverH = isLandscape ? (device.coverWidth || 466) : (device.coverHeight || 678);
-  const innerW = isLandscape ? (device.innerHeight || 890) : (device.innerWidth || 626);
-  const innerH = isLandscape ? (device.innerWidth || 626) : (device.innerHeight || 890);
+  // Dimensions for Duo Both (Identical height for both screens as on authentic hardware)
+  const coverW = isLandscape ? (device.coverHeight || 626) : (device.coverWidth || 446);
+  const coverH = isLandscape ? (device.coverWidth || 446) : (device.coverHeight || 626);
+  const innerW = isLandscape ? (device.innerHeight || 626) : (device.innerWidth || 872);
+  const innerH = isLandscape ? (device.innerWidth || 872) : (device.innerHeight || 626);
 
   // For Single Device modes
-  const singleW = isLandscape ? (device.height || 844) : (device.width || 390);
-  const singleH = isLandscape ? (device.width || 390) : (device.height || 844);
+  const singleW = isLandscape ? (device.height || 626) : (device.width || 446);
+  const singleH = isLandscape ? (device.width || 446) : (device.height || 626);
 
   // Total unscaled content dimensions for container
   const totalContentWidth = isDuoBoth
@@ -74,7 +74,6 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
 
   // Auto-fit scale to desktop viewport height & width
   const handleAutoFit = () => {
-    // Available height inside modal = window height minus modal padding (32px), header (~56px), footer (~32px), buffer (25px)
     const availableHeight = Math.max(260, window.innerHeight - 145);
     const availableWidth = Math.max(300, window.innerWidth - 48);
 
@@ -111,39 +110,48 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
     setIframeKey((prev) => prev + 1);
   };
 
-  // Render Cover Screen Shell (5.4 inch - 1398 x 2034 px / CSS 466 x 678)
+  // Render Cover Screen (Màn hình phụ bên ngoài 5.4"):
+  // 2 góc trái KHÔNG bo cong (vuông 90 độ), 2 góc phải bo cong, camera nốt ruồi ở góc phải trên
   const renderCoverScreen = (keySuffix) => (
     <div className="flex flex-col items-center">
       <span className="text-[11px] font-bold text-amber-300 mb-2 px-3 py-0.5 rounded-full bg-slate-900/95 border border-amber-400/40 shadow-sm shrink-0">
-        📱 Màn Phụ Ngoài 5.4" (1398×2034 px • CSS {coverW}×{coverH})
+        📱 Màn Phụ Ngoài 5.4" (Gập • {coverW}×{coverH}px)
       </span>
 
       <div
         style={{
-          width: `${coverW + 24}px`,
-          height: `${coverH + 24}px`,
+          width: `${coverW + 20}px`,
+          height: `${coverH + 20}px`,
         }}
-        className="relative rounded-[36px] p-2.5 bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] border-[4px] border-slate-700/90 border-l-[6px] border-l-slate-600 ring-1 ring-white/20 select-none flex flex-col justify-center items-center"
+        className="relative rounded-tl-none rounded-bl-none rounded-tr-[44px] rounded-br-[44px] p-2.5 bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] border-[4px] border-slate-700/90 border-l-[8px] border-l-slate-500/90 ring-1 ring-white/20 select-none flex flex-col justify-center items-center"
       >
-        {/* Inner Screen */}
+        {/* Left metallic spine hinge line */}
+        <div className="absolute top-4 bottom-4 -left-1 w-[3px] bg-gradient-to-b from-slate-400 via-slate-300 to-slate-500 rounded-full opacity-60 pointer-events-none" />
+
+        {/* Side buttons on right chassis */}
+        <div className="absolute top-28 -right-[6px] w-[3px] h-12 bg-slate-600 rounded-r-xs pointer-events-none" />
+
+        {/* Inner Screen: 2 góc bên trái vuông 90 độ, 2 góc bên phải bo cong */}
         <div
           style={{
             width: `${coverW}px`,
             height: `${coverH}px`,
           }}
-          className="relative overflow-hidden rounded-[26px] bg-white border border-slate-900/90 shadow-inner flex flex-col shrink-0"
+          className="relative overflow-hidden rounded-tl-none rounded-bl-none rounded-tr-[36px] rounded-br-[36px] bg-white border border-slate-900 shadow-inner flex flex-col shrink-0"
         >
-          {/* Cover Screen Status Bar with Punch-Hole Camera at Top-Right */}
+          {/* Status Bar */}
           {!isLandscape && (
-            <div className="h-6 w-full bg-[#074780] text-white flex items-center justify-between px-4 text-[10px] font-semibold shrink-0 select-none relative z-20 border-b border-blue-900/40">
-              <span className="font-mono text-[9px] tracking-tight">09:41</span>
+            <div className="h-7 w-full bg-[#074780] text-white flex items-center justify-between px-3.5 text-[10px] font-semibold shrink-0 select-none relative z-20 border-b border-blue-900/40">
+              <span className="font-mono text-[9px] tracking-tight pl-1">09:41</span>
 
-              {/* Punch-hole camera dot at top-right (characteristic of iPhone Duo cover screen) */}
-              <div className="absolute top-1.5 right-14 w-3.5 h-3.5 rounded-full bg-black/90 border border-black/80 shadow-xs flex items-center justify-center pointer-events-none">
-                <div className="w-1 h-1 rounded-full bg-slate-900" />
+              {/* Punch-hole camera dot at TOP RIGHT (Exact position from user reference photo) */}
+              <div className="absolute top-2 right-4 w-4 h-4 rounded-full bg-black/95 border border-slate-700/80 shadow-inner flex items-center justify-center pointer-events-none z-30">
+                <div className="w-1.5 h-1.5 rounded-full bg-slate-900 border border-slate-800" />
+                <div className="w-0.5 h-0.5 rounded-full bg-blue-400/40 absolute top-0.5 right-0.5" />
               </div>
 
-              <div className="flex items-center gap-1 font-mono text-[8px] text-blue-100 pr-1">
+              {/* Status Icons on Right (offset with right padding to clear punch-hole camera) */}
+              <div className="flex items-center gap-1 font-mono text-[8px] text-blue-100 pr-9">
                 <span>5G</span>
                 <div className="w-3.5 h-2 border border-white/70 rounded-2xs p-0.2 flex items-center">
                   <div className="w-2 h-1 bg-white rounded-3xs" />
@@ -171,37 +179,48 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
     </div>
   );
 
-  // Render Inner Screen Shell (7.6 inch - 1878 x 2670 px / CSS 626 x 890)
+  // Render Inner Screen (Màn hình chính bên trong 7.6" Unfolded):
+  // 4 góc bo cong đều, bản lề gập ở giữa, màn hình liền mạch tràn viền
   const renderInnerScreen = (keySuffix) => (
     <div className="flex flex-col items-center">
       <span className="text-[11px] font-bold text-emerald-300 mb-2 px-3 py-0.5 rounded-full bg-slate-900/95 border border-emerald-400/40 shadow-sm shrink-0">
-        ✨ Màn Chính Trong 7.6" (1878×2670 px • CSS {innerW}×{innerH})
+        ✨ Màn Chính Trong 7.6" (Mở Rộng • {innerW}×{innerH}px)
       </span>
 
       <div
         style={{
-          width: `${innerW + 24}px`,
-          height: `${innerH + 24}px`,
+          width: `${innerW + 20}px`,
+          height: `${innerH + 20}px`,
         }}
-        className="relative rounded-[32px] p-2.5 bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] border-[4px] border-slate-700/90 ring-1 ring-white/20 select-none flex flex-col justify-center items-center"
+        className="relative rounded-[36px] p-2.5 bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] border-[4px] border-slate-700/90 ring-1 ring-white/20 select-none flex flex-col justify-center items-center"
       >
-        {/* Inner Screen */}
+        {/* Center top & bottom hinge crease notches */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3.5 h-1 bg-slate-600 rounded-b-sm pointer-events-none z-30" />
+        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3.5 h-1 bg-slate-600 rounded-t-sm pointer-events-none z-30" />
+
+        {/* Side power button on right chassis */}
+        <div className="absolute top-28 -right-[6px] w-[3px] h-10 bg-slate-600 rounded-r-xs pointer-events-none" />
+
+        {/* Inner Screen: 4 góc bo cong đều */}
         <div
           style={{
             width: `${innerW}px`,
             height: `${innerH}px`,
           }}
-          className="relative overflow-hidden rounded-[24px] bg-white border border-slate-900/90 shadow-inner flex flex-col shrink-0"
+          className="relative overflow-hidden rounded-[28px] bg-white border border-slate-900 shadow-inner flex flex-col shrink-0"
         >
-          {/* Inner Screen Status Bar (Full width nano-texture OLED display) */}
+          {/* Status Bar */}
           {!isLandscape && (
-            <div className="h-6 w-full bg-[#074780] text-white flex items-center justify-between px-5 text-[10px] font-semibold shrink-0 select-none relative z-20 border-b border-blue-900/40">
+            <div className="h-7 w-full bg-[#074780] text-white flex items-center justify-between px-5 text-[10px] font-semibold shrink-0 select-none relative z-20 border-b border-blue-900/40">
               <span className="font-mono text-[9px] tracking-tight">09:41</span>
+
+              {/* Center subtle crease fold mark */}
+              <div className="w-1 h-3 bg-white/20 rounded-full" />
 
               {/* Status Bar Indicators */}
               <div className="flex items-center gap-1.5 font-mono text-[8px] text-blue-100">
                 <span className="px-1.5 py-0.2 rounded-full bg-blue-950/60 border border-blue-800/40 text-[7px] text-emerald-300 font-sans">
-                  120Hz ProMotion
+                  120Hz OLED
                 </span>
                 <span>5G</span>
                 <div className="w-3.5 h-2 border border-white/70 rounded-2xs p-0.2 flex items-center">
@@ -222,7 +241,7 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
           {/* Bottom Home Indicator Bar */}
           {!isLandscape && (
             <div className="h-3.5 w-full bg-white/95 border-t border-slate-200/50 flex items-center justify-center shrink-0">
-              <div className="w-36 h-1 bg-slate-400 rounded-full" />
+              <div className="w-40 h-1 bg-slate-400 rounded-full" />
             </div>
           )}
         </div>
@@ -299,13 +318,13 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
               </span>
               <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono">
                 {isDuoBoth
-                  ? `5.4" (466×678) + 7.6" (626×890)`
+                  ? `Màn ngoài: ${coverW}×${coverH} | Màn trong: ${innerW}×${innerH}`
                   : `${singleW} × ${singleH}px`}
               </span>
             </h3>
             <p className="text-[10px] text-slate-400 hidden sm:block">
               {isDuoBoth
-                ? 'Mô phỏng chuẩn thông số iPhone Duo: Màn ngoài 5.4" (1398×2034) & Màn chính 7.6" (1878×2670)'
+                ? 'Chuẩn tỉ lệ ảnh iPhone Duo: Màn ngoài 5.4" (2 góc trái phẳng) & Màn chính trong 7.6" mở rộng'
                 : 'Mô phỏng chính xác giao diện thực tế như khi mở web trên điện thoại'}
             </p>
           </div>
@@ -414,7 +433,7 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
             className="absolute top-0 left-0"
           >
             {isDuoBoth ? (
-              <div className="flex items-end justify-center gap-6 sm:gap-8 h-full">
+              <div className="flex items-center justify-center gap-6 sm:gap-8 h-full">
                 {renderCoverScreen('cover')}
                 {renderInnerScreen('inner')}
               </div>
@@ -431,7 +450,7 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
 
       {/* Footer hint */}
       <div className="text-center text-[11px] text-slate-400 py-1 shrink-0">
-        💡 {isDuoBoth ? 'iPhone Duo trang bị Màn phụ ngoài 5.4" (1398×2034px) khi gập và Màn chính trong 7.6" (1878×2670px) khi mở rộng. Bạn có thể thao tác độc lập trên cả 2 màn hình. ' : 'Bạn có thể thao tác vuốt cuộn và bấm thử mọi chức năng bên trong chiếc điện thoại này y như trên máy thật. '}Nhấn nút % để Auto-Fit hoặc phím <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px] border border-slate-700">ESC</kbd> để thoát.
+        💡 {isDuoBoth ? 'iPhone Duo: Màn ngoài 5.4" (2 góc trái phẳng gắn bản lề, camera nốt ruồi góc phải) & Màn chính trong 7.6" mở rộng. ' : 'Bạn có thể thao tác vuốt cuộn và bấm thử mọi chức năng bên trong chiếc điện thoại này y như trên máy thật. '}Nhấn nút % để Auto-Fit hoặc phím <kbd className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 font-mono text-[10px] border border-slate-700">ESC</kbd> để thoát.
       </div>
     </div>
   );
