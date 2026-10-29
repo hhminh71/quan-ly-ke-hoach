@@ -466,7 +466,7 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
             <div className="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
               <h3 className="text-sm font-bold flex items-center gap-2">
                 <UserPlus className="w-4 h-4 text-amber-400" />
-                <span>{editingUser ? 'Chỉnh Sửa Phân Quyền' : 'Thêm Người Dùng Google Mới'}</span>
+                <span>{editingUser ? 'Chỉnh Sửa Phân Quyền' : 'Thêm Người Dùng Mới'}</span>
               </h3>
               <button
                 type="button"
@@ -487,7 +487,7 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Email Google của người dùng <span className="text-rose-500">*</span>
+                  Tài khoản / Email người dùng <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="email"
