@@ -507,7 +507,12 @@ function getUsersFromSheet(ss) {
     }
 
     const rawAllowedCodes = customCodesIdx >= 0 ? String(r[customCodesIdx] || '').trim() : '';
-    const allowedCodes = rawAllowedCodes ? rawAllowedCodes.split(',').map(function(s) { return s.trim(); }).filter(Boolean) : [];
+    let allowedCodes = rawAllowedCodes ? rawAllowedCodes.split(',').map(function(s) { return s.trim(); }).filter(Boolean) : [];
+
+    // Hỗ trợ nếu người dùng nhập trực tiếp các mã tài khoản vào cột Phạm vi chi phí
+    if (allowedCodes.length === 0 && /\d{3,}/.test(scopeVal)) {
+      allowedCodes = scopeVal.split(/[,;\s]+/).map(function(s) { return s.trim(); }).filter(function(s) { return /\d{3,}/.test(s); });
+    }
 
     list.push({
       email: email,

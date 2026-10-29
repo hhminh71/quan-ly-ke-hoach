@@ -261,12 +261,23 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
         }
       }
 
+      let codes = [];
+      if (Array.isArray(u.allowedCodes) && u.allowedCodes.length > 0) {
+        codes = u.allowedCodes;
+      } else if (typeof u.allowedCodes === 'string' && u.allowedCodes.trim()) {
+        codes = u.allowedCodes.split(/[,;\s]+/).map((s) => s.trim()).filter(Boolean);
+      } else if (typeof scope === 'string' && /\d{3,}/.test(scope)) {
+        codes = scope.split(/[,;\s]+/).map((s) => s.trim()).filter((s) => /\d{3,}/.test(s));
+      } else if (defaultMatch?.allowedCodes && defaultMatch.allowedCodes.length > 0) {
+        codes = defaultMatch.allowedCodes;
+      }
+
       return {
         ...u,
         email: email,
         password: u.password || defaultMatch?.password || '123456',
         expenseScope: scope,
-        allowedCodes: Array.isArray(u.allowedCodes) && u.allowedCodes.length > 0 ? u.allowedCodes : (defaultMatch?.allowedCodes || []),
+        allowedCodes: codes,
       };
     });
 

@@ -189,6 +189,8 @@ export const normalizeExpenseScope = (scopeStr) => {
   if (str.includes('HÀNH CHÍNH') || str.includes('HANH_CHINH') || str.includes('VĂN PHÒNG')) return 'HANH_CHINH';
   if (str.includes('AN NINH') || str.includes('AN_NINH') || str.includes('PCCC')) return 'AN_NINH';
   if (str.includes('CUSTOM') || str.includes('TÙY CHỌN')) return 'CUSTOM';
+  // Nếu người dùng nhập trực tiếp các mã tài khoản (VD: "62762101, 62762201" hoặc "627621")
+  if (/\d{3,}/.test(str)) return 'CUSTOM';
   return 'ALL';
 };
 
@@ -256,22 +258,28 @@ export const isAccountCodeAllowedForUser = (accountCode, user) => {
   const cleanCode = String(accountCode || '').trim();
   if (!cleanCode) return true;
 
-  // 1. Kiểm tra nếu có danh sách mã tùy chọn cụ thể (allowedCodes)
+  // 1. Kiểm tra danh sách mã tùy chọn cụ thể (allowedCodes) và mã nhập trực tiếp trong expenseScope
+  let allowedList = [];
   if (user.allowedCodes) {
-    let allowedList = [];
     if (Array.isArray(user.allowedCodes)) {
-      allowedList = user.allowedCodes;
+      allowedList = [...user.allowedCodes];
     } else if (typeof user.allowedCodes === 'string') {
-      allowedList = user.allowedCodes.split(',').map((s) => s.trim()).filter(Boolean);
+      allowedList = user.allowedCodes.split(/[,;\s]+/).map((s) => s.trim()).filter(Boolean);
     }
+  }
 
-    if (allowedList.length > 0) {
-      const matched = allowedList.some((allowed) => {
-        const a = String(allowed).trim();
-        return cleanCode === a || cleanCode.startsWith(a) || a.startsWith(cleanCode);
-      });
-      if (matched) return true;
-    }
+  // Hỗ trợ trường hợp admin gõ thẳng các mã số vào cột Phạm vi chi phí (VD: "62762101, 62762201")
+  if (typeof user.expenseScope === 'string' && /\d{3,}/.test(user.expenseScope)) {
+    const codesFromScope = user.expenseScope.split(/[,;\s]+/).map((s) => s.trim()).filter((s) => /\d{3,}/.test(s));
+    allowedList = [...new Set([...allowedList, ...codesFromScope])];
+  }
+
+  if (allowedList.length > 0) {
+    const matched = allowedList.some((allowed) => {
+      const a = String(allowed).trim();
+      return cleanCode === a || cleanCode.startsWith(a) || a.startsWith(cleanCode);
+    });
+    if (matched) return true;
   }
 
   // 2. Kiểm tra theo tiền tố cấu hình của phạm vi
