@@ -4,8 +4,39 @@
 
 const STORAGE_KEY_WEBHOOK_URL = 'app_google_sheet_webhook_url';
 const STORAGE_KEY_LAST_SYNC = 'app_last_sync_time';
+const STORAGE_KEY_USERS = 'app_users_list_v1';
 
 export const DEFAULT_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbypvdO6D1QW4K_PgKlIRAoUFfWnRyC4Wkn3oYU4Tbz5GOyX5gd3zpIhx93715PKUp8A/exec';
+
+export const DEFAULT_USERS = [
+  {
+    email: 'admin@company.vn',
+    name: 'Quản trị viên trưởng',
+    department: 'Phòng TC-KH',
+    role: 'ADMIN',
+    status: 'HOAT_DONG',
+    createdAt: '29/10/2026 11:50',
+    notes: 'Quản trị hệ thống toàn quyền',
+  },
+  {
+    email: 'ketoan@company.vn',
+    name: 'Nguyễn Thị Lan (Kế toán)',
+    department: 'Tổ Kế toán chi phí',
+    role: 'EDITOR',
+    status: 'HOAT_DONG',
+    createdAt: '29/10/2026 11:50',
+    notes: 'Biên tập & nhập số liệu chi phí',
+  },
+  {
+    email: 'viewer@company.vn',
+    name: 'Trần Văn Bình (Ban Giám Đốc)',
+    department: 'Ban Giám Đốc Cảng',
+    role: 'VIEWER',
+    status: 'HOAT_DONG',
+    createdAt: '29/10/2026 11:50',
+    notes: 'Tra cứu & xem báo cáo số liệu',
+  },
+];
 
 export const getSavedWebhookUrl = () => {
   return localStorage.getItem(STORAGE_KEY_WEBHOOK_URL) || DEFAULT_WEBHOOK_URL;
@@ -27,8 +58,27 @@ export const setLastSyncTime = (timestamp = new Date().toISOString()) => {
   localStorage.setItem(STORAGE_KEY_LAST_SYNC, timestamp);
 };
 
+export const getSavedUsers = () => {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_USERS);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return DEFAULT_USERS;
+};
+
+export const saveSavedUsers = (users) => {
+  if (Array.isArray(users)) {
+    localStorage.setItem(STORAGE_KEY_USERS, JSON.stringify(users));
+  }
+};
+
 /**
- * Lấy toàn bộ dữ liệu (Kế hoạch & Giao dịch) từ Google Sheet
+ * Lấy toàn bộ dữ liệu (Kế hoạch, Giao dịch & Danh sách User phân quyền) từ Google Sheet
  */
 export const fetchFromGoogleSheet = async (webhookUrl) => {
   const url = webhookUrl || getSavedWebhookUrl();
@@ -75,7 +125,7 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
             const day = String(d.getDate()).padStart(2, '0');
             cleanDate = `${y}-${m}-${day}`;
           } else {
-            cleanDate = String(t.accountCode).split('T')[0];
+            cleanDate = String(t.accountCode);
           }
         } catch (e) {
           cleanDate = String(t.accountCode);
@@ -134,8 +184,13 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
     });
   }
 
+  // Tự động lưu và cập nhật danh sách người dùng phân quyền từ sheet QUAN_TRI_USER
+  if (Array.isArray(result.users) && result.users.length > 0) {
+    saveSavedUsers(result.users);
+  }
+
   setLastSyncTime();
-  return result; // { budgets: [...], transactions: [...], bravoInfo: [...] }
+  return result; // { budgets: [...], transactions: [...], bravoInfo: [...], users: [...] }
 };
 
 /**
@@ -143,13 +198,13 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
  */
 export const addTransactionToGoogleSheet = async (webhookUrl, transaction) => {
   const url = webhookUrl || getSavedWebhookUrl();
-  if (!url) return null; // Nếu chưa cấu hình, bỏ qua không báo lỗi
+  if (!url) return null;
 
   try {
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'text/plain;charset=utf-8', // text/plain để tránh CORS preflight check của Google Apps Script
+        'Content-Type': 'text/plain;charset=utf-8',
       },
       body: JSON.stringify({
         action: 'addTransaction',
@@ -161,7 +216,6 @@ export const addTransactionToGoogleSheet = async (webhookUrl, transaction) => {
     return result;
   } catch (error) {
     console.error('Không thể đồng bộ phiếu lên Google Sheet:', error);
-    // Vẫn trả về null để Web App không bị gián đoạn hoạt động offline
     return null;
   }
 };
@@ -193,7 +247,7 @@ export const deleteTransactionFromGoogleSheet = async (webhookUrl, transactionId
 };
 
 /**
- * Cập nhật trực tiếp nội dung 1 phiếu chi trên Google Sheet (Đồng bộ tức thì)
+ * Cập nhật trực tiếp nội dung 1 phiếu chi trên Google Sheet
  */
 export const updateTransactionInGoogleSheet = async (webhookUrl, transaction) => {
   const url = webhookUrl || getSavedWebhookUrl();
@@ -214,6 +268,58 @@ export const updateTransactionInGoogleSheet = async (webhookUrl, transaction) =>
     return await response.json();
   } catch (error) {
     console.error('Không thể cập nhật phiếu trên Google Sheet:', error);
+    return null;
+  }
+};
+
+/**
+ * Lưu hoặc cập nhật phân quyền 1 User lên Google Sheet (Sheet QUAN_TRI_USER)
+ */
+export const saveUserToGoogleSheet = async (webhookUrl, user) => {
+  const url = webhookUrl || getSavedWebhookUrl();
+  if (!url) return null;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify({
+        action: 'saveUser',
+        user: user,
+      }),
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error('Không thể lưu user lên Google Sheet:', error);
+    return null;
+  }
+};
+
+/**
+ * Xóa quyền của 1 User trên Google Sheet (Sheet QUAN_TRI_USER)
+ */
+export const deleteUserFromGoogleSheet = async (webhookUrl, email) => {
+  const url = webhookUrl || getSavedWebhookUrl();
+  if (!url) return null;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify({
+        action: 'deleteUser',
+        email: email,
+      }),
+    });
+
+    return await response.json();
+  } catch (error) {
+    console.error('Không thể xóa user trên Google Sheet:', error);
     return null;
   }
 };

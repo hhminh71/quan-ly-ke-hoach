@@ -10,12 +10,18 @@ import {
   Cloud,
   FileSpreadsheet,
   CheckCircle2,
+  Users,
+  Shield,
 } from 'lucide-react';
+import { canManageUsers, canSettings, normalizeRole, ROLE_INFO } from '../utils/permissions';
 
 export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator }) {
   const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const menuRef = useRef(null);
+
+  const normRole = normalizeRole(user?.role);
+  const roleMeta = ROLE_INFO[normRole] || ROLE_INFO.VIEWER;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -61,15 +67,15 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
             </div>
           </div>
 
-          {/* RIGHT: Minimalist Icon Controls */}
-          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+          {/* RIGHT: Minimalist Icon Controls & User Role Badge */}
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {/* Desktop Simulator Button */}
             {!isInIframe && onOpenSimulator && (
               <button
                 type="button"
                 onClick={onOpenSimulator}
                 className="hidden md:flex w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 items-center justify-center shadow-2xs transition-all cursor-pointer"
-                title="Bật khung xem trước giả lập màn hình điện thoại iPhone/Android"
+                title="Bật khung xem trước giả lập màn hình điện thoại iPhone Duo / Android"
               >
                 <Smartphone className="w-4 h-4 text-amber-300" />
               </button>
@@ -85,6 +91,12 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
               <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
             </button>
 
+            {/* Role Badge on desktop */}
+            <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/20 text-white text-xs font-semibold">
+              <span className={`w-2 h-2 rounded-full ${roleMeta.dotClass}`} />
+              <span className="text-[11px] font-bold text-amber-300">{roleMeta.shortLabel}</span>
+            </div>
+
             {/* User Profile Area: ONLY Person Icon with Interactive Dropdown Menu */}
             <div className="relative" ref={menuRef}>
               <button
@@ -95,34 +107,55 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
                     ? 'bg-white text-blue-900 border-white'
                     : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
                 }`}
-                title="Quản trị viên & Menu cài đặt hệ thống"
+                title={`${user?.name || 'Tài khoản'} (${roleMeta.label})`}
               >
                 <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </button>
 
-              {/* Administrator Dropdown Menu */}
+              {/* Administrator & User Dropdown Menu */}
               {isUserMenuOpen && (
                 <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl bg-white text-slate-800 shadow-2xl border border-slate-200 p-2 z-50 animate-in fade-in zoom-in-95">
                   {/* User Profile Header */}
-                  <div className="p-2.5 bg-blue-50/70 rounded-xl mb-1 flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs shrink-0">
-                      <User className="w-4 h-4" />
+                  <div className="p-3 bg-blue-50/80 rounded-xl mb-1 flex items-center gap-2.5 border border-blue-100">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-bold flex items-center justify-center text-xs shrink-0 shadow-sm">
+                      {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-bold text-slate-900 truncate">
-                        {user?.name || 'Quản trị viên'}
+                        {user?.name || 'Người dùng'}
                       </p>
-                      <p className="text-[10px] text-blue-700 font-medium truncate">
-                        {user?.role || 'Phòng TC-KH'}
+                      <p className="text-[10px] text-slate-500 font-mono truncate">
+                        {user?.email || 'user@company.vn'}
                       </p>
+                      <div className="mt-1">
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold border ${roleMeta.badgeClass}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${roleMeta.dotClass}`} />
+                          <span>{roleMeta.label}</span>
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Actions & Integration Tools (Hidden from main toolbar into here) */}
+                  {/* Actions & Integration Tools */}
                   <div className="py-1 border-t border-slate-100 space-y-0.5 text-xs">
                     <div className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-slate-400">
-                      Tiện ích & Đồng bộ
+                      Tiện ích & Quản trị
                     </div>
+
+                    {/* Quản lý User (Chỉ Admin mới thấy) */}
+                    {canManageUsers(user) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          window.dispatchEvent(new CustomEvent('app_open_user_management'));
+                        }}
+                        className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg font-bold text-amber-900 bg-amber-50/70 hover:bg-amber-100/90 transition-colors cursor-pointer border border-amber-200/60"
+                      >
+                        <Users className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Quản lý phân quyền User</span>
+                      </button>
+                    )}
 
                     <button
                       type="button"
@@ -136,29 +169,34 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
                       <span>Đồng bộ lại từ Google Sheet</span>
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        window.dispatchEvent(new CustomEvent('app_open_sheet_settings'));
-                      }}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-800 transition-colors cursor-pointer"
-                    >
-                      <Settings className="w-3.5 h-3.5 text-blue-600" />
-                      <span>Cài đặt kết nối Google Sheet</span>
-                    </button>
+                    {/* Cài đặt Sheet (Chỉ Admin mới có) */}
+                    {canSettings(user) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          window.dispatchEvent(new CustomEvent('app_open_sheet_settings'));
+                        }}
+                        className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-800 transition-colors cursor-pointer"
+                      >
+                        <Settings className="w-3.5 h-3.5 text-blue-600" />
+                        <span>Cài đặt kết nối Google Sheet</span>
+                      </button>
+                    )}
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsUserMenuOpen(false);
-                        window.dispatchEvent(new CustomEvent('app_reset_data'));
-                      }}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg font-medium text-slate-700 hover:bg-amber-50 hover:text-amber-800 transition-colors cursor-pointer"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5 text-amber-600" />
-                      <span>Nạp lại dữ liệu gốc từ Excel</span>
-                    </button>
+                    {canSettings(user) && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsUserMenuOpen(false);
+                          window.dispatchEvent(new CustomEvent('app_reset_data'));
+                        }}
+                        className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg font-medium text-slate-700 hover:bg-amber-50 hover:text-amber-800 transition-colors cursor-pointer"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Nạp lại dữ liệu gốc từ Excel</span>
+                      </button>
+                    )}
 
                     <button
                       type="button"

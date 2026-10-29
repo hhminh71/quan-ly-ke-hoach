@@ -221,16 +221,18 @@ export default function AccountLedgerModal({
             </div>
 
             <div className="flex items-center gap-1.5 shrink-0">
-              {/* Nút Thêm Mới Hạng Mục (chọn sẵn mã kế hoạch hiện tại) */}
-              <button
-                type="button"
-                onClick={() => setIsAddModalOpen(true)}
-                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-2xs sm:text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-colors"
-                title={`Thêm mới hạng mục cho mã [${account.code}]`}
-              >
-                <PlusCircle className="w-3.5 h-3.5" />
-                <span>Thêm Mới</span>
-              </button>
+              {/* Nút Thêm Mới Hạng Mục (chỉ hiển thị khi có quyền onAddTransaction) */}
+              {onAddTransaction && (
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-2xs sm:text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-colors"
+                  title={`Thêm mới hạng mục cho mã [${account.code}]`}
+                >
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  <span>Thêm Mới</span>
+                </button>
+              )}
 
               {onNavigateToLedger && (
                 <button

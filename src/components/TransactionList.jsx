@@ -625,26 +625,33 @@ export default function TransactionList({
                   {isColumnVisible('actions') && (
                     <td className="py-0.5 px-0.5 text-center leading-tight">
                       <div className="flex items-center justify-center gap-0.5">
-                        <button
-                          type="button"
-                          onClick={() => handleStartEdit(item)}
-                          className="p-0.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-75 group-hover:opacity-100"
-                          title="Chỉnh sửa nội dung hạng mục này"
-                        >
-                          <Edit3 className="w-2.5 h-2.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (confirm(`Bạn có chắc muốn xóa hạng mục "${item.notes}" không?`)) {
-                              onDeleteTransaction(item.id);
-                            }
-                          }}
-                          className="p-0.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-75 group-hover:opacity-100"
-                          title="Xóa hạng mục này"
-                        >
-                          <Trash2 className="w-2.5 h-2.5" />
-                        </button>
+                        {onUpdateTransaction && (
+                          <button
+                            type="button"
+                            onClick={() => handleStartEdit(item)}
+                            className="p-0.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-75 group-hover:opacity-100"
+                            title="Chỉnh sửa nội dung hạng mục này"
+                          >
+                            <Edit3 className="w-2.5 h-2.5" />
+                          </button>
+                        )}
+                        {onDeleteTransaction && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (confirm(`Bạn có chắc muốn xóa hạng mục "${item.notes}" không?`)) {
+                                onDeleteTransaction(item.id);
+                              }
+                            }}
+                            className="p-0.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-75 group-hover:opacity-100"
+                            title="Xóa hạng mục này"
+                          >
+                            <Trash2 className="w-2.5 h-2.5" />
+                          </button>
+                        )}
+                        {!onUpdateTransaction && !onDeleteTransaction && (
+                          <span className="text-[9px] text-slate-400 italic">Chỉ xem</span>
+                        )}
                       </div>
                     </td>
                   )}

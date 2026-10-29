@@ -4,6 +4,8 @@ import AccountLedgerModal from '../components/AccountLedgerModal';
 import TransactionList from '../components/TransactionList';
 import BudgetOverview from '../components/BudgetOverview';
 import SyncModal from '../components/SyncModal';
+import UserManagementModal from '../components/UserManagementModal';
+import { canAdd, canEdit, canDelete, hasPermission } from '../utils/permissions';
 import {
   Download,
   RefreshCw,
@@ -147,9 +149,16 @@ export default function DashboardPage({ user }) {
 
   // Google Sheets sync states
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [hasWebhook, setHasWebhook] = useState(() => Boolean(getSavedWebhookUrl()));
   const [lastSyncTime, setLastSyncTimeState] = useState(() => getLastSyncTime());
+
+  // Role permissions
+  const canAddTx = canAdd(user);
+  const canEditTx = canEdit(user);
+  const canDeleteTx = canDelete(user);
+  const canEditBudgetsPlan = hasPermission(user, 'EDIT_BUDGET_PLANS');
 
   // Dynamically compute available years from existing transactions
   const availableYears = useMemo(() => {
@@ -287,6 +296,10 @@ export default function DashboardPage({ user }) {
   };
 
   const handleResetData = () => {
+    if (!canDelete(user)) {
+      alert('Bạn không có quyền khôi phục hoặc xóa dữ liệu.');
+      return;
+    }
     if (confirm('Khôi phục toàn bộ danh sách 1.216 giao dịch thực tế (2024, 2025, 2026) từ file gốc?')) {
       setTransactions(initialTransactions);
       localStorage.removeItem('app_transactions_v4');
@@ -324,19 +337,22 @@ export default function DashboardPage({ user }) {
     const handleSync = () => handleSyncNow(null, true);
     const handleSettings = () => setIsSyncModalOpen(true);
     const handleReset = () => handleResetData();
+    const handleOpenUserModal = () => setIsUserModalOpen(true);
 
     window.addEventListener('app_export_csv', handleCustomExport);
     window.addEventListener('app_sync_sheet', handleSync);
     window.addEventListener('app_open_sheet_settings', handleSettings);
     window.addEventListener('app_reset_data', handleReset);
+    window.addEventListener('app_open_user_management', handleOpenUserModal);
 
     return () => {
       window.removeEventListener('app_export_csv', handleCustomExport);
       window.removeEventListener('app_sync_sheet', handleSync);
       window.removeEventListener('app_open_sheet_settings', handleSettings);
       window.removeEventListener('app_reset_data', handleReset);
+      window.removeEventListener('app_open_user_management', handleOpenUserModal);
     };
-  }, [yearTransactions, selectedYear]);
+  }, [yearTransactions, selectedYear, user]);
 
   return (
     <div className="space-y-1 sm:space-y-3">
@@ -427,13 +443,13 @@ export default function DashboardPage({ user }) {
           budgets={budgets}
           transactions={yearTransactions}
           selectedYear={selectedYear}
-          onUpdateBudgets={(newBudgets) => {
+          onUpdateBudgets={canEditBudgetsPlan ? (newBudgets) => {
             setBudgets(newBudgets);
             localStorage.setItem('app_budgets_v3', JSON.stringify(newBudgets));
-          }}
-          onAddTransaction={handleAddTransaction}
-          onUpdateTransaction={handleUpdateTransaction}
-          onDeleteTransaction={handleDeleteTransaction}
+          } : null}
+          onAddTransaction={canAddTx ? handleAddTransaction : null}
+          onUpdateTransaction={canEditTx ? handleUpdateTransaction : null}
+          onDeleteTransaction={canDeleteTx ? handleDeleteTransaction : null}
           onNavigateToLedger={(accountCode) => {
             setSelectedLedgerAccount(accountCode);
             handleTabChange('TRANSACTIONS');
@@ -446,9 +462,9 @@ export default function DashboardPage({ user }) {
         <TransactionList
           transactions={yearTransactions}
           budgets={budgets}
-          onAddTransaction={handleAddTransaction}
-          onUpdateTransaction={handleUpdateTransaction}
-          onDeleteTransaction={handleDeleteTransaction}
+          onAddTransaction={canAddTx ? handleAddTransaction : null}
+          onUpdateTransaction={canEditTx ? handleUpdateTransaction : null}
+          onDeleteTransaction={canDeleteTx ? handleDeleteTransaction : null}
           selectedYear={selectedYear}
           selectedCategory={selectedLedgerAccount}
           onSelectCategory={setSelectedLedgerAccount}
@@ -464,9 +480,9 @@ export default function DashboardPage({ user }) {
           budgets={budgets}
           selectedYear={selectedYear}
           onClose={() => setSelectedDetailAccount(null)}
-          onAddTransaction={handleAddTransaction}
-          onUpdateTransaction={handleUpdateTransaction}
-          onDeleteTransaction={handleDeleteTransaction}
+          onAddTransaction={canAddTx ? handleAddTransaction : null}
+          onUpdateTransaction={canEditTx ? handleUpdateTransaction : null}
+          onDeleteTransaction={canDeleteTx ? handleDeleteTransaction : null}
           onNavigateToLedger={(accountCode) => {
             setSelectedDetailAccount(null);
             setSelectedLedgerAccount(accountCode);
@@ -482,9 +498,9 @@ export default function DashboardPage({ user }) {
           transactions={yearTransactions}
           selectedYear={selectedYear}
           bravoInfo={bravoInfo}
-          onAddTransaction={handleAddTransaction}
-          onUpdateTransaction={handleUpdateTransaction}
-          onDeleteTransaction={handleDeleteTransaction}
+          onAddTransaction={canAddTx ? handleAddTransaction : null}
+          onUpdateTransaction={canEditTx ? handleUpdateTransaction : null}
+          onDeleteTransaction={canDeleteTx ? handleDeleteTransaction : null}
           onNavigateToLedger={(accountCode) => {
             setSelectedLedgerAccount(accountCode);
             handleTabChange('TRANSACTIONS');
@@ -502,6 +518,13 @@ export default function DashboardPage({ user }) {
           if (data?.bravoInfo) setBravoInfo(data.bravoInfo);
           setHasWebhook(true);
         }}
+      />
+
+      {/* User Management RBAC Modal */}
+      <UserManagementModal
+        isOpen={isUserModalOpen}
+        onClose={() => setIsUserModalOpen(false)}
+        currentUser={user}
       />
     </div>
   );

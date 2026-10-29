@@ -15,6 +15,7 @@
 
 const SHEET_TRANSACTIONS = 'SO_CAI_PHIEU_CHI';
 const SHEET_BUDGETS = 'KE_HOACH_NGAN_SACH';
+const SHEET_USERS = 'QUAN_TRI_USER';
 
 /**
  * Menu tùy chỉnh tự động hiện lên thanh công cụ của Google Sheets
@@ -24,6 +25,7 @@ function onOpen() {
     .createMenu('📊 QUẢN LÝ KẾ HOẠCH')
     .addItem('⚡ 1. Tự động tạo Sheet Kế Hoạch Đa Năm (76 Mã Khoản Mục)', 'setupKeHoachNganSachSheet')
     .addItem('📋 2. Tự động nạp 1.216 Phiếu Chi Lịch Sử vào Sổ Cái (Có Cột Năm)', 'napToanBo1216PhieuChi')
+    .addItem('👥 3. Tự động tạo Sheet Quản Trị User (Phân Quyền)', 'setupQuanTriUserSheet')
     .addToUi();
 }
 
@@ -41,12 +43,14 @@ function doGet(e) {
       const transactions = getTransactionsFromSheet(ss);
       const budgets = getBudgetsFromSheet(ss);
       const bravoInfo = getBravoInfoFromSheet(ss);
+      const users = getUsersFromSheet(ss);
 
       return createJsonResponse({
         status: 'success',
         transactions: transactions,
         budgets: budgets,
         bravoInfo: bravoInfo,
+        users: users,
         serverTime: new Date().toISOString()
       });
     }
@@ -211,6 +215,78 @@ function doPost(e) {
       });
     }
 
+    
+    // 5. Lưu (Thêm mới hoặc Cập nhật) User phân quyền
+    if (action === 'saveUser') {
+      const u = data.user;
+      if (!u || !u.email) throw new Error('Thiếu email người dùng');
+      const emailToSave = String(u.email).trim().toLowerCase();
+      let sheet = ss.getSheetByName(SHEET_USERS);
+      if (!sheet) {
+        setupQuanTriUserSheet();
+        sheet = ss.getSheetByName(SHEET_USERS);
+      }
+      const rows = sheet.getDataRange().getValues();
+      let updated = false;
+
+      for (let i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]).trim().toLowerCase() === emailToSave) {
+          const rowIdx = i + 1;
+          sheet.getRange(rowIdx, 2, 1, 6).setValues([[
+            u.name || rows[i][1],
+            u.department || rows[i][2],
+            (u.role || rows[i][3] || 'VIEWER').toUpperCase(),
+            (u.status || rows[i][4] || 'HOAT_DONG').toUpperCase(),
+            Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'),
+            u.notes || rows[i][6] || ''
+          ]]);
+          updated = true;
+          break;
+        }
+      }
+
+      if (!updated) {
+        sheet.appendRow([
+          emailToSave,
+          u.name || emailToSave.split('@')[0],
+          u.department || 'Phòng TC-KH',
+          (u.role || 'VIEWER').toUpperCase(),
+          (u.status || 'HOAT_DONG').toUpperCase(),
+          Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'),
+          u.notes || ''
+        ]);
+      }
+
+      return createJsonResponse({
+        status: 'success',
+        message: updated ? 'Đã cập nhật quyền người dùng thành công' : 'Đã thêm mới người dùng thành công',
+        user: u
+      });
+    }
+
+    // 6. Xóa User khỏi danh sách phân quyền
+    if (action === 'deleteUser') {
+      const emailToDelete = String(data.email || '').trim().toLowerCase();
+      if (!emailToDelete) throw new Error('Thiếu email cần xóa');
+      const sheet = ss.getSheetByName(SHEET_USERS);
+      if (!sheet) throw new Error('Sheet Quản trị User chưa được khởi tạo');
+      const rows = sheet.getDataRange().getValues();
+      let deleted = false;
+
+      for (let i = 1; i < rows.length; i++) {
+        if (String(rows[i][0]).trim().toLowerCase() === emailToDelete) {
+          sheet.deleteRow(i + 1);
+          deleted = true;
+          break;
+        }
+      }
+
+      return createJsonResponse({
+        status: 'success',
+        message: deleted ? 'Đã xóa quyền người dùng thành công' : 'Không tìm thấy email'
+      });
+    }
+
     return createJsonResponse({ status: 'error', message: 'Hành động POST không hợp lệ' });
   } catch (err) {
     return createJsonResponse({ status: 'error', message: err.toString() });
@@ -358,6 +434,77 @@ function getBravoInfoFromSheet(ss) {
 /**
  * Đảm bảo 2 sheet cần thiết luôn tồn tại và có tiêu đề
  */
+
+/**
+ * Lấy danh sách tài khoản phân quyền từ sheet QUAN_TRI_USER
+ */
+function getUsersFromSheet(ss) {
+  const sheet = ss.getSheetByName(SHEET_USERS);
+  if (!sheet) return [];
+  const rows = sheet.getDataRange().getValues();
+  if (rows.length <= 1) return [];
+
+  const list = [];
+  for (let i = 1; i < rows.length; i++) {
+    const r = rows[i];
+    const email = String(r[0] || '').trim();
+    if (!email) continue;
+    list.push({
+      email: email,
+      name: String(r[1] || email.split('@')[0]).trim(),
+      department: String(r[2] || '').trim(),
+      role: String(r[3] || 'VIEWER').trim().toUpperCase(),
+      status: String(r[4] || 'HOAT_DONG').trim().toUpperCase(),
+      createdAt: String(r[5] || '').trim(),
+      notes: String(r[6] || '').trim()
+    });
+  }
+  return list;
+}
+
+/**
+ * Tự động tạo và cấu hình Sheet QUAN_TRI_USER
+ */
+function setupQuanTriUserSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let userSheet = ss.getSheetByName(SHEET_USERS);
+  if (!userSheet) {
+    userSheet = ss.insertSheet(SHEET_USERS);
+  } else {
+    if (userSheet.getLastRow() > 1) return userSheet;
+  }
+
+  userSheet.clear();
+  userSheet.appendRow([
+    'Email Google',
+    'Họ và tên',
+    'Phòng ban / Bộ phận',
+    'Vai trò (ADMIN/EDITOR/VIEWER)',
+    'Trạng thái (HOAT_DONG/KHOA)',
+    'Ngày cấp quyền',
+    'Ghi chú'
+  ]);
+
+  const defaultUsers = [
+    ['admin@company.vn', 'Quản trị viên trưởng', 'Phòng TC-KH', 'ADMIN', 'HOAT_DONG', Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'), 'Quản trị hệ thống toàn quyền'],
+    ['ketoan@company.vn', 'Nguyễn Thị Lan (Kế toán)', 'Tổ Kế toán chi phí', 'EDITOR', 'HOAT_DONG', Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'), 'Biên tập & nhập số liệu chi phí'],
+    ['viewer@company.vn', 'Trần Văn Bình (Ban Giám Đốc)', 'Ban Giám Đốc Cảng', 'VIEWER', 'HOAT_DONG', Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'), 'Tra cứu & xem báo cáo số liệu']
+  ];
+
+  defaultUsers.forEach(function(u) {
+    userSheet.appendRow(u);
+  });
+
+  try {
+    userSheet.getRange('1:1').setFontWeight('bold').setBackground('#fef3c7').setFontColor('#78350f');
+    userSheet.getRange('D2:D').setHorizontalAlignment('center');
+    userSheet.getRange('E2:E').setHorizontalAlignment('center');
+    userSheet.setFrozenRows(1);
+  } catch(e) {}
+
+  return userSheet;
+}
+
 function ensureSheetsInitialized(ss) {
   let txSheet = ss.getSheetByName(SHEET_TRANSACTIONS);
   if (!txSheet) {
@@ -376,6 +523,11 @@ function ensureSheetsInitialized(ss) {
     ]);
     txSheet.getRange('1:1').setFontWeight('bold').setBackground('#eff6ff');
     txSheet.setFrozenRows(1);
+  }
+
+  let userSheet = ss.getSheetByName(SHEET_USERS);
+  if (!userSheet) {
+    setupQuanTriUserSheet();
   }
 
   let bgSheet = ss.getSheetByName(SHEET_BUDGETS);

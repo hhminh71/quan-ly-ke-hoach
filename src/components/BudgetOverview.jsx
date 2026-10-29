@@ -523,8 +523,8 @@ export default function BudgetOverview({
               onShowAll={viewMode === 'PROGRESS' ? showAllProgCols : showAllMatrixCols}
             />
 
-            {/* Matrix Actions */}
-            {viewMode === 'MATRIX' && (
+            {/* Matrix Actions (Chỉ hiển thị khi có quyền onUpdateBudgets - Admin) */}
+            {viewMode === 'MATRIX' && onUpdateBudgets && (
               <>
                 <button
                   type="button"
