@@ -8,7 +8,6 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
-  UserCheck,
 } from 'lucide-react';
 import aviationBg from '../assets/aviation-bg.jpg';
 import {
@@ -16,18 +15,18 @@ import {
   getSavedWebhookUrl,
   fetchFromGoogleSheet,
 } from '../services/googleSheetService';
-import { ROLES, normalizeRole, ROLE_INFO, resolveUserScope } from '../utils/permissions';
+import { ROLES, normalizeRole, resolveUserScope } from '../utils/permissions';
 
 export default function LoginPage({ onLogin }) {
-  const [emailInput, setEmailInput] = useState('admin@company.vn');
-  const [password, setPassword] = useState('admin123');
+  const [emailInput, setEmailInput] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [hint, setHint] = useState('');
 
   // Xử lý Đăng nhập bằng Tài khoản & Mật khẩu
-  const handleLogin = async (userEmail, userPass, forcedScope) => {
+  const handleLogin = async (userEmail, userPass) => {
     setError('');
     setHint('');
     const cleanEmail = (userEmail || emailInput).trim().toLowerCase();
@@ -85,14 +84,13 @@ export default function LoginPage({ onLogin }) {
             : '123456');
 
         if (cleanPass !== expectedPassword) {
-          setError('Mật khẩu không chính xác!');
-          setHint(`Gợi ý mật khẩu mẫu: ${expectedPassword}`);
+          setError('Mật khẩu không chính xác. Vui lòng thử lại!');
           setIsLoading(false);
           return;
         }
 
         const role = normalizeRole(matched.role);
-        const effectiveScope = forcedScope || resolveUserScope(matched);
+        const effectiveScope = resolveUserScope(matched);
         onLogin({
           name: matched.name || cleanEmail.split('@')[0],
           email: matched.email,
@@ -106,8 +104,7 @@ export default function LoginPage({ onLogin }) {
         // Fallback demo admin nếu chưa cấu hình sheet
         if (cleanEmail === 'admin@company.vn' || cleanEmail.includes('admin')) {
           if (cleanPass !== 'admin123') {
-            setError('Mật khẩu Admin không chính xác!');
-            setHint('Mật khẩu mặc định: admin123');
+            setError('Mật khẩu không chính xác. Vui lòng thử lại!');
             setIsLoading(false);
             return;
           }
@@ -122,7 +119,7 @@ export default function LoginPage({ onLogin }) {
           });
         } else {
           setError(`Tài khoản "${cleanEmail}" chưa được cấp quyền trong hệ thống.`);
-          setHint('Vui lòng liên hệ Quản trị viên (Admin) để được thêm tài khoản vào Sheet QUAN_TRI_USER.');
+          setHint('Vui lòng liên hệ Quản trị viên (Admin) để được cấp quyền truy cập.');
         }
       }
     } catch (err) {
@@ -135,12 +132,6 @@ export default function LoginPage({ onLogin }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     handleLogin(emailInput, password);
-  };
-
-  const handleSelectRoleDemo = (email, pass, defaultScope) => {
-    setEmailInput(email);
-    setPassword(pass);
-    handleLogin(email, pass, defaultScope);
   };
 
   return (
@@ -187,13 +178,13 @@ export default function LoginPage({ onLogin }) {
 
         {/* Login Card with Glassmorphism */}
         <div className="bg-[#09294a]/85 backdrop-blur-xl border border-blue-300/25 rounded-2xl p-5 sm:p-7 shadow-2xl shadow-slate-950/70">
-          <div className="mb-4 sm:mb-5">
+          <div className="mb-5">
             <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-amber-400" />
               <span>Đăng nhập hệ thống</span>
             </h2>
             <p className="text-[11px] sm:text-xs text-blue-200/70 mt-0.5">
-              Phân quyền 3 cấp độ (Admin / Kế toán / Viewer) qua Google Sheet
+              Đăng nhập tài khoản được cấp quyền để tiếp tục
             </p>
           </div>
 
@@ -207,7 +198,7 @@ export default function LoginPage({ onLogin }) {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-3.5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email / Username Field */}
             <div>
               <label className="block text-[11px] sm:text-xs font-semibold text-blue-200 mb-1">
@@ -221,9 +212,10 @@ export default function LoginPage({ onLogin }) {
                   type="text"
                   value={emailInput}
                   onChange={(e) => setEmailInput(e.target.value)}
-                  placeholder="admin@company.vn hoặc email người dùng"
+                  placeholder="Nhập email hoặc tên tài khoản"
                   className="w-full pl-9 pr-3 py-2 sm:py-2.5 rounded-xl bg-[#041a30]/85 border border-blue-400/30 text-white placeholder-slate-400 text-xs sm:text-sm focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-all font-medium"
                   required
+                  autoFocus
                 />
               </div>
             </div>
@@ -234,9 +226,6 @@ export default function LoginPage({ onLogin }) {
                 <label className="block text-[11px] sm:text-xs font-semibold text-blue-200">
                   Mật khẩu
                 </label>
-                <span className="text-[10px] text-amber-300/80 font-mono">
-                  Mặc định: admin123
-                </span>
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-blue-300">
@@ -264,7 +253,7 @@ export default function LoginPage({ onLogin }) {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2.5 sm:py-3 px-4 rounded-xl font-bold text-xs sm:text-sm text-slate-950 bg-amber-400 hover:bg-amber-300 active:scale-[0.99] transition-all duration-150 shadow-lg shadow-amber-400/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full py-2.5 sm:py-3 px-4 rounded-xl font-bold text-xs sm:text-sm text-slate-950 bg-amber-400 hover:bg-amber-300 active:scale-[0.99] transition-all duration-150 shadow-lg shadow-amber-400/25 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer mt-2"
             >
               {isLoading ? (
                 <>
@@ -279,122 +268,6 @@ export default function LoginPage({ onLogin }) {
               )}
             </button>
           </form>
-
-          {/* Quick Demo Roles Selection */}
-          <div className="mt-4 pt-3.5 border-t border-blue-400/20 space-y-2">
-            <p className="text-[10px] text-blue-300/80 font-bold uppercase tracking-wider flex items-center justify-between">
-              <span>Tài khoản thử nghiệm phân quyền (1 chạm):</span>
-              <span className="text-amber-300/90 font-normal lowercase">(bấm vào ngay)</span>
-            </p>
-
-            {/* Row 1: Core Roles */}
-            <div className="grid grid-cols-3 gap-1.5">
-              <button
-                type="button"
-                onClick={() => handleSelectRoleDemo('admin@company.vn', 'admin123', 'ALL')}
-                className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-amber-500/20 border border-amber-400/40 text-left transition-all cursor-pointer group"
-                title="Email: admin@company.vn • Pass: admin123"
-              >
-                <div className="text-[10px] font-bold text-amber-300 flex items-center gap-1">
-                  <span>👑 Admin</span>
-                </div>
-                <div className="text-[9px] text-slate-300 font-medium truncate mt-0.5">
-                  Toàn quyền
-                </div>
-                <div className="text-[8px] font-mono text-amber-200/60 truncate">
-                  Pass: admin123
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSelectRoleDemo('ketoan@company.vn', 'ketoan123', 'ALL')}
-                className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-sky-500/20 border border-sky-400/40 text-left transition-all cursor-pointer group"
-                title="Email: ketoan@company.vn • Pass: ketoan123"
-              >
-                <div className="text-[10px] font-bold text-sky-300 flex items-center gap-1">
-                  <span>✏️ Kế toán</span>
-                </div>
-                <div className="text-[9px] text-slate-300 font-medium truncate mt-0.5">
-                  Thêm & Sửa
-                </div>
-                <div className="text-[8px] font-mono text-sky-200/60 truncate">
-                  Pass: ketoan123
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSelectRoleDemo('viewer@company.vn', 'viewer123', 'ALL')}
-                className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-slate-500/20 border border-slate-400/40 text-left transition-all cursor-pointer group"
-                title="Email: viewer@company.vn • Pass: viewer123"
-              >
-                <div className="text-[10px] font-bold text-slate-300 flex items-center gap-1">
-                  <span>👁️ Giám Đốc</span>
-                </div>
-                <div className="text-[9px] text-slate-300 font-medium truncate mt-0.5">
-                  Xem toàn cảng
-                </div>
-                <div className="text-[8px] font-mono text-slate-300/60 truncate">
-                  Pass: viewer123
-                </div>
-              </button>
-            </div>
-
-            {/* Row 2: Department Expense Scopes */}
-            <div className="grid grid-cols-3 gap-1.5">
-              <button
-                type="button"
-                onClick={() => handleSelectRoleDemo('kythuat@company.vn', 'kythuat123', 'KY_THUAT')}
-                className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-blue-500/20 border border-blue-400/40 text-left transition-all cursor-pointer group"
-                title="Email: kythuat@company.vn • Pass: kythuat123 • SCTX Máy móc & Phương tiện"
-              >
-                <div className="text-[10px] font-bold text-blue-300 flex items-center gap-1">
-                  <span>🛠️ Kỹ thuật</span>
-                </div>
-                <div className="text-[9px] text-slate-300 font-medium truncate mt-0.5">
-                  Chỉ Máy & Xe
-                </div>
-                <div className="text-[8px] font-mono text-blue-200/60 truncate">
-                  Pass: kythuat123
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSelectRoleDemo('xaydung@company.vn', 'xaydung123', 'XAY_DUNG')}
-                className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-amber-500/20 border border-amber-400/40 text-left transition-all cursor-pointer group"
-                title="Email: xaydung@company.vn • Pass: xaydung123 • SCTX Cơ sở hạ tầng"
-              >
-                <div className="text-[10px] font-bold text-amber-300 flex items-center gap-1">
-                  <span>🏗️ Xây dựng</span>
-                </div>
-                <div className="text-[9px] text-slate-300 font-medium truncate mt-0.5">
-                  Chỉ Hạ tầng
-                </div>
-                <div className="text-[8px] font-mono text-amber-200/60 truncate">
-                  Pass: xaydung123
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSelectRoleDemo('daotao@company.vn', 'daotao123', 'DAO_TAO')}
-                className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-purple-500/20 border border-purple-400/40 text-left transition-all cursor-pointer group"
-                title="Email: daotao@company.vn • Pass: daotao123 • Chi phí Đào tạo"
-              >
-                <div className="text-[10px] font-bold text-purple-300 flex items-center gap-1">
-                  <span>🎓 Đào tạo</span>
-                </div>
-                <div className="text-[9px] text-slate-300 font-medium truncate mt-0.5">
-                  Chỉ Đào tạo
-                </div>
-                <div className="text-[8px] font-mono text-purple-200/60 truncate">
-                  Pass: daotao123
-                </div>
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Footer */}
