@@ -13,7 +13,7 @@ import {
   Users,
   Shield,
 } from 'lucide-react';
-import { canManageUsers, canSettings, normalizeRole, ROLE_INFO } from '../utils/permissions';
+import { canManageUsers, canSettings, normalizeRole, ROLE_INFO, getUserScopeInfo } from '../utils/permissions';
 
 export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator }) {
   const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
@@ -22,6 +22,7 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
 
   const normRole = normalizeRole(user?.role);
   const roleMeta = ROLE_INFO[normRole] || ROLE_INFO.VIEWER;
+  const scopeMeta = getUserScopeInfo(user);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -91,11 +92,21 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
               <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
             </button>
 
-            {/* Role Badge on desktop */}
+            {/* Role Badge & Scope Badge on desktop */}
             <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/20 text-white text-xs font-semibold">
               <span className={`w-2 h-2 rounded-full ${roleMeta.dotClass}`} />
               <span className="text-[11px] font-bold text-amber-300">{roleMeta.shortLabel}</span>
             </div>
+
+            {scopeMeta.id !== 'ALL' && (
+              <div
+                className={`hidden lg:flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border shadow-2xs ${scopeMeta.badgeClass}`}
+                title={`Phạm vi: ${scopeMeta.label}`}
+              >
+                <span>{scopeMeta.iconText}</span>
+                <span>{scopeMeta.shortLabel}</span>
+              </div>
+            )}
 
             {/* User Profile Area: ONLY Person Icon with Interactive Dropdown Menu */}
             <div className="relative" ref={menuRef}>
@@ -107,7 +118,7 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
                     ? 'bg-white text-blue-900 border-white'
                     : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
                 }`}
-                title={`${user?.name || 'Tài khoản'} (${roleMeta.label})`}
+                title={`${user?.name || 'Tài khoản'} (${roleMeta.label} • ${scopeMeta.shortLabel})`}
               >
                 <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
               </button>
@@ -127,10 +138,14 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
                       <p className="text-[10px] text-slate-500 font-mono truncate">
                         {user?.email || 'user@company.vn'}
                       </p>
-                      <div className="mt-1">
+                      <div className="mt-1 flex items-center gap-1 flex-wrap">
                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold border ${roleMeta.badgeClass}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${roleMeta.dotClass}`} />
-                          <span>{roleMeta.label}</span>
+                          <span>{roleMeta.shortLabel}</span>
+                        </span>
+                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold border ${scopeMeta.badgeClass}`}>
+                          <span>{scopeMeta.iconText}</span>
+                          <span>{scopeMeta.shortLabel}</span>
                         </span>
                       </div>
                     </div>

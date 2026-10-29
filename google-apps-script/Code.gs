@@ -228,21 +228,24 @@ function doPost(e) {
       }
       const rows = sheet.getDataRange().getValues();
       const header = rows[0].map(function(h) { return String(h).trim().toLowerCase(); });
-      const hasPassCol = header.some(function(h) { return h.includes('mật khẩu') || h.includes('pass'); });
+      const hasScopeCol = header.some(function(h) { return h.includes('phạm vi') || h.includes('scope'); });
+      const customCodesStr = Array.isArray(u.allowedCodes) ? u.allowedCodes.join(', ') : String(u.allowedCodes || '');
       let updated = false;
 
       for (let i = 1; i < rows.length; i++) {
         if (String(rows[i][0]).trim().toLowerCase() === emailToSave) {
           const rowIdx = i + 1;
-          if (hasPassCol) {
-            sheet.getRange(rowIdx, 2, 1, 7).setValues([[
+          if (hasScopeCol) {
+            sheet.getRange(rowIdx, 2, 1, 9).setValues([[
               u.name || rows[i][1],
               u.password || rows[i][2] || '123456',
               u.department || rows[i][3],
               (u.role || rows[i][4] || 'VIEWER').toUpperCase(),
-              (u.status || rows[i][5] || 'HOAT_DONG').toUpperCase(),
+              (u.expenseScope || rows[i][5] || 'ALL').toUpperCase(),
+              customCodesStr,
+              (u.status || rows[i][7] || 'HOAT_DONG').toUpperCase(),
               Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'),
-              u.notes || rows[i][7] || ''
+              u.notes || rows[i][9] || ''
             ]]);
           } else {
             sheet.getRange(rowIdx, 2, 1, 6).setValues([[
@@ -260,13 +263,15 @@ function doPost(e) {
       }
 
       if (!updated) {
-        if (hasPassCol) {
+        if (hasScopeCol) {
           sheet.appendRow([
             emailToSave,
             u.name || emailToSave.split('@')[0],
             u.password || '123456',
             u.department || 'Phòng TC-KH',
             (u.role || 'VIEWER').toUpperCase(),
+            (u.expenseScope || 'ALL').toUpperCase(),
+            customCodesStr,
             (u.status || 'HOAT_DONG').toUpperCase(),
             Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'),
             u.notes || ''
@@ -472,11 +477,13 @@ function getUsersFromSheet(ss) {
   if (rows.length <= 1) return [];
 
   const header = rows[0].map(function(h) { return String(h).trim().toLowerCase(); });
-  const emailIdx = header.findIndex(function(h) { return h.includes('email'); });
+  const emailIdx = header.findIndex(function(h) { return h.includes('email') || h.includes('tài khoản'); });
   const nameIdx = header.findIndex(function(h) { return h.includes('tên') || h.includes('họ'); });
   const passIdx = header.findIndex(function(h) { return h.includes('mật khẩu') || h.includes('pass'); });
   const deptIdx = header.findIndex(function(h) { return h.includes('phòng') || h.includes('bộ phận'); });
   const roleIdx = header.findIndex(function(h) { return h.includes('vai trò') || h.includes('role') || h.includes('quyền'); });
+  const scopeIdx = header.findIndex(function(h) { return h.includes('phạm vi') || h.includes('scope'); });
+  const customCodesIdx = header.findIndex(function(h) { return h.includes('mã') && (h.includes('tùy chọn') || h.includes('cho phép')); });
   const statusIdx = header.findIndex(function(h) { return h.includes('trạng thái') || h.includes('status'); });
   const dateIdx = header.findIndex(function(h) { return h.includes('ngày'); });
   const noteIdx = header.findIndex(function(h) { return h.includes('ghi chú') || h.includes('note'); });
@@ -486,12 +493,30 @@ function getUsersFromSheet(ss) {
     const r = rows[i];
     const email = String(emailIdx >= 0 ? r[emailIdx] : r[0] || '').trim();
     if (!email) continue;
+    
+    // Auto-detect default scope if not set in sheet
+    let scopeVal = 'ALL';
+    if (scopeIdx >= 0 && r[scopeIdx]) {
+      scopeVal = String(r[scopeIdx]).trim().toUpperCase();
+    } else if (email.includes('kythuat')) {
+      scopeVal = 'KY_THUAT';
+    } else if (email.includes('xaydung')) {
+      scopeVal = 'XAY_DUNG';
+    } else if (email.includes('daotao')) {
+      scopeVal = 'DAO_TAO';
+    }
+
+    const rawAllowedCodes = customCodesIdx >= 0 ? String(r[customCodesIdx] || '').trim() : '';
+    const allowedCodes = rawAllowedCodes ? rawAllowedCodes.split(',').map(function(s) { return s.trim(); }).filter(Boolean) : [];
+
     list.push({
       email: email,
       name: String(nameIdx >= 0 ? r[nameIdx] : r[1] || email.split('@')[0]).trim(),
       password: String(passIdx >= 0 ? r[passIdx] : (email.includes('admin') ? 'admin123' : email.includes('ketoan') ? 'ketoan123' : '123456')).trim(),
       department: String(deptIdx >= 0 ? r[deptIdx] : (passIdx >= 0 ? r[3] : r[2]) || '').trim(),
       role: String(roleIdx >= 0 ? r[roleIdx] : (passIdx >= 0 ? r[4] : r[3]) || 'VIEWER').trim().toUpperCase(),
+      expenseScope: scopeVal,
+      allowedCodes: allowedCodes,
       status: String(statusIdx >= 0 ? r[statusIdx] : (passIdx >= 0 ? r[5] : r[4]) || 'HOAT_DONG').trim().toUpperCase(),
       createdAt: String(dateIdx >= 0 ? r[dateIdx] : (passIdx >= 0 ? r[6] : r[5]) || '').trim(),
       notes: String(noteIdx >= 0 ? r[noteIdx] : (passIdx >= 0 ? r[7] : r[6]) || '').trim()
@@ -500,9 +525,6 @@ function getUsersFromSheet(ss) {
   return list;
 }
 
-/**
- * Tự động tạo và cấu hình Sheet QUAN_TRI_USER
- */
 function setupQuanTriUserSheet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   let userSheet = ss.getSheetByName(SHEET_USERS);
@@ -514,20 +536,25 @@ function setupQuanTriUserSheet() {
 
   userSheet.clear();
   userSheet.appendRow([
-    'Email Google',
+    'Tài khoản / Email',
     'Họ và tên',
     'Mật khẩu',
     'Phòng ban / Bộ phận',
     'Vai trò (ADMIN/EDITOR/VIEWER)',
+    'Phạm vi chi phí (ALL/KY_THUAT/XAY_DUNG/DAO_TAO/HANH_CHINH/AN_NINH/CUSTOM)',
+    'Mã khoản mục tùy chọn',
     'Trạng thái (HOAT_DONG/KHOA)',
     'Ngày cấp quyền',
     'Ghi chú'
   ]);
 
   const defaultUsers = [
-    ['admin@company.vn', 'Quản trị viên trưởng', 'admin123', 'Phòng TC-KH', 'ADMIN', 'HOAT_DONG', Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'), 'Quản trị hệ thống toàn quyền'],
-    ['ketoan@company.vn', 'Nguyễn Thị Lan (Kế toán)', 'ketoan123', 'Tổ Kế toán chi phí', 'EDITOR', 'HOAT_DONG', Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'), 'Biên tập & nhập số liệu chi phí'],
-    ['viewer@company.vn', 'Trần Văn Bình (Ban Giám Đốc)', 'viewer123', 'Ban Giám Đốc Cảng', 'VIEWER', 'HOAT_DONG', Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'), 'Tra cứu & xem báo cáo số liệu']
+    ['admin@company.vn', 'Quản trị viên trưởng', 'admin123', 'Phòng TC-KH', 'ADMIN', 'ALL', '', 'HOAT_DONG', Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'), 'Quản trị hệ thống toàn quyền'],
+    ['ketoan@company.vn', 'Nguyễn Thị Lan (Kế toán)', 'ketoan123', 'Tổ Kế toán chi phí', 'EDITOR', 'ALL', '', 'HOAT_DONG', Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'), 'Biên tập & nhập số liệu chi phí toàn cảng'],
+    ['kythuat@company.vn', 'Kỹ sư Kỹ thuật (Máy móc & Xe)', 'kythuat123', 'Đội Kỹ thuật - TTB', 'VIEWER', 'KY_THUAT', '', 'HOAT_DONG', Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'), 'Chỉ xem SCTX Máy móc thiết bị (627622) & Xe vận tải (627623)'],
+    ['xaydung@company.vn', 'Kỹ sư Xây dựng (Hạ tầng)', 'xaydung123', 'Đội Xây dựng - KCHTHK', 'VIEWER', 'XAY_DUNG', '', 'HOAT_DONG', Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'), 'Chỉ xem SCTX Cơ sở hạ tầng, Nhà ga, Sân đường (627621)'],
+    ['daotao@company.vn', 'Chuyên viên Đào tạo', 'daotao123', 'Phòng TCHC - Tổ Đào tạo', 'VIEWER', 'DAO_TAO', '', 'HOAT_DONG', Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'), 'Chỉ xem Chi phí Đào tạo, huấn luyện chuyên môn (627715)'],
+    ['viewer@company.vn', 'Trần Văn Bình (Ban Giám Đốc)', 'viewer123', 'Ban Giám Đốc Cảng', 'VIEWER', 'ALL', '', 'HOAT_DONG', Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'), 'Tra cứu & xem báo cáo toàn cảng']
   ];
 
   defaultUsers.forEach(function(u) {
@@ -539,37 +566,7 @@ function setupQuanTriUserSheet() {
     userSheet.getRange('C2:C').setHorizontalAlignment('center');
     userSheet.getRange('E2:E').setHorizontalAlignment('center');
     userSheet.getRange('F2:F').setHorizontalAlignment('center');
-    userSheet.setFrozenRows(1);
-  } catch(e) {}
-
-  return userSheet;
-}
-
-  userSheet.clear();
-  userSheet.appendRow([
-    'Email Google',
-    'Họ và tên',
-    'Phòng ban / Bộ phận',
-    'Vai trò (ADMIN/EDITOR/VIEWER)',
-    'Trạng thái (HOAT_DONG/KHOA)',
-    'Ngày cấp quyền',
-    'Ghi chú'
-  ]);
-
-  const defaultUsers = [
-    ['admin@company.vn', 'Quản trị viên trưởng', 'Phòng TC-KH', 'ADMIN', 'HOAT_DONG', Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'), 'Quản trị hệ thống toàn quyền'],
-    ['ketoan@company.vn', 'Nguyễn Thị Lan (Kế toán)', 'Tổ Kế toán chi phí', 'EDITOR', 'HOAT_DONG', Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'), 'Biên tập & nhập số liệu chi phí'],
-    ['viewer@company.vn', 'Trần Văn Bình (Ban Giám Đốc)', 'Ban Giám Đốc Cảng', 'VIEWER', 'HOAT_DONG', Utilities.formatDate(new Date(), 'GMT+7', 'dd/MM/yyyy HH:mm'), 'Tra cứu & xem báo cáo số liệu']
-  ];
-
-  defaultUsers.forEach(function(u) {
-    userSheet.appendRow(u);
-  });
-
-  try {
-    userSheet.getRange('1:1').setFontWeight('bold').setBackground('#fef3c7').setFontColor('#78350f');
-    userSheet.getRange('D2:D').setHorizontalAlignment('center');
-    userSheet.getRange('E2:E').setHorizontalAlignment('center');
+    userSheet.getRange('H2:H').setHorizontalAlignment('center');
     userSheet.setFrozenRows(1);
   } catch(e) {}
 

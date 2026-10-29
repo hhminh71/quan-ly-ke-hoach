@@ -5,7 +5,16 @@ import TransactionList from '../components/TransactionList';
 import BudgetOverview from '../components/BudgetOverview';
 import SyncModal from '../components/SyncModal';
 import UserManagementModal from '../components/UserManagementModal';
-import { canAdd, canEdit, canDelete, hasPermission } from '../utils/permissions';
+import {
+  canAdd,
+  canEdit,
+  canDelete,
+  hasPermission,
+  getUserScopeInfo,
+  filterBudgetsForUser,
+  filterTransactionsForUser,
+  filterBravoInfoForUser,
+} from '../utils/permissions';
 import {
   Download,
   RefreshCw,
@@ -183,6 +192,14 @@ export default function DashboardPage({ user }) {
     });
   }, [transactions, selectedYear]);
 
+  // Scope information for current user
+  const scopeInfo = useMemo(() => getUserScopeInfo(user), [user]);
+
+  // Scoped budgets, transactions, and bravoInfo based on user permissions
+  const scopedBudgets = useMemo(() => filterBudgetsForUser(budgets, user), [budgets, user]);
+  const scopedYearTransactions = useMemo(() => filterTransactionsForUser(yearTransactions, user), [yearTransactions, user]);
+  const scopedBravoInfo = useMemo(() => filterBravoInfoForUser(bravoInfo, user), [bravoInfo, user]);
+
   // Sync transactions to localStorage
   useEffect(() => {
     try {
@@ -310,12 +327,12 @@ export default function DashboardPage({ user }) {
   };
 
   const handleExportCSV = () => {
-    if (yearTransactions.length === 0) {
-      alert(`Không có dữ liệu năm ${selectedYear} để xuất.`);
+    if (scopedYearTransactions.length === 0) {
+      alert(`Không có dữ liệu năm ${selectedYear} trong phạm vi của bạn để xuất.`);
       return;
     }
     const headers = 'ID,Nam,MaKhoanMuc,DanhMuc,Nhom,Ngay,NguoiThucHien,SoTien,GhiChu\n';
-    const rows = yearTransactions
+    const rows = scopedYearTransactions
       .map(
         (t) =>
           `"${t.id}","${(t.date || '').substring(0, 4)}","${t.accountCode || ''}","${(t.category || '').replace(/"/g, '""')}","${(t.group || '').replace(/"/g, '""')}","${t.date || ''}","${(t.employeeName || '').replace(/"/g, '""')}","${t.amount || 0}","${(t.notes || '').replace(/"/g, '""')}"`
@@ -402,8 +419,20 @@ export default function DashboardPage({ user }) {
           </button>
         </div>
 
-        {/* ONLY Year Selector: Sleek, compact */}
-        <div className="shrink-0 flex items-center">
+        {/* Right side: Scope indicator & Year Selector */}
+        <div className="shrink-0 flex items-center gap-1.5">
+          {/* User Expense Scope Badge */}
+          {scopeInfo && scopeInfo.id !== 'ALL' && (
+            <div
+              className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold border shadow-2xs ${scopeInfo.badgeClass}`}
+              title={`Phạm vi chi phí: ${scopeInfo.label} • ${scopeInfo.description}`}
+            >
+              <span>{scopeInfo.iconText}</span>
+              <span className="hidden sm:inline">Phạm vi: {scopeInfo.shortLabel}</span>
+              <span className="sm:hidden">{scopeInfo.shortLabel}</span>
+            </div>
+          )}
+
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
@@ -423,8 +452,8 @@ export default function DashboardPage({ user }) {
       {/* Tab 1: Executive Dashboard (Macro Analytics, Group breakdown, Cashflow, Top 8, Risk radar) */}
       {activeTab === 'DASHBOARD' && (
         <ExecutiveDashboard
-          budgets={budgets}
-          transactions={yearTransactions}
+          budgets={scopedBudgets}
+          transactions={scopedYearTransactions}
           selectedYear={selectedYear}
           onNavigateToBudgets={() => handleTabChange('BUDGETS')}
           onNavigateToLedger={(accountCode) => {
@@ -440,8 +469,8 @@ export default function DashboardPage({ user }) {
       {/* Tab 2: Master Budgets Table for this Fiscal Year */}
       {activeTab === 'BUDGETS' && (
         <BudgetOverview
-          budgets={budgets}
-          transactions={yearTransactions}
+          budgets={scopedBudgets}
+          transactions={scopedYearTransactions}
           selectedYear={selectedYear}
           onUpdateBudgets={canEditBudgetsPlan ? (newBudgets) => {
             setBudgets(newBudgets);
@@ -460,8 +489,8 @@ export default function DashboardPage({ user }) {
       {/* Tab 3: Full Width Transactions List */}
       {activeTab === 'TRANSACTIONS' && (
         <TransactionList
-          transactions={yearTransactions}
-          budgets={budgets}
+          transactions={scopedYearTransactions}
+          budgets={scopedBudgets}
           onAddTransaction={canAddTx ? handleAddTransaction : null}
           onUpdateTransaction={canEditTx ? handleUpdateTransaction : null}
           onDeleteTransaction={canDeleteTx ? handleDeleteTransaction : null}
@@ -476,8 +505,8 @@ export default function DashboardPage({ user }) {
         <AccountLedgerModal
           isOpen={Boolean(selectedDetailAccount)}
           account={selectedDetailAccount}
-          transactions={yearTransactions}
-          budgets={budgets}
+          transactions={scopedYearTransactions}
+          budgets={scopedBudgets}
           selectedYear={selectedYear}
           onClose={() => setSelectedDetailAccount(null)}
           onAddTransaction={canAddTx ? handleAddTransaction : null}
@@ -494,10 +523,10 @@ export default function DashboardPage({ user }) {
       {/* Tab 4: BRAVO Reconciliation & Macro Airport View */}
       {activeTab === 'BRAVO_RECON' && (
         <BravoReconciliation
-          budgets={budgets}
-          transactions={yearTransactions}
+          budgets={scopedBudgets}
+          transactions={scopedYearTransactions}
           selectedYear={selectedYear}
-          bravoInfo={bravoInfo}
+          bravoInfo={scopedBravoInfo}
           onAddTransaction={canAddTx ? handleAddTransaction : null}
           onUpdateTransaction={canEditTx ? handleUpdateTransaction : null}
           onDeleteTransaction={canDeleteTx ? handleDeleteTransaction : null}

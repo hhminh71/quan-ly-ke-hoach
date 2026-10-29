@@ -90,6 +90,8 @@ export default function LoginPage({ onLogin }) {
           name: matched.name || cleanEmail.split('@')[0],
           email: matched.email,
           role: role,
+          expenseScope: matched.expenseScope || 'ALL',
+          allowedCodes: matched.allowedCodes || [],
           department: matched.department || 'Phòng TC-KH',
           provider: 'credentials',
         });
@@ -106,6 +108,8 @@ export default function LoginPage({ onLogin }) {
             name: cleanEmail.split('@')[0].toUpperCase(),
             email: cleanEmail,
             role: ROLES.ADMIN,
+            expenseScope: 'ALL',
+            allowedCodes: [],
             department: 'Phòng TC-KH',
             provider: 'credentials',
           });
@@ -270,26 +274,27 @@ export default function LoginPage({ onLogin }) {
           </form>
 
           {/* Quick Demo Roles Selection */}
-          <div className="mt-4 pt-3.5 border-t border-blue-400/20">
-            <p className="text-[10px] text-blue-300/80 font-bold uppercase tracking-wider mb-2 flex items-center justify-between">
-              <span>Tài khoản thử nghiệm (1 chạm):</span>
-              <span className="text-amber-300/90 font-normal lowercase">(tự điền & vào ngay)</span>
+          <div className="mt-4 pt-3.5 border-t border-blue-400/20 space-y-2">
+            <p className="text-[10px] text-blue-300/80 font-bold uppercase tracking-wider flex items-center justify-between">
+              <span>Tài khoản thử nghiệm phân quyền (1 chạm):</span>
+              <span className="text-amber-300/90 font-normal lowercase">(bấm vào ngay)</span>
             </p>
 
+            {/* Row 1: Core Roles */}
             <div className="grid grid-cols-3 gap-1.5">
               <button
                 type="button"
                 onClick={() => handleSelectRoleDemo('admin@company.vn', 'admin123')}
-                className="p-2 rounded-xl bg-[#041a30]/80 hover:bg-amber-500/20 border border-amber-400/40 text-left transition-all cursor-pointer group"
+                className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-amber-500/20 border border-amber-400/40 text-left transition-all cursor-pointer group"
                 title="Email: admin@company.vn • Pass: admin123"
               >
                 <div className="text-[10px] font-bold text-amber-300 flex items-center gap-1">
                   <span>👑 Admin</span>
                 </div>
                 <div className="text-[9px] text-slate-300 font-medium truncate mt-0.5">
-                  Làm tất cả
+                  Toàn quyền
                 </div>
-                <div className="text-[8.5px] font-mono text-amber-200/60 mt-0.5 truncate">
+                <div className="text-[8px] font-mono text-amber-200/60 truncate">
                   Pass: admin123
                 </div>
               </button>
@@ -297,7 +302,7 @@ export default function LoginPage({ onLogin }) {
               <button
                 type="button"
                 onClick={() => handleSelectRoleDemo('ketoan@company.vn', 'ketoan123')}
-                className="p-2 rounded-xl bg-[#041a30]/80 hover:bg-sky-500/20 border border-sky-400/40 text-left transition-all cursor-pointer group"
+                className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-sky-500/20 border border-sky-400/40 text-left transition-all cursor-pointer group"
                 title="Email: ketoan@company.vn • Pass: ketoan123"
               >
                 <div className="text-[10px] font-bold text-sky-300 flex items-center gap-1">
@@ -306,7 +311,7 @@ export default function LoginPage({ onLogin }) {
                 <div className="text-[9px] text-slate-300 font-medium truncate mt-0.5">
                   Thêm & Sửa
                 </div>
-                <div className="text-[8.5px] font-mono text-sky-200/60 mt-0.5 truncate">
+                <div className="text-[8px] font-mono text-sky-200/60 truncate">
                   Pass: ketoan123
                 </div>
               </button>
@@ -314,17 +319,71 @@ export default function LoginPage({ onLogin }) {
               <button
                 type="button"
                 onClick={() => handleSelectRoleDemo('viewer@company.vn', 'viewer123')}
-                className="p-2 rounded-xl bg-[#041a30]/80 hover:bg-slate-500/20 border border-slate-400/40 text-left transition-all cursor-pointer group"
+                className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-slate-500/20 border border-slate-400/40 text-left transition-all cursor-pointer group"
                 title="Email: viewer@company.vn • Pass: viewer123"
               >
                 <div className="text-[10px] font-bold text-slate-300 flex items-center gap-1">
-                  <span>👁️ Viewer</span>
+                  <span>👁️ Giám Đốc</span>
                 </div>
                 <div className="text-[9px] text-slate-300 font-medium truncate mt-0.5">
-                  Chỉ xem
+                  Xem toàn cảng
                 </div>
-                <div className="text-[8.5px] font-mono text-slate-300/60 mt-0.5 truncate">
+                <div className="text-[8px] font-mono text-slate-300/60 truncate">
                   Pass: viewer123
+                </div>
+              </button>
+            </div>
+
+            {/* Row 2: Department Expense Scopes */}
+            <div className="grid grid-cols-3 gap-1.5">
+              <button
+                type="button"
+                onClick={() => handleSelectRoleDemo('kythuat@company.vn', 'kythuat123')}
+                className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-blue-500/20 border border-blue-400/40 text-left transition-all cursor-pointer group"
+                title="Email: kythuat@company.vn • Pass: kythuat123 • SCTX Máy móc & Phương tiện"
+              >
+                <div className="text-[10px] font-bold text-blue-300 flex items-center gap-1">
+                  <span>🛠️ Kỹ thuật</span>
+                </div>
+                <div className="text-[9px] text-slate-300 font-medium truncate mt-0.5">
+                  Chỉ Máy & Xe
+                </div>
+                <div className="text-[8px] font-mono text-blue-200/60 truncate">
+                  Pass: kythuat123
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSelectRoleDemo('xaydung@company.vn', 'xaydung123')}
+                className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-amber-500/20 border border-amber-400/40 text-left transition-all cursor-pointer group"
+                title="Email: xaydung@company.vn • Pass: xaydung123 • SCTX Cơ sở hạ tầng"
+              >
+                <div className="text-[10px] font-bold text-amber-300 flex items-center gap-1">
+                  <span>🏗️ Xây dựng</span>
+                </div>
+                <div className="text-[9px] text-slate-300 font-medium truncate mt-0.5">
+                  Chỉ Hạ tầng
+                </div>
+                <div className="text-[8px] font-mono text-amber-200/60 truncate">
+                  Pass: xaydung123
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSelectRoleDemo('daotao@company.vn', 'daotao123')}
+                className="p-1.5 rounded-xl bg-[#041a30]/80 hover:bg-purple-500/20 border border-purple-400/40 text-left transition-all cursor-pointer group"
+                title="Email: daotao@company.vn • Pass: daotao123 • Chi phí Đào tạo"
+              >
+                <div className="text-[10px] font-bold text-purple-300 flex items-center gap-1">
+                  <span>🎓 Đào tạo</span>
+                </div>
+                <div className="text-[9px] text-slate-300 font-medium truncate mt-0.5">
+                  Chỉ Đào tạo
+                </div>
+                <div className="text-[8px] font-mono text-purple-200/60 truncate">
+                  Pass: daotao123
                 </div>
               </button>
             </div>

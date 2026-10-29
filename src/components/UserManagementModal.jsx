@@ -4,7 +4,6 @@ import {
   UserPlus,
   Shield,
   ShieldCheck,
-  ShieldAlert,
   Search,
   X,
   Edit2,
@@ -16,12 +15,18 @@ import {
   CheckCircle2,
   AlertCircle,
   FileSpreadsheet,
+  Check,
+  Sliders,
+  ChevronDown,
 } from 'lucide-react';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
 import {
   ROLES,
   ROLE_INFO,
   normalizeRole,
+  EXPENSE_SCOPES,
+  getUserScopeInfo,
+  normalizeExpenseScope,
 } from '../utils/permissions';
 import {
   getSavedUsers,
@@ -31,11 +36,13 @@ import {
   fetchFromGoogleSheet,
   getSavedWebhookUrl,
 } from '../services/googleSheetService';
+import initialBudgets from '../data/budgets.json';
 
 export default function UserManagementModal({ isOpen, onClose, currentUser }) {
   const [users, setUsers] = useState(getSavedUsers);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
+  const [scopeFilter, setScopeFilter] = useState('ALL');
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
@@ -47,6 +54,9 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
   const [formName, setFormName] = useState('');
   const [formDept, setFormDept] = useState('Phòng TC-KH');
   const [formRole, setFormRole] = useState(ROLES.VIEWER);
+  const [formScope, setFormScope] = useState('ALL');
+  const [formAllowedCodes, setFormAllowedCodes] = useState([]);
+  const [customSearch, setCustomSearch] = useState('');
   const [formNotes, setFormNotes] = useState('');
   const [formStatus, setFormStatus] = useState('HOAT_DONG');
   const [formError, setFormError] = useState('');
@@ -76,9 +86,13 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
       const matchRole =
         roleFilter === 'ALL' || normalizeRole(u.role) === roleFilter;
 
-      return matchSearch && matchRole;
+      const userScope = normalizeExpenseScope(u.expenseScope);
+      const matchScope =
+        scopeFilter === 'ALL' || userScope === scopeFilter;
+
+      return matchSearch && matchRole && matchScope;
     });
-  }, [users, searchTerm, roleFilter]);
+  }, [users, searchTerm, roleFilter, scopeFilter]);
 
   const handleOpenAdd = () => {
     setEditingUser(null);
@@ -87,6 +101,9 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
     setFormName('');
     setFormDept('Phòng TC-KH');
     setFormRole(ROLES.VIEWER);
+    setFormScope('ALL');
+    setFormAllowedCodes([]);
+    setCustomSearch('');
     setFormNotes('');
     setFormStatus('HOAT_DONG');
     setFormError('');
@@ -100,10 +117,38 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
     setFormName(u.name || '');
     setFormDept(u.department || 'Phòng TC-KH');
     setFormRole(normalizeRole(u.role));
+    setFormScope(normalizeExpenseScope(u.expenseScope));
+    const rawCodes = u.allowedCodes;
+    const parsedCodes = Array.isArray(rawCodes)
+      ? rawCodes
+      : typeof rawCodes === 'string'
+      ? rawCodes.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+    setFormAllowedCodes(parsedCodes);
+    setCustomSearch('');
     setFormNotes(u.notes || '');
     setFormStatus(u.status || 'HOAT_DONG');
     setFormError('');
     setIsAddUserOpen(true);
+  };
+
+  const handleToggleCode = (code) => {
+    setFormAllowedCodes((prev) =>
+      prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]
+    );
+  };
+
+  const handleSelectAllCustom = (codesToSelect) => {
+    setFormAllowedCodes((prev) => {
+      const set = new Set([...prev, ...codesToSelect]);
+      return Array.from(set);
+    });
+  };
+
+  const handleDeselectAllCustom = (codesToDeselect) => {
+    setFormAllowedCodes((prev) =>
+      prev.filter((c) => !codesToDeselect.includes(c))
+    );
   };
 
   const handleSaveForm = async (e) => {
@@ -112,12 +157,7 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
 
     const cleanEmail = formEmail.trim().toLowerCase();
     if (!cleanEmail) {
-      setFormError('Vui lòng nhập địa chỉ Email Google.');
-      return;
-    }
-
-    if (!cleanEmail.includes('@')) {
-      setFormError('Email Google không hợp lệ.');
+      setFormError('Vui lòng nhập Email hoặc Tên tài khoản.');
       return;
     }
 
@@ -125,7 +165,7 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
     if (!editingUser) {
       const exists = users.some((u) => u.email.toLowerCase() === cleanEmail);
       if (exists) {
-        setFormError('Email này đã được cấp quyền trong hệ thống. Bạn có thể chọn Chỉnh sửa.');
+        setFormError('Tài khoản này đã tồn tại trong hệ thống. Bạn có thể chọn Chỉnh sửa.');
         return;
       }
     }
@@ -136,6 +176,8 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
       name: formName.trim() || cleanEmail.split('@')[0],
       department: formDept.trim() || 'Phòng TC-KH',
       role: formRole,
+      expenseScope: formScope,
+      allowedCodes: formScope === 'CUSTOM' ? formAllowedCodes : [],
       status: formStatus,
       createdAt: editingUser?.createdAt || new Date().toLocaleDateString('vi-VN'),
       notes: formNotes.trim(),
@@ -162,76 +204,94 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
 
   const handleToggleStatus = (u) => {
     const newStatus = u.status === 'KHOA' ? 'HOAT_DONG' : 'KHOA';
-    const updated = { ...u, status: newStatus };
-    const updatedList = users.map((item) => (item.email.toLowerCase() === u.email.toLowerCase() ? updated : item));
+    const updatedUser = { ...u, status: newStatus };
+    const updatedList = users.map((item) => (item.email.toLowerCase() === u.email.toLowerCase() ? updatedUser : item));
     setUsers(updatedList);
     saveSavedUsers(updatedList);
-    showToast(newStatus === 'KHOA' ? `Đã khóa quyền truy cập của ${u.email}` : `Đã mở khóa tài khoản ${u.email}`);
+    showToast(newStatus === 'KHOA' ? `Đã khóa tài khoản ${u.email}` : `Đã mở khóa tài khoản ${u.email}`);
 
     const webhookUrl = getSavedWebhookUrl();
     if (webhookUrl) {
-      saveUserToGoogleSheet(webhookUrl, updated);
+      saveUserToGoogleSheet(webhookUrl, updatedUser);
     }
   };
 
-  const handleDeleteUser = (email) => {
-    if (email.toLowerCase() === currentUser?.email?.toLowerCase()) {
-      alert('Bạn không thể tự xóa tài khoản của chính mình.');
+  const handleDeleteUser = (emailToDelete) => {
+    if (emailToDelete.toLowerCase() === currentUser?.email?.toLowerCase()) {
+      alert('Bạn không thể tự xóa tài khoản của chính mình!');
       return;
     }
 
-    if (window.confirm(`Bạn có chắc chắn muốn xóa quyền truy cập của tài khoản ${email}?`)) {
-      const updatedList = users.filter((u) => u.email.toLowerCase() !== email.toLowerCase());
+    if (confirm(`Bạn có chắc chắn muốn xóa quyền tài khoản "${emailToDelete}"?`)) {
+      const updatedList = users.filter((u) => u.email.toLowerCase() !== emailToDelete.toLowerCase());
       setUsers(updatedList);
       saveSavedUsers(updatedList);
-      showToast(`Đã xóa tài khoản ${email}`);
+      showToast(`Đã xóa tài khoản ${emailToDelete}!`);
 
       const webhookUrl = getSavedWebhookUrl();
       if (webhookUrl) {
-        deleteUserFromGoogleSheet(webhookUrl, email);
+        deleteUserFromGoogleSheet(webhookUrl, emailToDelete);
       }
     }
   };
 
   const handleSyncFromSheet = async () => {
+    const webhookUrl = getSavedWebhookUrl();
+    if (!webhookUrl) {
+      alert('Chưa có cấu hình Webhook Google Sheet. Vui lòng cấu hình Webhook trước.');
+      return;
+    }
+
     setIsSyncing(true);
     try {
-      const webhookUrl = getSavedWebhookUrl();
       const res = await fetchFromGoogleSheet(webhookUrl);
       if (Array.isArray(res.users) && res.users.length > 0) {
         setUsers(res.users);
-        showToast(`Đã đồng bộ thành công ${res.users.length} tài khoản từ Sheet QUAN_TRI_USER!`);
+        saveSavedUsers(res.users);
+        showToast(`Đồng bộ thành công! Đã nạp ${res.users.length} tài khoản từ Sheet QUAN_TRI_USER.`);
       } else {
-        showToast('Đã kết nối với Sheet thành công!');
+        showToast('Sheet QUAN_TRI_USER chưa có dữ liệu mới.');
       }
     } catch (err) {
-      console.error(err);
-      alert('Không thể nạp danh sách từ Google Sheet: ' + err.message);
+      alert('Lỗi đồng bộ: ' + err.message);
     } finally {
       setIsSyncing(false);
     }
   };
 
+  // Filter budgets for custom selection
+  const filteredBudgetOptions = useMemo(() => {
+    if (!customSearch.trim()) return initialBudgets;
+    const term = customSearch.toLowerCase();
+    return initialBudgets.filter(
+      (b) =>
+        b.code.toLowerCase().includes(term) ||
+        b.name.toLowerCase().includes(term) ||
+        (b.group && b.group.toLowerCase().includes(term))
+    );
+  }, [customSearch]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-fadeIn">
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-150">
-        {/* Header */}
-        <div className="px-5 py-3.5 bg-gradient-to-r from-[#074780] via-[#09579d] to-[#074780] text-white flex items-center justify-between shrink-0">
+    <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 animate-fadeIn">
+      <div className="w-full max-w-5xl bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95">
+        
+        {/* Modal Header */}
+        <div className="px-4 py-3 sm:px-6 sm:py-3.5 bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-amber-400 text-slate-950 flex items-center justify-center font-bold shadow-md">
-              <Users className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-xl bg-amber-400/20 text-amber-400 border border-amber-400/30 flex items-center justify-center">
+              <Users className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                <span>Quản Trị Người Dùng & Phân Quyền</span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] bg-amber-400/20 text-amber-300 border border-amber-400/30 font-mono">
-                  Google Workspace
+              <h2 className="text-sm sm:text-base font-bold flex items-center gap-2">
+                <span>Quản Lý Phân Quyền Người Dùng & Phạm Vi Chi Phí</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-400/30">
+                  {users.length} tài khoản
                 </span>
               </h2>
-              <p className="text-[11px] text-blue-200/80">
-                Quản lý danh sách tài khoản Google và quyền hạn (Admin / Kế toán / Viewer)
+              <p className="text-[10.5px] sm:text-xs text-blue-200/70">
+                Phân quyền vai trò (Admin / Biên tập / Chỉ xem) và phạm vi chuyên môn (Kỹ thuật, Xây dựng, Đào tạo...)
               </p>
             </div>
           </div>
@@ -239,45 +299,47 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
           <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={handleSyncFromSheet}
               disabled={isSyncing}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 transition-all cursor-pointer disabled:opacity-50"
-              title="Lấy lại danh sách User mới nhất từ Google Sheet QUAN_TRI_USER"
+              onClick={handleSyncFromSheet}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 transition-all cursor-pointer disabled:opacity-50"
+              title="Đồng bộ danh sách tài khoản từ Sheet QUAN_TRI_USER trên Google Sheets"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Làm mới từ Sheet</span>
+              <span>{isSyncing ? 'Đang đồng bộ...' : 'Đồng bộ từ Sheet'}</span>
             </button>
 
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-lg bg-white/10 hover:bg-rose-600 text-white flex items-center justify-center transition-all cursor-pointer"
+              className="w-8 h-8 rounded-lg hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
             >
-              <X className="w-4 h-4" />
+              <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
         {/* Toast Notification */}
         {toastMessage && (
-          <div className="bg-emerald-50 border-b border-emerald-200 px-4 py-2 text-xs font-semibold text-emerald-800 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-            <span>{toastMessage}</span>
+          <div className="bg-emerald-600 text-white text-xs px-4 py-2 font-semibold flex items-center justify-between animate-fadeIn">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>{toastMessage}</span>
+            </div>
           </div>
         )}
 
-        {/* Toolbar & Filters */}
-        <div className="p-4 bg-slate-50/80 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-2 flex-1 min-w-[240px]">
-            {/* Search Box */}
-            <div className="relative flex-1">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+        {/* Toolbar: Search, Filters & Add button */}
+        <div className="p-3 sm:p-4 border-b border-slate-200/80 bg-slate-50/60 flex flex-wrap items-center justify-between gap-2.5">
+          <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[280px]">
+            {/* Search Input */}
+            <div className="relative flex-1 min-w-[180px] max-w-xs">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Tìm theo email, họ tên, phòng ban..."
-                className="w-full pl-9 pr-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder="Tìm tên, tài khoản, phòng ban..."
+                className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 font-medium"
               />
             </div>
 
@@ -285,19 +347,34 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
             <select
               value={roleFilter}
               onChange={(e) => setRoleFilter(e.target.value)}
-              className="px-2.5 py-1.5 rounded-lg bg-white border border-slate-300 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+              className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
             >
               <option value="ALL">Tất cả vai trò</option>
-              <option value={ROLES.ADMIN}>Quản trị viên (Admin)</option>
-              <option value={ROLES.EDITOR}>Kế toán / Biên tập</option>
-              <option value={ROLES.VIEWER}>Chỉ xem (Viewer)</option>
+              <option value={ROLES.ADMIN}>👑 Quản trị viên (Admin)</option>
+              <option value={ROLES.EDITOR}>✏️ Biên tập / Kế toán</option>
+              <option value={ROLES.VIEWER}>👁️ Người xem (Viewer)</option>
+            </select>
+
+            {/* Scope Filter */}
+            <select
+              value={scopeFilter}
+              onChange={(e) => setScopeFilter(e.target.value)}
+              className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+            >
+              <option value="ALL">Tất cả phạm vi</option>
+              <option value="KY_THUAT">🛠️ Kỹ thuật (Máy & Xe)</option>
+              <option value="XAY_DUNG">🏗️ Xây dựng (Hạ tầng)</option>
+              <option value="DAO_TAO">🎓 Đào tạo & Huấn luyện</option>
+              <option value="HANH_CHINH">🏢 Hành chính VP</option>
+              <option value="AN_NINH">🛡️ An ninh & PCCC</option>
+              <option value="CUSTOM">⚙️ Tùy chọn linh hoạt</option>
             </select>
           </div>
 
           <button
             type="button"
             onClick={handleOpenAdd}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer shrink-0"
           >
             <UserPlus className="w-4 h-4" />
             <span>Thêm User Mới</span>
@@ -305,15 +382,16 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
         </div>
 
         {/* Users Table */}
-        <div className="flex-1 overflow-auto p-4">
+        <div className="flex-1 overflow-auto p-3 sm:p-4">
           <div className="rounded-xl border border-slate-200 overflow-hidden shadow-xs">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-100/90 text-slate-700 border-b border-slate-200 font-bold">
                   <th className="py-2.5 px-3 text-center w-10">STT</th>
-                  <th className="py-2.5 px-3">Tài Khoản Google / Họ Tên</th>
+                  <th className="py-2.5 px-3">Tài Khoản / Họ Tên</th>
                   <th className="py-2.5 px-3">Phòng Ban / Chức Vụ</th>
-                  <th className="py-2.5 px-3 text-center">Vai Trò (Quyền Hạn)</th>
+                  <th className="py-2.5 px-3 text-center">Vai Trò</th>
+                  <th className="py-2.5 px-3">Phạm Vi Chi Phí</th>
                   <th className="py-2.5 px-3 text-center">Trạng Thái</th>
                   <th className="py-2.5 px-3 text-right">Thao Tác</th>
                 </tr>
@@ -321,7 +399,7 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
               <tbody className="divide-y divide-slate-100 bg-white">
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-slate-400">
+                    <td colSpan={7} className="py-8 text-center text-slate-400">
                       Không tìm thấy người dùng nào phù hợp.
                     </td>
                   </tr>
@@ -329,6 +407,7 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
                   filteredUsers.map((u, idx) => {
                     const normRole = normalizeRole(u.role);
                     const roleMeta = ROLE_INFO[normRole] || ROLE_INFO[ROLES.VIEWER];
+                    const scopeMeta = getUserScopeInfo(u);
                     const isCurrentUser = u.email.toLowerCase() === currentUser?.email?.toLowerCase();
                     const isLocked = u.status === 'KHOA';
 
@@ -360,7 +439,7 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
                               <p className="text-[11px] font-mono text-slate-500 truncate flex items-center gap-1.5 flex-wrap">
                                 <span>{u.email}</span>
                                 {u.password && (
-                                  <span className="text-[9.5px] text-slate-500 font-mono bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200" title="Mật khẩu đăng nhập">
+                                  <span className="text-[9.5px] text-slate-500 font-mono bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200" title="Mật khẩu">
                                     Pass: {u.password}
                                   </span>
                                 )}
@@ -378,8 +457,26 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
                             className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border ${roleMeta.badgeClass}`}
                           >
                             <span className={`w-1.5 h-1.5 rounded-full ${roleMeta.dotClass}`} />
-                            <span>{roleMeta.label}</span>
+                            <span>{roleMeta.shortLabel}</span>
                           </span>
+                        </td>
+
+                        {/* Expense Scope Badge */}
+                        <td className="py-2.5 px-3">
+                          <div className="flex flex-col items-start gap-0.5">
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border shadow-2xs ${scopeMeta.badgeClass}`}
+                              title={scopeMeta.description}
+                            >
+                              <span>{scopeMeta.iconText}</span>
+                              <span>{scopeMeta.shortLabel}</span>
+                            </span>
+                            {u.expenseScope === 'CUSTOM' && Array.isArray(u.allowedCodes) && u.allowedCodes.length > 0 && (
+                              <span className="text-[9.5px] font-mono text-slate-400">
+                                ({u.allowedCodes.length} mã được chọn)
+                              </span>
+                            )}
+                          </div>
                         </td>
 
                         <td className="py-2.5 px-3 text-center">
@@ -416,7 +513,7 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
                               type="button"
                               onClick={() => handleOpenEdit(u)}
                               className="p-1.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors cursor-pointer"
-                              title="Sửa phân quyền"
+                              title="Sửa quyền hạn & phạm vi chi phí"
                             >
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
@@ -441,16 +538,12 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
           </div>
         </div>
 
-        {/* Footer info & Rules summary */}
-        <div className="p-3.5 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-[11px] text-slate-500 shrink-0">
+        {/* Modal Footer info */}
+        <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-200 text-slate-500 text-[11px] flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1 text-slate-700 font-semibold">
-              <Shield className="w-3.5 h-3.5 text-amber-500" />
-              <span>Quy tắc:</span>
-            </span>
             <span>👑 <strong>Admin</strong>: Làm tất cả</span>
             <span>✏️ <strong>Biên tập</strong>: Thêm & Sửa (không xóa)</span>
-            <span>👁️ <strong>Viewer</strong>: Chỉ xem</span>
+            <span>👁️ <strong>Viewer</strong>: Chỉ xem theo phạm vi</span>
           </div>
 
           <span className="text-slate-400">
@@ -459,25 +552,27 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
         </div>
       </div>
 
-      {/* Modal Add / Edit User Form */}
+      {/* Submodal Add / Edit User Form */}
       {isAddUserOpen && (
         <div className="fixed inset-0 z-60 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-3 animate-fadeIn">
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in zoom-in-95">
-            <div className="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between">
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95">
+            {/* Header */}
+            <div className="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between shrink-0">
               <h3 className="text-sm font-bold flex items-center gap-2">
                 <UserPlus className="w-4 h-4 text-amber-400" />
-                <span>{editingUser ? 'Chỉnh Sửa Phân Quyền' : 'Thêm Người Dùng Mới'}</span>
+                <span>{editingUser ? 'Chỉnh Sửa Quyền Hạn & Phạm Vi' : 'Thêm Người Dùng Mới'}</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setIsAddUserOpen(false)}
-                className="w-7 h-7 rounded-lg hover:bg-white/20 text-white flex items-center justify-center transition-colors"
+                className="w-7 h-7 rounded-lg hover:bg-white/20 text-white flex items-center justify-center transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveForm} className="p-5 space-y-3.5">
+            {/* Form Body */}
+            <form onSubmit={handleSaveForm} className="p-5 space-y-3.5 overflow-y-auto flex-1">
               {formError && (
                 <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
@@ -485,21 +580,23 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
                 </div>
               )}
 
+              {/* Username / Email */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Tài khoản / Email người dùng <span className="text-rose-500">*</span>
+                  Tài khoản / Email <span className="text-rose-500">*</span>
                 </label>
                 <input
-                  type="email"
+                  type="text"
                   value={formEmail}
                   onChange={(e) => setFormEmail(e.target.value)}
                   disabled={Boolean(editingUser)}
-                  placeholder="ví dụ: nhanvien@gmail.com hoặc user@acv.vn"
+                  placeholder="ví dụ: kythuat@company.vn hoặc username"
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium disabled:bg-slate-100 disabled:text-slate-500"
                   required
                 />
               </div>
 
+              {/* Full Name */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Họ và tên
@@ -513,6 +610,7 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
                 />
               </div>
 
+              {/* Password */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Mật khẩu đăng nhập <span className="text-rose-500">*</span>
@@ -525,9 +623,9 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono font-medium"
                   required
                 />
-                <p className="text-[10px] text-slate-500 mt-0.5">Dùng để đăng nhập khi sử dụng tài khoản Email.</p>
               </div>
 
+              {/* Department */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Phòng ban / Chức vụ
@@ -536,14 +634,15 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
                   type="text"
                   value={formDept}
                   onChange={(e) => setFormDept(e.target.value)}
-                  placeholder="ví dụ: Phòng TC-KH, Ban Giám Đốc..."
+                  placeholder="ví dụ: Đội Kỹ thuật - TTB, Phòng TC-KH..."
                   className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
                 />
               </div>
 
+              {/* Role Level */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Vai trò (Quyền hạn) <span className="text-rose-500">*</span>
+                  Vai trò (Quyền hạn chức năng) <span className="text-rose-500">*</span>
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
@@ -574,9 +673,117 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
                 </div>
               </div>
 
+              {/* EXPENSE SCOPE (Phạm vi chi phí chuyên môn) */}
+              <div className="pt-2 border-t border-slate-200">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold text-slate-900">
+                    Phạm vi chi phí được phép xem <span className="text-rose-500">*</span>
+                  </label>
+                  <span className="text-[10.5px] text-blue-600 font-medium">
+                    (Phân hệ theo chuyên môn)
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-1.5">
+                  {Object.values(EXPENSE_SCOPES).map((scope) => (
+                    <label
+                      key={scope.id}
+                      className={`p-2 rounded-xl border cursor-pointer transition-all flex items-start gap-2 ${
+                        formScope === scope.id
+                          ? 'bg-blue-50/80 border-blue-500 ring-2 ring-blue-500/20 text-blue-950 font-bold shadow-2xs'
+                          : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="expenseScope"
+                        value={scope.id}
+                        checked={formScope === scope.id}
+                        onChange={() => setFormScope(scope.id)}
+                        className="sr-only"
+                      />
+                      <span className="text-base leading-none shrink-0 mt-0.5">{scope.iconText}</span>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[11.5px] leading-tight font-bold">{scope.label}</div>
+                        <div className="text-[9.5px] text-slate-500 font-normal leading-tight mt-0.5 line-clamp-2">
+                          {scope.description}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+
+                {/* If CUSTOM is selected: Show searchable budget item checklist */}
+                {formScope === 'CUSTOM' && (
+                  <div className="mt-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-2 animate-fadeIn">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                        <Sliders className="w-3.5 h-3.5 text-teal-600" />
+                        <span>Tùy chọn mã khoản mục ({formAllowedCodes.length} đã chọn):</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleSelectAllCustom(initialBudgets.map((b) => b.code))}
+                          className="px-2 py-0.5 text-[10px] rounded bg-white border border-slate-200 text-blue-700 font-bold hover:bg-blue-50 cursor-pointer"
+                        >
+                          Chọn tất cả (76)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setFormAllowedCodes([])}
+                          className="px-2 py-0.5 text-[10px] rounded bg-white border border-slate-200 text-rose-700 font-bold hover:bg-rose-50 cursor-pointer"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="relative">
+                      <Search className="w-3 h-3 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <input
+                        type="text"
+                        value={customSearch}
+                        onChange={(e) => setCustomSearch(e.target.value)}
+                        placeholder="Tìm mã hoặc tên khoản mục..."
+                        className="w-full pl-7 pr-3 py-1 rounded-lg border border-slate-200 bg-white text-xs placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div className="max-h-48 overflow-y-auto divide-y divide-slate-100 border border-slate-200 rounded-lg bg-white">
+                      {filteredBudgetOptions.map((item) => {
+                        const isChecked = formAllowedCodes.includes(item.code);
+                        return (
+                          <label
+                            key={item.code}
+                            className={`flex items-center gap-2 p-2 text-xs cursor-pointer hover:bg-slate-50 transition-colors ${
+                              isChecked ? 'bg-teal-50/50' : ''
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => handleToggleCode(item.code)}
+                              className="rounded border-slate-300 text-teal-600 focus:ring-teal-500 w-3.5 h-3.5 cursor-pointer"
+                            />
+                            <span className="font-mono font-bold text-slate-700 shrink-0 text-[11px]">
+                              {item.code}
+                            </span>
+                            <span className="text-slate-800 text-[11px] truncate flex-1 font-medium">
+                              {item.name}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Status */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Trạng thái
+                  Trạng thái tài khoản
                 </label>
                 <select
                   value={formStatus}
@@ -588,6 +795,7 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
                 </select>
               </div>
 
+              {/* Notes */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Ghi chú
@@ -601,19 +809,20 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2">
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setIsAddUserOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                 >
-                  Hủy
+                  Hủy Bỏ
                 </button>
                 <button
                   type="submit"
                   className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-md shadow-blue-500/20 transition-all cursor-pointer"
                 >
-                  {editingUser ? 'Lưu Thay Đổi' : 'Thêm Người Dùng'}
+                  {editingUser ? 'Cập Nhật Quyền Hạn' : 'Lưu Người Dùng'}
                 </button>
               </div>
             </form>

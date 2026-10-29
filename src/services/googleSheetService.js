@@ -4,7 +4,7 @@
 
 const STORAGE_KEY_WEBHOOK_URL = 'app_google_sheet_webhook_url';
 const STORAGE_KEY_LAST_SYNC = 'app_last_sync_time';
-const STORAGE_KEY_USERS = 'app_users_list_v2';
+const STORAGE_KEY_USERS = 'app_users_list_v3';
 
 export const DEFAULT_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbypvdO6D1QW4K_PgKlIRAoUFfWnRyC4Wkn3oYU4Tbz5GOyX5gd3zpIhx93715PKUp8A/exec';
 
@@ -15,6 +15,8 @@ export const DEFAULT_USERS = [
     name: 'Quản trị viên trưởng',
     department: 'Phòng TC-KH',
     role: 'ADMIN',
+    expenseScope: 'ALL',
+    allowedCodes: [],
     status: 'HOAT_DONG',
     createdAt: '29/10/2026 11:50',
     notes: 'Quản trị hệ thống toàn quyền',
@@ -25,9 +27,47 @@ export const DEFAULT_USERS = [
     name: 'Nguyễn Thị Lan (Kế toán)',
     department: 'Tổ Kế toán chi phí',
     role: 'EDITOR',
+    expenseScope: 'ALL',
+    allowedCodes: [],
     status: 'HOAT_DONG',
     createdAt: '29/10/2026 11:50',
-    notes: 'Biên tập & nhập số liệu chi phí',
+    notes: 'Biên tập & nhập số liệu chi phí toàn cảng',
+  },
+  {
+    email: 'kythuat@company.vn',
+    password: 'kythuat123',
+    name: 'Kỹ sư Kỹ thuật (Máy móc & Xe)',
+    department: 'Đội Kỹ thuật - TTB',
+    role: 'VIEWER',
+    expenseScope: 'KY_THUAT',
+    allowedCodes: [],
+    status: 'HOAT_DONG',
+    createdAt: '29/10/2026 14:30',
+    notes: 'Chỉ xem SCTX Máy móc thiết bị (627622) & Xe vận tải (627623)',
+  },
+  {
+    email: 'xaydung@company.vn',
+    password: 'xaydung123',
+    name: 'Kỹ sư Xây dựng (Hạ tầng)',
+    department: 'Đội Xây dựng - KCHTHK',
+    role: 'VIEWER',
+    expenseScope: 'XAY_DUNG',
+    allowedCodes: [],
+    status: 'HOAT_DONG',
+    createdAt: '29/10/2026 14:30',
+    notes: 'Chỉ xem SCTX Cơ sở hạ tầng, Nhà ga, Sân đường (627621)',
+  },
+  {
+    email: 'daotao@company.vn',
+    password: 'daotao123',
+    name: 'Chuyên viên Đào tạo',
+    department: 'Phòng TCHC - Tổ Đào tạo',
+    role: 'VIEWER',
+    expenseScope: 'DAO_TAO',
+    allowedCodes: [],
+    status: 'HOAT_DONG',
+    createdAt: '29/10/2026 14:30',
+    notes: 'Chỉ xem Chi phí Đào tạo, huấn luyện chuyên môn (627715)',
   },
   {
     email: 'viewer@company.vn',
@@ -35,9 +75,11 @@ export const DEFAULT_USERS = [
     name: 'Trần Văn Bình (Ban Giám Đốc)',
     department: 'Ban Giám Đốc Cảng',
     role: 'VIEWER',
+    expenseScope: 'ALL',
+    allowedCodes: [],
     status: 'HOAT_DONG',
     createdAt: '29/10/2026 11:50',
-    notes: 'Tra cứu & xem báo cáo số liệu',
+    notes: 'Tra cứu & xem báo cáo toàn cảng',
   },
 ];
 
@@ -70,6 +112,8 @@ export const getSavedUsers = () => {
         return parsed.map((u) => ({
           ...u,
           password: u.password || (u.email.includes('admin') ? 'admin123' : u.email.includes('ketoan') ? 'ketoan123' : '123456'),
+          expenseScope: u.expenseScope || (u.email.includes('kythuat') ? 'KY_THUAT' : u.email.includes('xaydung') ? 'XAY_DUNG' : u.email.includes('daotao') ? 'DAO_TAO' : 'ALL'),
+          allowedCodes: Array.isArray(u.allowedCodes) ? u.allowedCodes : (typeof u.allowedCodes === 'string' ? u.allowedCodes.split(',').map(s => s.trim()).filter(Boolean) : []),
         }));
       }
     }
