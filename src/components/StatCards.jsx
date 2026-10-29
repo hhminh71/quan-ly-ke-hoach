@@ -72,7 +72,7 @@ export default function StatCards({ transactions = [], budgets = [], selectedYea
     {
       title: `Tổng chi phí thực tế (${yearLabel})`,
       value: formatCurrency(totalReportActual),
-      description: `MAX(Bravo, Nhập liệu) • ${totalCount.toLocaleString('vi-VN')} phiếu chi`,
+      description: `MAX(Bravo, Nhập liệu) • ${totalCount.toLocaleString('vi-VN')} hạng mục`,
       icon: TrendingUp,
       color: 'emerald',
       badge: `Đã chi ${percentExecuted.toFixed(1)}%`,

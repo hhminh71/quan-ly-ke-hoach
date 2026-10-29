@@ -24,6 +24,7 @@ export default function AddTransactionModal({
   budgets = [],
   transactions = [],
   selectedYear = '2026',
+  defaultAccountCode = null,
 }) {
   const getTodayString = () => new Date().toISOString().split('T')[0];
 
@@ -60,12 +61,23 @@ export default function AddTransactionModal({
       setAccountSearch('');
       setIsDropdownOpen(false);
 
-      // Default select the first budget account if none selected
-      if (budgets.length > 0 && !selectedAccount) {
-        setSelectedAccount(budgets[0]);
+      // Select default account if provided, or first budget account
+      if (budgets.length > 0) {
+        if (defaultAccountCode) {
+          const match = budgets.find(
+            (b) => String(b.code || '').trim() === String(defaultAccountCode).trim()
+          );
+          if (match) {
+            setSelectedAccount(match);
+          } else if (!selectedAccount) {
+            setSelectedAccount(budgets[0]);
+          }
+        } else if (!selectedAccount) {
+          setSelectedAccount(budgets[0]);
+        }
       }
     }
-  }, [isOpen, selectedYear, budgets]);
+  }, [isOpen, selectedYear, budgets, defaultAccountCode]);
 
   // Click outside to close dropdown
   useEffect(() => {
@@ -153,7 +165,7 @@ export default function AddTransactionModal({
     if (!date) newErrors.date = 'Vui lòng chọn ngày chi';
     if (!employeeName.trim()) newErrors.employeeName = 'Vui lòng nhập tên người thực hiện / nhận';
     if (!amount || Number(amount) <= 0) newErrors.amount = 'Vui lòng nhập số tiền chi (> 0)';
-    if (!notes.trim()) newErrors.notes = 'Vui lòng nhập nội dung phiếu chi';
+    if (!notes.trim()) newErrors.notes = 'Vui lòng nhập nội dung diễn giải hạng mục';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -196,13 +208,13 @@ export default function AddTransactionModal({
             </div>
             <div>
               <h3 className="text-base font-bold text-white flex items-center gap-2">
-                <span>Thêm Phiếu Chi Mới</span>
+                <span>Thêm Hạng Mục Mới</span>
                 <span className="text-2xs font-mono font-bold px-2 py-0.5 rounded-full bg-blue-500/30 text-blue-100 border border-blue-400/30">
                   Năm {selectedYear}
                 </span>
               </h3>
               <p className="text-2xs text-blue-200">
-                Tìm kiếm mã khoản mục và tạo phiếu chi đồng bộ trực tiếp vào sổ cái & Google Sheet
+                Tìm kiếm mã khoản mục và tạo hạng mục đồng bộ trực tiếp vào sổ cái & Google Sheet
               </p>
             </div>
           </div>
@@ -440,7 +452,7 @@ export default function AddTransactionModal({
           <div>
             <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
               <FileText className="w-3.5 h-3.5 text-blue-600" />
-              Nội Dung / Diễn Giải Phiếu Chi <span className="text-rose-500">*</span>
+              Nội Dung / Diễn Giải Hạng Mục <span className="text-rose-500">*</span>
             </label>
             <textarea
               rows="3"

@@ -82,7 +82,7 @@ export default function EditTransactionModal({
             </div>
             <div>
               <h3 className="text-sm font-bold text-slate-900">
-                Chỉnh Sửa Phiếu Chi #{transaction.id}
+                Chỉnh Sửa Hạng Mục #{transaction.id}
               </h3>
               <p className="text-[11px] text-slate-500">
                 Sửa đổi sẽ tự động đồng bộ trực tiếp về Google Sheet

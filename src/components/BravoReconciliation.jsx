@@ -29,6 +29,7 @@ export default function BravoReconciliation({
   budgets = [],
   transactions = [],
   selectedYear = '2026',
+  onAddTransaction,
   onUpdateTransaction,
   onDeleteTransaction,
   onNavigateToLedger,
@@ -341,7 +342,7 @@ export default function BravoReconciliation({
                 </span>
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Phân tích chênh lệch giữa số liệu hạch toán phần mềm kế toán Tổng công ty (BRAVO) và sổ cái phiếu chi thực tế năm {selectedYear}
+                Phân tích chênh lệch giữa số liệu hạch toán phần mềm kế toán Tổng công ty (BRAVO) và sổ cái hạng mục thực tế năm {selectedYear}
               </p>
             </div>
           </div>
@@ -497,7 +498,7 @@ export default function BravoReconciliation({
                 {formatCompactVND(macroKPIs.khauHao)}
               </p>
               <p className="text-2xs text-rose-700 mt-0.5">
-                Tổ KH không lập phiếu chi (Kế toán trích tự động)
+                Tổ KH không lập hạng mục (Kế toán trích tự động)
               </p>
             </div>
 
@@ -586,7 +587,7 @@ export default function BravoReconciliation({
                       ? 'bg-purple-600 text-white shadow-2xs font-semibold'
                       : 'text-purple-800 hover:bg-purple-100/50'
                   }`}
-                  title="Tổ Kế hoạch đã phát sinh phiếu chi nhưng Kế toán chưa lên BRAVO"
+                  title="Tổ Kế hoạch đã phát sinh hạng mục nhưng Kế toán chưa lên BRAVO"
                 >
                   KH &gt; BRAVO ({planningKPIs.actualHighCount})
                 </button>
@@ -651,9 +652,9 @@ export default function BravoReconciliation({
                 Quy tắc đối soát & Quản lý an toàn ngân sách theo file TỔNG HỢP KẾ HOẠCH:
               </p>
               <p className="text-amber-800">
-                • <span className="font-semibold text-amber-900">BRAVO &gt; Thực tế (Màu cam):</span> Kế toán đã ghi nhận chi phí trên phần mềm BRAVO mà không qua phiếu chi Tổ Kế hoạch, hoặc các hóa đơn hạch toán trực tiếp.
+                • <span className="font-semibold text-amber-900">BRAVO &gt; Thực tế (Màu cam):</span> Kế toán đã ghi nhận chi phí trên phần mềm BRAVO mà không qua hạng mục Tổ Kế hoạch, hoặc các hóa đơn hạch toán trực tiếp.
                 <br />
-                • <span className="font-semibold text-purple-900">Thực tế &gt; BRAVO (Màu tím):</span> Tổ Kế hoạch đã duyệt và phát sinh phiếu chi cục bộ nhưng Kế toán chưa kịp hạch toán vào kỳ BRAVO.
+                • <span className="font-semibold text-purple-900">Thực tế &gt; BRAVO (Màu tím):</span> Tổ Kế hoạch đã duyệt và phát sinh hạng mục cục bộ nhưng Kế toán chưa kịp hạch toán vào kỳ BRAVO.
                 <br />
                 • <span className="font-semibold text-emerald-900">MAX Thực Tế = MAX(Thực tế, BRAVO):</span> Theo công thức cột H trong file Excel gốc, Cảng luôn dùng giá trị lớn nhất giữa hai bên để kiểm soát hạn mức, tránh bội chi.
               </p>
@@ -827,7 +828,7 @@ export default function BravoReconciliation({
                               type="button"
                               onClick={() => setSelectedDetailCode(item.code)}
                               className="p-0.5 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded transition-colors"
-                              title="Xem chi tiết các phiếu chi của khoản mục này"
+                              title="Xem chi tiết các hạng mục của khoản mục này"
                             >
                               <FileSpreadsheet className="w-3 h-3" />
                             </button>
@@ -873,7 +874,7 @@ export default function BravoReconciliation({
               <br />
               • <strong className="text-indigo-950">55+ Hạng mục lớn (~112.9 tỷ VNĐ)</strong> phát sinh hoàn toàn ngoài Tổ Kế hoạch: Tiền lương &amp; Bảo hiểm (35.33 tỷ), Khấu hao TSCĐ (53.68 tỷ), Giá vốn thương mại (6.72 tỷ), Tiền thuê đất, Chi phí phúc lợi, v.v. do Kế toán hoặc Tổng công ty trích lập tự động.
               <br />
-              • <strong className="text-blue-700 font-bold">76 Khoản mục (~48.06 tỷ VNĐ)</strong> được giao Tổ Kế hoạch trực tiếp lập hồ sơ, thẩm duyệt và theo dõi giải ngân từng phiếu chi.
+              • <strong className="text-blue-700 font-bold">76 Khoản mục (~48.06 tỷ VNĐ)</strong> được giao Tổ Kế hoạch trực tiếp lập hồ sơ, thẩm duyệt và theo dõi giải ngân từng hạng mục.
             </p>
           </div>
 
@@ -1091,7 +1092,7 @@ export default function BravoReconciliation({
                           <td className="py-0.5 px-0.5 sm:px-1 text-[7.5px] sm:text-3xs text-slate-500 leading-tight">
                             {isPlanning ? (
                               <span className="text-emerald-700 font-medium">
-                                Tổ KH theo dõi định mức và kiểm soát từng phiếu chi
+                                Tổ KH theo dõi định mức và kiểm soát từng hạng mục
                               </span>
                             ) : (
                               <span className="text-slate-600">
@@ -1129,6 +1130,7 @@ export default function BravoReconciliation({
           budgets={budgets}
           selectedYear={selectedYear}
           onClose={() => setSelectedDetailCode(null)}
+          onAddTransaction={onAddTransaction}
           onUpdateTransaction={onUpdateTransaction}
           onDeleteTransaction={onDeleteTransaction}
           onNavigateToLedger={onNavigateToLedger}

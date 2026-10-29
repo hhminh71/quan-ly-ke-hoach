@@ -9,8 +9,10 @@ import {
   ArrowUpRight,
   Shield,
   Layers,
+  PlusCircle,
 } from 'lucide-react';
 import EditTransactionModal from './EditTransactionModal';
+import AddTransactionModal from './AddTransactionModal';
 import { matchesVietnameseSearch } from '../utils/searchUtils';
 import { formatDate } from '../utils/dateUtils';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
@@ -28,6 +30,7 @@ export default function AccountLedgerModal({
   budgets = [],
   selectedYear = '2026',
   onClose,
+  onAddTransaction,
   onUpdateTransaction,
   onDeleteTransaction,
   onNavigateToLedger,
@@ -35,6 +38,7 @@ export default function AccountLedgerModal({
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('newest'); // 'newest', 'oldest', 'highest', 'lowest'
   const [editingItem, setEditingItem] = useState(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Sync with browser history for mobile hardware/gesture Back button
   useModalBackHandler(isOpen && Boolean(account), onClose, 'account-ledger');
@@ -164,13 +168,24 @@ export default function AccountLedgerModal({
                   <span className="font-medium text-slate-700">{account.scope || account.group}</span>
                   {' • '}
                   <span>
-                    Tổng cộng <strong className="text-blue-700">{accountTransactions.length}</strong> phiếu chi phát sinh
+                    Tổng cộng <strong className="text-blue-700">{accountTransactions.length}</strong> hạng mục phát sinh
                   </span>
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-1.5 shrink-0">
+              {/* Nút Thêm Mới Hạng Mục (chọn sẵn mã kế hoạch hiện tại) */}
+              <button
+                type="button"
+                onClick={() => setIsAddModalOpen(true)}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-2xs sm:text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-colors"
+                title={`Thêm mới hạng mục cho mã [${account.code}]`}
+              >
+                <PlusCircle className="w-3.5 h-3.5" />
+                <span>Thêm Mới</span>
+              </button>
+
               {onNavigateToLedger && (
                 <button
                   type="button"
@@ -333,9 +348,9 @@ export default function AccountLedgerModal({
             </div>
           </div>
 
-          {/* Ledger Table: Sổ cái chi tiết các phiếu chi */}
+          {/* Ledger Table: Sổ cái chi tiết các hạng mục */}
           {/* USER SPECIFICATION:
-              1. Cột 'Người thực hiện' di chuyển ra cuối, trước cột 'Điều chỉnh' (Thao tác)
+              1. Cột 'Người thực hiện' di chuyển ra cuối, trước cột 'Điều chỉnh' (Thao tác), căn giữa và bỏ chữ cái viết tắt phía trước
                  -> Thứ tự: # | Ngày | Nội Dung Diễn Giải | Số Tiền (VNĐ) | Người Thực Hiện | Điều Chỉnh
               2. Bóp nhỏ tối giản các cột, có thể xuống dòng nếu cần (break-words, whitespace-normal, padding py-1 sm:py-1.5)
           */}
@@ -345,13 +360,13 @@ export default function AccountLedgerModal({
                 <FileSpreadsheet className="w-10 h-10 text-slate-300 mx-auto mb-1.5" />
                 <p className="text-xs sm:text-sm font-semibold text-slate-700">
                   {searchTerm
-                    ? 'Không tìm thấy phiếu chi nào khớp với từ khóa'
-                    : `Chưa có phiếu chi nào phát sinh cho khoản mục này trong năm ${selectedYear}`}
+                    ? 'Không tìm thấy hạng mục nào khớp với từ khóa'
+                    : `Chưa có hạng mục nào phát sinh cho khoản mục này trong năm ${selectedYear}`}
                 </p>
                 <p className="text-3xs sm:text-xs text-slate-400 mt-0.5 max-w-md mx-auto">
                   {searchTerm
-                    ? 'Thử thay đổi từ khóa hoặc xóa tìm kiếm để xem tất cả phiếu chi.'
-                    : 'Các khoản chi mới phát sinh trên Webhook hoặc form nhập liệu sẽ tự động xuất hiện tại đây.'}
+                    ? 'Thử thay đổi từ khóa hoặc xóa tìm kiếm để xem tất cả hạng mục.'
+                    : 'Các hạng mục mới phát sinh trên Webhook hoặc form nhập liệu sẽ tự động xuất hiện tại đây.'}
                 </p>
               </div>
             ) : (
@@ -366,8 +381,8 @@ export default function AccountLedgerModal({
                     <th className="py-0.5 px-0.5 sm:px-1 min-w-[95px] leading-tight">Nội Dung Diễn Giải</th>
                     {/* 4. Số tiền */}
                     <th className="py-0.5 px-0.5 sm:px-1 text-right w-18 sm:w-22 whitespace-nowrap leading-tight">Số Tiền (VNĐ)</th>
-                    {/* 5. Người thực hiện */}
-                    <th className="py-0.5 px-0.5 sm:px-1 w-16 sm:w-22 leading-tight">Người Thực Hiện</th>
+                    {/* 5. Người thực hiện: Căn giữa */}
+                    <th className="py-0.5 px-0.5 sm:px-1 w-16 sm:w-22 text-center leading-tight">Người Thực Hiện</th>
                     {/* 6. Điều chỉnh */}
                     <th className="py-0.5 px-0.5 text-center w-8 sm:w-10 whitespace-nowrap leading-tight">Điều Chỉnh</th>
                   </tr>
@@ -398,16 +413,11 @@ export default function AccountLedgerModal({
                         {formatVND(item.amount)}
                       </td>
 
-                      {/* 5. Người thực hiện */}
-                      <td className="py-0.5 px-0.5 sm:px-1 text-slate-700 text-[9.5px] sm:text-xs break-words leading-tight">
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 rounded-full bg-blue-100 text-blue-700 font-bold text-[7.5px] flex items-center justify-center shrink-0">
-                            {String(item.employeeName || 'U').trim().charAt(0).toUpperCase() || 'U'}
-                          </div>
-                          <span className="font-medium text-slate-800 leading-tight">
-                            {item.employeeName || 'Chưa ghi nhận'}
-                          </span>
-                        </div>
+                      {/* 5. Người thực hiện: Căn giữa, bỏ chữ viết tắt phía trước */}
+                      <td className="py-0.5 px-0.5 sm:px-1 text-slate-700 text-[9.5px] sm:text-xs text-center leading-tight">
+                        <span className="font-medium text-slate-800 leading-tight">
+                          {item.employeeName || 'Chưa ghi nhận'}
+                        </span>
                       </td>
 
                       {/* 6. Điều chỉnh */}
@@ -418,7 +428,7 @@ export default function AccountLedgerModal({
                               type="button"
                               onClick={() => setEditingItem(item)}
                               className="p-0.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-75 group-hover:opacity-100"
-                              title="Chỉnh sửa phiếu này"
+                              title="Chỉnh sửa hạng mục này"
                             >
                               <Edit3 className="w-2.5 h-2.5" />
                             </button>
@@ -427,12 +437,12 @@ export default function AccountLedgerModal({
                             <button
                               type="button"
                               onClick={() => {
-                                if (confirm(`Bạn có chắc muốn xóa phiếu chi "${item.notes}" (${formatVND(item.amount)})?`)) {
+                                if (confirm(`Bạn có chắc muốn xóa hạng mục "${item.notes}" (${formatVND(item.amount)})?`)) {
                                   onDeleteTransaction(item.id);
                                 }
                               }}
                               className="p-0.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-75 group-hover:opacity-100"
-                              title="Xóa phiếu này"
+                              title="Xóa hạng mục này"
                             >
                               <Trash2 className="w-2.5 h-2.5" />
                             </button>
@@ -449,7 +459,7 @@ export default function AccountLedgerModal({
           {/* Modal Footer: Slim single-line footer */}
           <div className="px-3 py-1.5 sm:px-4 sm:py-2 border-t border-slate-100 bg-slate-50/80 flex items-center justify-between gap-2 text-3xs sm:text-[11px] text-slate-500 shrink-0">
             <div className="truncate">
-              Hiển thị <strong className="text-slate-800">{sortedTransactions.length}</strong> / <strong className="text-slate-800">{accountTransactions.length}</strong> phiếu{' '}
+              Hiển thị <strong className="text-slate-800">{sortedTransactions.length}</strong> / <strong className="text-slate-800">{accountTransactions.length}</strong> hạng mục{' '}
               {searchTerm && <span>(Khớp bộ lọc)</span>}
               {' • '}
               Tổng cộng:{' '}
@@ -483,6 +493,24 @@ export default function AccountLedgerModal({
               onUpdateTransaction(updated);
             }
           }}
+        />
+      )}
+
+      {/* Add Transaction Modal with pre-selected account */}
+      {isAddModalOpen && (
+        <AddTransactionModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onAddTransaction={(newRecord) => {
+            if (onAddTransaction) {
+              onAddTransaction(newRecord);
+            }
+            setIsAddModalOpen(false);
+          }}
+          budgets={budgets}
+          transactions={transactions}
+          selectedYear={selectedYear}
+          defaultAccountCode={account?.code}
         />
       )}
     </>

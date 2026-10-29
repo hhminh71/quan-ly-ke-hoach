@@ -231,7 +231,7 @@ export default function DashboardPage({ user }) {
       setHasWebhook(true);
       setLastSyncTimeState(new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }));
       if (showAlert) {
-        alert(`Đồng bộ thành công! Đã nạp ${data.transactions?.length || 0} phiếu chi và số liệu đối soát Bravo từ Google Sheet.`);
+        alert(`Đồng bộ thành công! Đã nạp ${data.transactions?.length || 0} hạng mục và số liệu đối soát Bravo từ Google Sheet.`);
       }
     } catch (err) {
       console.error('Sync error', err);
@@ -431,6 +431,7 @@ export default function DashboardPage({ user }) {
             setBudgets(newBudgets);
             localStorage.setItem('app_budgets_v3', JSON.stringify(newBudgets));
           }}
+          onAddTransaction={handleAddTransaction}
           onUpdateTransaction={handleUpdateTransaction}
           onDeleteTransaction={handleDeleteTransaction}
           onNavigateToLedger={(accountCode) => {
@@ -463,6 +464,7 @@ export default function DashboardPage({ user }) {
           budgets={budgets}
           selectedYear={selectedYear}
           onClose={() => setSelectedDetailAccount(null)}
+          onAddTransaction={handleAddTransaction}
           onUpdateTransaction={handleUpdateTransaction}
           onDeleteTransaction={handleDeleteTransaction}
           onNavigateToLedger={(accountCode) => {
@@ -480,6 +482,7 @@ export default function DashboardPage({ user }) {
           transactions={yearTransactions}
           selectedYear={selectedYear}
           bravoInfo={bravoInfo}
+          onAddTransaction={handleAddTransaction}
           onUpdateTransaction={handleUpdateTransaction}
           onDeleteTransaction={handleDeleteTransaction}
           onNavigateToLedger={(accountCode) => {

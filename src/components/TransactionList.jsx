@@ -206,7 +206,7 @@ export default function TransactionList({
               <div className="flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ring-2 ring-emerald-100"></span>
                 <h2 className="text-[9.5px] sm:text-sm font-bold text-slate-800 leading-none">
-                  Sổ Cái Phiếu Chi{' '}
+                  Sổ Cái Hạng Mục{' '}
                   <span className="text-emerald-700 font-extrabold">
                     ({selectedYear === 'ALL' ? 'Tất Cả' : selectedYear})
                   </span>
@@ -218,10 +218,10 @@ export default function TransactionList({
                   type="button"
                   onClick={() => setIsAddModalOpen(true)}
                   className="inline-flex items-center gap-0.5 px-1 py-0.2 sm:px-2 sm:py-0.5 rounded text-[8px] sm:text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-2xs transition-all"
-                  title="Thêm mới phiếu chi và đồng bộ trực tiếp lên Google Sheet"
+                  title="Thêm mới hạng mục và đồng bộ trực tiếp lên Google Sheet"
                 >
                   <PlusCircle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
-                  <span>+ Thêm Phiếu</span>
+                  <span>+ Thêm Hạng Mục</span>
                 </button>
               )}
             </div>
@@ -375,10 +375,10 @@ export default function TransactionList({
                 type="button"
                 onClick={() => setIsAddModalOpen(true)}
                 className="w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold inline-flex items-center justify-center gap-1.5 shadow-sm shadow-blue-500/25 transition-all"
-                title="Tạo phiếu chi mới theo mã khoản mục"
+                title="Tạo hạng mục mới theo mã khoản mục"
               >
                 <PlusCircle className="w-4 h-4 shrink-0" />
-                <span className="truncate">Thêm Phiếu</span>
+                <span className="truncate">Thêm Hạng Mục</span>
               </button>
             </div>
           )}
@@ -439,8 +439,8 @@ export default function TransactionList({
                   </div>
                 </th>
 
-                {/* 5. Người thực hiện (di chuyển ra trước cột điều chỉnh) */}
-                <th className="py-0.5 px-0.5 sm:px-1 w-16 sm:w-22 leading-tight">Người thực hiện</th>
+                {/* 5. Người thực hiện (di chuyển ra trước cột điều chỉnh, căn giữa và bỏ chữ cái viết tắt phía trước) */}
+                <th className="py-0.5 px-0.5 sm:px-1 w-16 sm:w-22 text-center leading-tight">Người thực hiện</th>
 
                 {/* 6. Điều chỉnh (Thao tác) */}
                 <th className="py-0.5 px-0.5 text-center w-8 sm:w-10 whitespace-nowrap leading-tight">Điều chỉnh</th>
@@ -481,16 +481,11 @@ export default function TransactionList({
                     {formatVND(item.amount)}
                   </td>
 
-                  {/* 5. Người thực hiện */}
-                  <td className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs text-slate-700 break-words leading-tight">
-                    <div className="flex items-center gap-1">
-                      <div className="w-3 h-3 rounded-full bg-slate-100 text-slate-700 font-bold text-[7.5px] flex items-center justify-center shrink-0">
-                        {String(item.employeeName || 'U').trim().charAt(0).toUpperCase() || 'U'}
-                      </div>
-                      <span className="font-medium text-slate-700 leading-tight">
-                        {item.employeeName || 'Chưa ghi nhận'}
-                      </span>
-                    </div>
+                  {/* 5. Người thực hiện: Căn giữa, bỏ chữ viết tắt phía trước */}
+                  <td className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs text-slate-700 text-center leading-tight">
+                    <span className="font-medium text-slate-700 leading-tight">
+                      {item.employeeName || 'Chưa ghi nhận'}
+                    </span>
                   </td>
 
                   {/* 6. Điều chỉnh */}
@@ -500,19 +495,19 @@ export default function TransactionList({
                         type="button"
                         onClick={() => handleStartEdit(item)}
                         className="p-0.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors opacity-75 group-hover:opacity-100"
-                        title="Chỉnh sửa nội dung phiếu này"
+                        title="Chỉnh sửa nội dung hạng mục này"
                       >
                         <Edit3 className="w-2.5 h-2.5" />
                       </button>
                       <button
                         type="button"
                         onClick={() => {
-                          if (confirm(`Bạn có chắc muốn xóa phiếu "${item.notes}" không?`)) {
+                          if (confirm(`Bạn có chắc muốn xóa hạng mục "${item.notes}" không?`)) {
                             onDeleteTransaction(item.id);
                           }
                         }}
                         className="p-0.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors opacity-75 group-hover:opacity-100"
-                        title="Xóa phiếu này"
+                        title="Xóa hạng mục này"
                       >
                         <Trash2 className="w-2.5 h-2.5" />
                       </button>
@@ -607,7 +602,7 @@ export default function TransactionList({
             if (onAddTransaction) {
               onAddTransaction(newRec);
             }
-            setToastMessage('Đã thêm phiếu chi mới & đồng bộ trực tiếp về Google Sheet!');
+            setToastMessage('Đã thêm hạng mục mới & đồng bộ trực tiếp về Google Sheet!');
             setShowEditToast(true);
             setTimeout(() => setShowEditToast(false), 3500);
           }}

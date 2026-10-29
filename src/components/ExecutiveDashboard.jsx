@@ -246,7 +246,7 @@ export default function ExecutiveDashboard({
             {formatCompactVND(kpis.totalReportActual)}
           </p>
           <p className="text-[9px] sm:text-[11px] text-emerald-700 font-medium mt-0.5 truncate">
-            Đã chi {kpis.avgPercent.toFixed(1)}% • {kpis.totalVouchers} phiếu
+            Đã chi {kpis.avgPercent.toFixed(1)}% • {kpis.totalVouchers} hạng mục
           </p>
         </div>
 
@@ -385,7 +385,7 @@ export default function ExecutiveDashboard({
                 <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
                   Giải Ngân 4 Quý ({selectedYear})
                 </h3>
-                <p className="hidden sm:block text-[10px] text-slate-400 leading-none">Dòng tiền phát sinh từ sổ cái phiếu chi</p>
+                <p className="hidden sm:block text-[10px] text-slate-400 leading-none">Dòng tiền phát sinh từ sổ cái hạng mục</p>
               </div>
             </div>
             {onNavigateToLedger && (
@@ -441,7 +441,7 @@ export default function ExecutiveDashboard({
                     <div
                       className="w-full max-w-[12px] sm:max-w-[14px] bg-blue-600/80 group-hover:bg-blue-600 rounded-t transition-all"
                       style={{ height: `${heightPercent}%` }}
-                      title={`Tháng ${m.month}: ${formatVND(m.amount)} (${m.count} phiếu)`}
+                      title={`Tháng ${m.month}: ${formatVND(m.amount)} (${m.count} hạng mục)`}
                     ></div>
                     <span className="text-[9px] text-slate-400 font-mono mt-0.5 group-hover:text-blue-600 font-semibold">
                       {m.name}

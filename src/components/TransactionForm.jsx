@@ -163,7 +163,7 @@ export default function TransactionForm({ onAddTransaction, budgets = [], transa
             </h2>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Ghi nhận phiếu chi thực tế gắn với Mã kế hoạch ngân sách (627x, 641x)
+            Ghi nhận hạng mục thực tế gắn với Mã kế hoạch ngân sách (627x, 641x)
           </p>
         </div>
 
@@ -183,7 +183,7 @@ export default function TransactionForm({ onAddTransaction, budgets = [], transa
           <div className="flex items-center gap-2.5">
             <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0" />
             <span className="font-medium">
-              Đã ghi nhận phiếu thu/chi thành công vào hệ thống!
+              Đã ghi nhận hạng mục thành công vào hệ thống!
             </span>
           </div>
           <span className="text-xs text-emerald-600 font-semibold cursor-pointer" onClick={() => setShowSuccessToast(false)}>
@@ -406,7 +406,7 @@ export default function TransactionForm({ onAddTransaction, budgets = [], transa
             className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white text-sm font-medium shadow-md shadow-blue-500/25 transition-all flex items-center justify-center gap-2"
           >
             <PlusCircle className="w-4 h-4" />
-            <span>Lưu phiếu chi thực tế</span>
+            <span>Lưu hạng mục thực tế</span>
           </button>
         </div>
       </form>

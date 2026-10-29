@@ -28,6 +28,7 @@ export default function BudgetOverview({
   transactions = [],
   selectedYear = '2026',
   onUpdateBudgets,
+  onAddTransaction,
   onUpdateTransaction,
   onDeleteTransaction,
   onNavigateToLedger,
@@ -642,7 +643,7 @@ export default function BudgetOverview({
                             {count > 0 && (
                               <span
                                 className="text-[7.5px] sm:text-3xs font-bold text-blue-700 bg-blue-100/80 group-hover:bg-white group-hover:text-blue-700 px-0.5 py-0.2 rounded-full border border-blue-200 transition-colors"
-                                title={`${count} phiếu chi phát sinh trong năm ${selectedYear}`}
+                                title={`${count} hạng mục phát sinh trong năm ${selectedYear}`}
                               >
                                 {count}
                               </span>
@@ -717,7 +718,7 @@ export default function BudgetOverview({
                             ) : (
                               <span
                                 className="inline-block text-[7px] sm:text-3xs font-semibold text-blue-800 bg-blue-100/90 px-0.5 py-0.2 rounded border border-blue-200"
-                                title={`Số này lấy theo Nhập liệu phiếu chi (${formatVND(item.liveActual)})`}
+                                title={`Số này lấy theo Nhập liệu hạng mục (${formatVND(item.liveActual)})`}
                               >
                                 (Theo Nhập liệu)
                               </span>
@@ -906,7 +907,7 @@ export default function BudgetOverview({
         </div>
       )}
 
-      {/* DETAIL DRILLDOWN MODAL: Sổ Cái Chi Tiết Các Phiếu Chi Theo Mã Khoản Mục */}
+      {/* DETAIL DRILLDOWN MODAL: Sổ Cái Chi Tiết Các Hạng Mục Theo Mã Khoản Mục */}
       {selectedDetailAccount && (
         <AccountLedgerModal
           isOpen={true}
@@ -915,6 +916,7 @@ export default function BudgetOverview({
           budgets={budgets}
           selectedYear={selectedYear}
           onClose={() => setSelectedDetailCode(null)}
+          onAddTransaction={onAddTransaction}
           onUpdateTransaction={onUpdateTransaction}
           onDeleteTransaction={onDeleteTransaction}
           onNavigateToLedger={onNavigateToLedger}

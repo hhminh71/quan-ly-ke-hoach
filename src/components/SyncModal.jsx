@@ -39,7 +39,7 @@ export default function SyncModal({ isOpen, onClose, onSyncSuccess }) {
       saveWebhookUrl(cleanUrl);
       setTestResult({
         success: true,
-        message: `Kết nối thành công! Đã tìm thấy ${data.transactions?.length || 0} phiếu chi trên Google Sheet.`,
+        message: `Kết nối thành công! Đã tìm thấy ${data.transactions?.length || 0} hạng mục trên Google Sheet.`,
       });
       if (onSyncSuccess) {
         onSyncSuccess(data);
