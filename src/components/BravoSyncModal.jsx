@@ -15,19 +15,27 @@ import {
   Sparkles,
   Link2,
   ExternalLink,
+  Lock,
+  Unlock,
+  Edit3,
+  Check,
+  ShieldAlert,
 } from 'lucide-react';
 import { parseBravoExcelBuffer } from '../utils/bravoParser';
 import {
   syncBravoInfoToGoogleSheet,
   fetchBravoFromDrive,
+  saveBravoDriveUrlToGoogleSheet,
   getSavedWebhookUrl,
 } from '../services/googleSheetService';
 import { formatVND } from '../utils/formatters';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
+import { canSettings } from '../utils/permissions';
 
 export default function BravoSyncModal({
   isOpen,
   onClose,
+  user = null,
   budgets = [],
   onUpdateBudgets,
   onUpdateBravoInfo,
@@ -36,14 +44,19 @@ export default function BravoSyncModal({
   useModalBackHandler(isOpen, onClose, 'bravo-sync-modal');
 
   const fileInputRef = useRef(null);
+  const isAdmin = canSettings(user);
   
   // Sync source mode: 'DRIVE_LINK' (Khuyên dùng) or 'LOCAL_FILE'
   const [syncSourceMode, setSyncSourceMode] = useState('DRIVE_LINK');
   
-  // Google Drive link state
+  // Google Drive link state - Thư mục cố định duy nhất của toàn hệ thống
   const [driveFolderUrl, setDriveFolderUrl] = useState(() => {
-    return localStorage.getItem('app_bravo_drive_url') || '';
+    return localStorage.getItem('app_bravo_drive_url') || 'https://drive.google.com/drive/folders/1cRZRKZRuvUEoNQyQuBA';
   });
+  const [isEditingLink, setIsEditingLink] = useState(false);
+  const [editUrlInput, setEditUrlInput] = useState(driveFolderUrl);
+  const [saveUrlFeedback, setSaveUrlFeedback] = useState(null);
+
   const [isLoadingFromDrive, setIsLoadingFromDrive] = useState(false);
   const [driveFileInfo, setDriveFileInfo] = useState(null);
 
@@ -94,17 +107,40 @@ export default function BravoSyncModal({
     }
   };
 
+  // Lưu link thư mục Google Drive cố định (Chỉ Admin)
+  const handleSaveSystemDriveUrl = async () => {
+    if (!isAdmin) {
+      alert('Chỉ tài khoản Admin mới có quyền thay đổi link thư mục Google Drive hệ thống.');
+      return;
+    }
+
+    const cleanUrl = editUrlInput.trim();
+    if (!cleanUrl) {
+      alert('Vui lòng nhập link thư mục Google Drive hợp lệ.');
+      return;
+    }
+
+    setDriveFolderUrl(cleanUrl);
+    localStorage.setItem('app_bravo_drive_url', cleanUrl);
+    setIsEditingLink(false);
+
+    // Lưu ngầm lên Google Sheet cho toàn bộ người dùng khác
+    const webhookUrl = getSavedWebhookUrl();
+    if (webhookUrl) {
+      saveBravoDriveUrlToGoogleSheet(webhookUrl, cleanUrl);
+    }
+
+    setSaveUrlFeedback('Đã cập nhật và khóa link thư mục Google Drive cố định cho toàn hệ thống!');
+    setTimeout(() => setSaveUrlFeedback(null), 3500);
+  };
+
   // Process directly from Google Drive Web Link via Apps Script Webhook
   const handleLoadFromDrive = async () => {
     const inputUrl = driveFolderUrl ? driveFolderUrl.trim() : '';
     if (!inputUrl) {
-      setParseError('Vui lòng nhập Link thư mục Google Drive (hoặc link file).');
+      setParseError('Chưa cấu hình Link thư mục Google Drive. Vui lòng liên hệ Admin để cài đặt.');
       return;
     }
-
-    try {
-      localStorage.setItem('app_bravo_drive_url', inputUrl);
-    } catch (e) {}
 
     const webhookUrl = getSavedWebhookUrl();
     if (!webhookUrl) {
@@ -277,7 +313,7 @@ export default function BravoSyncModal({
           <button
             type="button"
             onClick={onClose}
-            className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition-colors"
+            className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -294,16 +330,16 @@ export default function BravoSyncModal({
                   setSyncSourceMode('DRIVE_LINK');
                   setParseError(null);
                 }}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-bold text-xs transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-bold text-xs transition-all cursor-pointer ${
                   syncSourceMode === 'DRIVE_LINK'
                     ? 'bg-white text-blue-700 shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <Cloud className="w-3.5 h-3.5 text-blue-600" />
-                <span>Link Thư Mục Google Drive</span>
+                <span>Thư Mục Google Drive (Hệ Thống)</span>
                 <span className="px-1.5 py-0.2 bg-blue-100 text-blue-800 rounded-full text-3xs font-extrabold uppercase">
-                  Tự Động
+                  Cố Định
                 </span>
               </button>
 
@@ -313,7 +349,7 @@ export default function BravoSyncModal({
                   setSyncSourceMode('LOCAL_FILE');
                   setParseError(null);
                 }}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-bold text-xs transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-bold text-xs transition-all cursor-pointer ${
                   syncSourceMode === 'LOCAL_FILE'
                     ? 'bg-white text-amber-700 shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -322,73 +358,144 @@ export default function BravoSyncModal({
                 <FolderOpen className="w-3.5 h-3.5 text-amber-600" />
                 <span>File Máy Tính (Kéo Thả)</span>
                 <span className="px-1.5 py-0.2 bg-amber-100 text-amber-800 rounded-full text-3xs font-extrabold uppercase">
-                  Thủ Công
+                  Dự Phòng
                 </span>
               </button>
             </div>
           )}
 
-          {/* PHƯƠNG THỨC 1: NHẬP LINK GOOGLE DRIVE */}
+          {/* PHƯƠNG THỨC 1: LINK GOOGLE DRIVE CỐ ĐỊNH HỆ THỐNG */}
           {syncSourceMode === 'DRIVE_LINK' && !parseResult && !syncSuccessMessage && (
             <div className="p-4 rounded-2xl bg-blue-50/40 border border-blue-200/80 space-y-3.5 animate-in fade-in">
-              <div className="flex items-start gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
-                  <Cloud className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-slate-900 text-xs sm:text-sm">
-                    Đồng bộ tự động từ Thư mục Google Drive được chia sẻ
-                  </h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-                    Dán link thư mục Google Drive chứa các file Excel xuất từ Bravo hàng ngày. Hệ thống sẽ tự động tìm file Excel mới nhất của ngày hôm đó để đối soát.
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-slate-700 flex items-center justify-between">
-                  <span>Link thư mục web Google Drive (hoặc link file):</span>
-                  <span className="text-3xs text-blue-600 font-medium">Tự động ghi nhớ sau khi dán</span>
-                </label>
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                  <div className="relative flex-1">
-                    <Link2 className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    <input
-                      type="text"
-                      value={driveFolderUrl}
-                      onChange={(e) => setDriveFolderUrl(e.target.value)}
-                      placeholder="https://drive.google.com/drive/folders/1aBcDeFgHiJk..."
-                      className="w-full pl-9 pr-3 py-2 text-xs font-mono rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
-                    />
+              {/* Thẻ Thư Mục Hệ Thống */}
+              <div className="bg-white p-3.5 rounded-xl border border-blue-200/90 shadow-2xs space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                      <Cloud className="w-4 h-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-bold text-slate-900 text-xs sm:text-sm flex items-center gap-1.5">
+                        <span>Thư Mục Google Drive Hệ Thống</span>
+                        <span className="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded text-3xs font-bold inline-flex items-center gap-0.5 border border-emerald-200">
+                          <Lock className="w-2.5 h-2.5" />
+                          <span>Cố định</span>
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 truncate">
+                        {isAdmin
+                          ? 'Bạn là Admin: Có quyền thay đổi link thư mục này'
+                          : 'Được cố định bởi Admin (Chỉ Admin mới có quyền sửa đổi)'}
+                      </p>
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    disabled={isLoadingFromDrive || !driveFolderUrl.trim()}
-                    onClick={handleLoadFromDrive}
-                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-xs transition-all cursor-pointer shrink-0"
-                  >
-                    {isLoadingFromDrive ? (
-                      <>
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                        <span>Đang quét Drive...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-3.5 h-3.5" />
-                        <span>Tải file mới nhất</span>
-                      </>
-                    )}
-                  </button>
+
+                  {/* Nút sửa link dành riêng cho Admin */}
+                  {isAdmin && !isEditingLink && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditUrlInput(driveFolderUrl);
+                        setIsEditingLink(true);
+                      }}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-2xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-all cursor-pointer shrink-0"
+                      title="Chỉnh sửa link thư mục Google Drive (Chỉ tài khoản Admin)"
+                    >
+                      <Edit3 className="w-3 h-3" />
+                      <span>Sửa link</span>
+                    </button>
+                  )}
                 </div>
+
+                {/* Chế độ xem link cố định (Mặc định) */}
+                {!isEditingLink ? (
+                  <div className="space-y-2.5 pt-1">
+                    <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200/80 font-mono text-[11px] text-slate-700 break-all select-all flex items-center justify-between gap-2">
+                      <span className="truncate">
+                        {driveFolderUrl || 'Chưa cấu hình link thư mục Google Drive.'}
+                      </span>
+                      <span className="text-3xs font-sans font-bold text-slate-400 shrink-0">
+                        [Đã khóa]
+                      </span>
+                    </div>
+
+                    {/* Nút Đồng Bộ 1-Click To Rõ */}
+                    <button
+                      type="button"
+                      disabled={isLoadingFromDrive || !driveFolderUrl}
+                      onClick={handleLoadFromDrive}
+                      className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none shadow-sm transition-all cursor-pointer"
+                    >
+                      {isLoadingFromDrive ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          <span>Đang quét Google Drive & Tải file mới nhất...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4 text-amber-300" />
+                          <span>Đồng Bộ Ngay Từ Google Drive (1-Click)</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                ) : (
+                  /* Chế độ chỉnh sửa link dành riêng cho Admin */
+                  <div className="space-y-2.5 pt-1 animate-in fade-in">
+                    <div className="relative">
+                      <Link2 className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        value={editUrlInput}
+                        onChange={(e) => setEditUrlInput(e.target.value)}
+                        placeholder="https://drive.google.com/drive/folders/1cRZRKZRuvUEoNQyQuBA..."
+                        className="w-full pl-9 pr-3 py-2 text-xs font-mono rounded-xl border border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 bg-white"
+                        autoFocus
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-3xs text-slate-500">
+                        * Link này sẽ được ghim cố định cho toàn bộ nhân viên và thiết bị khác.
+                      </span>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingLink(false)}
+                          className="px-2.5 py-1 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer"
+                        >
+                          Hủy
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleSaveSystemDriveUrl}
+                          className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs cursor-pointer"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Lưu link hệ thống</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {saveUrlFeedback && (
+                  <div className="text-2xs font-bold text-emerald-700 flex items-center gap-1 pt-0.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>{saveUrlFeedback}</span>
+                  </div>
+                )}
               </div>
 
-              <div className="p-2.5 rounded-xl bg-white/80 border border-blue-100 text-[11px] text-slate-600 space-y-1">
+              <div className="p-2.5 rounded-xl bg-white/90 border border-blue-100 text-[11px] text-slate-600 space-y-1">
                 <p>
-                  💡 <strong>Gợi ý:</strong> Bạn chỉ cần copy link thư mục Google Drive (Ví dụ: <code className="font-mono text-blue-700">https://drive.google.com/drive/folders/...</code>) và dán vào đây 1 lần duy nhất.
+                  💡 <strong>Cơ chế tự động:</strong> Mỗi ngày khi có file mới xuất từ Bravo đẩy lên thư mục Drive trên, hệ thống sẽ tự động tìm file Excel có thời gian cập nhật mới nhất để đối soát.
                 </p>
-                <p className="text-slate-500 text-3xs">
-                  Ứng dụng gọi Webhook Google Apps Script để truy cập trực tiếp Google Drive, tự động giải quyết triệt để rào cản CORS và bảo mật của Google.
-                </p>
+                {!isAdmin && (
+                  <p className="text-3xs text-slate-400">
+                    (Tài khoản nhân viên không có quyền thay đổi link thư mục Google Drive để bảo đảm an toàn dữ liệu).
+                  </p>
+                )}
               </div>
             </div>
           )}
@@ -451,14 +558,49 @@ export default function BravoSyncModal({
             </div>
           )}
 
-          {/* Lỗi nếu có */}
+          {/* Lỗi nếu có (Kèm hướng dẫn chi tiết nếu dính lỗi phiên bản cũ của Apps Script) */}
           {parseError && (
-            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-start gap-2.5 animate-in fade-in">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-              <div>
-                <strong className="block font-bold">Không thể đọc file:</strong>
-                <span className="leading-relaxed">{parseError}</span>
+            <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 space-y-2 animate-in fade-in">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <strong className="block font-bold text-xs sm:text-sm text-rose-800">
+                    {parseError.includes('Code.gs') || parseError.includes('POST') || parseError.includes('hợp lệ')
+                      ? 'Webhook Google Sheet cần cập nhật phiên bản mới'
+                      : 'Không thể tải hoặc đọc file:'}
+                  </strong>
+                  <p className="text-xs leading-relaxed text-rose-800">{parseError}</p>
+                </div>
               </div>
+
+              {/* Hướng dẫn chi tiết nếu dính lỗi Hành động POST không hợp lệ */}
+              {(parseError.includes('POST') || parseError.includes('Code.gs') || parseError.includes('hợp lệ')) && (
+                <div className="mt-2 p-3 bg-white/95 rounded-xl border border-rose-200 text-2xs text-slate-700 space-y-1.5 shadow-2xs">
+                  <div className="font-bold text-rose-900 flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                    <span>Hướng dẫn cập nhật Webhook Google Sheet (Chỉ mất 1 phút):</span>
+                  </div>
+                  <ol className="list-decimal pl-4 space-y-1 text-slate-600">
+                    <li>Mở file Google Sheet trên trình duyệt -&gt; Vào menu <strong>Tiện ích mở rộng (Extensions)</strong> -&gt; <strong>Apps Script</strong>.</li>
+                    <li>Xóa code cũ, dán toàn bộ nội dung mới từ file <code className="font-mono bg-slate-100 px-1 py-0.2 rounded border border-slate-200 text-slate-800 font-bold">google-apps-script/Code.gs</code> vào.</li>
+                    <li>Bấm <strong>Lưu (Ctrl + S)</strong> -&gt; Bấm <strong>Triển khai (Deploy)</strong> -&gt; <strong>Quản lý bản triển khai (Manage deployments)</strong>.</li>
+                    <li>Bấm hình <strong>Cây bút (Chỉnh sửa)</strong> -&gt; Mục Phiên bản chọn <strong>Phiên bản mới (New version)</strong> -&gt; Bấm <strong>Triển khai (Deploy)</strong>.</li>
+                  </ol>
+                  <div className="pt-1.5 text-blue-700 font-semibold border-t border-slate-100 flex items-center justify-between">
+                    <span>💡 <em>Gợi ý tạm thời:</em> Bạn có thể chuyển sang tab <strong>"File Máy Tính"</strong> ở trên để chọn file từ thư mục <code>BRAVO Daily</code> và đồng bộ ngay lập tức!</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSyncSourceMode('LOCAL_FILE');
+                        setParseError(null);
+                      }}
+                      className="px-2 py-0.5 rounded bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold text-3xs cursor-pointer shrink-0"
+                    >
+                      Chuyển sang File Máy Tính
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -482,7 +624,7 @@ export default function BravoSyncModal({
                 <button
                   type="button"
                   onClick={handleResetForm}
-                  className="text-2xs text-slate-500 hover:text-slate-800 underline shrink-0 font-medium"
+                  className="text-2xs text-slate-500 hover:text-slate-800 underline shrink-0 font-medium cursor-pointer"
                 >
                   Đổi nguồn / Tải lại
                 </button>
@@ -597,7 +739,7 @@ export default function BravoSyncModal({
               <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
                 <strong className="block text-slate-800 font-semibold">1. Đồng bộ 1-Click trên Web:</strong>
                 <span className="text-slate-500">
-                  Dán link thư mục Google Drive một lần duy nhất. Hàng ngày bạn chỉ cần mở modal và bấm <span className="font-semibold text-blue-700">"Tải file mới nhất"</span>.
+                  Thư mục Google Drive được Admin ghim cố định. Mọi nhân viên chỉ cần mở popup và bấm <span className="font-semibold text-blue-700">"Đồng Bộ Ngay Từ Google Drive"</span>.
                 </span>
               </div>
               <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
@@ -618,7 +760,7 @@ export default function BravoSyncModal({
             ) : driveFileInfo ? (
               <span>File Drive: <strong>{driveFileInfo.fileName}</strong></span>
             ) : (
-              <span>Chưa nạp file nào</span>
+              <span>Thư mục Drive: <strong>{driveFolderUrl ? 'Đã kết nối' : 'Chưa cấu hình'}</strong></span>
             )}
           </div>
 

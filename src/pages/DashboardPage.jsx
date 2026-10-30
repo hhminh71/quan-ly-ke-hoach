@@ -561,6 +561,7 @@ export default function DashboardPage({ user }) {
       <BravoSyncModal
         isOpen={isBravoSyncModalOpen}
         onClose={() => setIsBravoSyncModalOpen(false)}
+        user={user}
         budgets={budgets}
         onUpdateBudgets={setBudgets}
         onUpdateBravoInfo={setBravoInfo}

@@ -45,12 +45,16 @@ function doGet(e) {
       const bravoInfo = getBravoInfoFromSheet(ss);
       const users = getUsersFromSheet(ss);
 
+      const scriptProperties = PropertiesService.getScriptProperties();
+      const bravoDriveUrl = scriptProperties.getProperty('BRAVO_DRIVE_FOLDER_URL') || '';
+
       return createJsonResponse({
         status: 'success',
         transactions: transactions,
         budgets: budgets,
         bravoInfo: bravoInfo,
         users: users,
+        bravoDriveUrl: bravoDriveUrl,
         serverTime: new Date().toISOString()
       });
     }
@@ -224,6 +228,17 @@ function doPost(e) {
     if (action === 'fetchBravoFromDrive') {
       const driveUrlOrId = data.driveUrl || data.folderUrl || data.url;
       return handleFetchBravoFromDrive(driveUrlOrId);
+    }
+
+    // 6. Lưu cấu hình link thư mục Google Drive cố định cho toàn hệ thống (Chỉ Admin)
+    if (action === 'saveBravoDriveUrl') {
+      const url = String(data.url || data.driveUrl || '').trim();
+      PropertiesService.getScriptProperties().setProperty('BRAVO_DRIVE_FOLDER_URL', url);
+      return createJsonResponse({
+        status: 'success',
+        message: 'Đã lưu cấu hình link thư mục Google Drive cố định thành công',
+        url: url
+      });
     }
 
     
@@ -647,8 +662,18 @@ function formatDate(val) {
  * Xử lý tải file Excel Bravo từ link hoặc ID thư mục/file Google Drive
  */
 function handleFetchBravoFromDrive(driveUrlOrId) {
-  if (!driveUrlOrId) {
-    return createJsonResponse({ status: 'error', message: 'Chưa cung cấp link hoặc ID thư mục Google Drive' });
+  let urlOrId = driveUrlOrId ? String(driveUrlOrId).trim() : '';
+  if (!urlOrId) {
+    try {
+      urlOrId = PropertiesService.getScriptProperties().getProperty('BRAVO_DRIVE_FOLDER_URL') || '';
+    } catch (e) {}
+  }
+
+  if (!urlOrId) {
+    return createJsonResponse({
+      status: 'error',
+      message: 'Chưa cấu hình Link thư mục Google Drive. Vui lòng liên hệ Admin để cài đặt link thư mục.'
+    });
   }
 
   try {
@@ -656,7 +681,7 @@ function handleFetchBravoFromDrive(driveUrlOrId) {
     let folderName = '';
 
     // Trích xuất Folder ID hoặc File ID từ link
-    const str = String(driveUrlOrId).trim();
+    const str = urlOrId;
     let extractedId = str;
     const folderMatch = str.match(/folders\/([a-zA-Z0-9_-]+)/);
     const fileMatch = str.match(/\/d\/([a-zA-Z0-9_-]+)/);

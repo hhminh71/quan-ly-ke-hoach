@@ -485,8 +485,41 @@ export const fetchBravoFromDrive = async (webhookUrl, driveUrl) => {
 
   const result = await response.json();
   if (result.status === 'error') {
-    throw new Error(result.message || 'Lỗi khi tải file từ Google Drive');
+    const rawMsg = result.message || '';
+    if (rawMsg.includes('POST') || rawMsg.includes('Action') || rawMsg.includes('hành động')) {
+      throw new Error('Google Apps Script trên Google Sheet đang chạy phiên bản cũ (chưa hỗ trợ lệnh fetchBravoFromDrive). Vui lòng cập nhật nội dung Code.gs vào Google Sheet và Triển khai (Deploy) phiên bản mới.');
+    }
+    throw new Error(rawMsg || 'Lỗi khi tải file từ Google Drive');
   }
 
   return result;
+};
+
+/**
+ * Lưu link thư mục Google Drive hệ thống lên Google Sheet qua Apps Script Webhook
+ * @param {string} webhookUrl
+ * @param {string} driveUrl
+ */
+export const saveBravoDriveUrlToGoogleSheet = async (webhookUrl, driveUrl) => {
+  const url = webhookUrl || getSavedWebhookUrl();
+  if (!url) return null;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify({
+        action: 'saveBravoDriveUrl',
+        url: (driveUrl || '').trim(),
+      }),
+    });
+
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (e) {
+    console.warn('Lỗi khi lưu link Drive lên Sheet:', e);
+    return null;
+  }
 };
