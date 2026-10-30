@@ -593,32 +593,30 @@ export default function BravoSyncModal({
                   <div className="mt-2 p-3 bg-white/95 rounded-xl border border-rose-200 text-2xs text-slate-700 space-y-2 shadow-2xs">
                     <div className="font-bold text-blue-900 flex items-center gap-1.5 text-xs">
                       <Sparkles className="w-4 h-4 text-amber-600" />
-                      <span>Cách cấp quyền Google Drive (Chỉ thực hiện 1 lần duy nhất - 20 giây):</span>
+                      <span>Cách cấp quyền Google Drive (Chỉ làm 1 lần trong Apps Script Editor - 20 giây):</span>
                     </div>
 
-                    <div className="space-y-2 text-slate-700">
-                      <div className="p-2 rounded-lg bg-blue-50/70 border border-blue-200 space-y-1">
-                        <strong className="text-blue-900 block font-bold">👉 Cách 1 (Nhanh nhất - Ngay trên Google Sheet):</strong>
-                        <ol className="list-decimal pl-4 space-y-1 text-slate-600">
-                          <li>Mở tab Google Sheet của bạn trên trình duyệt (F5 tải lại trang).</li>
-                          <li>Trên thanh menu, bấm <strong>📊 QUẢN LÝ KẾ HOẠCH</strong> -&gt; chọn <strong>📁 4. Cấp quyền truy cập Google Drive (Đọc Bravo)</strong>.</li>
-                          <li>Google sẽ hiện popup <em>"Cần có quyền ủy quyền"</em> -&gt; Bấm <strong>Tiếp tục / Xem lại quyền</strong> -&gt; Chọn tài khoản Google của bạn -&gt; Bấm <strong>Nâng cao (Advanced)</strong> -&gt; Bấm <strong>Đi tới ... (không an toàn)</strong> -&gt; Bấm <strong>Cho phép (Allow)</strong>.</li>
-                        </ol>
-                      </div>
-
-                      <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
-                        <strong className="text-slate-800 block font-semibold">Hoặc Cách 2 (Trong màn hình Apps Script):</strong>
-                        <ol className="list-decimal pl-4 space-y-0.5 text-slate-600 text-3xs">
-                          <li>Vào menu <em>Tiện ích mở rộng -&gt; Apps Script</em>.</li>
-                          <li>Dán code mới nhất từ file <code className="font-mono bg-white px-1 py-0.2 rounded border">google-apps-script/Code.gs</code> -&gt; Bấm <strong>Lưu (Ctrl+S)</strong>.</li>
-                          <li>Tại thanh công cụ phía trên, ô chọn hàm bấm chọn <strong>capQuyenTruyCapGoogleDrive</strong> -&gt; Bấm nút <strong>Chạy (Run)</strong>.</li>
-                          <li>Bấm <strong>Xem lại quyền</strong> -&gt; <strong>Nâng cao</strong> -&gt; <strong>Cho phép</strong>. Sau đó vào <strong>Triển khai</strong> -&gt; <strong>Quản lý bản triển khai</strong> -&gt; Sửa chọn <strong>Phiên bản mới</strong> -&gt; Bấm <strong>Triển khai</strong>.</li>
-                        </ol>
-                      </div>
+                    <div className="p-2.5 rounded-lg bg-amber-50/80 border border-amber-200 text-amber-900 text-3xs font-medium">
+                      ⚠️ <strong>Lưu ý:</strong> Chính sách bảo mật của Google <u>không cho phép</u> mở popup cấp quyền từ menu trên Google Sheet. Bạn cần bấm nút <strong>"▶ Chạy" (Run)</strong> trực tiếp trong màn hình Apps Script theo các bước dưới đây:
                     </div>
+
+                    <ol className="list-decimal pl-4 space-y-1.5 text-slate-700 leading-relaxed">
+                      <li>Trên Google Sheet, vào menu <strong>Tiện ích mở rộng (Extensions)</strong> -&gt; <strong>Apps Script</strong>.</li>
+                      <li>Tại thanh công cụ phía trên (ngay cạnh nút Lưu), ở ô chọn hàm, nhấp chọn hàm <strong>capQuyenTruyCapGoogleDrive</strong>.</li>
+                      <li>Bấm nút <strong>▶ Chạy (Run)</strong>.</li>
+                      <li>Google sẽ hiện popup <em>"Cần có quyền ủy quyền" (Authorization required)</em>:
+                        <ul className="list-disc pl-4 mt-0.5 space-y-0.5 text-slate-600">
+                          <li>Bấm <strong>Xem lại quyền (Review permissions)</strong> -&gt; Chọn tài khoản Google của bạn.</li>
+                          <li>Bấm <strong>Nâng cao (Advanced)</strong> ở góc dưới.</li>
+                          <li>Bấm <strong>Đi tới ... (không an toàn) / Go to ... (unsafe)</strong>.</li>
+                          <li>Bấm nút <strong>Cho phép (Allow)</strong>.</li>
+                        </ul>
+                      </li>
+                      <li>Sau khi cấp quyền xong, bấm <strong>Triển khai (Deploy)</strong> -&gt; <strong>Quản lý bản triển khai (Manage deployments)</strong> -&gt; Bấm hình <strong>Cây bút (Chỉnh sửa)</strong> -&gt; Chọn <strong>Phiên bản mới (New version)</strong> -&gt; Bấm <strong>Triển khai (Deploy)</strong>.</li>
+                    </ol>
 
                     <div className="pt-2 text-blue-700 font-semibold border-t border-slate-100 flex items-center justify-between">
-                      <span>💡 Sau khi cấp quyền xong, bạn bấm nút xanh <strong>"Đồng Bộ Ngay Từ Google Drive (1-Click)"</strong> ở trên là xong ngay!</span>
+                      <span>💡 Cấp quyền xong, bạn quay lại đây bấm <strong>"Đồng Bộ Ngay Từ Google Drive (1-Click)"</strong> là thành công 100%!</span>
                       <button
                         type="button"
                         onClick={() => {

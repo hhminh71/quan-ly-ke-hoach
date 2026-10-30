@@ -753,22 +753,25 @@ function handleFetchBravoFromDrive(driveUrlOrId) {
 /**
  * HÀM CẤP QUYỀN TRUY CẬP GOOGLE DRIVE (OAuth Scope: DriveApp)
  * 
- * Cách dùng:
- * Cách 1: Trong trình soạn thảo Apps Script, chọn hàm "capQuyenTruyCapGoogleDrive" từ menu dropdown và bấm nút "Chạy" (Run).
- *         Google sẽ hiện hộp thoại "Yêu cầu cấp quyền" (Review Permissions) -> Bấm Cho phép (Allow).
- * Cách 2: Trên trang Google Sheet, bấm menu "📊 QUẢN LÝ KẾ HOẠCH" -> chọn "📁 4. Cấp quyền truy cập Google Drive".
+ * LƯU Ý BẢO MẬT CỦA GOOGLE:
+ * Google KHÔNG cho phép mở popup cấp quyền từ menu trên Google Sheet.
+ * Bạn PHẢI bấm nút "▶ Chạy" (Run) trực tiếp trong màn hình Apps Script:
+ * 1. Ở ô chọn hàm (trên thanh công cụ Apps Script), chọn: capQuyenTruyCapGoogleDrive
+ * 2. Bấm nút "▶ Chạy" (Run).
+ * 3. Google sẽ hiện hộp thoại "Yêu cầu cấp quyền" (Review Permissions) -> Chọn Cho phép (Allow).
  */
 function capQuyenTruyCapGoogleDrive() {
+  const root = DriveApp.getRootFolder();
+  Logger.log('Đã kết nối thành công thư mục: ' + root.getName());
+
   try {
-    const root = DriveApp.getRootFolder();
-    const folderName = root.getName();
     SpreadsheetApp.getUi().alert(
       '✅ CẤP QUYỀN TRUY CẬP GOOGLE DRIVE THÀNH CÔNG!\n\n' +
       'Tài khoản Google của bạn đã chính thức cấp quyền cho Apps Script đọc thư mục Bravo trên Google Drive.\n\n' +
       '👉 Bây giờ bạn có thể quay lại Web App và bấm nút "Đồng Bộ Ngay Từ Google Drive (1-Click)".'
     );
-  } catch (err) {
-    SpreadsheetApp.getUi().alert('Thông báo: ' + err.toString());
+  } catch (e) {
+    Logger.log('Đã cấp quyền thành công trong Apps Script Editor!');
   }
 }
 
