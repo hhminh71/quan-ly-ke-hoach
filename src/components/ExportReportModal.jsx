@@ -222,8 +222,8 @@ export default function ExportReportModal({
             </div>
             <div className="flex items-center justify-between text-slate-600">
               <span>Hạn mức ngân sách tổng:</span>
-              <span className="font-bold text-emerald-700">
-                {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(totalApproved)}
+              <span className="font-bold text-emerald-700 whitespace-nowrap">
+                {Math.round(totalApproved || 0).toLocaleString('vi-VN') + '\u00A0đ'}
               </span>
             </div>
             <div className="flex items-center justify-between text-slate-600">

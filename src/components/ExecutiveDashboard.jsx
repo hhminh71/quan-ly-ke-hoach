@@ -41,14 +41,14 @@ export default function ExecutiveDashboard({
   }, []);
 
   const formatVND = (num) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num || 0);
+    return Math.round(Number(num) || 0).toLocaleString('vi-VN') + '\u00A0đ';
   };
 
   const formatCompactVND = (num) => {
     const val = Number(num) || 0;
-    if (Math.abs(val) >= 1e9) return (val / 1e9).toFixed(2) + ' tỷ';
-    if (Math.abs(val) >= 1e6) return (val / 1e6).toFixed(1) + ' tr';
-    return val.toLocaleString('vi-VN') + ' đ';
+    if (Math.abs(val) >= 1e9) return (val / 1e9).toFixed(2) + '\u00A0tỷ';
+    if (Math.abs(val) >= 1e6) return (val / 1e6).toFixed(1) + '\u00A0tr';
+    return Math.round(val).toLocaleString('vi-VN') + '\u00A0đ';
   };
 
   // 1. Live Actuals by Account Code from Transactions

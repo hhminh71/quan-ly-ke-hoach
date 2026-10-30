@@ -108,14 +108,14 @@ export default function BudgetOverview({
   }, [budgets]);
 
   const formatVND = (num) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num || 0);
+    return Math.round(Number(num) || 0).toLocaleString('vi-VN') + '\u00A0đ';
   };
 
   const formatCompactVND = (num) => {
     const val = Number(num) || 0;
-    if (Math.abs(val) >= 1e9) return (val / 1e9).toFixed(2) + ' tỷ';
-    if (Math.abs(val) >= 1e6) return (val / 1e6).toFixed(1) + ' tr';
-    return val.toLocaleString('vi-VN') + ' đ';
+    if (Math.abs(val) >= 1e9) return (val / 1e9).toFixed(2) + '\u00A0tỷ';
+    if (Math.abs(val) >= 1e6) return (val / 1e6).toFixed(1) + '\u00A0tr';
+    return Math.round(val).toLocaleString('vi-VN') + '\u00A0đ';
   };
 
   // Determine all available budget column years from the data
@@ -1069,19 +1069,19 @@ export default function BudgetOverview({
 
                         {/* Được duyệt của năm đang chọn */}
                         {isProgColVisible('approved') && (
-                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs text-slate-700 font-semibold leading-tight break-words">
+                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs text-slate-700 font-semibold leading-tight whitespace-nowrap">
                             {formatVND(item.selectedYearApproved)}
                           </td>
                         )}
 
                         {/* Cột Tùy Chọn: Theo Bravo */}
                         {showBravoCol && isProgColVisible('bravo') && (
-                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-semibold text-amber-900 bg-amber-50/20 border-l border-r border-amber-100/60 leading-tight break-words">
-                            <div className="flex flex-col items-end">
-                              <span>{formatVND(item.bravoVal)}</span>
+                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-semibold text-amber-900 bg-amber-50/20 border-l border-r border-amber-100/60 leading-tight whitespace-nowrap">
+                            <div className="flex flex-col items-end whitespace-nowrap">
+                              <span className="whitespace-nowrap">{formatVND(item.bravoVal)}</span>
                               {item.isSctsSeparated && (
                                 <span
-                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-amber-800 bg-amber-100/90 px-0.5 py-0.2 rounded border border-amber-300"
+                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-amber-800 bg-amber-100/90 px-0.5 py-0.2 rounded border border-amber-300 whitespace-nowrap"
                                   title="Bravo hạch toán gộp chung cả SCTX và SCTS (Sửa chữa lớn)"
                                 >
                                   Gộp SCTS & SCTX
@@ -1093,40 +1093,40 @@ export default function BudgetOverview({
 
                         {/* Cột Tùy Chọn: Theo Thực Tế */}
                         {showActualCol && isProgColVisible('actual') && (
-                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-semibold text-blue-700 bg-blue-50/20 border-l border-r border-blue-100/60 leading-tight break-words">
+                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-semibold text-blue-700 bg-blue-50/20 border-l border-r border-blue-100/60 leading-tight whitespace-nowrap">
                             {formatVND(item.liveActual)}
                           </td>
                         )}
 
                         {/* Cột Chính: Chi Phí Thực Tế (MAX Báo Cáo) */}
                         {isProgColVisible('reportActual') && (
-                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-bold text-emerald-950 bg-emerald-50/40 border-l border-r border-emerald-100 leading-tight break-words">
-                            <div className="flex flex-col items-end">
-                              <span className="font-bold">{formatVND(item.reportActual)}</span>
+                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-bold text-emerald-950 bg-emerald-50/40 border-l border-r border-emerald-100 leading-tight whitespace-nowrap">
+                            <div className="flex flex-col items-end whitespace-nowrap">
+                              <span className="font-bold whitespace-nowrap">{formatVND(item.reportActual)}</span>
                               {item.isSctsSeparated ? (
                                 <span
-                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-indigo-800 bg-indigo-100/90 px-0.5 py-0.2 rounded border border-indigo-200"
+                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-indigo-800 bg-indigo-100/90 px-0.5 py-0.2 rounded border border-indigo-200 whitespace-nowrap"
                                   title="Đã tách riêng Sửa chữa tài sản (SCTS) theo nghiệp vụ Cảng. Chi phí kế hoạch chỉ tính theo SCTX nhập liệu."
                                 >
                                   SCTX (Đã tách SCTS)
                                 </span>
                               ) : item.source === 'BRAVO' ? (
                                 <span
-                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-amber-800 bg-amber-100/90 px-0.5 py-0.2 rounded border border-amber-200"
+                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-amber-800 bg-amber-100/90 px-0.5 py-0.2 rounded border border-amber-200 whitespace-nowrap"
                                   title={`Số này lấy theo BRAVO (${formatVND(item.bravoVal)}) vì lớn hơn số nhập liệu (${formatVND(item.liveActual)})`}
                                 >
                                   (Theo Bravo)
                                 </span>
                               ) : item.bravoVal > 0 && item.liveActual === item.bravoVal ? (
                                 <span
-                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-emerald-800 bg-emerald-100/90 px-0.5 py-0.2 rounded border border-emerald-200"
+                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-emerald-800 bg-emerald-100/90 px-0.5 py-0.2 rounded border border-emerald-200 whitespace-nowrap"
                                   title="Bravo và Nhập liệu bằng nhau"
                                 >
                                   (Khớp)
                                 </span>
                               ) : (
                                 <span
-                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-blue-800 bg-blue-100/90 px-0.5 py-0.2 rounded border border-blue-200"
+                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-blue-800 bg-blue-100/90 px-0.5 py-0.2 rounded border border-blue-200 whitespace-nowrap"
                                   title={`Số này lấy theo Nhập liệu hạng mục (${formatVND(item.liveActual)})`}
                                 >
                                   (Theo Nhập liệu)
@@ -1139,7 +1139,7 @@ export default function BudgetOverview({
                         {/* Còn lại */}
                         {isProgColVisible('remaining') && (
                           <td
-                            className={`py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-bold leading-tight break-words ${
+                            className={`py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-bold leading-tight whitespace-nowrap ${
                               item.liveRemaining < 0 ? 'text-rose-600' : 'text-emerald-700'
                             }`}
                           >
@@ -1209,28 +1209,28 @@ export default function BudgetOverview({
                       </td>
                     )}
                     {isProgColVisible('approved') && (
-                      <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-slate-900 leading-tight break-words">
+                      <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-slate-900 leading-tight whitespace-nowrap">
                         {formatVND(summary.totalApproved)}
                       </td>
                     )}
                     {showBravoCol && isProgColVisible('bravo') && (
-                      <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-amber-900 bg-amber-100/50 border-l border-r border-amber-200 leading-tight break-words">
+                      <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-amber-900 bg-amber-100/50 border-l border-r border-amber-200 leading-tight whitespace-nowrap">
                         {formatVND(summary.totalBravo)}
                       </td>
                     )}
                     {showActualCol && isProgColVisible('actual') && (
-                      <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-blue-900 bg-blue-100/50 border-l border-r border-blue-200 leading-tight break-words">
+                      <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-blue-900 bg-blue-100/50 border-l border-r border-blue-200 leading-tight whitespace-nowrap">
                         {formatVND(summary.totalLiveActual)}
                       </td>
                     )}
                     {isProgColVisible('reportActual') && (
-                      <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-emerald-950 bg-emerald-100/70 border-l border-r border-emerald-300 leading-tight break-words">
+                      <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-emerald-950 bg-emerald-100/70 border-l border-r border-emerald-300 leading-tight whitespace-nowrap">
                         {formatVND(summary.totalReportActual)}
                       </td>
                     )}
                     {isProgColVisible('remaining') && (
                       <td
-                        className={`py-1 px-0.5 sm:px-1 text-right font-mono leading-tight break-words ${
+                        className={`py-1 px-0.5 sm:px-1 text-right font-mono leading-tight whitespace-nowrap ${
                           summary.totalRemaining < 0 ? 'text-rose-600' : 'text-emerald-700'
                         }`}
                       >
@@ -1389,7 +1389,7 @@ export default function BudgetOverview({
                     return (
                       <td
                         key={yr}
-                        className={`py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs leading-tight break-words ${
+                        className={`py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs leading-tight whitespace-nowrap ${
                           isSelected ? 'bg-blue-50/50 border-x border-blue-100 font-bold text-blue-900' : 'text-slate-700'
                         }`}
                         style={{
@@ -1405,7 +1405,7 @@ export default function BudgetOverview({
                             className="w-full text-right px-1 py-0.5 rounded border border-indigo-300 bg-white text-xs font-mono font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-300"
                           />
                         ) : (
-                          <span>{formatVND(val)}</span>
+                          <span className="whitespace-nowrap">{formatVND(val)}</span>
                         )}
                       </td>
                     );

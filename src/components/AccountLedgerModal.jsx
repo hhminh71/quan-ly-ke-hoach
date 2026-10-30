@@ -155,7 +155,7 @@ export default function AccountLedgerModal({
   if (!isOpen || !account) return null;
 
   const formatVND = (num) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(num) || 0);
+    return Math.round(Number(num) || 0).toLocaleString('vi-VN') + '\u00A0đ';
   };
 
   // Live account stats defensively
@@ -621,7 +621,7 @@ export default function AccountLedgerModal({
                         {/* 4. Số tiền */}
                         {isColumnVisible('amount') && (
                           <td
-                            className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight break-words"
+                            className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight whitespace-nowrap"
                             style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
                           >
                             {formatVND(item.amount)}
@@ -728,7 +728,7 @@ export default function AccountLedgerModal({
                       )}
                       {isColumnVisible('amount') && (
                         <td
-                          className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-extrabold text-amber-900 text-[9px] sm:text-xs leading-tight break-words"
+                          className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-extrabold text-amber-900 text-[9px] sm:text-xs leading-tight whitespace-nowrap"
                           style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
                         >
                           {formatVND(bravoVal)}
@@ -767,7 +767,7 @@ export default function AccountLedgerModal({
               {showActual && (
                 <>
                   {' • '}Thực Tế:{' '}
-                  <strong className="text-blue-700 font-mono font-bold">
+                  <strong className="text-blue-700 font-mono font-bold whitespace-nowrap">
                     {formatVND(currentTotalAmount)}
                   </strong>
                 </>
@@ -775,13 +775,13 @@ export default function AccountLedgerModal({
               {showBravo && bravoVal > 0 && (
                 <>
                   {' • '}Bravo:{' '}
-                  <strong className="text-amber-700 font-mono font-bold">
+                  <strong className="text-amber-700 font-mono font-bold whitespace-nowrap">
                     {formatVND(bravoVal)}
                   </strong>
                 </>
               )}
               {' • '}Báo Cáo (MAX):{' '}
-              <strong className="text-emerald-700 font-mono font-bold">
+              <strong className="text-emerald-700 font-mono font-bold whitespace-nowrap">
                 {formatVND(reportActual)}
               </strong>
             </div>

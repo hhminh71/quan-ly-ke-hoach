@@ -120,7 +120,7 @@ export default function TransactionList({
   }, [selectedCategory, searchTerm, budgets]);
 
   const formatVND = (num) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num || 0);
+    return Math.round(Number(num) || 0).toLocaleString('vi-VN') + '\u00A0đ';
   };
 
   // Open Edit Modal
@@ -323,7 +323,7 @@ export default function TransactionList({
                   100%
                 </span>
               </div>
-              <div className="text-[9px] sm:text-xs font-extrabold text-slate-800 font-mono mt-0.5 truncate leading-tight" title={formatVND(budgetStats.approved)}>
+              <div className="text-[9px] sm:text-xs font-extrabold text-slate-800 font-mono mt-0.5 truncate whitespace-nowrap leading-tight" title={formatVND(budgetStats.approved)}>
                 {formatVND(budgetStats.approved)}
               </div>
             </div>
@@ -336,7 +336,7 @@ export default function TransactionList({
                   {budgetStats.spentPercent.toFixed(0)}%
                 </span>
               </div>
-              <div className="text-[9px] sm:text-xs font-extrabold text-blue-900 font-mono mt-0.5 truncate leading-tight" title={formatVND(budgetStats.spent)}>
+              <div className="text-[9px] sm:text-xs font-extrabold text-blue-900 font-mono mt-0.5 truncate whitespace-nowrap leading-tight" title={formatVND(budgetStats.spent)}>
                 {formatVND(budgetStats.spent)}
               </div>
             </div>
@@ -362,7 +362,7 @@ export default function TransactionList({
                 </span>
               </div>
               <div
-                className={`text-[9px] sm:text-xs font-extrabold font-mono mt-0.5 truncate leading-tight ${
+                className={`text-[9px] sm:text-xs font-extrabold font-mono mt-0.5 truncate whitespace-nowrap leading-tight ${
                   budgetStats.remaining >= 0 ? 'text-emerald-900' : 'text-rose-700'
                 }`}
                 title={formatVND(budgetStats.remaining)}
@@ -605,9 +605,9 @@ export default function TransactionList({
                     </td>
                   )}
 
-                  {/* 4. Số tiền: Xuống dòng nếu quá hẹp */}
+                  {/* 4. Số tiền */}
                   {isColumnVisible('amount') && (
-                    <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight break-words">
+                    <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight whitespace-nowrap">
                       {formatVND(item.amount)}
                     </td>
                   )}

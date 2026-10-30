@@ -49,7 +49,7 @@ export default function StatCards({ transactions = [], budgets = [], selectedYea
   ).size;
 
   const formatCurrency = (val) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val || 0);
+    return Math.round(Number(val) || 0).toLocaleString('vi-VN') + '\u00A0đ';
   };
 
   const yearLabel = selectedYear === 'ALL' ? 'Toàn bộ' : `Năm ${selectedYear}`;
@@ -125,7 +125,7 @@ export default function StatCards({ transactions = [], budgets = [], selectedYea
             </div>
 
             <div className="mt-3">
-              <div className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight font-mono">
+              <div className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight font-mono whitespace-nowrap truncate">
                 {stat.value}
               </div>
               <div className="flex items-center justify-between mt-2.5 text-xs">

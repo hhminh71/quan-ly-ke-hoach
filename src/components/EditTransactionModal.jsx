@@ -40,7 +40,7 @@ export default function EditTransactionModal({
   if (!isOpen || !transaction) return null;
 
   const formatVND = (num) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(Number(num) || 0);
+    return Math.round(Number(num) || 0).toLocaleString('vi-VN') + '\u00A0đ';
   };
 
   const handleEditAccountChange = (code) => {
