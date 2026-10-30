@@ -55,6 +55,11 @@ function doGet(e) {
       });
     }
 
+    if (action === 'fetchBravoFromDrive') {
+      const driveUrlOrId = e.parameter.driveUrl || e.parameter.folderUrl || e.parameter.url;
+      return handleFetchBravoFromDrive(driveUrlOrId);
+    }
+
     return createJsonResponse({ status: 'error', message: 'Action không hợp lệ' });
   } catch (err) {
     return createJsonResponse({ status: 'error', message: err.toString() });
@@ -213,6 +218,12 @@ function doPost(e) {
         updateTime: updateTime,
         count: items.length
       });
+    }
+
+    // 5. Tải file Excel Bravo mới nhất từ thư mục hoặc file Google Drive được share
+    if (action === 'fetchBravoFromDrive') {
+      const driveUrlOrId = data.driveUrl || data.folderUrl || data.url;
+      return handleFetchBravoFromDrive(driveUrlOrId);
     }
 
     
@@ -630,6 +641,87 @@ function formatDate(val) {
     return Utilities.formatDate(val, 'GMT+7', 'yyyy-MM-dd');
   }
   return String(val);
+}
+
+/**
+ * Xử lý tải file Excel Bravo từ link hoặc ID thư mục/file Google Drive
+ */
+function handleFetchBravoFromDrive(driveUrlOrId) {
+  if (!driveUrlOrId) {
+    return createJsonResponse({ status: 'error', message: 'Chưa cung cấp link hoặc ID thư mục Google Drive' });
+  }
+
+  try {
+    let targetFile = null;
+    let folderName = '';
+
+    // Trích xuất Folder ID hoặc File ID từ link
+    const str = String(driveUrlOrId).trim();
+    let extractedId = str;
+    const folderMatch = str.match(/folders\/([a-zA-Z0-9_-]+)/);
+    const fileMatch = str.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    const idParam = str.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+
+    if (folderMatch) {
+      extractedId = folderMatch[1];
+    } else if (fileMatch) {
+      extractedId = fileMatch[1];
+    } else if (idParam) {
+      extractedId = idParam[1];
+    }
+
+    // 1. Thử mở như Thư mục (Folder) để tìm file Excel mới nhất
+    try {
+      const folder = DriveApp.getFolderById(extractedId);
+      folderName = folder.getName();
+      const files = folder.getFiles();
+      let latestTime = 0;
+
+      while (files.hasNext()) {
+        const f = files.next();
+        const fname = f.getName().toLowerCase();
+        // Lọc file Excel (.xlsx hoặc .xls)
+        if (fname.indexOf('.xlsx') !== -1 || fname.indexOf('.xls') !== -1) {
+          const updated = f.getLastUpdated().getTime();
+          if (updated > latestTime) {
+            latestTime = updated;
+            targetFile = f;
+          }
+        }
+      }
+    } catch (folderErr) {
+      // 2. Nếu không phải folder hoặc lỗi, thử mở trực tiếp như File
+      try {
+        targetFile = DriveApp.getFileById(extractedId);
+      } catch (fileErr) {
+        return createJsonResponse({
+          status: 'error',
+          message: 'Không thể truy cập Google Drive với link/ID này. Hãy đảm bảo tài khoản Google đã được chia sẻ quyền xem thư mục/file: ' + folderErr.message
+        });
+      }
+    }
+
+    if (!targetFile) {
+      return createJsonResponse({
+        status: 'error',
+        message: 'Không tìm thấy file Excel (.xlsx / .xls) nào trong thư mục Google Drive' + (folderName ? ' "' + folderName + '"' : '')
+      });
+    }
+
+    const blob = targetFile.getBlob();
+    const base64 = Utilities.base64Encode(blob.getBytes());
+
+    return createJsonResponse({
+      status: 'success',
+      fileName: targetFile.getName(),
+      folderName: folderName,
+      fileSize: blob.getBytes().length,
+      lastUpdated: Utilities.formatDate(targetFile.getLastUpdated(), 'GMT+7', 'dd/MM/yyyy HH:mm:ss'),
+      base64: base64
+    });
+  } catch (err) {
+    return createJsonResponse({ status: 'error', message: 'Lỗi xử lý Google Drive: ' + err.toString() });
+  }
 }
 
 /**

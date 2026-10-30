@@ -13,9 +13,15 @@ import {
   Cloud,
   Clock,
   Sparkles,
+  Link2,
+  ExternalLink,
 } from 'lucide-react';
 import { parseBravoExcelBuffer } from '../utils/bravoParser';
-import { syncBravoInfoToGoogleSheet, getSavedWebhookUrl } from '../services/googleSheetService';
+import {
+  syncBravoInfoToGoogleSheet,
+  fetchBravoFromDrive,
+  getSavedWebhookUrl,
+} from '../services/googleSheetService';
 import { formatVND } from '../utils/formatters';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
 
@@ -30,6 +36,18 @@ export default function BravoSyncModal({
   useModalBackHandler(isOpen, onClose, 'bravo-sync-modal');
 
   const fileInputRef = useRef(null);
+  
+  // Sync source mode: 'DRIVE_LINK' (Khuyên dùng) or 'LOCAL_FILE'
+  const [syncSourceMode, setSyncSourceMode] = useState('DRIVE_LINK');
+  
+  // Google Drive link state
+  const [driveFolderUrl, setDriveFolderUrl] = useState(() => {
+    return localStorage.getItem('app_bravo_drive_url') || '';
+  });
+  const [isLoadingFromDrive, setIsLoadingFromDrive] = useState(false);
+  const [driveFileInfo, setDriveFileInfo] = useState(null);
+
+  // Local file state
   const [selectedFile, setSelectedFile] = useState(null);
   const [isParsing, setIsParsing] = useState(false);
   const [parseResult, setParseResult] = useState(null);
@@ -42,21 +60,23 @@ export default function BravoSyncModal({
 
   if (!isOpen) return null;
 
+  // Process a local File object
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    await processFile(file);
+    await processLocalFile(file);
   };
 
   const handleDrop = async (e) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
     if (!file) return;
-    await processFile(file);
+    await processLocalFile(file);
   };
 
-  const processFile = async (file) => {
+  const processLocalFile = async (file) => {
     setSelectedFile(file);
+    setDriveFileInfo(null);
     setParseError(null);
     setSyncSuccessMessage(null);
     setIsParsing(true);
@@ -71,6 +91,66 @@ export default function BravoSyncModal({
       setParseResult(null);
     } finally {
       setIsParsing(false);
+    }
+  };
+
+  // Process directly from Google Drive Web Link via Apps Script Webhook
+  const handleLoadFromDrive = async () => {
+    const inputUrl = driveFolderUrl ? driveFolderUrl.trim() : '';
+    if (!inputUrl) {
+      setParseError('Vui lòng nhập Link thư mục Google Drive (hoặc link file).');
+      return;
+    }
+
+    try {
+      localStorage.setItem('app_bravo_drive_url', inputUrl);
+    } catch (e) {}
+
+    const webhookUrl = getSavedWebhookUrl();
+    if (!webhookUrl) {
+      setParseError(
+        'Chưa kết nối Webhook Google Sheet. Bạn vui lòng vào Menu avatar -> Cài đặt kết nối Google Sheet để dán link Webhook trước khi đồng bộ từ Google Drive.'
+      );
+      return;
+    }
+
+    setIsLoadingFromDrive(true);
+    setParseError(null);
+    setSyncSuccessMessage(null);
+    setParseResult(null);
+    setSelectedFile(null);
+
+    try {
+      const driveRes = await fetchBravoFromDrive(webhookUrl, inputUrl);
+      if (!driveRes || !driveRes.base64) {
+        throw new Error('Không nhận được dữ liệu file từ Google Drive.');
+      }
+
+      setDriveFileInfo({
+        fileName: driveRes.fileName,
+        folderName: driveRes.folderName,
+        lastUpdated: driveRes.lastUpdated,
+        fileSize: driveRes.fileSize,
+      });
+
+      // Decode base64 to binary ArrayBuffer
+      const binaryStr = atob(driveRes.base64);
+      const len = binaryStr.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryStr.charCodeAt(i);
+      }
+      const buffer = bytes.buffer;
+
+      const result = await parseBravoExcelBuffer(buffer, driveRes.fileName);
+      setParseResult(result);
+    } catch (err) {
+      console.error('Error fetching/parsing from Drive:', err);
+      setParseError(err.message || 'Lỗi khi tải hoặc đọc file từ Google Drive.');
+      setParseResult(null);
+      setDriveFileInfo(null);
+    } finally {
+      setIsLoadingFromDrive(false);
     }
   };
 
@@ -127,7 +207,7 @@ export default function BravoSyncModal({
         const webhookUrl = getSavedWebhookUrl();
         if (webhookUrl) {
           try {
-            const sheetRes = await syncBravoInfoToGoogleSheet(webhookUrl, items, summary.syncTime);
+            await syncBravoInfoToGoogleSheet(webhookUrl, items, summary.syncTime);
             sheetMsg = ' và tab INFO trên Google Sheet';
           } catch (sheetErr) {
             console.warn('Lỗi đồng bộ Google Sheet Webhook:', sheetErr);
@@ -162,6 +242,7 @@ export default function BravoSyncModal({
 
   const handleResetForm = () => {
     setSelectedFile(null);
+    setDriveFileInfo(null);
     setParseResult(null);
     setParseError(null);
     setSyncSuccessMessage(null);
@@ -182,13 +263,13 @@ export default function BravoSyncModal({
             </div>
             <div>
               <h3 className="text-sm sm:text-base font-bold text-slate-900 flex items-center gap-2">
-                <span>Đồng Bộ Số Liệu Từ Phần Mềm BRAVO</span>
+                <span>Đồng Bộ Số Liệu Thực Tế BRAVO (ERP)</span>
                 <span className="text-[10px] font-mono font-bold bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded border border-amber-300">
                   BRAVO Daily
                 </span>
               </h3>
               <p className="text-xs text-slate-500">
-                Lấy số liệu thực hiện chi phí xuất từ Bravo vào Web App & Google Sheet
+                Lấy số liệu thực hiện chi phí từ phần mềm Bravo vào Web App & Google Sheet
               </p>
             </div>
           </div>
@@ -204,70 +285,179 @@ export default function BravoSyncModal({
 
         {/* Modal Body */}
         <div className="p-5 overflow-y-auto space-y-4 flex-1 text-xs">
-          {/* Thông báo hướng dẫn vị trí file */}
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-start gap-2.5 text-slate-600">
-            <FolderOpen className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <div className="font-semibold text-slate-800">
-                Thư mục kết xuất file trên máy tính (Google Drive):
-              </div>
-              <code className="text-3xs sm:text-[11px] font-mono bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-800 block select-all">
-                I:\My Drive\APP\Projects\quan-ly-ke-hoach\BRAVO Daily\Báo cáo thực hiện chi phí 2026.xlsx
-              </code>
-            </div>
-          </div>
-
-          {/* Vùng Chọn / Kéo thả File Excel */}
+          {/* Lựa chọn phương thức: Link Google Drive vs File máy tính */}
           {!parseResult && !syncSuccessMessage && (
-            <div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".xlsx, .xls"
-                onChange={handleFileChange}
-                className="hidden"
-                id="bravo-file-input"
-              />
-
-              <label
-                htmlFor="bravo-file-input"
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={handleDrop}
-                className="border-2 border-dashed border-slate-300 hover:border-amber-500 bg-amber-50/20 hover:bg-amber-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-2.5 cursor-pointer transition-all text-center group"
+            <div className="flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200/80">
+              <button
+                type="button"
+                onClick={() => {
+                  setSyncSourceMode('DRIVE_LINK');
+                  setParseError(null);
+                }}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-bold text-xs transition-all ${
+                  syncSourceMode === 'DRIVE_LINK'
+                    ? 'bg-white text-blue-700 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
               >
-                <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs">
-                  <FileSpreadsheet className="w-6 h-6" />
+                <Cloud className="w-3.5 h-3.5 text-blue-600" />
+                <span>Link Thư Mục Google Drive</span>
+                <span className="px-1.5 py-0.2 bg-blue-100 text-blue-800 rounded-full text-3xs font-extrabold uppercase">
+                  Tự Động
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setSyncSourceMode('LOCAL_FILE');
+                  setParseError(null);
+                }}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg font-bold text-xs transition-all ${
+                  syncSourceMode === 'LOCAL_FILE'
+                    ? 'bg-white text-amber-700 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <FolderOpen className="w-3.5 h-3.5 text-amber-600" />
+                <span>File Máy Tính (Kéo Thả)</span>
+                <span className="px-1.5 py-0.2 bg-amber-100 text-amber-800 rounded-full text-3xs font-extrabold uppercase">
+                  Thủ Công
+                </span>
+              </button>
+            </div>
+          )}
+
+          {/* PHƯƠNG THỨC 1: NHẬP LINK GOOGLE DRIVE */}
+          {syncSourceMode === 'DRIVE_LINK' && !parseResult && !syncSuccessMessage && (
+            <div className="p-4 rounded-2xl bg-blue-50/40 border border-blue-200/80 space-y-3.5 animate-in fade-in">
+              <div className="flex items-start gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-2xs mt-0.5">
+                  <Cloud className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="font-bold text-slate-800 text-sm">
-                    Nhấp để chọn file Excel hoặc Kéo thả file vào đây
-                  </div>
-                  <div className="text-slate-500 text-xs mt-0.5">
-                    Hỗ trợ file xuất trực tiếp từ Bravo 10: <span className="font-mono font-medium text-slate-700">.xlsx, .xls</span>
-                  </div>
+                  <h4 className="font-bold text-slate-900 text-xs sm:text-sm">
+                    Đồng bộ tự động từ Thư mục Google Drive được chia sẻ
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                    Dán link thư mục Google Drive chứa các file Excel xuất từ Bravo hàng ngày. Hệ thống sẽ tự động tìm file Excel mới nhất của ngày hôm đó để đối soát.
+                  </p>
                 </div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 font-semibold text-2xs shadow-2xs group-hover:border-amber-300">
-                  <Upload className="w-3 h-3 text-amber-600" />
-                  <span>Chọn file từ thư mục BRAVO Daily</span>
-                </div>
-              </label>
+              </div>
 
-              {isParsing && (
-                <div className="flex items-center justify-center gap-2 text-amber-700 font-semibold py-3">
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Đang phân tích dữ liệu file Excel...</span>
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-slate-700 flex items-center justify-between">
+                  <span>Link thư mục web Google Drive (hoặc link file):</span>
+                  <span className="text-3xs text-blue-600 font-medium">Tự động ghi nhớ sau khi dán</span>
+                </label>
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <div className="relative flex-1">
+                    <Link2 className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={driveFolderUrl}
+                      onChange={(e) => setDriveFolderUrl(e.target.value)}
+                      placeholder="https://drive.google.com/drive/folders/1aBcDeFgHiJk..."
+                      className="w-full pl-9 pr-3 py-2 text-xs font-mono rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    disabled={isLoadingFromDrive || !driveFolderUrl.trim()}
+                    onClick={handleLoadFromDrive}
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 active:scale-95 disabled:opacity-50 disabled:pointer-events-none shadow-xs transition-all cursor-pointer shrink-0"
+                  >
+                    {isLoadingFromDrive ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                        <span>Đang quét Drive...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Tải file mới nhất</span>
+                      </>
+                    )}
+                  </button>
                 </div>
-              )}
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-white/80 border border-blue-100 text-[11px] text-slate-600 space-y-1">
+                <p>
+                  💡 <strong>Gợi ý:</strong> Bạn chỉ cần copy link thư mục Google Drive (Ví dụ: <code className="font-mono text-blue-700">https://drive.google.com/drive/folders/...</code>) và dán vào đây 1 lần duy nhất.
+                </p>
+                <p className="text-slate-500 text-3xs">
+                  Ứng dụng gọi Webhook Google Apps Script để truy cập trực tiếp Google Drive, tự động giải quyết triệt để rào cản CORS và bảo mật của Google.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* PHƯƠNG THỨC 2: CHỌN / KÉO THẢ FILE TỪ MÁY TÍNH */}
+          {syncSourceMode === 'LOCAL_FILE' && !parseResult && !syncSuccessMessage && (
+            <div className="space-y-3 animate-in fade-in">
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-start gap-2.5 text-slate-600">
+                <FolderOpen className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <div className="font-semibold text-slate-800">
+                    Vị trí thư mục file trên máy tính (Google Drive Desktop):
+                  </div>
+                  <code className="text-3xs sm:text-[11px] font-mono bg-white px-2 py-0.5 rounded border border-slate-200 text-slate-800 block select-all">
+                    I:\My Drive\APP\Projects\quan-ly-ke-hoach\BRAVO Daily\Báo cáo thực hiện chi phí 2026.xlsx
+                  </code>
+                </div>
+              </div>
+
+              <div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".xlsx, .xls"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id="bravo-file-input"
+                />
+
+                <label
+                  htmlFor="bravo-file-input"
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handleDrop}
+                  className="border-2 border-dashed border-slate-300 hover:border-amber-500 bg-amber-50/20 hover:bg-amber-50/50 rounded-2xl p-6 flex flex-col items-center justify-center gap-2.5 cursor-pointer transition-all text-center group"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center group-hover:scale-110 transition-transform shadow-xs">
+                    <FileSpreadsheet className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-slate-800 text-sm">
+                      Nhấp để chọn file Excel hoặc Kéo thả file vào đây
+                    </div>
+                    <div className="text-slate-500 text-xs mt-0.5">
+                      Hỗ trợ file xuất trực tiếp từ Bravo 10: <span className="font-mono font-medium text-slate-700">.xlsx, .xls</span>
+                    </div>
+                  </div>
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-slate-200 text-slate-700 font-semibold text-2xs shadow-2xs group-hover:border-amber-300">
+                    <Upload className="w-3 h-3 text-amber-600" />
+                    <span>Chọn file từ thư mục BRAVO Daily</span>
+                  </div>
+                </label>
+
+                {isParsing && (
+                  <div className="flex items-center justify-center gap-2 text-amber-700 font-semibold py-3">
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Đang phân tích dữ liệu file Excel...</span>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {/* Lỗi nếu có */}
           {parseError && (
-            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-start gap-2.5">
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-start gap-2.5 animate-in fade-in">
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               <div>
                 <strong className="block font-bold">Không thể đọc file:</strong>
-                <span>{parseError}</span>
+                <span className="leading-relaxed">{parseError}</span>
               </div>
             </div>
           )}
@@ -275,19 +465,26 @@ export default function BravoSyncModal({
           {/* Xem trước kết quả phân tích (Preview) */}
           {parseResult && !syncSuccessMessage && (
             <div className="space-y-3.5 animate-in fade-in duration-200">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span className="font-bold text-slate-900 text-sm">
-                    Đã đọc thành công: {parseResult.summary.fileName}
-                  </span>
+              <div className="p-3 rounded-xl bg-emerald-50/80 border border-emerald-200 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <div className="min-w-0">
+                    <span className="font-bold text-slate-900 text-xs sm:text-sm truncate block">
+                      Đã đọc thành công: {parseResult.summary.fileName}
+                    </span>
+                    {driveFileInfo && (
+                      <span className="text-3xs text-emerald-800 block">
+                        Nguồn: Google Drive {driveFileInfo.folderName ? `• Thư mục: ${driveFileInfo.folderName}` : ''} • Cập nhật: {driveFileInfo.lastUpdated}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <button
                   type="button"
                   onClick={handleResetForm}
-                  className="text-2xs text-slate-500 hover:text-slate-800 underline"
+                  className="text-2xs text-slate-500 hover:text-slate-800 underline shrink-0 font-medium"
                 >
-                  Chọn file khác
+                  Đổi nguồn / Tải lại
                 </button>
               </div>
 
@@ -318,10 +515,10 @@ export default function BravoSyncModal({
                 </div>
               </div>
 
-              {/* Bảng xem trước 5 tài khoản tiêu biểu */}
+              {/* Bảng xem trước 8 tài khoản tiêu biểu */}
               <div className="border border-slate-200 rounded-xl overflow-hidden">
                 <div className="px-3 py-1.5 bg-slate-100/80 font-bold text-slate-700 text-3xs uppercase tracking-wider flex items-center justify-between">
-                  <span>Xem trước một số khoản mục tiêu biểu từ file</span>
+                  <span>Xem trước các khoản mục tiêu biểu từ file</span>
                   <span>{parseResult.validAccounts.length} khoản mục</span>
                 </div>
                 <div className="max-h-40 overflow-y-auto divide-y divide-slate-100 text-2xs">
@@ -363,7 +560,7 @@ export default function BravoSyncModal({
             </div>
           )}
 
-          {/* Thành công */}
+          {/* Thông báo thành công */}
           {syncSuccessMessage && (
             <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 space-y-2 animate-in fade-in">
               <div className="flex items-center gap-2 font-bold text-sm text-emerald-800">
@@ -375,14 +572,14 @@ export default function BravoSyncModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors"
+                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
                 >
                   Xong & Đóng
                 </button>
                 <button
                   type="button"
                   onClick={handleResetForm}
-                  className="px-3 py-1.5 rounded-lg border border-emerald-300 text-emerald-800 hover:bg-emerald-100 font-semibold text-xs transition-colors"
+                  className="px-3 py-1.5 rounded-lg border border-emerald-300 text-emerald-800 hover:bg-emerald-100 font-semibold text-xs transition-colors cursor-pointer"
                 >
                   Nạp file khác
                 </button>
@@ -390,23 +587,23 @@ export default function BravoSyncModal({
             </div>
           )}
 
-          {/* Tiện ích tự động hóa trên máy tính */}
+          {/* Tiện ích tự động hóa */}
           <div className="pt-2 border-t border-slate-100">
             <div className="text-3xs font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1">
               <Sparkles className="w-3 h-3 text-amber-500" />
-              <span>Các cách tự động hóa đồng bộ trên máy tính (Đã có sẵn):</span>
+              <span>Tiện ích tự động hóa đồng bộ:</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-2xs">
               <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                <strong className="block text-slate-800 font-semibold">1. Chạy 1-Click:</strong>
+                <strong className="block text-slate-800 font-semibold">1. Đồng bộ 1-Click trên Web:</strong>
                 <span className="text-slate-500">
-                  Nhấp đúp file <code className="font-mono bg-white px-1 py-0.2 rounded border border-slate-200">Cap_Nhat_Bravo_Vao_App.bat</code> trong thư mục dự án để tự đọc file và cập nhật trong 2 giây.
+                  Dán link thư mục Google Drive một lần duy nhất. Hàng ngày bạn chỉ cần mở modal và bấm <span className="font-semibold text-blue-700">"Tải file mới nhất"</span>.
                 </span>
               </div>
               <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-                <strong className="block text-slate-800 font-semibold">2. Canh giữ tự động 100%:</strong>
+                <strong className="block text-slate-800 font-semibold">2. Tự động ngầm trên máy tính:</strong>
                 <span className="text-slate-500">
-                  Chạy script <code className="font-mono bg-white px-1 py-0.2 rounded border border-slate-200">scripts/watch_bravo_daily.py</code>. Cứ mỗi lần xuất file từ Bravo là máy tính tự đồng bộ ngầm.
+                  Nhấp đúp file <code className="font-mono bg-white px-1 py-0.2 rounded border border-slate-200">Cap_Nhat_Bravo_Vao_App.bat</code> hoặc chạy <code className="font-mono bg-white px-1 py-0.2 rounded border border-slate-200">scripts/watch_bravo_daily.py</code> để tự canh thư mục máy tính.
                 </span>
               </div>
             </div>
@@ -417,9 +614,11 @@ export default function BravoSyncModal({
         <div className="px-5 py-3 border-t border-slate-100 bg-slate-50 flex items-center justify-between gap-2 shrink-0">
           <div className="text-3xs text-slate-500">
             {selectedFile ? (
-              <span>Đang chọn: <strong>{selectedFile.name}</strong></span>
+              <span>File đã chọn: <strong>{selectedFile.name}</strong></span>
+            ) : driveFileInfo ? (
+              <span>File Drive: <strong>{driveFileInfo.fileName}</strong></span>
             ) : (
-              <span>Chưa chọn file nào</span>
+              <span>Chưa nạp file nào</span>
             )}
           </div>
 
@@ -427,7 +626,7 @@ export default function BravoSyncModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-white transition-colors"
+              className="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-white transition-colors cursor-pointer"
             >
               Hủy bỏ
             </button>

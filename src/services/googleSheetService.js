@@ -451,3 +451,42 @@ export const syncBravoInfoToGoogleSheet = async (webhookUrl, items, updateTime) 
 
   return result;
 };
+
+/**
+ * Lấy file Excel Bravo mới nhất từ link hoặc ID thư mục Google Drive qua Webhook Apps Script
+ * @param {string} webhookUrl
+ * @param {string} driveUrl
+ * @returns {Promise<{ status: string, fileName: string, folderName: string, lastUpdated: string, fileSize: number, base64: string }>}
+ */
+export const fetchBravoFromDrive = async (webhookUrl, driveUrl) => {
+  const url = webhookUrl || getSavedWebhookUrl();
+  if (!url) {
+    throw new Error('Chưa kết nối Webhook Google Sheet. Vui lòng vào "Cài đặt kết nối Google Sheet" để dán URL Webhook trước khi đồng bộ từ Google Drive.');
+  }
+
+  if (!driveUrl || !driveUrl.trim()) {
+    throw new Error('Vui lòng nhập link hoặc ID thư mục Google Drive.');
+  }
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8',
+    },
+    body: JSON.stringify({
+      action: 'fetchBravoFromDrive',
+      driveUrl: driveUrl.trim(),
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Lỗi kết nối Webhook Google Apps Script: HTTP ${response.status}`);
+  }
+
+  const result = await response.json();
+  if (result.status === 'error') {
+    throw new Error(result.message || 'Lỗi khi tải file từ Google Drive');
+  }
+
+  return result;
+};
