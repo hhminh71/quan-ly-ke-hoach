@@ -558,51 +558,112 @@ export default function BravoSyncModal({
             </div>
           )}
 
-          {/* Lỗi nếu có (Kèm hướng dẫn chi tiết nếu dính lỗi phiên bản cũ của Apps Script) */}
-          {parseError && (
-            <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 space-y-2 animate-in fade-in">
-              <div className="flex items-start gap-2.5">
-                <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <strong className="block font-bold text-xs sm:text-sm text-rose-800">
-                    {parseError.includes('Code.gs') || parseError.includes('POST') || parseError.includes('hợp lệ')
-                      ? 'Webhook Google Sheet cần cập nhật phiên bản mới'
-                      : 'Không thể tải hoặc đọc file:'}
-                  </strong>
-                  <p className="text-xs leading-relaxed text-rose-800">{parseError}</p>
-                </div>
-              </div>
+          {/* Lỗi nếu có (Kèm hướng dẫn chi tiết nếu dính lỗi phân quyền hoặc phiên bản cũ của Apps Script) */}
+          {parseError && (() => {
+            const isAuthError =
+              parseError.includes('DriveApp') ||
+              parseError.includes('auth/drive') ||
+              parseError.includes('getFolderById') ||
+              parseError.includes('quyền thực hiện lệnh gọi') ||
+              parseError.includes('authorization');
+            const isPostActionError =
+              !isAuthError &&
+              (parseError.includes('POST') ||
+                parseError.includes('Code.gs') ||
+                parseError.includes('hợp lệ'));
 
-              {/* Hướng dẫn chi tiết nếu dính lỗi Hành động POST không hợp lệ */}
-              {(parseError.includes('POST') || parseError.includes('Code.gs') || parseError.includes('hợp lệ')) && (
-                <div className="mt-2 p-3 bg-white/95 rounded-xl border border-rose-200 text-2xs text-slate-700 space-y-1.5 shadow-2xs">
-                  <div className="font-bold text-rose-900 flex items-center gap-1">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Hướng dẫn cập nhật Webhook Google Sheet (Chỉ mất 1 phút):</span>
-                  </div>
-                  <ol className="list-decimal pl-4 space-y-1 text-slate-600">
-                    <li>Mở file Google Sheet trên trình duyệt -&gt; Vào menu <strong>Tiện ích mở rộng (Extensions)</strong> -&gt; <strong>Apps Script</strong>.</li>
-                    <li>Xóa code cũ, dán toàn bộ nội dung mới từ file <code className="font-mono bg-slate-100 px-1 py-0.2 rounded border border-slate-200 text-slate-800 font-bold">google-apps-script/Code.gs</code> vào.</li>
-                    <li>Bấm <strong>Lưu (Ctrl + S)</strong> -&gt; Bấm <strong>Triển khai (Deploy)</strong> -&gt; <strong>Quản lý bản triển khai (Manage deployments)</strong>.</li>
-                    <li>Bấm hình <strong>Cây bút (Chỉnh sửa)</strong> -&gt; Mục Phiên bản chọn <strong>Phiên bản mới (New version)</strong> -&gt; Bấm <strong>Triển khai (Deploy)</strong>.</li>
-                  </ol>
-                  <div className="pt-1.5 text-blue-700 font-semibold border-t border-slate-100 flex items-center justify-between">
-                    <span>💡 <em>Gợi ý tạm thời:</em> Bạn có thể chuyển sang tab <strong>"File Máy Tính"</strong> ở trên để chọn file từ thư mục <code>BRAVO Daily</code> và đồng bộ ngay lập tức!</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSyncSourceMode('LOCAL_FILE');
-                        setParseError(null);
-                      }}
-                      className="px-2 py-0.5 rounded bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold text-3xs cursor-pointer shrink-0"
-                    >
-                      Chuyển sang File Máy Tính
-                    </button>
+            return (
+              <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 space-y-2.5 animate-in fade-in">
+                <div className="flex items-start gap-2.5">
+                  <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <strong className="block font-bold text-xs sm:text-sm text-rose-800">
+                      {isAuthError
+                        ? 'Google yêu cầu cấp quyền truy cập Google Drive cho Apps Script'
+                        : isPostActionError
+                        ? 'Webhook Google Sheet cần cập nhật phiên bản mới'
+                        : 'Không thể tải hoặc đọc file:'}
+                    </strong>
+                    <p className="text-xs leading-relaxed text-rose-800">{parseError}</p>
                   </div>
                 </div>
-              )}
-            </div>
-          )}
+
+                {/* Hướng dẫn giải quyết lỗi Cấp quyền Google Drive (OAuth Scope DriveApp) */}
+                {isAuthError && (
+                  <div className="mt-2 p-3 bg-white/95 rounded-xl border border-rose-200 text-2xs text-slate-700 space-y-2 shadow-2xs">
+                    <div className="font-bold text-blue-900 flex items-center gap-1.5 text-xs">
+                      <Sparkles className="w-4 h-4 text-amber-600" />
+                      <span>Cách cấp quyền Google Drive (Chỉ thực hiện 1 lần duy nhất - 20 giây):</span>
+                    </div>
+
+                    <div className="space-y-2 text-slate-700">
+                      <div className="p-2 rounded-lg bg-blue-50/70 border border-blue-200 space-y-1">
+                        <strong className="text-blue-900 block font-bold">👉 Cách 1 (Nhanh nhất - Ngay trên Google Sheet):</strong>
+                        <ol className="list-decimal pl-4 space-y-1 text-slate-600">
+                          <li>Mở tab Google Sheet của bạn trên trình duyệt (F5 tải lại trang).</li>
+                          <li>Trên thanh menu, bấm <strong>📊 QUẢN LÝ KẾ HOẠCH</strong> -&gt; chọn <strong>📁 4. Cấp quyền truy cập Google Drive (Đọc Bravo)</strong>.</li>
+                          <li>Google sẽ hiện popup <em>"Cần có quyền ủy quyền"</em> -&gt; Bấm <strong>Tiếp tục / Xem lại quyền</strong> -&gt; Chọn tài khoản Google của bạn -&gt; Bấm <strong>Nâng cao (Advanced)</strong> -&gt; Bấm <strong>Đi tới ... (không an toàn)</strong> -&gt; Bấm <strong>Cho phép (Allow)</strong>.</li>
+                        </ol>
+                      </div>
+
+                      <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 space-y-1">
+                        <strong className="text-slate-800 block font-semibold">Hoặc Cách 2 (Trong màn hình Apps Script):</strong>
+                        <ol className="list-decimal pl-4 space-y-0.5 text-slate-600 text-3xs">
+                          <li>Vào menu <em>Tiện ích mở rộng -&gt; Apps Script</em>.</li>
+                          <li>Dán code mới nhất từ file <code className="font-mono bg-white px-1 py-0.2 rounded border">google-apps-script/Code.gs</code> -&gt; Bấm <strong>Lưu (Ctrl+S)</strong>.</li>
+                          <li>Tại thanh công cụ phía trên, ô chọn hàm bấm chọn <strong>capQuyenTruyCapGoogleDrive</strong> -&gt; Bấm nút <strong>Chạy (Run)</strong>.</li>
+                          <li>Bấm <strong>Xem lại quyền</strong> -&gt; <strong>Nâng cao</strong> -&gt; <strong>Cho phép</strong>. Sau đó vào <strong>Triển khai</strong> -&gt; <strong>Quản lý bản triển khai</strong> -&gt; Sửa chọn <strong>Phiên bản mới</strong> -&gt; Bấm <strong>Triển khai</strong>.</li>
+                        </ol>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 text-blue-700 font-semibold border-t border-slate-100 flex items-center justify-between">
+                      <span>💡 Sau khi cấp quyền xong, bạn bấm nút xanh <strong>"Đồng Bộ Ngay Từ Google Drive (1-Click)"</strong> ở trên là xong ngay!</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSyncSourceMode('LOCAL_FILE');
+                          setParseError(null);
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-3xs cursor-pointer shrink-0 border border-amber-300"
+                      >
+                        Dùng file máy tính ngay
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Hướng dẫn chi tiết nếu dính lỗi Hành động POST không hợp lệ */}
+                {isPostActionError && (
+                  <div className="mt-2 p-3 bg-white/95 rounded-xl border border-rose-200 text-2xs text-slate-700 space-y-1.5 shadow-2xs">
+                    <div className="font-bold text-rose-900 flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Hướng dẫn cập nhật Webhook Google Sheet (Chỉ mất 1 phút):</span>
+                    </div>
+                    <ol className="list-decimal pl-4 space-y-1 text-slate-600">
+                      <li>Mở file Google Sheet trên trình duyệt -&gt; Vào menu <strong>Tiện ích mở rộng (Extensions)</strong> -&gt; <strong>Apps Script</strong>.</li>
+                      <li>Xóa code cũ, dán toàn bộ nội dung mới từ file <code className="font-mono bg-slate-100 px-1 py-0.2 rounded border border-slate-200 text-slate-800 font-bold">google-apps-script/Code.gs</code> vào.</li>
+                      <li>Bấm <strong>Lưu (Ctrl + S)</strong> -&gt; Bấm <strong>Triển khai (Deploy)</strong> -&gt; <strong>Quản lý bản triển khai (Manage deployments)</strong>.</li>
+                      <li>Bấm hình <strong>Cây bút (Chỉnh sửa)</strong> -&gt; Mục Phiên bản chọn <strong>Phiên bản mới (New version)</strong> -&gt; Bấm <strong>Triển khai (Deploy)</strong>.</li>
+                    </ol>
+                    <div className="pt-1.5 text-blue-700 font-semibold border-t border-slate-100 flex items-center justify-between">
+                      <span>💡 <em>Gợi ý tạm thời:</em> Bạn có thể chuyển sang tab <strong>"File Máy Tính"</strong> ở trên để chọn file từ thư mục <code>BRAVO Daily</code> và đồng bộ ngay lập tức!</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSyncSourceMode('LOCAL_FILE');
+                          setParseError(null);
+                        }}
+                        className="px-2 py-0.5 rounded bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold text-3xs cursor-pointer shrink-0"
+                      >
+                        Chuyển sang File Máy Tính
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* Xem trước kết quả phân tích (Preview) */}
           {parseResult && !syncSuccessMessage && (
