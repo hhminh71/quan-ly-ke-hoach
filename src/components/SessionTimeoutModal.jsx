@@ -1,9 +1,10 @@
 import React from 'react';
-import { Clock, ShieldAlert, LogOut, CheckCircle2 } from 'lucide-react';
+import { Clock, ShieldAlert, LogOut, CheckCircle2, ShieldCheck } from 'lucide-react';
 
 export default function SessionTimeoutModal({
   isOpen,
   remainingSeconds,
+  isAdmin = false,
   onExtend,
   onLogout,
 }) {
@@ -25,13 +26,35 @@ export default function SessionTimeoutModal({
             <Clock className="w-8 h-8 animate-bounce" />
           </div>
 
+          <div className="flex items-center gap-1.5 mb-1">
+            {isAdmin ? (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-300 border border-amber-400/40">
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-500" />
+                <span>Quản trị viên (Admin) • Phiên 8 Giờ</span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/15 text-blue-600 dark:text-blue-300 border border-blue-400/40">
+                <Clock className="w-3 h-3 text-blue-500" />
+                <span>Tự động ngắt sau 30 phút không hoạt động</span>
+              </span>
+            )}
+          </div>
+
           <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <ShieldAlert className="w-5 h-5 text-amber-500" />
-            <span>Sắp hết hạn phiên làm việc</span>
+            <span>{isAdmin ? 'Phiên làm việc Admin sắp hết hạn' : 'Sắp hết hạn phiên làm việc'}</span>
           </h3>
 
           <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">
-            Hệ thống nhận thấy bạn không có thao tác trong gần <strong className="text-slate-800 dark:text-white">30 phút</strong>. Để bảo vệ dữ liệu kế hoạch ngân sách, phiên đăng nhập sẽ tự động kết thúc sau:
+            {isAdmin ? (
+              <>
+                Phiên làm việc của Quản trị viên được quy định giới hạn tối đa <strong className="text-slate-900 dark:text-white font-bold">8 giờ</strong> kể từ lúc đăng nhập để bảo mật hệ thống. Phiên sẽ tự động đăng xuất sau:
+              </>
+            ) : (
+              <>
+                Hệ thống nhận thấy bạn không có thao tác trong gần <strong className="text-slate-900 dark:text-white font-bold">30 phút</strong>. Để bảo vệ dữ liệu kế hoạch, phiên sẽ tự động kết thúc sau:
+              </>
+            )}
           </p>
 
           {/* Countdown Clock Box */}
@@ -52,7 +75,7 @@ export default function SessionTimeoutModal({
               className="w-full py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm text-slate-950 bg-amber-400 hover:bg-amber-300 active:scale-[0.98] transition-all duration-150 shadow-md shadow-amber-400/20 flex items-center justify-center gap-2 cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
-              <span>Tiếp tục làm việc</span>
+              <span>{isAdmin ? 'Gia hạn thêm 8 giờ' : 'Tiếp tục làm việc'}</span>
             </button>
 
             <button

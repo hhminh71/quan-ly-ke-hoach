@@ -6,8 +6,10 @@ import ErrorBoundary from './components/ErrorBoundary';
 import MobileSimulatorModal from './components/MobileSimulatorModal';
 import SessionTimeoutModal from './components/SessionTimeoutModal';
 import { Smartphone } from 'lucide-react';
+import { ROLES, normalizeRole } from './utils/permissions';
 import {
   useAutoLogout,
+  recordLoginTimestamp,
   recordActivityTimestamp,
   isSessionValid,
   setSessionExpiredMessage,
@@ -17,32 +19,38 @@ export default function App() {
   const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
   const [isSimulatorOpen, setIsSimulatorOpen] = useState(false);
 
-  // Khởi tạo người dùng đăng nhập; kiểm tra hiệu lực phiên (tối đa 30 phút không hoạt động)
+  // Khởi tạo người dùng đăng nhập; kiểm tra hiệu lực phiên
+  // (Admin: 8 giờ kể từ lúc đăng nhập • User thường: 30 phút không hoạt động)
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem('demo_user');
     if (!saved) return null;
 
-    // Nếu đã quá 30 phút không hoạt động kể từ phiên trước -> Hết hạn phiên
-    if (!isSessionValid()) {
-      localStorage.removeItem('demo_user');
-      localStorage.removeItem('last_active_timestamp');
-      setSessionExpiredMessage(
-        'Phiên làm việc trước đó đã hết hạn do không có hoạt động trong 30 phút. Vui lòng đăng nhập lại.'
-      );
-      return null;
-    }
-
     try {
       const u = JSON.parse(saved);
-      if (u) {
-        const email = String(u.email || '').toLowerCase();
-        if (email.includes('xaydung') && u.expenseScope !== 'XAY_DUNG') {
-          u.expenseScope = 'XAY_DUNG';
-        } else if (email.includes('kythuat') && u.expenseScope !== 'KY_THUAT') {
-          u.expenseScope = 'KY_THUAT';
-        } else if (email.includes('daotao') && u.expenseScope !== 'DAO_TAO') {
-          u.expenseScope = 'DAO_TAO';
-        }
+      if (!u) return null;
+
+      // Kiểm tra tính hợp lệ của phiên làm việc
+      if (!isSessionValid(u)) {
+        localStorage.removeItem('demo_user');
+        localStorage.removeItem('last_active_timestamp');
+        localStorage.removeItem('session_login_timestamp');
+
+        const isAdmin = normalizeRole(u.role) === ROLES.ADMIN;
+        setSessionExpiredMessage(
+          isAdmin
+            ? 'Phiên làm việc 8 giờ của Quản trị viên (Admin) đã kết thúc. Vui lòng đăng nhập lại để tiếp tục.'
+            : 'Phiên làm việc đã hết hạn do không có hoạt động trong 30 phút. Vui lòng đăng nhập lại để tiếp tục.'
+        );
+        return null;
+      }
+
+      const email = String(u.email || '').toLowerCase();
+      if (email.includes('xaydung') && u.expenseScope !== 'XAY_DUNG') {
+        u.expenseScope = 'XAY_DUNG';
+      } else if (email.includes('kythuat') && u.expenseScope !== 'KY_THUAT') {
+        u.expenseScope = 'KY_THUAT';
+      } else if (email.includes('daotao') && u.expenseScope !== 'DAO_TAO') {
+        u.expenseScope = 'DAO_TAO';
       }
       return u;
     } catch {
@@ -53,17 +61,18 @@ export default function App() {
   const handleLogin = (userData) => {
     setUser(userData);
     localStorage.setItem('demo_user', JSON.stringify(userData));
-    recordActivityTimestamp();
+    recordLoginTimestamp();
   };
 
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('demo_user');
     localStorage.removeItem('last_active_timestamp');
+    localStorage.removeItem('session_login_timestamp');
   };
 
-  // Giám sát tự động đăng xuất sau 30 phút không hoạt động
-  const { showWarning, remainingSeconds, extendSession, performTimeoutLogout } = useAutoLogout({
+  // Giám sát tự động đăng xuất: Admin (8 giờ tối đa) / User thường (30 phút không hoạt động)
+  const { showWarning, remainingSeconds, isAdmin, extendSession, performTimeoutLogout } = useAutoLogout({
     user,
     onLogout: handleLogout,
   });
@@ -109,10 +118,11 @@ export default function App() {
             onClose={() => setIsSimulatorOpen(false)}
           />
 
-          {/* Cảnh báo tự động đăng xuất do không hoạt động (sau 28 phút) */}
+          {/* Cảnh báo tự động đăng xuất: Admin (8 giờ) / User thường (30 phút không hoạt động) */}
           <SessionTimeoutModal
             isOpen={showWarning}
             remainingSeconds={remainingSeconds}
+            isAdmin={isAdmin}
             onExtend={extendSession}
             onLogout={performTimeoutLogout}
           />
