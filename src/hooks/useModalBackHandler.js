@@ -82,3 +82,5 @@ export function useModalBackHandler(isOpen, onClose, modalId = 'modal') {
     };
   }, [isOpen, modalId]);
 }
+
+export default useModalBackHandler;

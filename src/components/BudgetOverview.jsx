@@ -22,6 +22,7 @@ import {
   ArrowUp,
   ArrowDown,
   FileSpreadsheet,
+  RefreshCw,
 } from 'lucide-react';
 import AccountLedgerModal from './AccountLedgerModal';
 import ExportReportModal from './ExportReportModal';
@@ -35,6 +36,7 @@ export default function BudgetOverview({
   selectedYear = '2026',
   user = null,
   onUpdateBudgets,
+  onOpenBravoSync,
   onAddTransaction,
   onUpdateTransaction,
   onDeleteTransaction,
@@ -538,6 +540,20 @@ export default function BudgetOverview({
               <span className="hidden sm:inline">Xuất Báo Cáo</span>
               <span className="sm:hidden">Xuất Excel</span>
             </button>
+
+            {/* Bravo Sync Quick Button */}
+            {onOpenBravoSync && (
+              <button
+                type="button"
+                onClick={onOpenBravoSync}
+                className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 py-0.2 sm:px-2.5 sm:py-0.5 rounded text-[8px] sm:text-xs font-bold text-amber-900 bg-amber-100 hover:bg-amber-200 active:scale-95 shadow-2xs transition-all cursor-pointer border border-amber-300 shrink-0"
+                title="Đồng bộ số liệu thực tế từ phần mềm Bravo (File Excel thư mục BRAVO Daily / Google Drive)"
+              >
+                <RefreshCw className="w-2 h-2 sm:w-3 sm:h-3 text-amber-700" />
+                <span className="hidden sm:inline">Đồng Bộ Bravo</span>
+                <span className="sm:hidden">Bravo</span>
+              </button>
+            )}
 
             {/* Matrix Actions (Chỉ hiển thị khi có quyền onUpdateBudgets - Admin) */}
             {viewMode === 'MATRIX' && onUpdateBudgets && (

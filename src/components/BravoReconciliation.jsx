@@ -21,6 +21,7 @@ import {
   Clock,
   Sparkles,
   ArrowUpRight,
+  RefreshCw,
 } from 'lucide-react';
 import bravoInfoData from '../data/bravoInfo.json';
 import AccountLedgerModal from './AccountLedgerModal';
@@ -37,6 +38,7 @@ export default function BravoReconciliation({
   onDeleteTransaction,
   onNavigateToLedger,
   bravoInfo = null,
+  onOpenBravoSync,
 }) {
   const activeBravoInfo = useMemo(() => {
     return Array.isArray(bravoInfo) && bravoInfo.length > 0 ? bravoInfo : bravoInfoData;
@@ -462,32 +464,46 @@ export default function BravoReconciliation({
             </div>
           </div>
 
-          {/* Sub-tab Pill Switcher */}
-          <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-xl border border-slate-200/60 self-start md:self-auto">
-            <button
-              type="button"
-              onClick={() => setActiveSubTab('PLANNING_RECON')}
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                activeSubTab === 'PLANNING_RECON'
-                  ? 'bg-white text-blue-700 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Scale className="w-3.5 h-3.5" />
-              <span>Đối Soát 76 Khoản Mục Tổ KH</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveSubTab('MACRO_INFO')}
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                activeSubTab === 'MACRO_INFO'
-                  ? 'bg-white text-indigo-700 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              <Building2 className="w-3.5 h-3.5" />
-              <span>Toàn Cảnh Cảng (Sheet INFO - 152 Mục)</span>
-            </button>
+          {/* Sub-tab Pill Switcher & Quick Sync */}
+          <div className="flex flex-wrap items-center gap-2 self-start md:self-auto">
+            <div className="flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-xl border border-slate-200/60">
+              <button
+                type="button"
+                onClick={() => setActiveSubTab('PLANNING_RECON')}
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  activeSubTab === 'PLANNING_RECON'
+                    ? 'bg-white text-blue-700 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Scale className="w-3.5 h-3.5" />
+                <span>Đối Soát 76 Khoản Mục Tổ KH</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveSubTab('MACRO_INFO')}
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  activeSubTab === 'MACRO_INFO'
+                    ? 'bg-white text-indigo-700 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Building2 className="w-3.5 h-3.5" />
+                <span>Toàn Cảnh Cảng (Sheet INFO - 152 Mục)</span>
+              </button>
+            </div>
+
+            {onOpenBravoSync && (
+              <button
+                type="button"
+                onClick={onOpenBravoSync}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-amber-950 bg-amber-100 hover:bg-amber-200 border border-amber-300 shadow-2xs transition-all cursor-pointer"
+                title="Đồng bộ số liệu thực tế từ phần mềm Bravo (File Excel thư mục BRAVO Daily / Google Drive)"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-amber-700" />
+                <span>Đồng Bộ Bravo Daily</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -766,6 +782,19 @@ export default function BravoReconciliation({
                 <Download className="w-3.5 h-3.5" />
                 <span>Xuất CSV</span>
               </button>
+
+              {/* Bravo Sync Button */}
+              {onOpenBravoSync && (
+                <button
+                  type="button"
+                  onClick={onOpenBravoSync}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-amber-950 bg-amber-100 hover:bg-amber-200 border border-amber-300 shadow-2xs transition-all cursor-pointer"
+                  title="Đồng bộ số liệu thực tế từ phần mềm Bravo (File Excel thư mục BRAVO Daily / Google Drive)"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 text-amber-700" />
+                  <span>Đồng Bộ Bravo</span>
+                </button>
+              )}
             </div>
           </div>
 

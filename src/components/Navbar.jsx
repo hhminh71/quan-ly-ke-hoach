@@ -176,6 +176,19 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
                       type="button"
                       onClick={() => {
                         setIsUserMenuOpen(false);
+                        window.dispatchEvent(new CustomEvent('app_open_bravo_sync'));
+                      }}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg font-bold text-amber-950 bg-amber-50/80 hover:bg-amber-100 transition-colors cursor-pointer border border-amber-200/60"
+                      title="Nạp số liệu đối soát từ file Excel xuất từ Bravo trong thư mục BRAVO Daily"
+                    >
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-amber-600" />
+                      <span>Đồng bộ Bravo Daily (Excel / Drive)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
                         window.dispatchEvent(new CustomEvent('app_sync_sheet'));
                       }}
                       className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 transition-colors cursor-pointer"

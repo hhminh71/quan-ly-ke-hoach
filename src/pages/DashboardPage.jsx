@@ -31,6 +31,7 @@ import initialBudgets from '../data/budgets.json';
 import initialTransactions from '../data/transactions.json';
 import initialBravoInfo from '../data/bravoInfo.json';
 import BravoReconciliation from '../components/BravoReconciliation';
+import BravoSyncModal from '../components/BravoSyncModal';
 import {
   getSavedWebhookUrl,
   fetchFromGoogleSheet,
@@ -158,6 +159,7 @@ export default function DashboardPage({ user }) {
 
   // Google Sheets sync states
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
+  const [isBravoSyncModalOpen, setIsBravoSyncModalOpen] = useState(false);
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [hasWebhook, setHasWebhook] = useState(() => Boolean(getSavedWebhookUrl()));
@@ -355,12 +357,14 @@ export default function DashboardPage({ user }) {
     const handleSettings = () => setIsSyncModalOpen(true);
     const handleReset = () => handleResetData();
     const handleOpenUserModal = () => setIsUserModalOpen(true);
+    const handleBravoSync = () => setIsBravoSyncModalOpen(true);
 
     window.addEventListener('app_export_csv', handleCustomExport);
     window.addEventListener('app_sync_sheet', handleSync);
     window.addEventListener('app_open_sheet_settings', handleSettings);
     window.addEventListener('app_reset_data', handleReset);
     window.addEventListener('app_open_user_management', handleOpenUserModal);
+    window.addEventListener('app_open_bravo_sync', handleBravoSync);
 
     return () => {
       window.removeEventListener('app_export_csv', handleCustomExport);
@@ -368,6 +372,7 @@ export default function DashboardPage({ user }) {
       window.removeEventListener('app_open_sheet_settings', handleSettings);
       window.removeEventListener('app_reset_data', handleReset);
       window.removeEventListener('app_open_user_management', handleOpenUserModal);
+      window.removeEventListener('app_open_bravo_sync', handleBravoSync);
     };
   }, [yearTransactions, selectedYear, user]);
 
@@ -477,6 +482,7 @@ export default function DashboardPage({ user }) {
             setBudgets(newBudgets);
             localStorage.setItem('app_budgets_v3', JSON.stringify(newBudgets));
           } : null}
+          onOpenBravoSync={() => setIsBravoSyncModalOpen(true)}
           onAddTransaction={canAddTx ? handleAddTransaction : null}
           onUpdateTransaction={canEditTx ? handleUpdateTransaction : null}
           onDeleteTransaction={canDeleteTx ? handleDeleteTransaction : null}
@@ -528,6 +534,7 @@ export default function DashboardPage({ user }) {
           transactions={scopedYearTransactions}
           selectedYear={selectedYear}
           bravoInfo={scopedBravoInfo}
+          onOpenBravoSync={() => setIsBravoSyncModalOpen(true)}
           onAddTransaction={canAddTx ? handleAddTransaction : null}
           onUpdateTransaction={canEditTx ? handleUpdateTransaction : null}
           onDeleteTransaction={canDeleteTx ? handleDeleteTransaction : null}
@@ -548,6 +555,16 @@ export default function DashboardPage({ user }) {
           if (data?.bravoInfo) setBravoInfo(data.bravoInfo);
           setHasWebhook(true);
         }}
+      />
+
+      {/* BRAVO Excel Sync Modal */}
+      <BravoSyncModal
+        isOpen={isBravoSyncModalOpen}
+        onClose={() => setIsBravoSyncModalOpen(false)}
+        budgets={budgets}
+        onUpdateBudgets={setBudgets}
+        onUpdateBravoInfo={setBravoInfo}
+        onRefreshAll={() => handleSyncNow(null, false)}
       />
 
       {/* User Management RBAC Modal */}

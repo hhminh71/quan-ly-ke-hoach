@@ -418,3 +418,36 @@ export const deleteUserFromGoogleSheet = async (webhookUrl, email) => {
     return null;
   }
 };
+
+/**
+ * Gửi dữ liệu đối soát Bravo lên Google Sheet (Ghi đè tab INFO)
+ */
+export const syncBravoInfoToGoogleSheet = async (webhookUrl, items, updateTime) => {
+  const url = webhookUrl || getSavedWebhookUrl();
+  if (!url) throw new Error('Chưa cấu hình URL Webhook Google Sheet');
+
+  const timeStr = updateTime || new Date().toLocaleString('vi-VN');
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8',
+    },
+    body: JSON.stringify({
+      action: 'syncBravoInfo',
+      updateTime: timeStr,
+      items: items,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Lỗi kết nối Webhook: HTTP ${response.status}`);
+  }
+
+  const result = await response.json();
+  if (result.status === 'error') {
+    throw new Error(result.message || 'Lỗi khi cập nhật tab INFO trên Google Sheet');
+  }
+
+  return result;
+};
