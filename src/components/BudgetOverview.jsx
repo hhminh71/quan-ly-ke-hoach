@@ -142,28 +142,28 @@ export default function BudgetOverview({
     showAllColumns: showAllProgCols,
     isRecentlyResized: isProgRecentlyResized,
   } = useResizableColumns({
-    storageKey: 'tbl_cols_budget_overview_v2',
+    storageKey: 'tbl_cols_budget_overview_v3',
     initialWidths: {
-      code: 65,
+      code: 70,
       name: 210,
-      approved: 105,
-      bravo: 105,
-      actual: 105,
-      reportActual: 120,
-      remaining: 100,
-      percent: 90,
-      status: 60,
+      approved: 115,
+      bravo: 120,
+      actual: 115,
+      reportActual: 135,
+      remaining: 115,
+      percent: 85,
+      status: 65,
     },
     minWidths: {
-      code: 40,
-      name: 75,
-      approved: 60,
-      bravo: 60,
-      actual: 60,
-      reportActual: 65,
-      remaining: 60,
-      percent: 50,
-      status: 40,
+      code: 65,
+      name: 150,
+      approved: 105,
+      bravo: 115,
+      actual: 105,
+      reportActual: 125,
+      remaining: 105,
+      percent: 75,
+      status: 55,
     },
   });
 
@@ -801,7 +801,7 @@ export default function BudgetOverview({
                   {/* Mã KH */}
                   {isProgColVisible('code') && (
                     <th
-                      style={{ width: `${progWidths.code}px` }}
+                      style={{ width: `${progWidths.code}px`, minWidth: `${progWidths.code}px` }}
                       className={`relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words transition-colors ${
                         sortField === 'code' ? 'bg-blue-100/90 text-blue-900 font-extrabold' : ''
                       }`}
@@ -832,7 +832,7 @@ export default function BudgetOverview({
                   {/* Tên Hạng Mục */}
                   {isProgColVisible('name') && (
                     <th
-                      style={{ width: `${progWidths.name}px` }}
+                      style={{ width: `${progWidths.name}px`, minWidth: `${progWidths.name}px` }}
                       className="relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words"
                       title="Tên Hạng Mục • Kéo mép phải để giãn cột"
                     >
@@ -844,7 +844,7 @@ export default function BudgetOverview({
                   {/* Được duyệt */}
                   {isProgColVisible('approved') && (
                     <th
-                      style={{ width: `${progWidths.approved}px` }}
+                      style={{ width: `${progWidths.approved}px`, minWidth: `${progWidths.approved}px` }}
                       className={`relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words transition-colors ${
                         sortField === 'approved' ? 'bg-blue-100/90 text-blue-900 font-extrabold' : ''
                       }`}
@@ -875,7 +875,7 @@ export default function BudgetOverview({
                   {/* Cột Tùy Chọn: Theo Bravo */}
                   {showBravoCol && isProgColVisible('bravo') && (
                     <th
-                      style={{ width: `${progWidths.bravo}px` }}
+                      style={{ width: `${progWidths.bravo}px`, minWidth: `${progWidths.bravo}px` }}
                       className="relative py-0.5 px-0.5 sm:px-1 text-center bg-amber-50/90 text-amber-900 border-l border-r border-amber-200/50 select-none leading-tight break-words"
                       title="Theo Bravo • Kéo mép phải để giãn cột"
                     >
@@ -887,7 +887,7 @@ export default function BudgetOverview({
                   {/* Cột Tùy Chọn: Theo Thực Tế */}
                   {showActualCol && isProgColVisible('actual') && (
                     <th
-                      style={{ width: `${progWidths.actual}px` }}
+                      style={{ width: `${progWidths.actual}px`, minWidth: `${progWidths.actual}px` }}
                       className="relative py-0.5 px-0.5 sm:px-1 text-center bg-blue-50/90 text-blue-900 border-l border-r border-blue-200/50 select-none leading-tight break-words"
                       title="Theo Thực Tế • Kéo mép phải để giãn cột"
                     >
@@ -899,7 +899,7 @@ export default function BudgetOverview({
                   {/* Cột Chính: Chi Phí Thực Tế (MAX Báo Cáo) */}
                   {isProgColVisible('reportActual') && (
                     <th
-                      style={{ width: `${progWidths.reportActual}px` }}
+                      style={{ width: `${progWidths.reportActual}px`, minWidth: `${progWidths.reportActual}px` }}
                       className={`relative py-0.5 px-0.5 sm:px-1 text-center border-l border-r select-none leading-tight break-words transition-colors ${
                         sortField === 'reportActual'
                           ? 'bg-emerald-100 text-emerald-950 font-extrabold border-emerald-300'
@@ -935,7 +935,7 @@ export default function BudgetOverview({
                   {/* Còn Lại */}
                   {isProgColVisible('remaining') && (
                     <th
-                      style={{ width: `${progWidths.remaining}px` }}
+                      style={{ width: `${progWidths.remaining}px`, minWidth: `${progWidths.remaining}px` }}
                       className={`relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words transition-colors ${
                         sortField === 'remaining' ? 'bg-blue-100/90 text-blue-900 font-extrabold' : ''
                       }`}
@@ -966,7 +966,7 @@ export default function BudgetOverview({
                   {/* Tiến Độ */}
                   {isProgColVisible('percent') && (
                     <th
-                      style={{ width: `${progWidths.percent}px` }}
+                      style={{ width: `${progWidths.percent}px`, minWidth: `${progWidths.percent}px` }}
                       className={`relative py-0.5 px-0.5 sm:px-1 text-center select-none leading-tight break-words transition-colors ${
                         sortField === 'percent'
                           ? 'bg-blue-100/90 text-blue-900 font-extrabold'
@@ -1005,7 +1005,7 @@ export default function BudgetOverview({
                   {/* Trạng Thái */}
                   {isProgColVisible('status') && (
                     <th
-                      style={{ width: `${progWidths.status}px` }}
+                      style={{ width: `${progWidths.status}px`, minWidth: `${progWidths.status}px` }}
                       className="relative py-0.5 px-0.5 text-center select-none leading-tight break-words"
                       title="Trạng Thái • Kéo mép phải để giãn cột"
                     >
@@ -1038,7 +1038,10 @@ export default function BudgetOverview({
                       >
                         {/* Mã */}
                         {isProgColVisible('code') && (
-                          <td className="py-0.5 px-0.5 sm:px-1 leading-tight break-words">
+                          <td
+                            className="py-0.5 px-0.5 sm:px-1 leading-tight break-words"
+                            style={{ width: `${progWidths.code}px`, minWidth: `${progWidths.code}px` }}
+                          >
                             <div className="flex flex-wrap items-center gap-0.5">
                               <span className="font-mono text-[9px] sm:text-2xs font-bold text-blue-700 bg-blue-50 group-hover:bg-blue-600 group-hover:text-white px-1 py-0.2 rounded border border-blue-200 group-hover:border-blue-600 transition-colors shadow-2xs shrink-0">
                                 {item.code}
@@ -1057,7 +1060,10 @@ export default function BudgetOverview({
 
                         {/* Tên & Nhóm: Xuống dòng tự nhiên khi bóp nhỏ, line-height mảnh */}
                         {isProgColVisible('name') && (
-                          <td className="py-0.5 px-0.5 sm:px-1 leading-tight break-words">
+                          <td
+                            className="py-0.5 px-0.5 sm:px-1 leading-tight break-words"
+                            style={{ width: `${progWidths.name}px`, minWidth: `${progWidths.name}px` }}
+                          >
                             <div className="font-semibold text-slate-800 text-[9.5px] sm:text-xs leading-tight group-hover:text-blue-700 transition-colors" title={item.name}>
                               {item.name}
                             </div>
@@ -1069,19 +1075,25 @@ export default function BudgetOverview({
 
                         {/* Được duyệt của năm đang chọn */}
                         {isProgColVisible('approved') && (
-                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs text-slate-700 font-semibold leading-tight whitespace-nowrap">
+                          <td
+                            className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs text-slate-700 font-semibold leading-tight whitespace-nowrap overflow-hidden"
+                            style={{ width: `${progWidths.approved}px`, minWidth: `${progWidths.approved}px` }}
+                          >
                             {formatVND(item.selectedYearApproved)}
                           </td>
                         )}
 
                         {/* Cột Tùy Chọn: Theo Bravo */}
                         {showBravoCol && isProgColVisible('bravo') && (
-                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-semibold text-amber-900 bg-amber-50/20 border-l border-r border-amber-100/60 leading-tight whitespace-nowrap">
+                          <td
+                            className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-semibold text-amber-900 bg-amber-50/20 border-l border-r border-amber-100/60 leading-tight whitespace-nowrap overflow-hidden"
+                            style={{ width: `${progWidths.bravo}px`, minWidth: `${progWidths.bravo}px` }}
+                          >
                             <div className="flex flex-col items-end whitespace-nowrap">
                               <span className="whitespace-nowrap">{formatVND(item.bravoVal)}</span>
                               {item.isSctsSeparated && (
                                 <span
-                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-amber-800 bg-amber-100/90 px-0.5 py-0.2 rounded border border-amber-300 whitespace-nowrap"
+                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-amber-800 bg-amber-100/90 px-0.5 py-0.2 rounded border border-amber-300 whitespace-nowrap max-w-full truncate text-right"
                                   title="Bravo hạch toán gộp chung cả SCTX và SCTS (Sửa chữa lớn)"
                                 >
                                   Gộp SCTS & SCTX
@@ -1093,40 +1105,46 @@ export default function BudgetOverview({
 
                         {/* Cột Tùy Chọn: Theo Thực Tế */}
                         {showActualCol && isProgColVisible('actual') && (
-                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-semibold text-blue-700 bg-blue-50/20 border-l border-r border-blue-100/60 leading-tight whitespace-nowrap">
+                          <td
+                            className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-semibold text-blue-700 bg-blue-50/20 border-l border-r border-blue-100/60 leading-tight whitespace-nowrap overflow-hidden"
+                            style={{ width: `${progWidths.actual}px`, minWidth: `${progWidths.actual}px` }}
+                          >
                             {formatVND(item.liveActual)}
                           </td>
                         )}
 
                         {/* Cột Chính: Chi Phí Thực Tế (MAX Báo Cáo) */}
                         {isProgColVisible('reportActual') && (
-                          <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-bold text-emerald-950 bg-emerald-50/40 border-l border-r border-emerald-100 leading-tight whitespace-nowrap">
+                          <td
+                            className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-bold text-emerald-950 bg-emerald-50/40 border-l border-r border-emerald-100 leading-tight whitespace-nowrap overflow-hidden"
+                            style={{ width: `${progWidths.reportActual}px`, minWidth: `${progWidths.reportActual}px` }}
+                          >
                             <div className="flex flex-col items-end whitespace-nowrap">
                               <span className="font-bold whitespace-nowrap">{formatVND(item.reportActual)}</span>
                               {item.isSctsSeparated ? (
                                 <span
-                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-indigo-800 bg-indigo-100/90 px-0.5 py-0.2 rounded border border-indigo-200 whitespace-nowrap"
+                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-indigo-800 bg-indigo-100/90 px-0.5 py-0.2 rounded border border-indigo-200 whitespace-nowrap max-w-full truncate text-right"
                                   title="Đã tách riêng Sửa chữa tài sản (SCTS) theo nghiệp vụ Cảng. Chi phí kế hoạch chỉ tính theo SCTX nhập liệu."
                                 >
                                   SCTX (Đã tách SCTS)
                                 </span>
                               ) : item.source === 'BRAVO' ? (
                                 <span
-                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-amber-800 bg-amber-100/90 px-0.5 py-0.2 rounded border border-amber-200 whitespace-nowrap"
+                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-amber-800 bg-amber-100/90 px-0.5 py-0.2 rounded border border-amber-200 whitespace-nowrap max-w-full truncate text-right"
                                   title={`Số này lấy theo BRAVO (${formatVND(item.bravoVal)}) vì lớn hơn số nhập liệu (${formatVND(item.liveActual)})`}
                                 >
                                   (Theo Bravo)
                                 </span>
                               ) : item.bravoVal > 0 && item.liveActual === item.bravoVal ? (
                                 <span
-                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-emerald-800 bg-emerald-100/90 px-0.5 py-0.2 rounded border border-emerald-200 whitespace-nowrap"
+                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-emerald-800 bg-emerald-100/90 px-0.5 py-0.2 rounded border border-emerald-200 whitespace-nowrap max-w-full truncate text-right"
                                   title="Bravo và Nhập liệu bằng nhau"
                                 >
                                   (Khớp)
                                 </span>
                               ) : (
                                 <span
-                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-blue-800 bg-blue-100/90 px-0.5 py-0.2 rounded border border-blue-200 whitespace-nowrap"
+                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-blue-800 bg-blue-100/90 px-0.5 py-0.2 rounded border border-blue-200 whitespace-nowrap max-w-full truncate text-right"
                                   title={`Số này lấy theo Nhập liệu hạng mục (${formatVND(item.liveActual)})`}
                                 >
                                   (Theo Nhập liệu)
@@ -1139,9 +1157,10 @@ export default function BudgetOverview({
                         {/* Còn lại */}
                         {isProgColVisible('remaining') && (
                           <td
-                            className={`py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-bold leading-tight whitespace-nowrap ${
+                            className={`py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-bold leading-tight whitespace-nowrap overflow-hidden ${
                               item.liveRemaining < 0 ? 'text-rose-600' : 'text-emerald-700'
                             }`}
+                            style={{ width: `${progWidths.remaining}px`, minWidth: `${progWidths.remaining}px` }}
                           >
                             {formatVND(item.liveRemaining)}
                           </td>
@@ -1149,7 +1168,10 @@ export default function BudgetOverview({
 
                         {/* Progress Bar */}
                         {isProgColVisible('percent') && (
-                          <td className="py-0.5 px-0.5 sm:px-1 leading-tight break-words text-center">
+                          <td
+                            className="py-0.5 px-0.5 sm:px-1 leading-tight break-words text-center"
+                            style={{ width: `${progWidths.percent}px`, minWidth: `${progWidths.percent}px` }}
+                          >
                             <div className="flex items-center justify-center gap-1 mx-auto w-full">
                               <div className="w-7 sm:w-9 h-1.5 bg-slate-100 rounded-full overflow-hidden shrink-0">
                                 <div
@@ -1172,7 +1194,10 @@ export default function BudgetOverview({
 
                         {/* Status Badge */}
                         {isProgColVisible('status') && (
-                          <td className="py-0.5 px-0.5 text-center leading-tight break-words">
+                          <td
+                            className="py-0.5 px-0.5 text-center leading-tight break-words"
+                            style={{ width: `${progWidths.status}px`, minWidth: `${progWidths.status}px` }}
+                          >
                             {item.status === 'OVER' ? (
                               <span className="inline-flex items-center px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 leading-none">
                                 Vượt
@@ -1199,51 +1224,76 @@ export default function BudgetOverview({
                 <tfoot className="bg-slate-100/90 font-bold text-slate-800 border-t-2 border-slate-300 text-[9px] sm:text-xs">
                   <tr>
                     {isProgColVisible('code') && (
-                      <td className="py-1 px-0.5 sm:px-1 leading-tight break-words text-center">
+                      <td
+                        className="py-1 px-0.5 sm:px-1 leading-tight break-words text-center"
+                        style={{ width: `${progWidths.code}px`, minWidth: `${progWidths.code}px` }}
+                      >
                         Tổng
                       </td>
                     )}
                     {isProgColVisible('name') && (
-                      <td className="py-1 px-1 sm:px-1.5 leading-tight break-words">
+                      <td
+                        className="py-1 px-1 sm:px-1.5 leading-tight break-words"
+                        style={{ width: `${progWidths.name}px`, minWidth: `${progWidths.name}px` }}
+                      >
                         {filtered.length} khoản mục
                       </td>
                     )}
                     {isProgColVisible('approved') && (
-                      <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-slate-900 leading-tight whitespace-nowrap">
+                      <td
+                        className="py-1 px-0.5 sm:px-1 text-right font-mono text-slate-900 leading-tight whitespace-nowrap overflow-hidden"
+                        style={{ width: `${progWidths.approved}px`, minWidth: `${progWidths.approved}px` }}
+                      >
                         {formatVND(summary.totalApproved)}
                       </td>
                     )}
                     {showBravoCol && isProgColVisible('bravo') && (
-                      <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-amber-900 bg-amber-100/50 border-l border-r border-amber-200 leading-tight whitespace-nowrap">
+                      <td
+                        className="py-1 px-0.5 sm:px-1 text-right font-mono text-amber-900 bg-amber-100/50 border-l border-r border-amber-200 leading-tight whitespace-nowrap overflow-hidden"
+                        style={{ width: `${progWidths.bravo}px`, minWidth: `${progWidths.bravo}px` }}
+                      >
                         {formatVND(summary.totalBravo)}
                       </td>
                     )}
                     {showActualCol && isProgColVisible('actual') && (
-                      <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-blue-900 bg-blue-100/50 border-l border-r border-blue-200 leading-tight whitespace-nowrap">
+                      <td
+                        className="py-1 px-0.5 sm:px-1 text-right font-mono text-blue-900 bg-blue-100/50 border-l border-r border-blue-200 leading-tight whitespace-nowrap overflow-hidden"
+                        style={{ width: `${progWidths.actual}px`, minWidth: `${progWidths.actual}px` }}
+                      >
                         {formatVND(summary.totalLiveActual)}
                       </td>
                     )}
                     {isProgColVisible('reportActual') && (
-                      <td className="py-1 px-0.5 sm:px-1 text-right font-mono text-emerald-950 bg-emerald-100/70 border-l border-r border-emerald-300 leading-tight whitespace-nowrap">
+                      <td
+                        className="py-1 px-0.5 sm:px-1 text-right font-mono text-emerald-950 bg-emerald-100/70 border-l border-r border-emerald-300 leading-tight whitespace-nowrap overflow-hidden"
+                        style={{ width: `${progWidths.reportActual}px`, minWidth: `${progWidths.reportActual}px` }}
+                      >
                         {formatVND(summary.totalReportActual)}
                       </td>
                     )}
                     {isProgColVisible('remaining') && (
                       <td
-                        className={`py-1 px-0.5 sm:px-1 text-right font-mono leading-tight whitespace-nowrap ${
+                        className={`py-1 px-0.5 sm:px-1 text-right font-mono leading-tight whitespace-nowrap overflow-hidden ${
                           summary.totalRemaining < 0 ? 'text-rose-600' : 'text-emerald-700'
                         }`}
+                        style={{ width: `${progWidths.remaining}px`, minWidth: `${progWidths.remaining}px` }}
                       >
                         {formatVND(summary.totalRemaining)}
                       </td>
                     )}
                     {isProgColVisible('percent') && (
-                      <td className="py-1 px-0.5 sm:px-1 text-center font-mono text-slate-700 leading-tight break-words">
+                      <td
+                        className="py-1 px-0.5 sm:px-1 text-center font-mono text-slate-700 leading-tight break-words"
+                        style={{ width: `${progWidths.percent}px`, minWidth: `${progWidths.percent}px` }}
+                      >
                         {summary.avgPercent.toFixed(1)}%
                       </td>
                     )}
                     {isProgColVisible('status') && (
-                      <td className="py-1 px-0.5 text-center text-3xs text-slate-500 leading-tight break-words">
+                      <td
+                        className="py-1 px-0.5 text-center text-3xs text-slate-500 leading-tight break-words"
+                        style={{ width: `${progWidths.status}px`, minWidth: `${progWidths.status}px` }}
+                      >
                         {summary.overCount > 0 ? `${summary.overCount} vượt` : '100% OK'}
                       </td>
                     )}

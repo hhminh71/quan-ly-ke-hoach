@@ -58,22 +58,22 @@ export default function TransactionList({
     toggleColumnVisibility,
     showAllColumns,
   } = useResizableColumns({
-    storageKey: 'tbl_cols_transactions_v2',
+    storageKey: 'tbl_cols_transactions_v3',
     initialWidths: {
       date: 72,
       account: 180,
       notes: 320,
-      amount: 110,
+      amount: 115,
       employee: 110,
       actions: 55,
     },
     minWidths: {
-      date: 45,
-      account: 65,
-      notes: 80,
-      amount: 60,
-      employee: 55,
-      actions: 40,
+      date: 50,
+      account: 75,
+      notes: 90,
+      amount: 105,
+      employee: 60,
+      actions: 45,
     },
   });
 
@@ -488,7 +488,7 @@ export default function TransactionList({
                 {isColumnVisible('date') && (
                   <th
                     onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
-                    style={{ width: `${columnWidths.date}px` }}
+                    style={{ width: `${columnWidths.date}px`, minWidth: `${columnWidths.date}px` }}
                     className="relative py-0.5 px-0.5 sm:px-1 cursor-pointer hover:text-blue-600 transition-colors select-none text-center leading-tight break-words"
                     title="Click để đổi thứ tự ngày • Kéo mép phải để giãn cột"
                   >
@@ -504,7 +504,7 @@ export default function TransactionList({
                 {isColumnVisible('account') && (
                   <th
                     onClick={() => setSortOrder(sortOrder === 'account_asc' ? 'account_desc' : 'account_asc')}
-                    style={{ width: `${columnWidths.account}px` }}
+                    style={{ width: `${columnWidths.account}px`, minWidth: `${columnWidths.account}px` }}
                     className="relative py-0.5 px-0.5 sm:px-1 cursor-pointer hover:text-blue-600 transition-colors select-none text-center leading-tight break-words"
                     title="Click để sort theo Mã khoản mục • Kéo mép phải để giãn cột"
                   >
@@ -519,7 +519,7 @@ export default function TransactionList({
                 {/* 3. Nội dung diễn giải: tùy biến kéo giãn, tiêu đề căn giữa */}
                 {isColumnVisible('notes') && (
                   <th
-                    style={{ width: `${columnWidths.notes}px` }}
+                    style={{ width: `${columnWidths.notes}px`, minWidth: `${columnWidths.notes}px` }}
                     className="relative py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words"
                     title="Nội dung diễn giải • Kéo mép phải để giãn cột"
                   >
@@ -532,7 +532,7 @@ export default function TransactionList({
                 {isColumnVisible('amount') && (
                   <th
                     onClick={() => setSortOrder(sortOrder === 'highest' ? 'lowest' : 'highest')}
-                    style={{ width: `${columnWidths.amount}px` }}
+                    style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
                     className="relative py-0.5 px-0.5 sm:px-1 text-center cursor-pointer hover:text-blue-600 transition-colors select-none leading-tight break-words"
                     title="Click để đổi thứ tự số tiền • Kéo mép phải để giãn cột"
                   >
@@ -547,7 +547,7 @@ export default function TransactionList({
                 {/* 5. Người thực hiện: căn giữa, tùy biến kéo giãn */}
                 {isColumnVisible('employee') && (
                   <th
-                    style={{ width: `${columnWidths.employee}px` }}
+                    style={{ width: `${columnWidths.employee}px`, minWidth: `${columnWidths.employee}px` }}
                     className="relative py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words"
                     title="Người thực hiện • Kéo mép phải để giãn cột"
                   >
@@ -559,7 +559,7 @@ export default function TransactionList({
                 {/* 6. Điều chỉnh (Thao tác): tùy biến kéo giãn, tiêu đề căn giữa */}
                 {isColumnVisible('actions') && (
                   <th
-                    style={{ width: `${columnWidths.actions}px` }}
+                    style={{ width: `${columnWidths.actions}px`, minWidth: `${columnWidths.actions}px` }}
                     className="relative py-0.5 px-0.5 text-center leading-tight break-words"
                     title="Thao tác"
                   >
@@ -577,14 +577,20 @@ export default function TransactionList({
                 >
                   {/* 1. Ngày: dd/mm/yy không logo lịch */}
                   {isColumnVisible('date') && (
-                    <td className="py-0.5 px-0.5 sm:px-1 text-center font-mono text-[9px] sm:text-xs text-slate-700 font-medium leading-tight break-words">
+                    <td
+                      className="py-0.5 px-0.5 sm:px-1 text-center font-mono text-[9px] sm:text-xs text-slate-700 font-medium leading-tight break-words"
+                      style={{ width: `${columnWidths.date}px`, minWidth: `${columnWidths.date}px` }}
+                    >
                       {formatDate(item.date)}
                     </td>
                   )}
 
                   {/* 2. Khoản mục & Mã: Xuống dòng tự nhiên khi hẹp, không bị cắt dấu 3 chấm */}
                   {isColumnVisible('account') && (
-                    <td className="py-0.5 px-0.5 sm:px-1 leading-tight break-words">
+                    <td
+                      className="py-0.5 px-0.5 sm:px-1 leading-tight break-words"
+                      style={{ width: `${columnWidths.account}px`, minWidth: `${columnWidths.account}px` }}
+                    >
                       <div className="flex flex-wrap items-baseline gap-0.5">
                         {item.accountCode && (
                           <span className="font-mono text-[8px] sm:text-[9.5px] font-bold px-1 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
@@ -600,21 +606,31 @@ export default function TransactionList({
 
                   {/* 3. Nội dung diễn giải: Xuống dòng tự nhiên, khoảng cách dòng mảnh */}
                   {isColumnVisible('notes') && (
-                    <td className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs text-slate-700 break-words whitespace-normal leading-tight" title={item.notes}>
+                    <td
+                      className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs text-slate-700 break-words whitespace-normal leading-tight"
+                      style={{ width: `${columnWidths.notes}px`, minWidth: `${columnWidths.notes}px` }}
+                      title={item.notes}
+                    >
                       {item.notes}
                     </td>
                   )}
 
                   {/* 4. Số tiền */}
                   {isColumnVisible('amount') && (
-                    <td className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight whitespace-nowrap">
+                    <td
+                      className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight whitespace-nowrap overflow-hidden"
+                      style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
+                    >
                       {formatVND(item.amount)}
                     </td>
                   )}
 
                   {/* 5. Người thực hiện: Căn giữa, xuống dòng nếu hẹp */}
                   {isColumnVisible('employee') && (
-                    <td className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs text-slate-700 text-center leading-tight break-words">
+                    <td
+                      className="py-0.5 px-0.5 sm:px-1 text-[9.5px] sm:text-xs text-slate-700 text-center leading-tight break-words"
+                      style={{ width: `${columnWidths.employee}px`, minWidth: `${columnWidths.employee}px` }}
+                    >
                       <span className="font-medium text-slate-700 leading-tight">
                         {item.employeeName || 'Chưa ghi nhận'}
                       </span>
@@ -623,7 +639,10 @@ export default function TransactionList({
 
                   {/* 6. Điều chỉnh */}
                   {isColumnVisible('actions') && (
-                    <td className="py-0.5 px-0.5 text-center leading-tight">
+                    <td
+                      className="py-0.5 px-0.5 text-center leading-tight"
+                      style={{ width: `${columnWidths.actions}px`, minWidth: `${columnWidths.actions}px` }}
+                    >
                       <div className="flex items-center justify-center gap-0.5">
                         {onUpdateTransaction && (
                           <button

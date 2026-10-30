@@ -70,33 +70,33 @@ export default function BravoReconciliation({
     showAllColumns: showAllReconCols,
     isRecentlyResized: isReconRecentlyResized,
   } = useResizableColumns({
-    storageKey: 'tbl_cols_bravo_recon_v2',
+    storageKey: 'tbl_cols_bravo_recon_v3',
     initialWidths: {
       stt: 38,
-      code: 68,
+      code: 70,
       name: 210,
       group: 95,
-      approved: 100,
-      actual: 100,
-      bravo: 100,
-      diff: 105,
-      maxActual: 110,
-      remaining: 95,
-      percent: 55,
+      approved: 115,
+      actual: 115,
+      bravo: 115,
+      diff: 110,
+      maxActual: 125,
+      remaining: 115,
+      percent: 65,
       ledger: 45,
     },
     minWidths: {
       stt: 28,
-      code: 42,
-      name: 85,
-      group: 50,
-      approved: 60,
-      actual: 60,
-      bravo: 60,
-      diff: 65,
-      maxActual: 70,
-      remaining: 60,
-      percent: 40,
+      code: 60,
+      name: 150,
+      group: 60,
+      approved: 105,
+      actual: 105,
+      bravo: 105,
+      diff: 95,
+      maxActual: 115,
+      remaining: 105,
+      percent: 50,
       ledger: 35,
     },
   });
@@ -129,26 +129,26 @@ export default function BravoReconciliation({
     toggleColumnVisibility: toggleMacroCol,
     showAllColumns: showAllMacroCols,
   } = useResizableColumns({
-    storageKey: 'tbl_cols_bravo_macro_v2',
+    storageKey: 'tbl_cols_bravo_macro_v3',
     initialWidths: {
       row: 42,
-      code: 68,
+      code: 70,
       name: 220,
       category: 100,
-      approved: 100,
-      bravo: 100,
-      rate: 55,
+      approved: 115,
+      bravo: 115,
+      rate: 65,
       owner: 100,
       reason: 200,
     },
     minWidths: {
       row: 30,
-      code: 42,
-      name: 85,
-      category: 55,
-      approved: 60,
-      bravo: 60,
-      rate: 40,
+      code: 60,
+      name: 150,
+      category: 60,
+      approved: 105,
+      bravo: 105,
+      rate: 50,
       owner: 65,
       reason: 80,
     },
@@ -1056,7 +1056,7 @@ export default function BravoReconciliation({
                           {/* Approved Budget */}
                           {isReconColVisible('approved') && (
                             <td
-                              className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-slate-900 font-mono text-[9px] sm:text-xs leading-tight whitespace-nowrap"
+                              className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-slate-900 font-mono text-[9px] sm:text-xs leading-tight whitespace-nowrap overflow-hidden"
                               style={{ width: `${reconWidths.approved}px`, minWidth: `${reconWidths.approved}px` }}
                             >
                               {formatVND(item.approved)}
@@ -1066,7 +1066,7 @@ export default function BravoReconciliation({
                           {/* Actual Spent (Planning) */}
                           {isReconColVisible('actual') && (
                             <td
-                              className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-blue-900 bg-blue-50/20 font-mono text-[9px] sm:text-xs leading-tight whitespace-nowrap"
+                              className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-blue-900 bg-blue-50/20 font-mono text-[9px] sm:text-xs leading-tight whitespace-nowrap overflow-hidden"
                               style={{ width: `${reconWidths.actual}px`, minWidth: `${reconWidths.actual}px` }}
                             >
                               {formatVND(item.actual)}
@@ -1076,7 +1076,7 @@ export default function BravoReconciliation({
                           {/* BRAVO Recorded Spent */}
                           {isReconColVisible('bravo') && (
                             <td
-                              className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-amber-900 bg-amber-50/20 font-mono text-[9px] sm:text-xs leading-tight whitespace-nowrap"
+                              className="py-0.5 px-0.5 sm:px-1 text-right font-semibold text-amber-900 bg-amber-50/20 font-mono text-[9px] sm:text-xs leading-tight whitespace-nowrap overflow-hidden"
                               style={{ width: `${reconWidths.bravo}px`, minWidth: `${reconWidths.bravo}px` }}
                             >
                               {formatVND(item.bravo)}
@@ -1086,41 +1086,41 @@ export default function BravoReconciliation({
                           {/* Discrepancy (BRAVO - Thực tế) */}
                           {isReconColVisible('diff') && (
                             <td
-                              className="py-0.5 px-0.5 sm:px-1 text-center leading-tight whitespace-nowrap"
+                              className="py-0.5 px-0.5 sm:px-1 text-center leading-tight whitespace-nowrap overflow-hidden"
                               style={{ width: `${reconWidths.diff}px`, minWidth: `${reconWidths.diff}px` }}
                             >
                               {item.isSctsSeparated ? (
-                                <div className="inline-flex flex-col items-center whitespace-nowrap">
+                                <div className="inline-flex flex-col items-center whitespace-nowrap max-w-full">
                                   <span
-                                    className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200 whitespace-nowrap"
+                                    className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-indigo-100 text-indigo-800 border border-indigo-200 whitespace-nowrap max-w-full truncate"
                                     title="Khoản mục này đã được tách riêng SCTS do Bravo hạch toán gộp cả dự án lớn của TCT"
                                   >
                                     Đã tách SCTS
                                   </span>
-                                  <span className="text-[7px] sm:text-3xs text-slate-500 font-normal mt-0.5 whitespace-nowrap" title="Chênh lệch gộp Bravo">
+                                  <span className="text-[7px] sm:text-3xs text-slate-500 font-normal mt-0.5 whitespace-nowrap max-w-full truncate" title="Chênh lệch gộp Bravo">
                                     Bravo: +{formatCompactVND(item.diff)}
                                   </span>
                                 </div>
                               ) : isBravoHigh ? (
-                                <div className="inline-flex flex-col items-center whitespace-nowrap">
-                                  <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-amber-100 text-amber-800 border border-amber-200 whitespace-nowrap">
+                                <div className="inline-flex flex-col items-center whitespace-nowrap max-w-full">
+                                  <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-amber-100 text-amber-800 border border-amber-200 whitespace-nowrap max-w-full truncate">
                                     +{formatCompactVND(item.diff)}
                                   </span>
-                                  <span className="text-[7px] sm:text-3xs text-amber-600 font-normal mt-0.5 whitespace-nowrap">
+                                  <span className="text-[7px] sm:text-3xs text-amber-600 font-normal mt-0.5 whitespace-nowrap max-w-full truncate">
                                     BRAVO &gt; KH
                                   </span>
                                 </div>
                               ) : isActualHigh ? (
-                                <div className="inline-flex flex-col items-center whitespace-nowrap">
-                                  <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-purple-100 text-purple-800 border border-purple-200 whitespace-nowrap">
+                                <div className="inline-flex flex-col items-center whitespace-nowrap max-w-full">
+                                  <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-purple-100 text-purple-800 border border-purple-200 whitespace-nowrap max-w-full truncate">
                                     {formatCompactVND(item.diff)}
                                   </span>
-                                  <span className="text-[7px] sm:text-3xs text-purple-600 font-normal mt-0.5 whitespace-nowrap">
+                                  <span className="text-[7px] sm:text-3xs text-purple-600 font-normal mt-0.5 whitespace-nowrap max-w-full truncate">
                                     KH &gt; BRAVO
                                   </span>
                                 </div>
                               ) : (
-                                <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 whitespace-nowrap">
+                                <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-full text-[7px] sm:text-3xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 whitespace-nowrap max-w-full truncate">
                                   <CheckCircle2 className="w-2.5 h-2.5" /> Khớp 100%
                                 </span>
                               )}
@@ -1130,12 +1130,12 @@ export default function BravoReconciliation({
                           {/* Max Actual Spent */}
                           {isReconColVisible('maxActual') && (
                             <td
-                              className="py-0.5 px-0.5 sm:px-1 text-right font-bold text-emerald-950 bg-emerald-50/30 font-mono text-[9px] sm:text-xs leading-tight whitespace-nowrap"
+                              className="py-0.5 px-0.5 sm:px-1 text-right font-bold text-emerald-950 bg-emerald-50/30 font-mono text-[9px] sm:text-xs leading-tight whitespace-nowrap overflow-hidden"
                               style={{ width: `${reconWidths.maxActual}px`, minWidth: `${reconWidths.maxActual}px` }}
                             >
                               <div className="whitespace-nowrap">{formatVND(item.maxActual)}</div>
                               {item.isSctsSeparated && (
-                                <span className="text-[7px] sm:text-3xs font-medium text-indigo-700 bg-indigo-50 px-1 py-0.2 rounded border border-indigo-200 inline-block mt-0.5 whitespace-nowrap" title="Chỉ lấy theo số nhập liệu SCTX của Cảng">
+                                <span className="text-[7px] sm:text-3xs font-medium text-indigo-700 bg-indigo-50 px-1 py-0.2 rounded border border-indigo-200 inline-block mt-0.5 whitespace-nowrap max-w-full truncate" title="Chỉ lấy theo số nhập liệu SCTX của Cảng">
                                   SCTX Nhập liệu
                                 </span>
                               )}
@@ -1145,7 +1145,7 @@ export default function BravoReconciliation({
                           {/* Remaining */}
                           {isReconColVisible('remaining') && (
                             <td
-                              className={`py-0.5 px-0.5 sm:px-1 text-right font-semibold font-mono text-[9px] sm:text-xs leading-tight whitespace-nowrap ${isOver ? 'text-rose-600' : 'text-slate-700'}`}
+                              className={`py-0.5 px-0.5 sm:px-1 text-right font-semibold font-mono text-[9px] sm:text-xs leading-tight whitespace-nowrap overflow-hidden ${isOver ? 'text-rose-600' : 'text-slate-700'}`}
                               style={{ width: `${reconWidths.remaining}px`, minWidth: `${reconWidths.remaining}px` }}
                             >
                               {formatVND(item.remaining)}

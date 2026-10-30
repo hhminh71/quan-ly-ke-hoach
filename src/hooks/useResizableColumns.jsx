@@ -27,7 +27,14 @@ export function useResizableColumns({
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed && typeof parsed === 'object') {
-            return { ...initialWidths, ...parsed };
+            const merged = { ...initialWidths, ...parsed };
+            Object.keys(merged).forEach((k) => {
+              const minW = minWidths[k] || defaultMinWidth;
+              if (merged[k] < minW) {
+                merged[k] = minW;
+              }
+            });
+            return merged;
           }
         }
       } catch (err) {

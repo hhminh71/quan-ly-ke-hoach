@@ -112,12 +112,12 @@ export default function AccountLedgerModal({
     toggleColumnVisibility,
     showAllColumns,
   } = useResizableColumns({
-    storageKey: 'tbl_cols_account_ledger_v2',
+    storageKey: 'tbl_cols_account_ledger_v3',
     initialWidths: {
       stt: 36,
       date: 72,
       notes: 300,
-      amount: 110,
+      amount: 115,
       employee: 110,
       actions: 60,
     },
@@ -125,7 +125,7 @@ export default function AccountLedgerModal({
       stt: 28,
       date: 50,
       notes: 90,
-      amount: 65,
+      amount: 105,
       employee: 60,
       actions: 45,
     },
@@ -621,7 +621,7 @@ export default function AccountLedgerModal({
                         {/* 4. Số tiền */}
                         {isColumnVisible('amount') && (
                           <td
-                            className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight whitespace-nowrap"
+                            className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight whitespace-nowrap overflow-hidden"
                             style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
                           >
                             {formatVND(item.amount)}
@@ -728,7 +728,7 @@ export default function AccountLedgerModal({
                       )}
                       {isColumnVisible('amount') && (
                         <td
-                          className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-extrabold text-amber-900 text-[9px] sm:text-xs leading-tight whitespace-nowrap"
+                          className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-extrabold text-amber-900 text-[9px] sm:text-xs leading-tight whitespace-nowrap overflow-hidden"
                           style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
                         >
                           {formatVND(bravoVal)}
