@@ -563,6 +563,7 @@ export default function DashboardPage({ user }) {
         onClose={() => setIsBravoSyncModalOpen(false)}
         user={user}
         budgets={budgets}
+        selectedYear={selectedYear}
         onUpdateBudgets={setBudgets}
         onUpdateBravoInfo={setBravoInfo}
         onRefreshAll={() => handleSyncNow(null, false)}

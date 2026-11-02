@@ -458,7 +458,7 @@ export const syncBravoInfoToGoogleSheet = async (webhookUrl, items, updateTime) 
  * @param {string} driveUrl
  * @returns {Promise<{ status: string, fileName: string, folderName: string, lastUpdated: string, fileSize: number, base64: string }>}
  */
-export const fetchBravoFromDrive = async (webhookUrl, driveUrl) => {
+export const fetchBravoFromDrive = async (webhookUrl, driveUrl, targetYear = '') => {
   const url = webhookUrl || getSavedWebhookUrl();
   if (!url) {
     throw new Error('Chưa kết nối Webhook Google Sheet. Vui lòng vào "Cài đặt kết nối Google Sheet" để dán URL Webhook trước khi đồng bộ từ Google Drive.');
@@ -476,6 +476,7 @@ export const fetchBravoFromDrive = async (webhookUrl, driveUrl) => {
     body: JSON.stringify({
       action: 'fetchBravoFromDrive',
       driveUrl: driveUrl.trim(),
+      targetYear: targetYear ? String(targetYear).trim() : '',
     }),
   });
 

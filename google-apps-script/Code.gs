@@ -62,7 +62,8 @@ function doGet(e) {
 
     if (action === 'fetchBravoFromDrive') {
       const driveUrlOrId = e.parameter.driveUrl || e.parameter.folderUrl || e.parameter.url;
-      return handleFetchBravoFromDrive(driveUrlOrId);
+      const targetYear = e.parameter.targetYear || e.parameter.selectedYear || e.parameter.year || '';
+      return handleFetchBravoFromDrive(driveUrlOrId, targetYear);
     }
 
     return createJsonResponse({ status: 'error', message: 'Action không hợp lệ' });
@@ -228,7 +229,8 @@ function doPost(e) {
     // 5. Tải file Excel Bravo mới nhất từ thư mục hoặc file Google Drive được share
     if (action === 'fetchBravoFromDrive') {
       const driveUrlOrId = data.driveUrl || data.folderUrl || data.url;
-      return handleFetchBravoFromDrive(driveUrlOrId);
+      const targetYear = data.targetYear || data.selectedYear || data.year || '';
+      return handleFetchBravoFromDrive(driveUrlOrId, targetYear);
     }
 
     // 6. Lưu cấu hình link thư mục Google Drive cố định cho toàn hệ thống (Chỉ Admin)
@@ -662,7 +664,7 @@ function formatDate(val) {
 /**
  * Xử lý tải file Excel Bravo từ link hoặc ID thư mục/file Google Drive
  */
-function handleFetchBravoFromDrive(driveUrlOrId) {
+function handleFetchBravoFromDrive(driveUrlOrId, targetYear) {
   let urlOrId = driveUrlOrId ? String(driveUrlOrId).trim() : '';
   if (!urlOrId) {
     try {
@@ -680,6 +682,8 @@ function handleFetchBravoFromDrive(driveUrlOrId) {
   try {
     let targetFile = null;
     let folderName = '';
+    const yearStr = targetYear ? String(targetYear).trim() : '';
+    let isMatchedByYear = false;
 
     // Trích xuất Folder ID hoặc File ID từ link
     const str = urlOrId;
@@ -696,24 +700,43 @@ function handleFetchBravoFromDrive(driveUrlOrId) {
       extractedId = idParam[1];
     }
 
-    // 1. Thử mở như Thư mục (Folder) để tìm file Excel mới nhất
+    // 1. Thử mở như Thư mục (Folder) để tìm file Excel phù hợp
     try {
       const folder = DriveApp.getFolderById(extractedId);
       folderName = folder.getName();
       const files = folder.getFiles();
-      let latestTime = 0;
+
+      let targetFileByYear = null;
+      let latestTimeByYear = 0;
+      let targetFileAny = null;
+      let latestTimeAny = 0;
 
       while (files.hasNext()) {
         const f = files.next();
         const fname = f.getName().toLowerCase();
-        // Lọc file Excel (.xlsx hoặc .xls)
-        if (fname.indexOf('.xlsx') !== -1 || fname.indexOf('.xls') !== -1) {
+        // Lọc file Excel (.xlsx hoặc .xls) và bỏ qua file tạm Windows (~$...)
+        if ((fname.indexOf('.xlsx') !== -1 || fname.indexOf('.xls') !== -1) && !fname.startsWith('~$')) {
           const updated = f.getLastUpdated().getTime();
-          if (updated > latestTime) {
-            latestTime = updated;
-            targetFile = f;
+          if (updated > latestTimeAny) {
+            latestTimeAny = updated;
+            targetFileAny = f;
+          }
+          // Nếu có lọc theo năm (ví dụ "2026"), ưu tiên file có chứa năm
+          if (yearStr && fname.indexOf(yearStr) !== -1) {
+            if (updated > latestTimeByYear) {
+              latestTimeByYear = updated;
+              targetFileByYear = f;
+            }
           }
         }
+      }
+
+      if (targetFileByYear) {
+        targetFile = targetFileByYear;
+        isMatchedByYear = true;
+      } else {
+        targetFile = targetFileAny;
+        isMatchedByYear = false;
       }
     } catch (folderErr) {
       // 2. Nếu không phải folder hoặc lỗi, thử mở trực tiếp như File
@@ -743,6 +766,8 @@ function handleFetchBravoFromDrive(driveUrlOrId) {
       folderName: folderName,
       fileSize: blob.getBytes().length,
       lastUpdated: Utilities.formatDate(targetFile.getLastUpdated(), 'GMT+7', 'dd/MM/yyyy HH:mm:ss'),
+      isMatchedByYear: isMatchedByYear,
+      targetYear: yearStr,
       base64: base64
     });
   } catch (err) {

@@ -37,6 +37,7 @@ export default function BravoSyncModal({
   onClose,
   user = null,
   budgets = [],
+  selectedYear = '2026',
   onUpdateBudgets,
   onUpdateBravoInfo,
   onRefreshAll,
@@ -157,7 +158,7 @@ export default function BravoSyncModal({
     setSelectedFile(null);
 
     try {
-      const driveRes = await fetchBravoFromDrive(webhookUrl, inputUrl);
+      const driveRes = await fetchBravoFromDrive(webhookUrl, inputUrl, selectedYear);
       if (!driveRes || !driveRes.base64) {
         throw new Error('Không nhận được dữ liệu file từ Google Drive.');
       }
@@ -167,6 +168,8 @@ export default function BravoSyncModal({
         folderName: driveRes.folderName,
         lastUpdated: driveRes.lastUpdated,
         fileSize: driveRes.fileSize,
+        isMatchedByYear: driveRes.isMatchedByYear,
+        targetYear: driveRes.targetYear,
       });
 
       // Decode base64 to binary ArrayBuffer
@@ -429,12 +432,12 @@ export default function BravoSyncModal({
                       {isLoadingFromDrive ? (
                         <>
                           <RefreshCw className="w-4 h-4 animate-spin" />
-                          <span>Đang quét Google Drive & Tải file mới nhất...</span>
+                          <span>Đang quét Google Drive & Tải file Bravo {selectedYear}...</span>
                         </>
                       ) : (
                         <>
                           <Sparkles className="w-4 h-4 text-amber-300" />
-                          <span>Đồng Bộ Ngay Từ Google Drive (1-Click)</span>
+                          <span>Đồng Bộ File Bravo Năm {selectedYear} Từ Google Drive</span>
                         </>
                       )}
                     </button>
@@ -676,6 +679,11 @@ export default function BravoSyncModal({
                     {driveFileInfo && (
                       <span className="text-3xs text-emerald-800 block">
                         Nguồn: Google Drive {driveFileInfo.folderName ? `• Thư mục: ${driveFileInfo.folderName}` : ''} • Cập nhật: {driveFileInfo.lastUpdated}
+                        {driveFileInfo.isMatchedByYear && (
+                          <span className="ml-1.5 px-1 py-0.2 bg-emerald-200 text-emerald-900 font-bold rounded">
+                            ✓ Khớp Năm {selectedYear}
+                          </span>
+                        )}
                       </span>
                     )}
                   </div>
