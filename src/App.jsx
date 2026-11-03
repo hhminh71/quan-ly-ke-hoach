@@ -88,7 +88,7 @@ export default function App() {
             onLogout={handleLogout}
             onOpenSimulator={() => setIsSimulatorOpen(true)}
           />
-          <main className="flex-1 max-w-7xl w-full mx-auto px-2.5 sm:px-6 lg:px-8 py-3 sm:py-6">
+          <main className="flex-1 max-w-7xl w-full mx-auto px-2.5 sm:px-6 lg:px-8 pt-0 pb-3 sm:pb-6">
             <DashboardPage user={user} />
           </main>
           <footer className="border-t border-slate-200 bg-white/50 py-3 sm:py-5 text-center text-3xs sm:text-xs text-slate-500">

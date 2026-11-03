@@ -485,7 +485,7 @@ export default function DashboardPage({ user }) {
   return (
     <div className="space-y-1 sm:space-y-3">
       {/* View Tabs & Fiscal Year Selector: Sticky Below Header khi cuộn trang */}
-      <div className="sticky top-[var(--navbar-height,56px)] z-30 bg-slate-50/95 backdrop-blur-md py-1.5 sm:py-2 border-b border-slate-200/90 shadow-2xs -mx-2.5 sm:-mx-6 lg:-mx-8 px-2.5 sm:px-6 lg:px-8 transition-all">
+      <div className="sticky top-[var(--navbar-height,56px)] z-30 bg-slate-50/95 backdrop-blur-md py-1 sm:py-1.5 border-b border-slate-200/90 shadow-2xs -mx-2.5 sm:-mx-6 lg:-mx-8 px-2.5 sm:px-6 lg:px-8 transition-all">
         <div className="flex items-center justify-between gap-1.5">
           {/* Navigation Tabs: Modern Apple/Linear Segmented Control */}
           <div className="inline-flex items-center p-0.5 sm:p-1 bg-slate-200/80 rounded-lg sm:rounded-xl border border-slate-300/70 shadow-2xs gap-0.5 sm:gap-1 overflow-x-auto no-scrollbar">
