@@ -70,23 +70,23 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
       ref={headerRef}
       className="w-full bg-gradient-to-r from-[#074780] via-[#09579d] to-[#063c6d] text-white shadow-md border-b border-blue-900/40 sticky top-0 z-40"
     >
-      <div className="w-full px-2 sm:px-6 lg:px-8 py-0.5 sm:py-2">
+      <div className="w-full px-2 sm:px-6 lg:px-8 py-1 sm:py-2">
         <div className="flex items-center justify-between gap-1.5 sm:gap-2">
           
           {/* LEFT: Official Corporate Brand Header - ALWAYS FULLY VISIBLE IN ALL MODES */}
-          <div className="min-w-0 flex-1 pr-1 leading-none">
+          <div className="min-w-0 flex-1 pr-1">
             {/* Line 1: Parent Corporation */}
-            <div className="text-[7px] sm:text-[10px] font-semibold text-blue-200/90 tracking-wider uppercase leading-none truncate block">
+            <div className="text-[9px] min-[380px]:text-[10px] sm:text-xs font-bold text-blue-200/95 tracking-wide uppercase leading-snug truncate block">
               TỔNG CÔNG TY CẢNG HÀNG KHÔNG VIỆT NAM - CTCP
             </div>
 
             {/* Line 2: Member Airport - Never truncated, crisp and prominent */}
-            <h1 className="text-[9.5px] sm:text-base lg:text-lg font-black text-white tracking-wide uppercase leading-tight mt-0.5 whitespace-nowrap">
+            <h1 className="text-[11px] min-[380px]:text-xs sm:text-base lg:text-lg font-black text-white tracking-wide uppercase leading-snug whitespace-nowrap mt-0.5">
               CẢNG HÀNG KHÔNG QUỐC TẾ CẦN THƠ
             </h1>
 
             {/* Line 3: Department & Software Name */}
-            <div className="text-[7.5px] sm:text-[10px] text-blue-200 font-medium leading-none mt-0.5 truncate">
+            <div className="text-[9px] min-[380px]:text-[10px] sm:text-xs text-blue-200 font-medium leading-snug truncate mt-0.5">
               Phòng TC-KH • Quản lý Kế hoạch
             </div>
           </div>
