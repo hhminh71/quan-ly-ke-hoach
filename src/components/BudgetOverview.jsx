@@ -326,24 +326,33 @@ export default function BudgetOverview({
   }, [editedBudgets]);
 
   // Helper calculations for multi-select Group checkboxes
-  const isAllGroups = selectedGroups.includes('ALL') || selectedGroups.length === 0 || (groups.length > 0 && selectedGroups.length === groups.length);
+  // isAllGroups = true khi chọn 'ALL' hoặc khi danh sách chọn chứa đầy đủ tất cả các nhóm
+  const isAllGroups = useMemo(() => {
+    if (selectedGroups.includes('ALL')) return true;
+    if (groups.length > 0 && selectedGroups.length >= groups.length) {
+      return groups.every((g) => selectedGroups.includes(g));
+    }
+    return false;
+  }, [selectedGroups, groups]);
 
   const isGroupChecked = (g) => {
-    if (isAllGroups) return true;
+    if (selectedGroups.includes('ALL')) return true;
     return selectedGroups.includes(g);
   };
 
   const handleToggleAllGroups = () => {
     if (isAllGroups) {
+      // Đang chọn tất cả -> Bỏ chọn toàn bộ
       setSelectedGroups([]);
     } else {
+      // Đang bỏ chọn hoặc chọn một phần -> Chọn tất cả
       setSelectedGroups(['ALL']);
     }
   };
 
   const handleToggleGroup = (g) => {
     if (isAllGroups) {
-      // Uncheck g, keeping other groups checked
+      // Đang chọn tất cả -> bỏ chọn g, giữ lại các nhóm còn lại
       const remaining = groups.filter((item) => item !== g);
       setSelectedGroups(remaining);
     } else {
@@ -352,7 +361,7 @@ export default function BudgetOverview({
         setSelectedGroups(next);
       } else {
         const next = [...selectedGroups, g];
-        if (next.length === groups.length) {
+        if (groups.length > 0 && next.length >= groups.length && groups.every((item) => next.includes(item))) {
           setSelectedGroups(['ALL']);
         } else {
           setSelectedGroups(next);
@@ -831,18 +840,24 @@ export default function BudgetOverview({
                   </div>
 
                   {/* Quick Action Footer */}
-                  <div className="flex items-center justify-between px-2.5 py-1 border-t border-slate-100 bg-slate-50/80 text-[7.5px] sm:text-[9.5px] font-semibold text-slate-500">
+                  <div className="flex items-center justify-between px-2.5 py-1.5 border-t border-slate-100 bg-slate-50/80 text-[8px] sm:text-[10px] font-semibold text-slate-500">
                     <button
                       type="button"
-                      onClick={() => setSelectedGroups(['ALL'])}
-                      className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedGroups(['ALL']);
+                      }}
+                      className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-bold"
                     >
                       Chọn tất cả
                     </button>
                     <button
                       type="button"
-                      onClick={() => setSelectedGroups([])}
-                      className="text-slate-500 hover:text-rose-600 hover:underline cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedGroups([]);
+                      }}
+                      className="text-slate-500 hover:text-rose-600 hover:underline cursor-pointer font-medium"
                     >
                       Bỏ chọn hết
                     </button>
@@ -1252,7 +1267,25 @@ export default function BudgetOverview({
                       colSpan={9}
                       className="text-center py-10 text-slate-400 text-xs"
                     >
-                      Không tìm thấy khoản mục kế hoạch phù hợp
+                      {selectedGroups.length === 0 ? (
+                        <div className="space-y-2">
+                          <p className="text-slate-600 font-semibold text-xs sm:text-sm">
+                            Chưa chọn nhóm chi phí nào để hiển thị
+                          </p>
+                          <p className="text-slate-400 text-2xs sm:text-xs">
+                            Vui lòng bấm vào bộ lọc nhóm ở trên hoặc bấm nút dưới đây:
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedGroups(['ALL'])}
+                            className="inline-flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-xs transition-colors cursor-pointer"
+                          >
+                            Chọn tất cả các nhóm
+                          </button>
+                        </div>
+                      ) : (
+                        'Không tìm thấy khoản mục kế hoạch phù hợp'
+                      )}
                     </td>
                   </tr>
                 ) : (
@@ -1628,7 +1661,32 @@ export default function BudgetOverview({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs sm:text-sm">
-              {filtered.map((item) => (
+              {filtered.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={10}
+                    className="text-center py-10 text-slate-400 text-xs"
+                  >
+                    {selectedGroups.length === 0 ? (
+                      <div className="space-y-2">
+                        <p className="text-slate-600 font-semibold text-xs sm:text-sm">
+                          Chưa chọn nhóm chi phí nào để hiển thị
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedGroups(['ALL'])}
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-xs transition-colors cursor-pointer"
+                        >
+                          Chọn tất cả các nhóm
+                        </button>
+                      </div>
+                    ) : (
+                      'Không tìm thấy khoản mục kế hoạch phù hợp'
+                    )}
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((item) => (
                 <tr
                   key={item.code}
                   onClick={() => !isEditingMatrix && setSelectedDetailCode(item.code)}
@@ -1701,7 +1759,8 @@ export default function BudgetOverview({
                     );
                   })}
                 </tr>
-              ))}
+              ))
+            )}
             </tbody>
           </table>
         </div>
