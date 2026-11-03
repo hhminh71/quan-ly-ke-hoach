@@ -55,18 +55,18 @@ export default function TransactionList({
     toggleColumnVisibility,
     showAllColumns,
   } = useResizableColumns({
-    storageKey: 'tbl_cols_transactions_v3',
+    storageKey: 'tbl_cols_transactions_v4',
     initialWidths: {
       date: 72,
-      account: 180,
-      notes: 320,
+      account: 88,
+      notes: 380,
       amount: 115,
       employee: 110,
       actions: 55,
     },
     minWidths: {
       date: 50,
-      account: 75,
+      account: 65,
       notes: 90,
       amount: 105,
       employee: 60,
@@ -505,22 +505,22 @@ export default function TransactionList({
                     </td>
                   )}
 
-                  {/* 2. Khoản mục & Mã: Xuống dòng tự nhiên khi hẹp, không bị cắt dấu 3 chấm */}
+                  {/* 2. Khoản mục: Chỉ hiện số mã không hiện tên khoản mục */}
                   {isColumnVisible('account') && (
                     <td
-                      className="py-0.5 px-0.5 sm:px-1 leading-tight break-words"
+                      className="py-0.5 px-0.5 sm:px-1 text-center leading-tight"
                       style={{ width: `${columnWidths.account}px`, minWidth: `${columnWidths.account}px` }}
+                      title={item.category ? `[${item.accountCode || ''}] ${item.category}` : item.accountCode}
                     >
-                      <div className="flex flex-wrap items-baseline gap-0.5">
-                        {item.accountCode && (
-                          <span className="font-mono text-[8px] sm:text-[9.5px] font-bold px-1 py-0.2 rounded bg-blue-50 text-blue-700 border border-blue-200 shrink-0">
-                            {item.accountCode}
-                          </span>
-                        )}
-                        <span className="font-semibold text-[9.5px] sm:text-xs text-slate-800 leading-tight" title={item.category}>
-                          {item.category}
+                      {item.accountCode ? (
+                        <span className="font-mono text-[8.5px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors inline-block">
+                          {item.accountCode}
                         </span>
-                      </div>
+                      ) : (
+                        <span className="font-mono text-[8.5px] sm:text-[10px] font-bold text-slate-500">
+                          {item.category || '—'}
+                        </span>
+                      )}
                     </td>
                   )}
 
@@ -614,14 +614,14 @@ export default function TransactionList({
                 {/* 2. Khoản mục */}
                 {isColumnVisible('account') && (
                   <td
-                    className="py-1 px-0.5 sm:px-1 text-[8.5px] sm:text-xs text-slate-700 leading-tight truncate"
+                    className="py-1 px-0.5 sm:px-1 text-center font-mono text-[8.5px] sm:text-xs text-slate-700 leading-tight truncate"
                     style={{ width: `${columnWidths.account}px`, minWidth: `${columnWidths.account}px` }}
-                    title={selectedCategory !== 'ALL' ? `Lọc: ${selectedCategory}` : 'Tất cả khoản mục'}
+                    title={selectedCategory !== 'ALL' ? `Lọc mã: ${selectedCategory}` : 'Tất cả khoản mục'}
                   >
                     {selectedCategory !== 'ALL' ? (
-                      <span className="text-blue-700 font-bold truncate block">[{selectedCategory}]</span>
+                      <span className="text-blue-700 font-bold truncate block">{selectedCategory}</span>
                     ) : (
-                      <span className="text-slate-600 font-semibold italic">Tất cả ({categories.length})</span>
+                      <span className="text-slate-500 font-semibold italic text-[8px] sm:text-[9.5px]">Tất cả</span>
                     )}
                   </td>
                 )}
