@@ -34,11 +34,11 @@ export default function TransactionForm({ onAddTransaction, budgets = [], transa
     }
   }, [selectedYear]);
 
-  // Compute live actual spent per account for this year's transactions
+  // Compute live actual spent per account for this year's transactions (loại trừ Chưa BCMS)
   const liveActualsByCode = useMemo(() => {
     const map = {};
     transactions.forEach((t) => {
-      if (t.accountCode) {
+      if (t.accountCode && !t.chuaBcms) {
         map[t.accountCode] = (map[t.accountCode] || 0) + (Number(t.amount) || 0);
       }
     });

@@ -5,11 +5,11 @@ import { calculateReportActual } from '../utils/sctsConfig';
 export default function StatCards({ transactions = [], budgets = [], selectedYear = '2026' }) {
   const totalCount = transactions.length;
 
-  // Map live actuals by code from transactions
+  // Map live actuals by code from transactions (loại trừ Chưa BCMS)
   const liveActualsByCode = React.useMemo(() => {
     const map = {};
     (transactions || []).forEach((t) => {
-      if (t && t.accountCode) {
+      if (t && t.accountCode && !t.chuaBcms) {
         const code = String(t.accountCode).trim();
         map[code] = (map[code] || 0) + (Number(t.amount) || 0);
       }

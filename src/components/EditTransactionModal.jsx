@@ -18,6 +18,8 @@ export default function EditTransactionModal({
     employeeName: '',
     amount: '',
     notes: '',
+    remark: '',
+    chuaBcms: false,
   });
 
   useEffect(() => {
@@ -30,6 +32,8 @@ export default function EditTransactionModal({
         employeeName: String(transaction.employeeName || '').trim(),
         amount: String(transaction.amount || 0),
         notes: String(transaction.notes || '').trim(),
+        remark: String(transaction.remark || '').trim(),
+        chuaBcms: Boolean(transaction.chuaBcms),
       });
     }
   }, [transaction, budgets]);
@@ -66,6 +70,8 @@ export default function EditTransactionModal({
       employeeName: String(editForm.employeeName || '').trim(),
       amount: Number(editForm.amount) || 0,
       notes: String(editForm.notes || '').trim(),
+      remark: String(editForm.remark || '').trim(),
+      chuaBcms: Boolean(editForm.chuaBcms),
     };
     onSave(updated);
     onClose();
@@ -194,6 +200,41 @@ export default function EditTransactionModal({
               onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
               placeholder="Chi tiết công việc..."
               className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 bg-white resize-none"
+            />
+          </div>
+
+          {/* Tùy chọn Chưa BCMS (Dự kiến) */}
+          <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-2.5">
+            <label className="flex items-start gap-2.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={editForm.chuaBcms}
+                onChange={(e) => setEditForm({ ...editForm, chuaBcms: e.target.checked })}
+                className="w-4 h-4 mt-0.5 rounded text-amber-600 border-amber-300 focus:ring-amber-500 cursor-pointer shrink-0"
+              />
+              <div>
+                <span className="text-xs font-bold text-amber-900 block leading-tight">
+                  Chưa BCMS (Khoản dự kiến)
+                </span>
+                <span className="text-[10px] text-amber-700 block mt-0.5 leading-tight">
+                  Khi check chọn: Khoản này sẽ <strong>không tính vào tổng thực tế</strong> (chỉ hiển thị khi bật "Tổng gồm dự kiến").
+                </span>
+              </div>
+            </label>
+          </div>
+
+          {/* Ghi Chú Phụ / Bổ sung */}
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
+              <FileText className="w-3.5 h-3.5 text-slate-400" />
+              <span>Ghi Chú (Tùy chọn)</span>
+            </label>
+            <input
+              type="text"
+              value={editForm.remark}
+              onChange={(e) => setEditForm({ ...editForm, remark: e.target.value })}
+              placeholder="VD: Chờ phê duyệt, đợt 2, hợp đồng số..."
+              className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 bg-white"
             />
           </div>
 

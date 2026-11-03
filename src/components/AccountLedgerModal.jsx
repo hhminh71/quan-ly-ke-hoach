@@ -10,6 +10,8 @@ import {
   Shield,
   Layers,
   PlusCircle,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import EditTransactionModal from './EditTransactionModal';
 import AddTransactionModal from './AddTransactionModal';
@@ -95,10 +97,29 @@ export default function AccountLedgerModal({
     });
   }, [isOpen, account, filteredTransactions, sortOrder]);
 
-  const currentTotalAmount = useMemo(() => {
+  // Tùy chọn Ẩn/Hiện Tổng bao gồm dự kiến (Chưa BCMS)
+  const [showExpectedTotal, setShowExpectedTotal] = useState(false);
+
+  // Tổng thực tế đã BCMS (loại trừ các khoản đã check Chưa BCMS)
+  const currentActualAmount = useMemo(() => {
+    if (!isOpen || !account) return 0;
+    return sortedTransactions
+      .filter((item) => !item.chuaBcms)
+      .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  }, [isOpen, account, sortedTransactions]);
+
+  // Tổng toàn bộ (bao gồm cả dự kiến Chưa BCMS)
+  const currentExpectedTotalAmount = useMemo(() => {
     if (!isOpen || !account) return 0;
     return sortedTransactions.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   }, [isOpen, account, sortedTransactions]);
+
+  const pendingBcmsAmount = currentExpectedTotalAmount - currentActualAmount;
+  const pendingBcmsCount = useMemo(() => {
+    return sortedTransactions.filter((item) => item.chuaBcms).length;
+  }, [sortedTransactions]);
+
+  const currentTotalAmount = showExpectedTotal ? currentExpectedTotalAmount : currentActualAmount;
 
   const [sctsCodes, setSctsCodes] = useState(getSctsSeparatedCodes);
 
@@ -112,20 +133,24 @@ export default function AccountLedgerModal({
     toggleColumnVisibility,
     showAllColumns,
   } = useResizableColumns({
-    storageKey: 'tbl_cols_account_ledger_v3',
+    storageKey: 'tbl_cols_account_ledger_v4',
     initialWidths: {
       stt: 36,
       date: 72,
-      notes: 300,
+      chuaBcms: 76,
+      notes: 260,
       amount: 115,
-      employee: 110,
+      remark: 130,
+      employee: 100,
       actions: 60,
     },
     minWidths: {
       stt: 28,
       date: 50,
+      chuaBcms: 55,
       notes: 90,
       amount: 105,
+      remark: 65,
       employee: 60,
       actions: 45,
     },
@@ -135,8 +160,10 @@ export default function AccountLedgerModal({
     () => [
       { key: 'stt', label: '#' },
       { key: 'date', label: 'Ngày' },
+      { key: 'chuaBcms', label: 'Chưa BCMS' },
       { key: 'notes', label: 'Nội Dung Diễn Giải' },
       { key: 'amount', label: 'Số Tiền (VNĐ)' },
+      { key: 'remark', label: 'Ghi Chú' },
       { key: 'employee', label: 'Người Thực Hiện' },
       { key: 'actions', label: 'Điều Chỉnh' },
     ],
@@ -160,7 +187,8 @@ export default function AccountLedgerModal({
 
   // Live account stats defensively
   const approved = Number(account.selectedYearApproved) || 0;
-  const spent = Number(account.liveActual) || 0;
+  // Số tiền thực tế: lấy theo currentTotalAmount (chỉ Đã BCMS hoặc Gồm Dự Kiến tùy theo showExpectedTotal)
+  const spent = accountTransactions.length > 0 ? currentTotalAmount : (Number(account.liveActual) || 0);
   const bravoVal = Number(
     account.bravoVal !== undefined
       ? account.bravoVal
@@ -292,16 +320,40 @@ export default function AccountLedgerModal({
 
               {/* 3. Theo Thực Tế (hiển thị khi showActual = true) */}
               {showActual && (
-                <div className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-blue-50/80 border border-blue-200 shadow-2xs shrink-0 sm:shrink">
-                  <div className="flex items-center justify-between text-[8px] sm:text-[10px] text-blue-800 font-semibold uppercase tracking-tight">
-                    <span className="truncate">Theo Thực Tế</span>
-                    <span className="font-bold px-1 py-0.2 rounded text-white bg-blue-600 text-3xs">
+                <div
+                  className={`px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border shadow-2xs shrink-0 sm:shrink transition-all ${
+                    showExpectedTotal
+                      ? 'bg-amber-50/90 border-amber-300 ring-1 ring-amber-300/40'
+                      : 'bg-blue-50/80 border-blue-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-[8px] sm:text-[10px] font-semibold uppercase tracking-tight">
+                    <span className={`truncate ${showExpectedTotal ? 'text-amber-900 font-bold' : 'text-blue-800'}`}>
+                      {showExpectedTotal ? 'Gồm Dự Kiến' : 'Theo Thực Tế'}
+                    </span>
+                    <span
+                      className={`font-bold px-1 py-0.2 rounded text-white text-3xs ${
+                        showExpectedTotal ? 'bg-amber-600' : 'bg-blue-600'
+                      }`}
+                    >
                       {liveActualPercent.toFixed(1)}%
                     </span>
                   </div>
-                  <div className="text-xs sm:text-sm font-extrabold text-blue-950 font-mono leading-tight mt-0.5 truncate" title={formatVND(spent)}>
+                  <div
+                    className={`text-xs sm:text-sm font-extrabold font-mono leading-tight mt-0.5 truncate ${
+                      showExpectedTotal ? 'text-amber-950' : 'text-blue-950'
+                    }`}
+                    title={formatVND(spent)}
+                  >
                     {formatVND(spent)}
                   </div>
+                  {pendingBcmsCount > 0 && (
+                    <div className="text-[7.5px] sm:text-[8.5px] text-slate-500 mt-0.5 leading-none truncate">
+                      {showExpectedTotal
+                        ? `(+${formatVND(pendingBcmsAmount)} dự kiến)`
+                        : `(-${pendingBcmsCount} mục Chưa BCMS)`}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -437,6 +489,34 @@ export default function AccountLedgerModal({
                 >
                   Thực Tế
                 </button>
+
+                {/* Tùy chọn Ẩn/Hiện Tổng bao gồm dự kiến */}
+                <button
+                  type="button"
+                  onClick={() => setShowExpectedTotal((prev) => !prev)}
+                  className={`h-5 sm:h-6 px-1.5 py-0 rounded text-[7.5px] sm:text-[9px] font-bold transition-all cursor-pointer leading-tight inline-flex items-center gap-1 ${
+                    showExpectedTotal
+                      ? 'bg-amber-600 text-white shadow-2xs ring-1 ring-amber-400/50'
+                      : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                  }`}
+                  title="Ẩn/Hiện tổng chi phí bao gồm cả các hạng mục Chưa BCMS (dự kiến)"
+                >
+                  {showExpectedTotal ? (
+                    <Eye className="w-2.5 h-2.5 text-white" />
+                  ) : (
+                    <EyeOff className="w-2.5 h-2.5 text-slate-400" />
+                  )}
+                  <span>{showExpectedTotal ? 'Gồm Dự Kiến' : 'Chỉ Đã BCMS'}</span>
+                  {pendingBcmsCount > 0 && (
+                    <span
+                      className={`px-1 rounded-full text-[7px] font-bold ${
+                        showExpectedTotal ? 'bg-amber-800 text-white' : 'bg-slate-200 text-slate-700'
+                      }`}
+                    >
+                      {pendingBcmsCount}
+                    </span>
+                  )}
+                </button>
               </div>
 
               <ColumnVisibilityDropdown
@@ -520,6 +600,22 @@ export default function AccountLedgerModal({
                       </th>
                     )}
 
+                    {/* 2b. Chưa BCMS (Dự kiến) */}
+                    {isColumnVisible('chuaBcms') && (
+                      <th
+                        className="py-0.5 px-0.5 text-center leading-tight relative select-none"
+                        style={{ width: `${columnWidths.chuaBcms}px`, minWidth: `${columnWidths.chuaBcms}px` }}
+                        title="Đánh dấu Chưa BCMS (Khoản dự kiến, không tính vào tổng thực tế)"
+                      >
+                        <div className="truncate text-center w-full">Chưa BCMS</div>
+                        <ColumnResizeHandle
+                          colKey="chuaBcms"
+                          onResizeStart={handleResizeStart}
+                          onResetWidth={resetColumnWidth}
+                        />
+                      </th>
+                    )}
+
                     {/* 3. Nội dung diễn giải */}
                     {isColumnVisible('notes') && (
                       <th
@@ -544,6 +640,22 @@ export default function AccountLedgerModal({
                         <div className="truncate text-center w-full">Số Tiền (VNĐ)</div>
                         <ColumnResizeHandle
                           colKey="amount"
+                          onResizeStart={handleResizeStart}
+                          onResetWidth={resetColumnWidth}
+                        />
+                      </th>
+                    )}
+
+                    {/* 4b. Ghi chú (nằm ngay phía sau cột số tiền) */}
+                    {isColumnVisible('remark') && (
+                      <th
+                        className="py-0.5 px-0.5 sm:px-1 text-center leading-tight relative select-none"
+                        style={{ width: `${columnWidths.remark}px`, minWidth: `${columnWidths.remark}px` }}
+                        title="Ghi chú bổ sung"
+                      >
+                        <div className="truncate text-center w-full">Ghi Chú</div>
+                        <ColumnResizeHandle
+                          colKey="remark"
                           onResizeStart={handleResizeStart}
                           onResetWidth={resetColumnWidth}
                         />
@@ -608,23 +720,70 @@ export default function AccountLedgerModal({
                           </td>
                         )}
 
+                        {/* 2b. Chưa BCMS (Dự kiến) */}
+                        {isColumnVisible('chuaBcms') && (
+                          <td
+                            className="py-0.5 px-0.5 text-center leading-tight select-none"
+                            style={{ width: `${columnWidths.chuaBcms}px`, minWidth: `${columnWidths.chuaBcms}px` }}
+                          >
+                            <label
+                              className="inline-flex items-center justify-center cursor-pointer p-0.5"
+                              title={item.chuaBcms ? 'Khoản dự kiến (Chưa BCMS) - Đang loại trừ khỏi tổng thực tế' : 'Đã BCMS - Tính vào tổng chi phí thực tế'}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={Boolean(item.chuaBcms)}
+                                onChange={(e) => {
+                                  if (onUpdateTransaction) {
+                                    onUpdateTransaction({
+                                      ...item,
+                                      chuaBcms: e.target.checked,
+                                    });
+                                  }
+                                }}
+                                className="w-3.5 h-3.5 rounded text-amber-600 focus:ring-amber-500 border-slate-300 cursor-pointer"
+                              />
+                            </label>
+                          </td>
+                        )}
+
                         {/* 3. Nội dung diễn giải */}
                         {isColumnVisible('notes') && (
                           <td
                             className="py-0.5 px-0.5 sm:px-1 text-slate-700 text-[9.5px] sm:text-xs break-words whitespace-normal leading-tight"
                             style={{ width: `${columnWidths.notes}px`, minWidth: `${columnWidths.notes}px` }}
                           >
-                            {item.notes}
+                            <div className="flex items-start gap-1">
+                              {item.chuaBcms && (
+                                <span className="inline-flex items-center px-1 py-0.2 rounded text-[8px] font-bold bg-amber-100 text-amber-800 border border-amber-300 shrink-0">
+                                  Dự kiến
+                                </span>
+                              )}
+                              <span>{item.notes}</span>
+                            </div>
                           </td>
                         )}
 
                         {/* 4. Số tiền */}
                         {isColumnVisible('amount') && (
                           <td
-                            className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight whitespace-nowrap overflow-hidden"
+                            className={`py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-[9.5px] sm:text-xs leading-tight whitespace-nowrap overflow-hidden ${
+                              item.chuaBcms ? 'text-amber-700 italic' : 'text-slate-900'
+                            }`}
                             style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
+                            title={item.chuaBcms ? 'Khoản Chưa BCMS (dự kiến)' : undefined}
                           >
                             {formatVND(item.amount)}
+                          </td>
+                        )}
+
+                        {/* 4b. Ghi chú (nằm ngay phía sau cột số tiền) */}
+                        {isColumnVisible('remark') && (
+                          <td
+                            className="py-0.5 px-0.5 sm:px-1 text-slate-600 text-[9px] sm:text-xs leading-tight break-words whitespace-normal italic"
+                            style={{ width: `${columnWidths.remark}px`, minWidth: `${columnWidths.remark}px` }}
+                          >
+                            {item.remark || '—'}
                           </td>
                         )}
 
@@ -680,7 +839,7 @@ export default function AccountLedgerModal({
                   {/* Khi người dùng ẩn danh sách Thực Tế */}
                   {!showActual && sortedTransactions.length > 0 && (
                     <tr className="bg-slate-50/70 text-slate-400 italic">
-                      <td colSpan={6} className="py-2.5 px-3 text-center text-3xs sm:text-xs">
+                      <td colSpan={8} className="py-2.5 px-3 text-center text-3xs sm:text-xs">
                         Danh sách hạng mục Thực Tế (nhập liệu) đang tạm ẩn. Bấm nút <strong>Thực Tế</strong> phía trên để hiển thị lại.
                       </td>
                     </tr>
@@ -703,6 +862,14 @@ export default function AccountLedgerModal({
                           style={{ width: `${columnWidths.date}px`, minWidth: `${columnWidths.date}px` }}
                         >
                           {selectedYear}
+                        </td>
+                      )}
+                      {isColumnVisible('chuaBcms') && (
+                        <td
+                          className="py-0.5 px-0.5 text-center text-amber-400 text-3xs leading-tight"
+                          style={{ width: `${columnWidths.chuaBcms}px`, minWidth: `${columnWidths.chuaBcms}px` }}
+                        >
+                          —
                         </td>
                       )}
                       {isColumnVisible('notes') && (
@@ -732,6 +899,14 @@ export default function AccountLedgerModal({
                           style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
                         >
                           {formatVND(bravoVal)}
+                        </td>
+                      )}
+                      {isColumnVisible('remark') && (
+                        <td
+                          className="py-0.5 px-0.5 sm:px-1 text-center text-amber-700/60 text-3xs leading-tight italic"
+                          style={{ width: `${columnWidths.remark}px`, minWidth: `${columnWidths.remark}px` }}
+                        >
+                          —
                         </td>
                       )}
                       {isColumnVisible('employee') && (
@@ -768,8 +943,18 @@ export default function AccountLedgerModal({
                 <>
                   {' • '}Thực Tế:{' '}
                   <strong className="text-blue-700 font-mono font-bold whitespace-nowrap">
-                    {formatVND(currentTotalAmount)}
+                    {formatVND(currentActualAmount)}
                   </strong>
+                  {pendingBcmsCount > 0 && (
+                    <span className="text-amber-700 ml-1">
+                      (Dự kiến: +{formatVND(pendingBcmsAmount)})
+                    </span>
+                  )}
+                  {showExpectedTotal && (
+                    <span className="text-amber-900 font-mono font-bold ml-1">
+                      {' => '}Gồm DK: {formatVND(currentExpectedTotalAmount)}
+                    </span>
+                  )}
                 </>
               )}
               {showBravo && bravoVal > 0 && (

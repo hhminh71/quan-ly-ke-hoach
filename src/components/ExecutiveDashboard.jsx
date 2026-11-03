@@ -51,11 +51,11 @@ export default function ExecutiveDashboard({
     return Math.round(val).toLocaleString('vi-VN') + '\u00A0đ';
   };
 
-  // 1. Live Actuals by Account Code from Transactions
+  // 1. Live Actuals by Account Code from Transactions (loại trừ Chưa BCMS)
   const liveActualsByCode = useMemo(() => {
     const map = {};
     (transactions || []).forEach((t) => {
-      if (t && t.accountCode) {
+      if (t && t.accountCode && !t.chuaBcms) {
         const code = String(t.accountCode).trim();
         map[code] = (map[code] || 0) + (Number(t.amount) || 0);
       }

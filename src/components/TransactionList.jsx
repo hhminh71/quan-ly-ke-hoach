@@ -18,6 +18,8 @@ import {
   Sparkles,
   PlusCircle,
   Calculator,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import EditTransactionModal from './EditTransactionModal';
 import AddTransactionModal from './AddTransactionModal';
@@ -39,6 +41,9 @@ export default function TransactionList({
   const [selectedCategory, setSelectedCategory] = useState(selectedCategoryProp || 'ALL');
   const [sortOrder, setSortOrder] = useState('newest'); // 'newest', 'oldest', 'account_asc', 'account_desc', 'highest', 'lowest'
 
+  // Tùy chọn Ẩn/Hiện Tổng bao gồm dự kiến (Chưa BCMS)
+  const [showExpectedTotal, setShowExpectedTotal] = useState(false);
+
   // Add & Edit Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -55,20 +60,24 @@ export default function TransactionList({
     toggleColumnVisibility,
     showAllColumns,
   } = useResizableColumns({
-    storageKey: 'tbl_cols_transactions_v4',
+    storageKey: 'tbl_cols_transactions_v5',
     initialWidths: {
       date: 72,
+      chuaBcms: 76,
       account: 88,
-      notes: 380,
+      notes: 320,
       amount: 115,
-      employee: 110,
+      remark: 130,
+      employee: 100,
       actions: 55,
     },
     minWidths: {
       date: 50,
+      chuaBcms: 55,
       account: 65,
       notes: 90,
       amount: 105,
+      remark: 65,
       employee: 60,
       actions: 45,
     },
@@ -77,9 +86,11 @@ export default function TransactionList({
   const transactionTableColumns = useMemo(
     () => [
       { key: 'date', label: 'Ngày' },
+      { key: 'chuaBcms', label: 'Chưa BCMS' },
       { key: 'account', label: 'Khoản mục' },
       { key: 'notes', label: 'Nội dung diễn giải' },
       { key: 'amount', label: 'Số tiền (VNĐ)' },
+      { key: 'remark', label: 'Ghi chú' },
       { key: 'employee', label: 'Người thực hiện' },
       { key: 'actions', label: 'Điều chỉnh' },
     ],
@@ -196,10 +207,27 @@ export default function TransactionList({
     });
   }, [filtered, sortOrder]);
 
-  // Auto-sum amount of filtered transactions
-  const totalFilteredAmount = useMemo(() => {
+  // Auto-sum amount of filtered transactions:
+  // 1. Tổng thực tế đã BCMS (loại trừ các khoản đã check Chưa BCMS)
+  const totalActualAmount = useMemo(() => {
+    return sorted
+      .filter((item) => !item.chuaBcms)
+      .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+  }, [sorted]);
+
+  // 2. Tổng bao gồm cả dự kiến Chưa BCMS
+  const totalExpectedAmount = useMemo(() => {
     return sorted.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   }, [sorted]);
+
+  const pendingBcmsCount = useMemo(() => {
+    return sorted.filter((item) => item.chuaBcms).length;
+  }, [sorted]);
+
+  const pendingBcmsAmount = totalExpectedAmount - totalActualAmount;
+
+  // Tổng số tiền đang hiển thị (phụ thuộc vào showExpectedTotal)
+  const totalFilteredAmount = showExpectedTotal ? totalExpectedAmount : totalActualAmount;
 
   // Auto-count unique descriptions of filtered transactions
   const uniqueNotesCount = useMemo(() => {
@@ -237,6 +265,34 @@ export default function TransactionList({
               </div>
 
               <div className="flex items-center gap-1">
+                {/* Tùy chọn Ẩn/Hiện Tổng bao gồm dự kiến (Chưa BCMS) */}
+                <button
+                  type="button"
+                  onClick={() => setShowExpectedTotal((prev) => !prev)}
+                  className={`h-5 sm:h-6 px-1.5 py-0 rounded text-[7.5px] sm:text-[9px] font-bold transition-all cursor-pointer leading-tight inline-flex items-center gap-1 ${
+                    showExpectedTotal
+                      ? 'bg-amber-600 text-white shadow-2xs ring-1 ring-amber-400/50'
+                      : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                  }`}
+                  title="Ẩn/Hiện tổng chi phí bao gồm cả các hạng mục Chưa BCMS (dự kiến)"
+                >
+                  {showExpectedTotal ? (
+                    <Eye className="w-2.5 h-2.5 text-white" />
+                  ) : (
+                    <EyeOff className="w-2.5 h-2.5 text-slate-400" />
+                  )}
+                  <span>{showExpectedTotal ? 'Gồm Dự Kiến' : 'Chỉ Đã BCMS'}</span>
+                  {pendingBcmsCount > 0 && (
+                    <span
+                      className={`px-1 rounded-full text-[7px] font-bold ${
+                        showExpectedTotal ? 'bg-amber-800 text-white' : 'bg-slate-200 text-slate-700'
+                      }`}
+                    >
+                      {pendingBcmsCount}
+                    </span>
+                  )}
+                </button>
+
                 <ColumnVisibilityDropdown
                   columns={transactionTableColumns}
                   isColumnVisible={isColumnVisible}
@@ -291,22 +347,43 @@ export default function TransactionList({
             </div>
 
             {/* 2. Tự sum cột số tiền */}
-            <div className="px-1.5 py-0.5 sm:py-1 rounded bg-blue-50/80 border border-blue-200 shadow-2xs text-left">
-              <div className="flex items-center justify-between text-[7px] sm:text-[8.5px] text-blue-700 font-semibold uppercase tracking-tight leading-none gap-1">
-                <span className="flex items-center gap-0.5">
-                  <Calculator className="w-2.5 h-2.5 text-blue-700 shrink-0" />
-                  <span>Tổng số tiền</span>
+            <div
+              className={`px-1.5 py-0.5 sm:py-1 rounded border shadow-2xs text-left transition-all ${
+                showExpectedTotal
+                  ? 'bg-amber-50/90 border-amber-300 ring-1 ring-amber-300/40'
+                  : 'bg-blue-50/80 border-blue-200'
+              }`}
+            >
+              <div className="flex items-center justify-between text-[7px] sm:text-[8.5px] font-semibold uppercase tracking-tight leading-none gap-1">
+                <span className={`flex items-center gap-0.5 ${showExpectedTotal ? 'text-amber-800' : 'text-blue-700'}`}>
+                  <Calculator className="w-2.5 h-2.5 shrink-0" />
+                  <span>{showExpectedTotal ? 'Tổng gồm dự kiến' : 'Tổng thực tế'}</span>
                 </span>
-                <span className="text-[7px] sm:text-[8.5px] font-bold text-blue-700 bg-white/90 px-1 rounded border border-blue-200 hidden sm:inline-block">
-                  Tự động sum
+                <span
+                  className={`text-[7px] sm:text-[8.5px] font-bold px-1 rounded border hidden sm:inline-block ${
+                    showExpectedTotal
+                      ? 'text-amber-800 bg-white/90 border-amber-300'
+                      : 'text-blue-700 bg-white/90 border-blue-200'
+                  }`}
+                >
+                  {showExpectedTotal ? 'Bao gồm Chưa BCMS' : 'Chỉ đã BCMS'}
                 </span>
               </div>
               <div
-                className="text-[9.5px] sm:text-xs font-black text-blue-900 font-mono mt-0.5 truncate whitespace-nowrap leading-tight"
+                className={`text-[9.5px] sm:text-xs font-black font-mono mt-0.5 truncate whitespace-nowrap leading-tight ${
+                  showExpectedTotal ? 'text-amber-950' : 'text-blue-900'
+                }`}
                 title={formatVND(totalFilteredAmount)}
               >
                 {formatVND(totalFilteredAmount)}
               </div>
+              {pendingBcmsCount > 0 && (
+                <div className="text-[7px] sm:text-[8px] text-slate-500 mt-0.5 leading-none truncate">
+                  {showExpectedTotal
+                    ? `(+${formatVND(pendingBcmsAmount)} dự kiến)`
+                    : `(-${pendingBcmsCount} mục Chưa BCMS)`}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -420,6 +497,18 @@ export default function TransactionList({
                   </th>
                 )}
 
+                {/* 1b. Chưa BCMS: Tùy biến kéo giãn */}
+                {isColumnVisible('chuaBcms') && (
+                  <th
+                    style={{ width: `${columnWidths.chuaBcms}px`, minWidth: `${columnWidths.chuaBcms}px` }}
+                    className="relative py-0.5 px-0.5 text-center leading-tight select-none"
+                    title="Chưa BCMS (Khoản dự kiến, không tính vào tổng thực tế) • Kéo mép phải để giãn cột"
+                  >
+                    <div className="truncate text-center w-full">Chưa BCMS</div>
+                    <ColumnResizeHandle colKey="chuaBcms" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
+                  </th>
+                )}
+
                 {/* 2. Khoản mục & Nhóm: tùy biến kéo giãn, tiêu đề căn giữa */}
                 {isColumnVisible('account') && (
                   <th
@@ -464,6 +553,18 @@ export default function TransactionList({
                   </th>
                 )}
 
+                {/* 4b. Ghi chú: Nằm ngay sau cột Số tiền */}
+                {isColumnVisible('remark') && (
+                  <th
+                    style={{ width: `${columnWidths.remark}px`, minWidth: `${columnWidths.remark}px` }}
+                    className="relative py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words select-none"
+                    title="Ghi chú bổ sung • Kéo mép phải để giãn cột"
+                  >
+                    <div className="text-center w-full pr-1">Ghi Chú</div>
+                    <ColumnResizeHandle colKey="remark" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
+                  </th>
+                )}
+
                 {/* 5. Người thực hiện: căn giữa, tùy biến kéo giãn */}
                 {isColumnVisible('employee') && (
                   <th
@@ -505,6 +606,40 @@ export default function TransactionList({
                     </td>
                   )}
 
+                  {/* 1b. Chưa BCMS: Checkbox bật/tắt dự kiến */}
+                  {isColumnVisible('chuaBcms') && (
+                    <td
+                      className="py-0.5 px-0.5 text-center leading-tight select-none"
+                      style={{ width: `${columnWidths.chuaBcms}px`, minWidth: `${columnWidths.chuaBcms}px` }}
+                    >
+                      <label
+                        className="inline-flex items-center justify-center cursor-pointer p-0.5"
+                        title={item.chuaBcms ? 'Khoản dự kiến (Chưa BCMS) - Loại trừ khỏi tổng thực tế' : 'Đã BCMS - Tính vào tổng thực tế'}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={Boolean(item.chuaBcms)}
+                          onChange={(e) => {
+                            if (onUpdateTransaction) {
+                              onUpdateTransaction({
+                                ...item,
+                                chuaBcms: e.target.checked,
+                              });
+                              setToastMessage(
+                                e.target.checked
+                                  ? 'Đã chuyển thành "Chưa BCMS" (khoản dự kiến)'
+                                  : 'Đã bỏ chọn Chưa BCMS (tính vào tổng thực tế)'
+                              );
+                              setShowEditToast(true);
+                              setTimeout(() => setShowEditToast(false), 2500);
+                            }
+                          }}
+                          className="w-3.5 h-3.5 rounded text-amber-600 focus:ring-amber-500 border-slate-300 cursor-pointer"
+                        />
+                      </label>
+                    </td>
+                  )}
+
                   {/* 2. Khoản mục: Chỉ hiện số mã không hiện tên khoản mục */}
                   {isColumnVisible('account') && (
                     <td
@@ -531,17 +666,37 @@ export default function TransactionList({
                       style={{ width: `${columnWidths.notes}px`, minWidth: `${columnWidths.notes}px` }}
                       title={item.notes}
                     >
-                      {item.notes}
+                      <div className="flex items-start gap-1">
+                        {item.chuaBcms && (
+                          <span className="inline-flex items-center px-1 py-0.2 rounded text-[8px] font-bold bg-amber-100 text-amber-800 border border-amber-300 shrink-0">
+                            Dự kiến
+                          </span>
+                        )}
+                        <span>{item.notes}</span>
+                      </div>
                     </td>
                   )}
 
                   {/* 4. Số tiền */}
                   {isColumnVisible('amount') && (
                     <td
-                      className="py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-slate-900 text-[9.5px] sm:text-xs leading-tight whitespace-nowrap overflow-hidden"
+                      className={`py-0.5 px-0.5 sm:px-1 text-right font-mono font-bold text-[9.5px] sm:text-xs leading-tight whitespace-nowrap overflow-hidden ${
+                        item.chuaBcms ? 'text-amber-700 italic' : 'text-slate-900'
+                      }`}
                       style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
+                      title={item.chuaBcms ? 'Khoản Chưa BCMS (dự kiến)' : undefined}
                     >
                       {formatVND(item.amount)}
+                    </td>
+                  )}
+
+                  {/* 4b. Ghi chú: Nằm ngay sau cột Số tiền */}
+                  {isColumnVisible('remark') && (
+                    <td
+                      className="py-0.5 px-0.5 sm:px-1 text-slate-600 text-[9px] sm:text-xs leading-tight break-words whitespace-normal italic"
+                      style={{ width: `${columnWidths.remark}px`, minWidth: `${columnWidths.remark}px` }}
+                    >
+                      {item.remark || '—'}
                     </td>
                   )}
 
@@ -611,6 +766,16 @@ export default function TransactionList({
                   </td>
                 )}
 
+                {/* 1b. Chưa BCMS */}
+                {isColumnVisible('chuaBcms') && (
+                  <td
+                    className="py-1 px-0.5 text-center text-slate-400 text-3xs"
+                    style={{ width: `${columnWidths.chuaBcms}px`, minWidth: `${columnWidths.chuaBcms}px` }}
+                  >
+                    —
+                  </td>
+                )}
+
                 {/* 2. Khoản mục */}
                 {isColumnVisible('account') && (
                   <td
@@ -645,11 +810,30 @@ export default function TransactionList({
                 {/* 4. Số tiền: Tự sum */}
                 {isColumnVisible('amount') && (
                   <td
-                    className="py-1 px-0.5 sm:px-1 text-right font-mono font-black text-blue-900 text-[9.5px] sm:text-xs leading-tight whitespace-nowrap overflow-hidden"
+                    className={`py-1 px-0.5 sm:px-1 text-right font-mono font-black text-[9.5px] sm:text-xs leading-tight whitespace-nowrap overflow-hidden ${
+                      showExpectedTotal ? 'text-amber-950' : 'text-blue-900'
+                    }`}
                     style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
-                    title={`Tổng cộng: ${formatVND(totalFilteredAmount)}`}
+                    title={`Tổng chi phí: ${formatVND(totalFilteredAmount)}`}
                   >
-                    {formatVND(totalFilteredAmount)}
+                    <div>{formatVND(totalFilteredAmount)}</div>
+                    {pendingBcmsCount > 0 && (
+                      <div className="text-[7.5px] font-normal text-slate-500 font-sans">
+                        {showExpectedTotal
+                          ? `(+${formatVND(pendingBcmsAmount)} DK)`
+                          : `(-${pendingBcmsCount} mục Chưa BCMS)`}
+                      </div>
+                    )}
+                  </td>
+                )}
+
+                {/* 4b. Ghi chú */}
+                {isColumnVisible('remark') && (
+                  <td
+                    className="py-1 px-0.5 sm:px-1 text-center text-slate-400 text-3xs"
+                    style={{ width: `${columnWidths.remark}px`, minWidth: `${columnWidths.remark}px` }}
+                  >
+                    —
                   </td>
                 )}
 

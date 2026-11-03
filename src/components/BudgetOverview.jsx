@@ -266,10 +266,11 @@ export default function BudgetOverview({
   );
 
   // Compute live actual spent per account strictly from the passed year's transactions
+  // Loại trừ các khoản đã check Chưa BCMS (dự kiến) khỏi tổng thực tế
   const liveActualsByCode = useMemo(() => {
     const map = {};
     (transactions || []).forEach((t) => {
-      if (t && t.accountCode) {
+      if (t && t.accountCode && !t.chuaBcms) {
         const code = String(t.accountCode).trim();
         map[code] = (map[code] || 0) + (Number(t.amount) || 0);
       }

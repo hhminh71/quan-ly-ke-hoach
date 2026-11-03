@@ -40,6 +40,8 @@ export default function AddTransactionModal({
   const [employeeName, setEmployeeName] = useState('');
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
+  const [remark, setRemark] = useState('');
+  const [chuaBcms, setChuaBcms] = useState(false);
 
   // Handle mobile Back button to close modal instead of exiting app
   useModalBackHandler(isOpen, onClose, 'add-transaction');
@@ -57,6 +59,8 @@ export default function AddTransactionModal({
       setEmployeeName('');
       setAmount('');
       setNotes('');
+      setRemark('');
+      setChuaBcms(false);
       setErrors({});
       setAccountSearch('');
       setIsDropdownOpen(false);
@@ -93,11 +97,11 @@ export default function AddTransactionModal({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Compute live actuals by account code
+  // Compute live actuals by account code (loại trừ Chưa BCMS)
   const liveActualsByCode = useMemo(() => {
     const map = {};
     (transactions || []).forEach((t) => {
-      if (t && t.accountCode) {
+      if (t && t.accountCode && !t.chuaBcms) {
         const code = String(t.accountCode).trim();
         map[code] = (map[code] || 0) + (Number(t.amount) || 0);
       }
@@ -187,6 +191,8 @@ export default function AddTransactionModal({
       employeeName: employeeName.trim(),
       amount: Number(amount),
       notes: notes.trim(),
+      remark: remark.trim(),
+      chuaBcms: Boolean(chuaBcms),
       status: 'Đã thực hiện',
       createdAt: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
     };
@@ -467,6 +473,41 @@ export default function AddTransactionModal({
               }`}
             ></textarea>
             {errors.notes && <p className="text-rose-600 text-2xs mt-1">{errors.notes}</p>}
+          </div>
+
+          {/* Row 5: Chưa BCMS (Dự kiến) */}
+          <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-2.5">
+            <label className="flex items-start gap-2.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={chuaBcms}
+                onChange={(e) => setChuaBcms(e.target.checked)}
+                className="w-4 h-4 mt-0.5 rounded text-amber-600 border-amber-300 focus:ring-amber-500 cursor-pointer shrink-0"
+              />
+              <div>
+                <span className="text-xs font-bold text-amber-900 block leading-tight">
+                  Chưa BCMS (Khoản dự kiến)
+                </span>
+                <span className="text-[10px] text-amber-700 block mt-0.5 leading-tight">
+                  Khi check chọn: Khoản này sẽ <strong>không tính vào tổng thực tế</strong> (chỉ hiển thị khi bật "Tổng gồm dự kiến").
+                </span>
+              </div>
+            </label>
+          </div>
+
+          {/* Row 6: Ghi chú phụ */}
+          <div>
+            <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
+              <FileText className="w-3.5 h-3.5 text-slate-400" />
+              Ghi Chú Bổ Sung <span className="text-slate-400 font-normal">(Tùy chọn)</span>
+            </label>
+            <input
+              type="text"
+              placeholder="VD: Chờ phê duyệt, dự kiến quý 4, hợp đồng..."
+              value={remark}
+              onChange={(e) => setRemark(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
+            />
           </div>
         </form>
 

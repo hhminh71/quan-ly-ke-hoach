@@ -106,7 +106,9 @@ function doPost(e) {
         t.employeeName || '',
         Number(t.amount) || 0,
         t.notes || '',
-        t.createdAt || Utilities.formatDate(new Date(), 'GMT+7', 'HH:mm')
+        t.createdAt || Utilities.formatDate(new Date(), 'GMT+7', 'HH:mm'),
+        t.remark || '',
+        t.chuaBcms ? true : false
       ]);
 
       return createJsonResponse({
@@ -153,7 +155,7 @@ function doPost(e) {
           const dateStr = t.date || String(rows[i][2]);
           const year = t.fiscalYear || (dateStr.length >= 4 ? dateStr.substring(0, 4) : '');
 
-          sheet.getRange(rowIdx, 2, 1, 9).setValues([[
+          const valuesToSet = [
             year,
             dateStr,
             t.accountCode || '',
@@ -162,8 +164,11 @@ function doPost(e) {
             t.employeeName || '',
             Number(t.amount) || 0,
             t.notes || '',
-            t.createdAt || rows[i][9] || '09:00'
-          ]]);
+            t.createdAt || rows[i][9] || '09:00',
+            t.remark || '',
+            t.chuaBcms ? true : false
+          ];
+          sheet.getRange(rowIdx, 2, 1, valuesToSet.length).setValues([valuesToSet]);
           updated = true;
           break;
         }
@@ -372,7 +377,9 @@ function getTransactionsFromSheet(ss) {
   const groupIdx = header.findIndex(function(h) { return h.includes('nhóm'); });
   const personIdx = header.findIndex(function(h) { return h.includes('người') || h.includes('nhân sự'); });
   const amountIdx = header.findIndex(function(h) { return h.includes('tiền') || h.includes('số tiền'); });
-  const notesIdx = header.findIndex(function(h) { return h.includes('nội dung') || h.includes('ghi chú'); });
+  const notesIdx = header.findIndex(function(h) { return h.includes('nội dung') || (h.includes('diễn giải') && !h.includes('ghi chú')); });
+  const remarkIdx = header.findIndex(function(h) { return h.includes('ghi chú'); });
+  const chuaBcmsIdx = header.findIndex(function(h) { return h.includes('chưa bcms') || h.includes('bcms') || h.includes('dự kiến'); });
   const timeIdx = header.findIndex(function(h) { return h.includes('thời gian') || h.includes('giờ'); });
 
   const list = [];
@@ -388,6 +395,17 @@ function getTransactionsFromSheet(ss) {
       yearVal = dateVal.substring(0, 4);
     }
 
+    const notesVal = String((notesIdx >= 0 ? r[notesIdx] : (r[8] || '')) || '');
+    const remarkVal = String((remarkIdx >= 0 ? r[remarkIdx] : (r[10] || '')) || '');
+    const rawChuaBcms = chuaBcmsIdx >= 0 ? r[chuaBcmsIdx] : (r[11] || false);
+    const isChuaBcms = Boolean(
+      rawChuaBcms === true ||
+      rawChuaBcms === 'TRUE' ||
+      rawChuaBcms === 'true' ||
+      rawChuaBcms === 1 ||
+      notesVal.toLowerCase().startsWith('dự kiến')
+    );
+
     list.push({
       id: rawId,
       fiscalYear: yearVal,
@@ -397,7 +415,9 @@ function getTransactionsFromSheet(ss) {
       group: String((groupIdx >= 0 ? r[groupIdx] : r[5]) || ''),
       employeeName: String((personIdx >= 0 ? r[personIdx] : r[6]) || ''),
       amount: Number(rawAmount) || 0,
-      notes: String((notesIdx >= 0 ? r[notesIdx] : r[8]) || ''),
+      notes: notesVal,
+      remark: remarkVal,
+      chuaBcms: isChuaBcms,
       createdAt: String((timeIdx >= 0 ? r[timeIdx] : r[9]) || '09:00'),
       status: 'Đã thực hiện'
     });
