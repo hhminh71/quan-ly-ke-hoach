@@ -52,6 +52,13 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
   // Handle mobile Back button to close simulator
   useModalBackHandler(isOpen, onClose, 'mobile-simulator');
 
+  // Khi mở giả lập, làm mới iframeKey để iframe nạp đúng trang hiện tại người dùng đang xem
+  useEffect(() => {
+    if (isOpen) {
+      setIframeKey((prev) => prev + 1);
+    }
+  }, [isOpen]);
+
   const device = DEVICES.find((d) => d.id === selectedDeviceId) || DEVICES[0];
   const isDuoBoth = device.type === 'duo_both';
 
@@ -104,8 +111,27 @@ export default function MobileSimulatorModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  // Build simulator URL pointing to current app
-  const simulatorUrl = `${window.location.protocol}//${window.location.host}${window.location.pathname}?is_mobile_sim=1`;
+  // Build simulator URL pointing to current app with the exact current tab and state
+  const getSimulatorUrl = () => {
+    if (typeof window === 'undefined') return '';
+    let activeTab = '';
+    try {
+      activeTab = localStorage.getItem('active_app_tab') || '';
+    } catch {}
+
+    let currentHash = window.location.hash || '';
+    if (!currentHash) {
+      if (activeTab === 'BUDGETS') currentHash = '#ke-hoach';
+      else if (activeTab === 'TRANSACTIONS') currentHash = '#so-cai';
+      else if (activeTab === 'BRAVO_RECON') currentHash = '#doi-soat';
+      else currentHash = '#dashboard';
+    }
+
+    const tabParam = activeTab ? `&tab=${encodeURIComponent(activeTab)}` : '';
+    return `${window.location.protocol}//${window.location.host}${window.location.pathname}?is_mobile_sim=1${tabParam}${currentHash}`;
+  };
+
+  const simulatorUrl = getSimulatorUrl();
 
   const handleReloadIframe = () => {
     setIframeKey((prev) => prev + 1);

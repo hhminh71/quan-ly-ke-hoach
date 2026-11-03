@@ -99,10 +99,32 @@ export default function DashboardPage({ user }) {
   // Mobile Back Button & URL Hash Navigation Helpers
   const getTabFromHash = () => {
     if (typeof window === 'undefined') return 'DASHBOARD';
+    // 1. Kiểm tra tham số URL ?tab= hoặc ?initial_tab= (ưu tiên cao nhất, đặc biệt từ khung giả lập)
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const queryTab = params.get('tab') || params.get('initial_tab');
+      if (queryTab) {
+        const upper = queryTab.toUpperCase();
+        if (['DASHBOARD', 'BUDGETS', 'TRANSACTIONS', 'BRAVO_RECON'].includes(upper)) {
+          return upper;
+        }
+      }
+    } catch {}
+
+    // 2. Kiểm tra Hash trên thanh địa chỉ (#so-cai, #ke-hoach, ...)
     const hash = window.location.hash.toLowerCase();
     if (hash.startsWith('#ke-hoach') || hash.startsWith('#budgets')) return 'BUDGETS';
     if (hash.startsWith('#so-cai') || hash.startsWith('#transactions') || hash.startsWith('#ledger')) return 'TRANSACTIONS';
     if (hash.startsWith('#doi-soat') || hash.startsWith('#bravo')) return 'BRAVO_RECON';
+
+    // 3. Kiểm tra tab gần nhất được lưu trong localStorage
+    try {
+      const savedTab = localStorage.getItem('active_app_tab');
+      if (savedTab && ['DASHBOARD', 'BUDGETS', 'TRANSACTIONS', 'BRAVO_RECON'].includes(savedTab)) {
+        return savedTab;
+      }
+    } catch {}
+
     return 'DASHBOARD';
   };
 
@@ -118,6 +140,9 @@ export default function DashboardPage({ user }) {
   const handleTabChange = (newTab, replace = false) => {
     if (newTab === activeTab) return;
     setActiveTab(newTab);
+    try {
+      localStorage.setItem('active_app_tab', newTab);
+    } catch {}
     const hash = getHashFromTab(newTab);
     if (replace) {
       window.history.replaceState({ tab: newTab }, '', hash);
@@ -126,8 +151,12 @@ export default function DashboardPage({ user }) {
     }
   };
 
-  // Đồng bộ điều hướng Tab với Browser History (Nút Back trên điện thoại)
+  // Đồng bộ điều hướng Tab với Browser History (Nút Back trên điện thoại) & lưu activeTab
   useEffect(() => {
+    try {
+      localStorage.setItem('active_app_tab', activeTab);
+    } catch {}
+
     const initialTab = getTabFromHash();
     if (!window.location.hash) {
       window.history.replaceState({ tab: initialTab }, '', getHashFromTab(initialTab));
@@ -146,14 +175,27 @@ export default function DashboardPage({ user }) {
       window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('hashchange', handlePopState);
     };
-  }, []);
+  }, [activeTab]);
 
   // Selected account for drilldown modal
   const [selectedDetailAccount, setSelectedDetailAccount] = useState(null);
 
   // Fiscal Year Selection
   const currentFiscalYear = String(new Date().getFullYear());
-  const [selectedYear, setSelectedYear] = useState(currentFiscalYear);
+  const [selectedYear, setSelectedYearState] = useState(() => {
+    try {
+      return localStorage.getItem('selected_fiscal_year') || currentFiscalYear;
+    } catch {
+      return currentFiscalYear;
+    }
+  });
+
+  const setSelectedYear = (yr) => {
+    setSelectedYearState(yr);
+    try {
+      localStorage.setItem('selected_fiscal_year', yr);
+    } catch {}
+  };
 
   // Tab bắt buộc chỉ chọn năm hiện tại: Dashboard & Kế hoạch báo cáo
   const isCurrentYearOnlyTab = activeTab === 'DASHBOARD' || activeTab === 'BUDGETS';
@@ -165,8 +207,22 @@ export default function DashboardPage({ user }) {
     }
   }, [activeTab, isCurrentYearOnlyTab, currentFiscalYear, selectedYear]);
 
-  // Active Account Filter for Ledger (synchronized across tabs)
-  const [selectedLedgerAccount, setSelectedLedgerAccount] = useState('ALL');
+  // Active Account Filter for Ledger (synchronized across tabs and simulator)
+  const [selectedLedgerAccount, setSelectedLedgerAccountState] = useState(() => {
+    try {
+      return localStorage.getItem('selected_ledger_account') || 'ALL';
+    } catch {
+      return 'ALL';
+    }
+  });
+
+  const setSelectedLedgerAccount = (acc) => {
+    const val = acc || 'ALL';
+    setSelectedLedgerAccountState(val);
+    try {
+      localStorage.setItem('selected_ledger_account', val);
+    } catch {}
+  };
 
   // Google Sheets sync states
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);

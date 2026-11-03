@@ -47,7 +47,20 @@ export default function BudgetOverview({
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL', 'OVER', 'WARNING', 'SAFE'
   
   // View mode: 'PROGRESS' (Tiến độ giải ngân 1 năm) or 'MATRIX' (Ma trận các cột năm 2024, 2025, 2026, 2027...)
-  const [viewMode, setViewMode] = useState('PROGRESS');
+  const [viewMode, setViewModeState] = useState(() => {
+    try {
+      return localStorage.getItem('budget_view_mode') || 'PROGRESS';
+    } catch {
+      return 'PROGRESS';
+    }
+  });
+
+  const setViewMode = (mode) => {
+    setViewModeState(mode);
+    try {
+      localStorage.setItem('budget_view_mode', mode);
+    } catch {}
+  };
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   // Drill-down Detail Modal State (Click row to see ledger)
