@@ -152,7 +152,18 @@ export default function DashboardPage({ user }) {
   const [selectedDetailAccount, setSelectedDetailAccount] = useState(null);
 
   // Fiscal Year Selection
-  const [selectedYear, setSelectedYear] = useState('2026');
+  const currentFiscalYear = String(new Date().getFullYear());
+  const [selectedYear, setSelectedYear] = useState(currentFiscalYear);
+
+  // Tab bắt buộc chỉ chọn năm hiện tại: Dashboard & Kế hoạch báo cáo
+  const isCurrentYearOnlyTab = activeTab === 'DASHBOARD' || activeTab === 'BUDGETS';
+
+  // Tự động khóa về năm hiện tại khi chuyển vào Dashboard hoặc Kế hoạch báo cáo
+  useEffect(() => {
+    if (isCurrentYearOnlyTab && selectedYear !== currentFiscalYear) {
+      setSelectedYear(currentFiscalYear);
+    }
+  }, [activeTab, isCurrentYearOnlyTab, currentFiscalYear, selectedYear]);
 
   // Active Account Filter for Ledger (synchronized across tabs)
   const [selectedLedgerAccount, setSelectedLedgerAccount] = useState('ALL');
@@ -439,17 +450,34 @@ export default function DashboardPage({ user }) {
           )}
 
           <select
-            value={selectedYear}
+            value={isCurrentYearOnlyTab ? currentFiscalYear : selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
-            className="px-1.5 py-0.5 rounded border border-slate-200 bg-white hover:bg-slate-50 text-[9.5px] sm:text-xs font-bold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-400 cursor-pointer shadow-2xs transition-all leading-tight"
-            title="Chọn năm tài chính"
+            disabled={isCurrentYearOnlyTab}
+            className={`px-1.5 py-0.5 rounded border text-[9.5px] sm:text-xs font-bold shadow-2xs transition-all leading-tight ${
+              isCurrentYearOnlyTab
+                ? 'border-blue-300 bg-blue-50/80 text-blue-900 cursor-not-allowed'
+                : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-400 cursor-pointer'
+            }`}
+            title={
+              isCurrentYearOnlyTab
+                ? `Dashboard và Kế hoạch báo cáo chỉ áp dụng cho năm tài chính hiện tại (${currentFiscalYear})`
+                : 'Chọn năm tài chính'
+            }
           >
-            {availableYears.map((yr) => (
-              <option key={yr} value={yr}>
-                Năm {yr}
+            {isCurrentYearOnlyTab ? (
+              <option value={currentFiscalYear}>
+                Năm {currentFiscalYear} (Hiện tại)
               </option>
-            ))}
-            <option value="ALL">Tất cả năm</option>
+            ) : (
+              <>
+                {availableYears.map((yr) => (
+                  <option key={yr} value={yr}>
+                    Năm {yr}
+                  </option>
+                ))}
+                <option value="ALL">Tất cả năm</option>
+              </>
+            )}
           </select>
         </div>
       </div>

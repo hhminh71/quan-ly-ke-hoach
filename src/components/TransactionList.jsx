@@ -19,6 +19,7 @@ import {
   Clock,
   Sparkles,
   PlusCircle,
+  Calculator,
 } from 'lucide-react';
 import EditTransactionModal from './EditTransactionModal';
 import AddTransactionModal from './AddTransactionModal';
@@ -200,44 +201,20 @@ export default function TransactionList({
     });
   }, [filtered, sortOrder]);
 
+  // Auto-sum amount of filtered transactions
   const totalFilteredAmount = useMemo(() => {
     return sorted.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
   }, [sorted]);
 
-  // Calculation for: Tổng được duyệt, Tổng phát sinh (số tiền và %), Tổng còn lại (số tiền và %)
-  const budgetStats = useMemo(() => {
-    let approved = 0;
-    if (selectedCategory === 'ALL') {
-      approved = budgets.reduce((sum, b) => {
-        const val =
-          b.yearlyApproved && selectedYear !== 'ALL' && b.yearlyApproved[selectedYear] !== undefined
-            ? Number(b.yearlyApproved[selectedYear])
-            : Number(b.approvedAmount) || Number(b.approved) || 0;
-        return sum + val;
-      }, 0);
-    } else {
-      const found = budgets.find((b) => b.code === selectedCategory || b.name === selectedCategory);
-      if (found) {
-        approved =
-          found.yearlyApproved && selectedYear !== 'ALL' && found.yearlyApproved[selectedYear] !== undefined
-            ? Number(found.yearlyApproved[selectedYear])
-            : Number(found.approvedAmount) || Number(found.approved) || 0;
-      }
-    }
-
-    const spent = totalFilteredAmount;
-    const spentPercent = approved > 0 ? (spent / approved) * 100 : 0;
-    const remaining = approved - spent;
-    const remainingPercent = approved > 0 ? (remaining / approved) * 100 : 0;
-
-    return {
-      approved,
-      spent,
-      spentPercent,
-      remaining,
-      remainingPercent,
-    };
-  }, [budgets, selectedCategory, selectedYear, totalFilteredAmount]);
+  // Auto-count unique descriptions of filtered transactions
+  const uniqueNotesCount = useMemo(() => {
+    const set = new Set();
+    sorted.forEach((item) => {
+      const n = String(item.notes || '').trim();
+      if (n) set.add(n);
+    });
+    return set.size;
+  }, [sorted]);
 
   // Pagination calculation
   const totalPages = Math.ceil(sorted.length / pageSize) || 1;
@@ -313,81 +290,44 @@ export default function TransactionList({
             </p>
           </div>
 
-          {/* 3 KPI Summary Cards: Ultra-slim horizontal tiles */}
-          <div className="grid grid-cols-3 gap-0.5 sm:gap-1 bg-slate-50/90 p-0.5 sm:p-1 rounded border border-slate-200/80 shadow-2xs">
-            {/* 1. Tổng được duyệt */}
-            <div className="px-1 py-0.5 rounded bg-white border border-slate-200/70 shadow-2xs text-left">
-              <div className="flex items-center justify-between text-[7px] sm:text-[8.5px] text-slate-500 font-semibold uppercase tracking-tight leading-none">
-                <span>Được duyệt</span>
-                <span className="hidden sm:inline-block font-bold text-slate-500 bg-slate-100 px-1 rounded text-3xs">
-                  100%
+          {/* 2 Filter Summary Cards: Auto-count Notes & Auto-sum Amount */}
+          <div className="grid grid-cols-2 gap-1 sm:gap-1.5 bg-slate-50/90 p-0.5 sm:p-1 rounded-lg border border-slate-200/80 shadow-2xs">
+            {/* 1. Tự đếm nội dung diễn giải */}
+            <div className="px-1.5 py-0.5 sm:py-1 rounded bg-white border border-slate-200 shadow-2xs text-left">
+              <div className="flex items-center justify-between text-[7px] sm:text-[8.5px] text-slate-500 font-semibold uppercase tracking-tight leading-none gap-1">
+                <span className="flex items-center gap-0.5">
+                  <FileText className="w-2.5 h-2.5 text-blue-600 shrink-0" />
+                  <span>Diễn giải</span>
+                </span>
+                <span className="text-[7px] sm:text-[8.5px] font-bold text-blue-700 bg-blue-50 px-1 rounded border border-blue-100">
+                  {uniqueNotesCount} nội dung
                 </span>
               </div>
-              <div className="text-[9px] sm:text-xs font-extrabold text-slate-800 font-mono mt-0.5 truncate whitespace-nowrap leading-tight" title={formatVND(budgetStats.approved)}>
-                {formatVND(budgetStats.approved)}
+              <div className="text-[9.5px] sm:text-xs font-extrabold text-slate-800 mt-0.5 truncate leading-tight">
+                Đếm: <span className="text-blue-700">{sorted.length.toLocaleString('vi-VN')}</span> mục
               </div>
             </div>
 
-            {/* 2. Tổng phát sinh (số tiền và %) */}
-            <div className="px-1 py-0.5 rounded bg-blue-50/80 border border-blue-200 shadow-2xs text-left">
-              <div className="flex items-center justify-between text-[7px] sm:text-[8.5px] text-blue-700 font-semibold uppercase tracking-tight leading-none">
-                <span>Phát sinh</span>
-                <span className="text-[7px] sm:text-[8.5px] font-bold bg-blue-600 text-white px-0.5 rounded">
-                  {budgetStats.spentPercent.toFixed(0)}%
+            {/* 2. Tự sum cột số tiền */}
+            <div className="px-1.5 py-0.5 sm:py-1 rounded bg-blue-50/80 border border-blue-200 shadow-2xs text-left">
+              <div className="flex items-center justify-between text-[7px] sm:text-[8.5px] text-blue-700 font-semibold uppercase tracking-tight leading-none gap-1">
+                <span className="flex items-center gap-0.5">
+                  <Calculator className="w-2.5 h-2.5 text-blue-700 shrink-0" />
+                  <span>Tổng số tiền</span>
                 </span>
-              </div>
-              <div className="text-[9px] sm:text-xs font-extrabold text-blue-900 font-mono mt-0.5 truncate whitespace-nowrap leading-tight" title={formatVND(budgetStats.spent)}>
-                {formatVND(budgetStats.spent)}
-              </div>
-            </div>
-
-            {/* 3. Tổng còn lại (số tiền và %) */}
-            <div
-              className={`px-1 py-0.5 rounded border shadow-2xs text-left ${
-                budgetStats.remaining >= 0
-                  ? 'bg-emerald-50/80 border-emerald-200'
-                  : 'bg-rose-50/80 border-rose-200'
-              }`}
-            >
-              <div className="flex items-center justify-between text-[7px] sm:text-[8.5px] font-semibold uppercase tracking-tight leading-none">
-                <span className={budgetStats.remaining >= 0 ? 'text-emerald-700' : 'text-rose-700'}>
-                  {budgetStats.remaining >= 0 ? 'Còn lại' : 'Vượt'}
-                </span>
-                <span
-                  className={`text-[7px] sm:text-[8.5px] font-bold px-0.5 rounded text-white ${
-                    budgetStats.remaining >= 0 ? 'bg-emerald-600' : 'bg-rose-600'
-                  }`}
-                >
-                  {budgetStats.remainingPercent.toFixed(0)}%
+                <span className="text-[7px] sm:text-[8.5px] font-bold text-blue-700 bg-white/90 px-1 rounded border border-blue-200 hidden sm:inline-block">
+                  Tự động sum
                 </span>
               </div>
               <div
-                className={`text-[9px] sm:text-xs font-extrabold font-mono mt-0.5 truncate whitespace-nowrap leading-tight ${
-                  budgetStats.remaining >= 0 ? 'text-emerald-900' : 'text-rose-700'
-                }`}
-                title={formatVND(budgetStats.remaining)}
+                className="text-[9.5px] sm:text-xs font-black text-blue-900 font-mono mt-0.5 truncate whitespace-nowrap leading-tight"
+                title={formatVND(totalFilteredAmount)}
               >
-                {formatVND(budgetStats.remaining)}
+                {formatVND(totalFilteredAmount)}
               </div>
             </div>
           </div>
         </div>
-
-        {/* Thanh tiến độ trực quan siêu mảnh */}
-        {budgetStats.approved > 0 && (
-          <div className="w-full bg-slate-100 rounded-full h-1 overflow-hidden">
-            <div
-              className={`h-full transition-all duration-500 rounded-full ${
-                budgetStats.spentPercent > 100
-                  ? 'bg-rose-500'
-                  : budgetStats.spentPercent > 80
-                  ? 'bg-amber-500'
-                  : 'bg-emerald-500'
-              }`}
-              style={{ width: `${Math.min(budgetStats.spentPercent, 100)}%` }}
-            ></div>
-          </div>
-        )}
 
         {/* Search, Filter & Sort Bar: Ultra-slim 1-line controls */}
         <div className="grid grid-cols-2 sm:grid-cols-12 gap-0.5 sm:gap-1.5 pt-0.5">
@@ -677,6 +617,83 @@ export default function TransactionList({
                 </tr>
               ))}
             </tbody>
+
+            {/* Sticky Table Footer: Tự sum tiền & Tự đếm diễn giải */}
+            <tfoot className="sticky bottom-0 z-20 bg-slate-100/95 backdrop-blur-xs border-t-2 border-slate-300 shadow-xs">
+              <tr className="divide-x divide-slate-200">
+                {/* 1. Ngày */}
+                {isColumnVisible('date') && (
+                  <td
+                    className="py-1 px-0.5 sm:px-1 text-center font-bold text-[8px] sm:text-xs text-slate-700 uppercase leading-tight"
+                    style={{ width: `${columnWidths.date}px`, minWidth: `${columnWidths.date}px` }}
+                  >
+                    TỔNG
+                  </td>
+                )}
+
+                {/* 2. Khoản mục */}
+                {isColumnVisible('account') && (
+                  <td
+                    className="py-1 px-0.5 sm:px-1 text-[8.5px] sm:text-xs text-slate-700 leading-tight truncate"
+                    style={{ width: `${columnWidths.account}px`, minWidth: `${columnWidths.account}px` }}
+                    title={selectedCategory !== 'ALL' ? `Lọc: ${selectedCategory}` : 'Tất cả khoản mục'}
+                  >
+                    {selectedCategory !== 'ALL' ? (
+                      <span className="text-blue-700 font-bold truncate block">[{selectedCategory}]</span>
+                    ) : (
+                      <span className="text-slate-600 font-semibold italic">Tất cả ({categories.length})</span>
+                    )}
+                  </td>
+                )}
+
+                {/* 3. Nội dung diễn giải: Tự đếm */}
+                {isColumnVisible('notes') && (
+                  <td
+                    className="py-1 px-0.5 sm:px-1 text-[8.5px] sm:text-xs text-slate-800 leading-tight"
+                    style={{ width: `${columnWidths.notes}px`, minWidth: `${columnWidths.notes}px` }}
+                  >
+                    <div className="flex items-center gap-1">
+                      <FileText className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-blue-600 shrink-0" />
+                      <span>
+                        Đếm: <strong className="text-blue-700 font-black">{sorted.length.toLocaleString('vi-VN')}</strong> mục{' '}
+                        <span className="text-slate-500 font-normal">({uniqueNotesCount} nội dung)</span>
+                      </span>
+                    </div>
+                  </td>
+                )}
+
+                {/* 4. Số tiền: Tự sum */}
+                {isColumnVisible('amount') && (
+                  <td
+                    className="py-1 px-0.5 sm:px-1 text-right font-mono font-black text-blue-900 text-[9.5px] sm:text-xs leading-tight whitespace-nowrap overflow-hidden"
+                    style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
+                    title={`Tổng cộng: ${formatVND(totalFilteredAmount)}`}
+                  >
+                    {formatVND(totalFilteredAmount)}
+                  </td>
+                )}
+
+                {/* 5. Người thực hiện */}
+                {isColumnVisible('employee') && (
+                  <td
+                    className="py-1 px-0.5 sm:px-1 text-center text-slate-400 text-[8.5px] sm:text-xs"
+                    style={{ width: `${columnWidths.employee}px`, minWidth: `${columnWidths.employee}px` }}
+                  >
+                    —
+                  </td>
+                )}
+
+                {/* 6. Điều chỉnh */}
+                {isColumnVisible('actions') && (
+                  <td
+                    className="py-1 px-0.5 text-center text-slate-400 text-[8.5px] sm:text-xs"
+                    style={{ width: `${columnWidths.actions}px`, minWidth: `${columnWidths.actions}px` }}
+                  >
+                    —
+                  </td>
+                )}
+              </tr>
+            </tfoot>
           </table>
         </div>
       )}
