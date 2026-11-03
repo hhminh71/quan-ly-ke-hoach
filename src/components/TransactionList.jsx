@@ -20,9 +20,11 @@ import {
   Calculator,
   Eye,
   EyeOff,
+  Download,
 } from 'lucide-react';
 import EditTransactionModal from './EditTransactionModal';
 import AddTransactionModal from './AddTransactionModal';
+import { exportAccountLedgerExcel } from '../utils/excelExport';
 import { useResizableColumns, ColumnResizeHandle, ColumnVisibilityDropdown } from '../hooks/useResizableColumns';
 import { matchesVietnameseSearch } from '../utils/searchUtils';
 import { formatDate } from '../utils/dateUtils';
@@ -436,6 +438,53 @@ export default function TransactionList({
     return set.size;
   }, [sorted]);
 
+  const handleExportSingleAccount = () => {
+    if (!activeFilteredAccountCode) return;
+    const targetBudget = (budgets || []).find(
+      (b) => String(b.code || '').trim() === activeFilteredAccountCode
+    ) || {
+      code: activeFilteredAccountCode,
+      name: `Khoản mục ${activeFilteredAccountCode}`,
+    };
+    const approved = Number(
+      targetBudget.selectedYearApproved !== undefined
+        ? targetBudget.selectedYearApproved
+        : targetBudget.approved !== undefined
+        ? targetBudget.approved
+        : (targetBudget.yearlyApproved && selectedYear !== 'ALL' && targetBudget.yearlyApproved[selectedYear] !== undefined)
+        ? targetBudget.yearlyApproved[selectedYear]
+        : targetBudget.approvedAmount || 0
+    );
+    const bravoVal = Number(
+      targetBudget.bravoVal !== undefined
+        ? targetBudget.bravoVal
+        : targetBudget.bravoActual !== undefined
+        ? targetBudget.bravoActual
+        : targetBudget.bravoAmount || 0
+    );
+    const currentUser = (() => {
+      try {
+        return JSON.parse(localStorage.getItem('demo_user'));
+      } catch {
+        return null;
+      }
+    })();
+
+    exportAccountLedgerExcel({
+      account: targetBudget,
+      transactions: sorted,
+      selectedYear,
+      approved,
+      bravoVal,
+      spent: totalFilteredAmount,
+      reportActual: Math.max(totalFilteredAmount, bravoVal),
+      remaining: approved - Math.max(totalFilteredAmount, bravoVal),
+      isSeparated: false,
+      user: currentUser,
+      showExpectedTotal,
+    });
+  };
+
   return (
     <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden relative">
       {/* Toast Notification when saved & synced */}
@@ -496,6 +545,19 @@ export default function TransactionList({
                   onToggleColumn={toggleColumnVisibility}
                   onShowAll={showAllColumns}
                 />
+
+                {activeFilteredAccountCode && (
+                  <button
+                    type="button"
+                    onClick={handleExportSingleAccount}
+                    className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded text-[8px] sm:text-xs font-bold bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-2xs border border-amber-300 transition-all active:scale-95 cursor-pointer"
+                    title={`Xuất file Excel báo cáo chi tiết cho riêng mã [${activeFilteredAccountCode}]`}
+                  >
+                    <Download className="w-2.5 h-2.5 sm:w-3 sm:h-3 stroke-[2.5]" />
+                    <span className="hidden sm:inline">Xuất Báo Cáo [{activeFilteredAccountCode}]</span>
+                    <span className="sm:hidden">Xuất [{activeFilteredAccountCode}]</span>
+                  </button>
+                )}
 
                 {onAddTransaction && (
                   <button

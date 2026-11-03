@@ -12,6 +12,7 @@ import {
   PlusCircle,
   Eye,
   EyeOff,
+  Download,
 } from 'lucide-react';
 import EditTransactionModal from './EditTransactionModal';
 import AddTransactionModal from './AddTransactionModal';
@@ -25,6 +26,7 @@ import {
   toggleSctsSeparation,
   calculateReportActual,
 } from '../utils/sctsConfig';
+import { exportAccountLedgerExcel, exportAccountLedgerCSV } from '../utils/excelExport';
 
 export default function AccountLedgerModal({
   isOpen = true,
@@ -32,6 +34,7 @@ export default function AccountLedgerModal({
   transactions = [],
   budgets = [],
   selectedYear = '2026',
+  user = null,
   onClose,
   onAddTransaction,
   onUpdateTransaction,
@@ -429,6 +432,30 @@ export default function AccountLedgerModal({
   const bravoPercent = approved > 0 ? (bravoVal / approved) * 100 : 0;
   const remainingPercent = approved > 0 ? (remaining / approved) * 100 : 0;
 
+  const currentUser = user || (() => {
+    try {
+      return JSON.parse(localStorage.getItem('demo_user'));
+    } catch {
+      return null;
+    }
+  })();
+
+  const handleExportLedgerExcel = () => {
+    exportAccountLedgerExcel({
+      account: { ...matchingBudget, ...account },
+      transactions: sorted.length > 0 ? sorted : accountTransactions,
+      selectedYear,
+      approved,
+      bravoVal,
+      spent,
+      reportActual,
+      remaining,
+      isSeparated,
+      user: currentUser,
+      showExpectedTotal,
+    });
+  };
+
   return (
     <>
       <div
@@ -486,7 +513,19 @@ export default function AccountLedgerModal({
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+              {/* Nút Xuất Báo Cáo Cho Riêng Mã Khoản Mục Này */}
+              <button
+                type="button"
+                onClick={handleExportLedgerExcel}
+                className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-2xs sm:text-xs font-bold bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-2xs border border-amber-300 transition-all active:scale-95 cursor-pointer"
+                title={`Xuất file Excel báo cáo chi tiết sổ cái cho riêng mã [${account.code}] ${account.name}`}
+              >
+                <Download className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span className="hidden sm:inline">Xuất Báo Cáo</span>
+                <span className="sm:hidden">Xuất</span>
+              </button>
+
               {/* Nút Thêm Mới Hạng Mục (chỉ hiển thị khi có quyền onAddTransaction) */}
               {onAddTransaction && (
                 <button
@@ -1303,6 +1342,15 @@ export default function AccountLedgerModal({
             </div>
 
             <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={handleExportLedgerExcel}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-2xs sm:text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-colors cursor-pointer"
+                title={`Xuất file Excel báo cáo chi tiết cho riêng mã [${account.code}]`}
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5" />
+                <span>Xuất Excel Sổ Cái</span>
+              </button>
               <button
                 type="button"
                 onClick={onClose}

@@ -478,3 +478,269 @@ export const exportProgressReportCSV = ({
   const content = '\uFEFF' + headers + '\n' + rows.join('\n');
   triggerDownload(content, `Bao_Cao_Tien_Do_${selectedYear}.csv`, 'text/csv;charset=utf-8;');
 };
+
+/**
+ * 4. XUẤT BÁO CÁO SỔ CÁI CHI TIẾT CHO RIÊNG MỘT MÃ KHOẢN MỤC (DẠNG EXCEL .XLS ĐẦY ĐỦ ĐỊNH DẠNG)
+ */
+export const exportAccountLedgerExcel = ({
+  account = {},
+  transactions = [],
+  selectedYear = '2026',
+  approved = 0,
+  bravoVal = 0,
+  spent = 0,
+  reportActual = 0,
+  remaining = 0,
+  isSeparated = false,
+  user = null,
+  showExpectedTotal = false,
+}) => {
+  const exportTime = formatDateNow();
+  const userName = user?.name || user?.email || 'Quản trị viên';
+  const accCode = String(account.code || '').trim();
+  const accName = String(account.name || '').trim();
+  const accScope = String(account.scope || account.group || '').trim();
+
+  const totalDoneCount = transactions.filter((t) => !t.chuaBcms).length;
+  const totalPendingCount = transactions.filter((t) => t.chuaBcms).length;
+  const totalDoneAmount = transactions
+    .filter((t) => !t.chuaBcms)
+    .reduce((s, t) => s + (Number(t.amount) || 0), 0);
+  const totalPendingAmount = transactions
+    .filter((t) => t.chuaBcms)
+    .reduce((s, t) => s + (Number(t.amount) || 0), 0);
+  const totalAmount = totalDoneAmount + totalPendingAmount;
+
+  const pctNumber = approved > 0 ? (reportActual / approved) * 100 : 0;
+  const pctFormatted = approved > 0 ? `${pctNumber.toFixed(1)}%` : (reportActual > 0 ? '100%' : '0%');
+
+  const formatDateDisplay = (d) => {
+    if (!d) return '';
+    const str = String(d).trim();
+    if (str.includes('-')) {
+      const parts = str.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+    }
+    return str;
+  };
+
+  let bodyHtml = `
+  <!-- HEADER CƠ QUAN / ĐƠN VỊ -->
+  <table>
+    <tr>
+      <td colspan="4" class="header-corp">TỔNG CÔNG TY CẢNG HÀNG KHÔNG VIỆT NAM - CTCP</td>
+      <td colspan="4" class="header-motto">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</td>
+    </tr>
+    <tr>
+      <td colspan="4" class="header-dept">CẢNG HÀNG KHÔNG QUỐC TẾ CẦN THƠ - PHÒNG TC-KH</td>
+      <td colspan="4" class="header-motto" style="font-weight: normal; font-style: italic;">Độc lập - Tự do - Hạnh phúc</td>
+    </tr>
+    <tr><td colspan="8">&nbsp;</td></tr>
+
+    <!-- TIÊU ĐỀ BÁO CÁO -->
+    <tr>
+      <td colspan="8" class="title-report">BÁO CÁO SỔ CÁI CHI TIẾT HẠNG MỤC PHÁT SINH NĂM ${selectedYear}</td>
+    </tr>
+    <tr>
+      <td colspan="8" style="text-align: center; font-size: 13pt; font-weight: bold; color: #1e3a8a; padding: 4px 0;">
+        MÃ KHOẢN MỤC: [${accCode}] ${accName}
+      </td>
+    </tr>
+    <tr>
+      <td colspan="8" class="subtitle-report">
+        (Nội dung: ${accScope || 'Theo dõi chi tiết'} • Xuất lúc: ${exportTime} • Người xuất: ${userName})
+      </td>
+    </tr>
+    <tr>
+      <td colspan="8" class="text-right" style="font-size: 9pt; font-style: italic; padding-bottom: 6px;">
+        Đơn vị tính: Đồng Việt Nam (VNĐ)
+      </td>
+    </tr>
+  </table>
+
+  <!-- KHỐI TÓM TẮT ĐỊNH MỨC VÀ TIẾN ĐỘ GIẢI NGÂN -->
+  <table style="margin-bottom: 12px; border: 1pt solid #cbd5e1;">
+    <tr style="background-color: #f8fafc;">
+      <td class="table-td font-bold" style="background-color: #f1f5f9; width: 140px;">Hạn mức duyệt (${selectedYear}):</td>
+      <td class="table-td font-bold num-currency" style="width: 140px; color: #0f172a;">${formatVndNumber(approved)}</td>
+      <td class="table-td font-bold" style="background-color: #f1f5f9; width: 140px;">Theo Bravo:</td>
+      <td class="table-td font-bold num-currency" style="width: 140px; color: #d97706;">${formatVndNumber(bravoVal)}</td>
+      <td class="table-td font-bold" style="background-color: #f1f5f9; width: 140px;">Chi phí thực tế:</td>
+      <td class="table-td font-bold num-currency" style="width: 140px; color: #2563eb;">${formatVndNumber(spent)}</td>
+      <td class="table-td font-bold" style="background-color: #f1f5f9; width: 140px;">Báo cáo (MAX):</td>
+      <td class="table-td font-bold num-currency" style="width: 140px; color: #059669;">${formatVndNumber(reportActual)}</td>
+    </tr>
+    <tr style="background-color: #ffffff;">
+      <td class="table-td font-bold" style="background-color: #f1f5f9;">Tỷ lệ giải ngân:</td>
+      <td class="table-td font-bold num-percent">${pctFormatted}</td>
+      <td class="table-td font-bold" style="background-color: #f1f5f9;">Còn lại / Vượt:</td>
+      <td class="table-td font-bold num-currency" style="color: ${remaining < 0 ? '#b91c1c' : '#15803d'};">
+        ${formatVndNumber(remaining)} ${remaining < 0 ? '(VƯỢT)' : ''}
+      </td>
+      <td class="table-td font-bold" style="background-color: #f1f5f9;">Quy tắc áp dụng:</td>
+      <td class="table-td" colspan="3" style="font-weight: 500;">
+        ${isSeparated ? 'Đã tách riêng SCTS (chỉ tính chi phí thực tế nhập liệu)' : 'Quy tắc MAX(Bravo, Thực Tế nhập liệu)'}
+        ${totalPendingCount > 0 ? ` • Có ${totalPendingCount} khoản Chưa BCMS (${formatVndNumber(totalPendingAmount)} đ)` : ''}
+      </td>
+    </tr>
+  </table>
+
+  <!-- BẢNG CHI TIẾT CÁC HẠNG MỤC PHÁT SINH -->
+  <table>
+    <thead>
+      <tr>
+        <th class="table-th" style="width: 45px;">STT</th>
+        <th class="table-th" style="width: 100px;">NGÀY</th>
+        <th class="table-th" style="width: 130px;">TRẠNG THÁI</th>
+        <th class="table-th" style="width: 340px;">NỘI DUNG DIỄN GIẢI HẠNG MỤC</th>
+        <th class="table-th" style="width: 150px;">SỐ TIỀN (VNĐ)</th>
+        <th class="table-th" style="width: 220px;">GHI CHÚ</th>
+        <th class="table-th" style="width: 140px;">NGƯỜI THỰC HIỆN</th>
+        <th class="table-th" style="width: 100px;">MÃ KH</th>
+      </tr>
+    </thead>
+    <tbody>
+  `;
+
+  // Render từng chứng từ / hạng mục
+  transactions.forEach((t, idx) => {
+    const isPending = Boolean(t.chuaBcms);
+    const amountNum = Number(t.amount) || 0;
+    const dateFormatted = formatDateDisplay(t.date);
+    const statusLabel = isPending ? 'Chưa BCMS (Dự kiến)' : 'Đã BCMS';
+    const statusColor = isPending ? '#b45309' : '#15803d';
+
+    bodyHtml += `
+      <tr style="${isPending ? 'background-color: #fffbeb;' : ''}">
+        <td class="table-td text-center">${idx + 1}</td>
+        <td class="table-td text-center" style="mso-number-format:'\\@';">${dateFormatted}</td>
+        <td class="table-td text-center font-bold" style="color: ${statusColor}; font-size: 8.5pt;">${statusLabel}</td>
+        <td class="table-td text-left font-bold">${t.notes || t.description || ''}</td>
+        <td class="table-td num-currency font-bold">${formatVndNumber(amountNum)}</td>
+        <td class="table-td text-left" style="font-size: 9pt; color: #475569;">${t.remark || t.ghiChu || ''}</td>
+        <td class="table-td text-center">${t.employeeName || ''}</td>
+        <td class="table-td text-center font-bold" style="mso-number-format:'\\@'; color: #1e3a8a;">${accCode}</td>
+      </tr>
+    `;
+  });
+
+  // Dòng đối chiếu hệ thống BRAVO nếu có
+  if (bravoVal > 0) {
+    const bravoDiff = spent - bravoVal;
+    bodyHtml += `
+      <tr style="background-color: #fef3c7; font-weight: bold; border-top: 1pt solid #f59e0b;">
+        <td class="table-td text-center" style="color: #92400e;">BRAVO</td>
+        <td class="table-td text-center" style="color: #92400e;">Năm ${selectedYear}</td>
+        <td class="table-td text-center" style="color: #92400e;">Hệ thống BRAVO</td>
+        <td class="table-td text-left" style="color: #92400e;">
+          Số liệu hạch toán hệ thống BRAVO ${bravoDiff !== 0 ? `(Chênh lệch thực tế: ${bravoDiff > 0 ? '+' : ''}${formatVndNumber(bravoDiff)} đ)` : '(Khớp 100%)'}
+        </td>
+        <td class="table-td num-currency font-bold" style="color: #92400e;">${formatVndNumber(bravoVal)}</td>
+        <td class="table-td text-left" style="color: #92400e; font-size: 8.5pt;">Số liệu từ phần mềm kế toán Bravo</td>
+        <td class="table-td text-center" style="color: #92400e;">Hệ thống BRAVO</td>
+        <td class="table-td text-center font-bold" style="color: #92400e;">${accCode}</td>
+      </tr>
+    `;
+  }
+
+  // Dòng TỔNG CỘNG
+  bodyHtml += `
+      <tr class="row-total">
+        <td class="table-td text-center font-bold" colspan="3">TỔNG CỘNG PHÁT SINH</td>
+        <td class="table-td text-left font-bold">
+          ${transactions.length} HẠNG MỤC (${totalDoneCount} Đã BCMS${totalPendingCount > 0 ? ` • ${totalPendingCount} Chưa BCMS` : ''})
+        </td>
+        <td class="table-td num-currency font-bold" style="font-size: 11pt; color: #1e3a8a;">${formatVndNumber(totalAmount)}</td>
+        <td class="table-td text-left font-bold" colspan="3" style="font-size: 9pt;">
+          ${totalPendingCount > 0 ? `Đã BCMS: ${formatVndNumber(totalDoneAmount)} đ | Dự kiến: ${formatVndNumber(totalPendingAmount)} đ` : 'Toàn bộ đã hoàn tất BCMS'}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- KHỐI CHỮ KÝ XÁC NHẬN CHUẨN KẾ TOÁN -->
+  <table style="margin-top: 30px;">
+    <tr>
+      <td colspan="4">&nbsp;</td>
+      <td colspan="4" class="text-center" style="font-style: italic; font-size: 10pt;">
+        Cần Thơ, ngày ..... tháng ..... năm 2026
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" class="signature-title">NGƯỜI LẬP BIỂU</td>
+      <td colspan="2" class="signature-title">KẾ TOÁN CHI PHÍ</td>
+      <td colspan="2" class="signature-title">TRƯỞNG PHÒNG TC-KH</td>
+      <td colspan="2" class="signature-title">GIÁM ĐỐC CẢNG</td>
+    </tr>
+    <tr>
+      <td colspan="2" class="signature-note">(Ký, ghi rõ họ tên)</td>
+      <td colspan="2" class="signature-note">(Ký, ghi rõ họ tên)</td>
+      <td colspan="2" class="signature-note">(Ký, ghi rõ họ tên)</td>
+      <td colspan="2" class="signature-note">(Ký, đóng dấu)</td>
+    </tr>
+    <tr>
+      <td colspan="2" class="text-center font-bold">${userName}</td>
+      <td colspan="2" class="text-center font-bold">&nbsp;</td>
+      <td colspan="2" class="text-center font-bold">&nbsp;</td>
+      <td colspan="2" class="text-center font-bold">&nbsp;</td>
+    </tr>
+  </table>
+  `;
+
+  const fullHtml = getExcelHtmlWrapper(`SoCai_${accCode}`, bodyHtml);
+  const cleanCode = accCode.replace(/[^a-zA-Z0-9]/g, '_');
+  const filename = `SoCai_${cleanCode}_${selectedYear}_${Date.now()}.xls`;
+  triggerDownload(fullHtml, filename);
+};
+
+/**
+ * 5. XUẤT SỔ CÁI CHO RIÊNG MỘT MÃ KHOẢN MỤC DẠNG CSV (UTF-8 có BOM)
+ */
+export const exportAccountLedgerCSV = ({
+  account = {},
+  transactions = [],
+  selectedYear = '2026',
+}) => {
+  const accCode = String(account.code || '').trim();
+  const accName = String(account.name || '').trim();
+
+  const headers = [
+    'STT',
+    'Mã Khoản Mục',
+    'Tên Khoản Mục',
+    'Ngày Phát Sinh',
+    'Trạng Thái',
+    'Nội Dung Diễn Giải',
+    'Số Tiền (VNĐ)',
+    'Ghi Chú',
+    'Người Thực Hiện',
+  ];
+
+  const escapeCSV = (str) => {
+    const val = String(str || '').replace(/"/g, '""');
+    return `"${val}"`;
+  };
+
+  const rows = transactions.map((t, idx) => {
+    const formattedDate = t.date ? (t.date.includes('-') ? t.date.split('-').reverse().join('/') : t.date) : '';
+    const statusLabel = t.chuaBcms ? 'Chưa BCMS (Dự kiến)' : 'Đã BCMS';
+    return [
+      idx + 1,
+      escapeCSV(accCode),
+      escapeCSV(accName),
+      escapeCSV(formattedDate),
+      escapeCSV(statusLabel),
+      escapeCSV(t.notes || t.description || ''),
+      Math.round(Number(t.amount) || 0),
+      escapeCSV(t.remark || t.ghiChu || ''),
+      escapeCSV(t.employeeName || ''),
+    ].join(',');
+  });
+
+  const content = '\uFEFF' + headers.join(',') + '\r\n' + rows.join('\r\n');
+  const cleanCode = accCode.replace(/[^a-zA-Z0-9]/g, '_');
+  const filename = `SoCai_${cleanCode}_${selectedYear}.csv`;
+  triggerDownload(content, filename, 'text/csv;charset=utf-8;');
+};

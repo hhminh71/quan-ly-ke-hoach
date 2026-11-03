@@ -643,6 +643,7 @@ export default function DashboardPage({ user }) {
           transactions={scopedYearTransactions}
           budgets={scopedBudgets}
           selectedYear={selectedYear}
+          user={user}
           onClose={() => setSelectedDetailAccount(null)}
           onAddTransaction={canAddTx ? handleAddTransaction : null}
           onUpdateTransaction={canEditTx ? handleUpdateTransaction : null}

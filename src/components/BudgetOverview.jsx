@@ -1774,6 +1774,7 @@ export default function BudgetOverview({
           transactions={transactions}
           budgets={budgets}
           selectedYear={selectedYear}
+          user={user}
           onClose={() => setSelectedDetailCode(null)}
           onAddTransaction={onAddTransaction}
           onUpdateTransaction={onUpdateTransaction}
