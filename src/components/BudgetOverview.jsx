@@ -305,9 +305,24 @@ export default function BudgetOverview({
   }, [transactions]);
 
   // Unique groups
+  // Thứ tự ưu tiên: 1. SCTX Cơ sở hạ tầng, 2. SCTX Máy móc thiết bị, 3. SCTX Phương tiện vận tải, 4. Chi phí bán hàng, 5. Chi phí khác
   const groups = useMemo(() => {
     const set = new Set(editedBudgets.map((b) => b.group).filter(Boolean));
-    return Array.from(set);
+    const getGroupRank = (name) => {
+      const upper = String(name || '').trim().toUpperCase();
+      if (upper.includes('HẠ TẦNG') || upper.includes('HA TANG')) return 0;
+      if (upper.includes('MÁY MÓC') || upper.includes('MAY MOC') || upper.includes('THIẾT BỊ') || upper.includes('THIET BI')) return 1;
+      if (upper.includes('PHƯƠNG TIỆN') || upper.includes('PHUONG TIEN') || upper.includes('VẬN TẢI') || upper.includes('VAN TAI')) return 2;
+      if (upper.includes('BÁN HÀNG') || upper.includes('BAN HANG')) return 3;
+      if (upper.includes('KHÁC') || upper.includes('KHAC')) return 4;
+      return 999;
+    };
+    return Array.from(set).sort((a, b) => {
+      const rankA = getGroupRank(a);
+      const rankB = getGroupRank(b);
+      if (rankA !== rankB) return rankA - rankB;
+      return String(a).localeCompare(String(b), 'vi');
+    });
   }, [editedBudgets]);
 
   // Helper calculations for multi-select Group checkboxes

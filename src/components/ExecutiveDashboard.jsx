@@ -137,6 +137,7 @@ export default function ExecutiveDashboard({
   }, [enhancedItems, transactions]);
 
   // 4. Group Analysis (Cơ Cấu Ngân Sách Theo Nhóm Chi Phí)
+  // Thứ tự ưu tiên: 1. SCTX Cơ sở hạ tầng, 2. SCTX Máy móc thiết bị, 3. SCTX Phương tiện vận tải, 4. Chi phí bán hàng, 5. Chi phí khác
   const groupStats = useMemo(() => {
     const map = {};
     enhancedItems.forEach((item) => {
@@ -156,12 +157,27 @@ export default function ExecutiveDashboard({
       map[g].remaining += item.remaining;
     });
 
+    const getGroupRank = (name) => {
+      const upper = String(name || '').trim().toUpperCase();
+      if (upper.includes('HẠ TẦNG') || upper.includes('HA TANG')) return 0;
+      if (upper.includes('MÁY MÓC') || upper.includes('MAY MOC') || upper.includes('THIẾT BỊ') || upper.includes('THIET BI')) return 1;
+      if (upper.includes('PHƯƠNG TIỆN') || upper.includes('PHUONG TIEN') || upper.includes('VẬN TẢI') || upper.includes('VAN TAI')) return 2;
+      if (upper.includes('BÁN HÀNG') || upper.includes('BAN HANG')) return 3;
+      if (upper.includes('KHÁC') || upper.includes('KHAC')) return 4;
+      return 999;
+    };
+
     return Object.values(map)
       .map((g) => ({
         ...g,
         percent: g.approved > 0 ? (g.actual / g.approved) * 100 : 0,
       }))
-      .sort((a, b) => b.actual - a.actual);
+      .sort((a, b) => {
+        const rankA = getGroupRank(a.name);
+        const rankB = getGroupRank(b.name);
+        if (rankA !== rankB) return rankA - rankB;
+        return b.actual - a.actual;
+      });
   }, [enhancedItems]);
 
   // 5. Top 8 Spending Accounts (Khoản Mục Chi Tiêu Lớn Nhất)

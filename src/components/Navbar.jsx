@@ -19,6 +19,26 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
   const isInIframe = typeof window !== 'undefined' && window.self !== window.top;
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const headerRef = useRef(null);
+
+  // Dynamically update --navbar-height on :root for sticky elements beneath
+  useEffect(() => {
+    if (!headerRef.current) return;
+    const updateHeight = () => {
+      if (headerRef.current) {
+        const h = headerRef.current.offsetHeight;
+        document.documentElement.style.setProperty('--navbar-height', `${h}px`);
+      }
+    };
+    updateHeight();
+    const ro = new ResizeObserver(updateHeight);
+    ro.observe(headerRef.current);
+    window.addEventListener('resize', updateHeight);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, []);
 
   const normRole = normalizeRole(user?.role);
   const roleMeta = ROLE_INFO[normRole] || ROLE_INFO.VIEWER;
@@ -46,7 +66,10 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
   };
 
   return (
-    <header className="w-full bg-gradient-to-r from-[#074780] via-[#09579d] to-[#063c6d] text-white shadow-md border-b border-blue-900/40 sticky top-0 z-40">
+    <header
+      ref={headerRef}
+      className="w-full bg-gradient-to-r from-[#074780] via-[#09579d] to-[#063c6d] text-white shadow-md border-b border-blue-900/40 sticky top-0 z-40"
+    >
       <div className="w-full px-2 sm:px-6 lg:px-8 py-0.5 sm:py-2">
         <div className="flex items-center justify-between gap-1.5 sm:gap-2">
           

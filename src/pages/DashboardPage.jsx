@@ -167,6 +167,7 @@ export default function DashboardPage({ user }) {
     setActiveTab(newTab);
     try {
       localStorage.setItem('active_app_tab', newTab);
+      window.scrollTo({ top: 0, behavior: 'instant' });
     } catch {}
     const hash = getHashFromTab(newTab);
     if (replace) {
@@ -483,81 +484,82 @@ export default function DashboardPage({ user }) {
 
   return (
     <div className="space-y-1 sm:space-y-3">
-      {/* View Tabs & Fiscal Year Selector in One Single Elegant Line */}
-      <div className="flex items-center justify-between gap-1.5 border-b border-slate-200/80 pb-1">
-        {/* Navigation Tabs: Sleek, compact pills */}
-        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
-          <button
-            type="button"
-            onClick={() => handleTabChange('DASHBOARD')}
-            className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded text-[9.5px] sm:text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
-              activeTab === 'DASHBOARD'
-                ? 'bg-blue-600 text-white shadow-xs ring-1 ring-blue-600/30'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
-          >
-            <LayoutDashboard className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
-            <span className="sm:hidden">Dashboard</span>
-            <span className="hidden sm:inline">Dashboard Điều Hành</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleTabChange('BUDGETS')}
-            className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded text-[9.5px] sm:text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
-              activeTab === 'BUDGETS'
-                ? 'bg-blue-600 text-white shadow-xs ring-1 ring-blue-600/30'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
-          >
-            <FileSpreadsheet className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
-            <span className="sm:hidden">Kế Hoạch</span>
-            <span className="hidden sm:inline">Kế Hoạch & Báo Cáo</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleTabChange('TRANSACTIONS')}
-            className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded text-[9.5px] sm:text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
-              activeTab === 'TRANSACTIONS'
-                ? 'bg-blue-600 text-white shadow-xs ring-1 ring-blue-600/30'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-            }`}
-          >
-            <ListOrdered className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
-            <span>Sổ Cái</span>
-          </button>
-        </div>
-
-        {/* Right side: Scope indicator & Year Selector */}
-        <div className="shrink-0 flex items-center gap-1.5">
-          {/* User Expense Scope Badge */}
-          {scopeInfo && scopeInfo.id !== 'ALL' && (
-            <div
-              className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold border shadow-2xs ${scopeInfo.badgeClass}`}
-              title={`Phạm vi chi phí: ${scopeInfo.label} • ${scopeInfo.description}`}
+      {/* View Tabs & Fiscal Year Selector: Sticky Below Header khi cuộn trang */}
+      <div className="sticky top-[var(--navbar-height,56px)] z-30 bg-slate-50/95 backdrop-blur-md py-1.5 sm:py-2 border-b border-slate-200/90 shadow-2xs -mx-2.5 sm:-mx-6 lg:-mx-8 px-2.5 sm:px-6 lg:px-8 transition-all">
+        <div className="flex items-center justify-between gap-1.5">
+          {/* Navigation Tabs: Sleek, compact pills */}
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+            <button
+              type="button"
+              onClick={() => handleTabChange('DASHBOARD')}
+              className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded text-[9.5px] sm:text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+                activeTab === 'DASHBOARD'
+                  ? 'bg-blue-600 text-white shadow-xs ring-1 ring-blue-600/30'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
             >
-              <span>{scopeInfo.iconText}</span>
-              <span className="hidden sm:inline">Phạm vi: {scopeInfo.shortLabel}</span>
-              <span className="sm:hidden">{scopeInfo.shortLabel}</span>
-            </div>
-          )}
+              <LayoutDashboard className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
+              <span className="sm:hidden">Dashboard</span>
+              <span className="hidden sm:inline">Dashboard Điều Hành</span>
+            </button>
 
-          <select
-            value={isCurrentYearOnlyTab ? currentFiscalYear : selectedYear}
-            onChange={(e) => setSelectedYear(e.target.value)}
-            disabled={isCurrentYearOnlyTab}
-            className={`px-1.5 py-0.5 rounded border text-[9.5px] sm:text-xs font-bold shadow-2xs transition-all leading-tight ${
-              isCurrentYearOnlyTab
-                ? 'border-blue-300 bg-blue-50/80 text-blue-900 cursor-not-allowed'
-                : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-400 cursor-pointer'
-            }`}
-            title={
-              isCurrentYearOnlyTab
-                ? `Dashboard và Kế hoạch báo cáo chỉ áp dụng cho năm tài chính hiện tại (${currentFiscalYear})`
-                : 'Chọn năm tài chính'
-            }
-          >
+            <button
+              type="button"
+              onClick={() => handleTabChange('BUDGETS')}
+              className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded text-[9.5px] sm:text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+                activeTab === 'BUDGETS'
+                  ? 'bg-blue-600 text-white shadow-xs ring-1 ring-blue-600/30'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <FileSpreadsheet className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
+              <span className="sm:hidden">Kế Hoạch</span>
+              <span className="hidden sm:inline">Kế Hoạch & Báo Cáo</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleTabChange('TRANSACTIONS')}
+              className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded text-[9.5px] sm:text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+                activeTab === 'TRANSACTIONS'
+                  ? 'bg-blue-600 text-white shadow-xs ring-1 ring-blue-600/30'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+              }`}
+            >
+              <ListOrdered className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
+              <span>Sổ Cái</span>
+            </button>
+          </div>
+
+          {/* Right side: Scope indicator & Year Selector */}
+          <div className="shrink-0 flex items-center gap-1.5">
+            {/* User Expense Scope Badge */}
+            {scopeInfo && scopeInfo.id !== 'ALL' && (
+              <div
+                className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2 sm:py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold border shadow-2xs ${scopeInfo.badgeClass}`}
+                title={`Phạm vi chi phí: ${scopeInfo.label} • ${scopeInfo.description}`}
+              >
+                <span>{scopeInfo.iconText}</span>
+                <span className="hidden sm:inline">Phạm vi: {scopeInfo.shortLabel}</span>
+                <span className="sm:hidden">{scopeInfo.shortLabel}</span>
+              </div>
+            )}
+
+            <select
+              value={isCurrentYearOnlyTab ? currentFiscalYear : selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              disabled={isCurrentYearOnlyTab}
+              className={`px-1.5 py-0.5 rounded border text-[9.5px] sm:text-xs font-bold shadow-2xs transition-all leading-tight ${
+                isCurrentYearOnlyTab
+                  ? 'border-blue-300 bg-blue-50/80 text-blue-900 cursor-not-allowed'
+                  : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-400 cursor-pointer'
+              }`}
+              title={
+                isCurrentYearOnlyTab
+                  ? `Dashboard và Kế hoạch báo cáo chỉ áp dụng cho năm tài chính hiện tại (${currentFiscalYear})`
+                  : 'Chọn năm tài chính'
+              }
+            >
             {isCurrentYearOnlyTab ? (
               <option value={currentFiscalYear}>
                 Năm {currentFiscalYear} (Hiện tại)
@@ -575,6 +577,7 @@ export default function DashboardPage({ user }) {
           </select>
         </div>
       </div>
+    </div>
 
       {/* Tab 1: Executive Dashboard (Macro Analytics, Group breakdown, Cashflow, Top 8, Risk radar) */}
       {activeTab === 'DASHBOARD' && (
