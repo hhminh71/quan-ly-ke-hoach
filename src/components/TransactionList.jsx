@@ -40,9 +40,16 @@ export default function TransactionList({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(selectedCategoryProp || 'ALL');
   const [sortOrder, setSortOrder] = useState('newest'); // 'newest', 'oldest', 'account_asc', 'account_desc', 'highest', 'lowest'
+  const [bcmsFilter, setBcmsFilter] = useState('ALL'); // 'ALL' | 'DA_BCMS' | 'CHUA_BCMS'
 
   // Tùy chọn Ẩn/Hiện Tổng bao gồm dự kiến (Chưa BCMS)
   const [showExpectedTotal, setShowExpectedTotal] = useState(false);
+
+  // Thống kê nhanh số lượng Đã BCMS / Chưa BCMS
+  const totalTxPendingCount = useMemo(() => {
+    return (transactions || []).filter((t) => t && t.chuaBcms).length;
+  }, [transactions]);
+  const totalTxDoneCount = (transactions || []).length - totalTxPendingCount;
 
   // Add & Edit Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -157,8 +164,12 @@ export default function TransactionList({
     return (transactions || []).filter((item) => {
       if (!item) return false;
 
+      // 1. Lọc theo trạng thái BCMS
+      if (bcmsFilter === 'CHUA_BCMS' && !item.chuaBcms) return false;
+      if (bcmsFilter === 'DA_BCMS' && item.chuaBcms) return false;
+
       const matchesSearch = matchesVietnameseSearch(
-        [item.employeeName, item.notes, item.accountCode, item.category],
+        [item.employeeName, item.notes, item.accountCode, item.category, item.remark],
         searchTerm
       );
 
@@ -172,7 +183,7 @@ export default function TransactionList({
 
       return matchesSearch && matchesCategory;
     });
-  }, [transactions, searchTerm, selectedCategory]);
+  }, [transactions, searchTerm, selectedCategory, bcmsFilter]);
 
   // Sort logic
   const sorted = useMemo(() => {
@@ -391,7 +402,7 @@ export default function TransactionList({
         {/* Search, Filter & Sort Bar: Ultra-slim 1-line controls */}
         <div className="grid grid-cols-2 sm:grid-cols-12 gap-0.5 sm:gap-1.5 pt-0.5">
           {/* Search Input */}
-          <div className="col-span-2 sm:col-span-5 relative">
+          <div className="col-span-2 sm:col-span-4 relative">
             <Search className="w-2.5 h-2.5 sm:w-3 sm:h-3 absolute left-1.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
@@ -405,7 +416,7 @@ export default function TransactionList({
           </div>
 
           {/* Category Filter */}
-          <div className="col-span-1 sm:col-span-4 relative">
+          <div className="col-span-1 sm:col-span-3 relative">
             <Layers className="w-2.5 h-2.5 absolute left-1.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <select
               value={selectedCategory}
@@ -425,8 +436,55 @@ export default function TransactionList({
             </select>
           </div>
 
+          {/* BCMS Filter Pills */}
+          <div className="col-span-1 sm:col-span-3 inline-flex items-center p-0.5 rounded border border-slate-200 bg-slate-50/80 h-5 sm:h-6 text-[7.5px] sm:text-[9.5px]">
+            <button
+              type="button"
+              onClick={() => setBcmsFilter('ALL')}
+              className={`flex-1 h-full px-1 rounded transition-all cursor-pointer font-semibold ${
+                bcmsFilter === 'ALL'
+                  ? 'bg-white text-slate-800 shadow-2xs font-bold'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+              title="Toàn bộ giao dịch"
+            >
+              Tất cả
+            </button>
+            <button
+              type="button"
+              onClick={() => setBcmsFilter('DA_BCMS')}
+              className={`flex-1 h-full px-1 rounded transition-all cursor-pointer font-semibold ${
+                bcmsFilter === 'DA_BCMS'
+                  ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+              title="Chỉ các khoản Đã có chứng từ/BCMS"
+            >
+              Đã BCMS ({totalTxDoneCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setBcmsFilter('CHUA_BCMS')}
+              className={`flex-1 h-full px-1 rounded transition-all cursor-pointer font-semibold inline-flex items-center justify-center gap-0.5 ${
+                bcmsFilter === 'CHUA_BCMS'
+                  ? 'bg-amber-600 text-white shadow-2xs font-bold'
+                  : totalTxPendingCount > 0
+                  ? 'text-amber-800 bg-amber-100 font-bold'
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
+              title={
+                totalTxPendingCount > 0
+                  ? `Có ${totalTxPendingCount} khoản Chưa BCMS (dự kiến)`
+                  : 'Không có khoản dự kiến nào'
+              }
+            >
+              {totalTxPendingCount > 0 && <span className="w-1 h-1 rounded-full bg-amber-500 animate-pulse"></span>}
+              <span>Chưa BCMS ({totalTxPendingCount})</span>
+            </button>
+          </div>
+
           {/* Sort Order */}
-          <div className="col-span-1 sm:col-span-3 relative">
+          <div className="col-span-2 sm:col-span-2 relative">
             <ArrowUpDown className="w-2.5 h-2.5 absolute left-1.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <select
               value={sortOrder}
@@ -693,10 +751,14 @@ export default function TransactionList({
                   {/* 4b. Ghi chú: Nằm ngay sau cột Số tiền */}
                   {isColumnVisible('remark') && (
                     <td
-                      className="py-0.5 px-0.5 sm:px-1 text-slate-600 text-[9px] sm:text-xs leading-tight break-words whitespace-normal italic"
+                      className="py-0.5 px-1 text-center text-slate-600 text-[9px] sm:text-xs leading-tight break-words whitespace-normal"
                       style={{ width: `${columnWidths.remark}px`, minWidth: `${columnWidths.remark}px` }}
                     >
-                      {item.remark || '—'}
+                      {item.remark ? (
+                        <span className="text-slate-700 italic">{item.remark}</span>
+                      ) : (
+                        <span className="text-slate-200 select-none font-light">—</span>
+                      )}
                     </td>
                   )}
 

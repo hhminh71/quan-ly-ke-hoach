@@ -66,15 +66,31 @@ export default function AccountLedgerModal({
     });
   }, [isOpen, transactions, account, selectedYear]);
 
+  // Bộ lọc nhanh trạng thái BCMS ('ALL' | 'DA_BCMS' | 'CHUA_BCMS')
+  const [bcmsFilter, setBcmsFilter] = useState('ALL');
+
+  // Thống kê tổng số lượng toàn tài khoản
+  const totalAccountCount = accountTransactions.length;
+  const totalAccountPendingCount = useMemo(() => {
+    return accountTransactions.filter((item) => item.chuaBcms).length;
+  }, [accountTransactions]);
+  const totalAccountDoneCount = totalAccountCount - totalAccountPendingCount;
+
   const filteredTransactions = useMemo(() => {
     if (!isOpen || !account) return [];
     return accountTransactions.filter((item) => {
+      // 1. Lọc theo trạng thái Chưa BCMS / Đã BCMS
+      if (bcmsFilter === 'CHUA_BCMS' && !item.chuaBcms) return false;
+      if (bcmsFilter === 'DA_BCMS' && item.chuaBcms) return false;
+
+      // 2. Lọc theo từ khóa tìm kiếm
+      if (!searchTerm || !searchTerm.trim()) return true;
       return matchesVietnameseSearch(
-        [item.employeeName, item.notes, item.date, item.amount],
+        [item.employeeName, item.notes, item.date, item.amount, item.remark],
         searchTerm
       );
     });
-  }, [isOpen, account, accountTransactions, searchTerm]);
+  }, [isOpen, account, accountTransactions, searchTerm, bcmsFilter]);
 
   const sortedTransactions = useMemo(() => {
     if (!isOpen || !account) return [];
@@ -238,12 +254,26 @@ export default function AccountLedgerModal({
                     Năm {selectedYear}
                   </span>
                 </div>
-                <p className="text-3xs sm:text-[11px] text-slate-500 leading-none mt-0.5 truncate">
+                <p className="text-3xs sm:text-[11px] text-slate-500 leading-none mt-0.5 truncate flex items-center gap-1.5 flex-wrap">
                   <span className="font-medium text-slate-700">{account.scope || account.group}</span>
                   {' • '}
                   <span>
-                    Tổng cộng <strong className="text-blue-700">{accountTransactions.length}</strong> hạng mục phát sinh
+                    Tổng cộng <strong className="text-blue-700">{totalAccountCount}</strong> hạng mục
                   </span>
+                  {' • '}
+                  <span>
+                    <strong className="text-slate-800">{totalAccountDoneCount}</strong> Đã BCMS
+                  </span>
+                  {' • '}
+                  {totalAccountPendingCount > 0 ? (
+                    <span className="inline-flex items-center gap-0.5 font-bold text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded border border-amber-300">
+                      ⚡ Có {totalAccountPendingCount} khoản Chưa BCMS ({formatVND(pendingBcmsAmount)})
+                    </span>
+                  ) : (
+                    <span className="text-emerald-700 font-semibold bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
+                      ✓ 0 khoản dự kiến
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
@@ -450,16 +480,67 @@ export default function AccountLedgerModal({
           </div>
 
           {/* Search & Sort Controls inside Modal: Slim bar */}
-          <div className="px-3 py-1.5 sm:px-4 sm:py-2 border-b border-slate-100 bg-white flex items-center justify-between gap-2 shrink-0">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Tìm người thực hiện, diễn giải..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-2.5 py-1 text-2xs sm:text-xs rounded-lg border border-slate-200 bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all"
-              />
+          <div className="px-3 py-1.5 sm:px-4 sm:py-2 border-b border-slate-100 bg-white flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 shrink-0">
+            <div className="flex items-center gap-1.5 flex-1 min-w-[240px]">
+              <div className="relative flex-1 max-w-xs">
+                <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Tìm người thực hiện, diễn giải..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-8 pr-2.5 py-1 text-2xs sm:text-xs rounded-lg border border-slate-200 bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all"
+                />
+              </div>
+
+              {/* Bộ lọc nhanh trạng thái BCMS: Tất cả | Đã BCMS | Chưa BCMS */}
+              <div className="inline-flex items-center p-0.5 rounded-lg bg-slate-100 border border-slate-200/80 shrink-0 text-3xs sm:text-[10px]">
+                <button
+                  type="button"
+                  onClick={() => setBcmsFilter('ALL')}
+                  className={`px-1.5 py-0.5 rounded font-semibold transition-all cursor-pointer ${
+                    bcmsFilter === 'ALL'
+                      ? 'bg-white text-slate-800 shadow-2xs font-bold'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                  title="Hiển thị toàn bộ hạng mục"
+                >
+                  Tất cả ({totalAccountCount})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBcmsFilter('DA_BCMS')}
+                  className={`px-1.5 py-0.5 rounded font-semibold transition-all cursor-pointer ${
+                    bcmsFilter === 'DA_BCMS'
+                      ? 'bg-white text-blue-700 shadow-2xs font-bold'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                  title="Chỉ hiển thị các khoản Đã có chứng từ/BCMS"
+                >
+                  Đã BCMS ({totalAccountDoneCount})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBcmsFilter('CHUA_BCMS')}
+                  className={`px-1.5 py-0.5 rounded font-semibold transition-all cursor-pointer inline-flex items-center gap-0.5 ${
+                    bcmsFilter === 'CHUA_BCMS'
+                      ? 'bg-amber-600 text-white shadow-2xs font-bold'
+                      : totalAccountPendingCount > 0
+                      ? 'text-amber-800 bg-amber-100/90 font-bold hover:bg-amber-200'
+                      : 'text-slate-400 hover:text-slate-600'
+                  }`}
+                  title={
+                    totalAccountPendingCount > 0
+                      ? `Lọc nhanh: Có ${totalAccountPendingCount} khoản Chưa BCMS (dự kiến)`
+                      : 'Không có khoản dự kiến nào'
+                  }
+                >
+                  {totalAccountPendingCount > 0 && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                  )}
+                  <span>Chưa BCMS ({totalAccountPendingCount})</span>
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
@@ -780,10 +861,14 @@ export default function AccountLedgerModal({
                         {/* 4b. Ghi chú (nằm ngay phía sau cột số tiền) */}
                         {isColumnVisible('remark') && (
                           <td
-                            className="py-0.5 px-0.5 sm:px-1 text-slate-600 text-[9px] sm:text-xs leading-tight break-words whitespace-normal italic"
+                            className="py-0.5 px-1 text-center text-slate-600 text-[9px] sm:text-xs leading-tight break-words whitespace-normal"
                             style={{ width: `${columnWidths.remark}px`, minWidth: `${columnWidths.remark}px` }}
                           >
-                            {item.remark || '—'}
+                            {item.remark ? (
+                              <span className="text-slate-700 italic">{item.remark}</span>
+                            ) : (
+                              <span className="text-slate-200 select-none font-light">—</span>
+                            )}
                           </td>
                         )}
 

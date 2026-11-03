@@ -215,7 +215,12 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
           rec.chuaBcms === 'TRUE' ||
           rec.chuaBcms === 1 ||
           rec.isPendingBcms ||
-          (rec.chuaBcms === undefined && typeof rec.notes === 'string' && rec.notes.toLowerCase().startsWith('dự kiến'))
+          (rec.chuaBcms === undefined &&
+            typeof rec.notes === 'string' &&
+            (rec.notes.toLowerCase().includes('dự kiến') ||
+              rec.notes.toLowerCase().includes('du kien') ||
+              rec.notes.toLowerCase().includes('chưa bcms') ||
+              rec.notes.toLowerCase().includes('chua bcms')))
         ),
         createdAt: String(rec.createdAt || '09:00'),
         status: String(rec.status || 'Đã thực hiện'),

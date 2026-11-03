@@ -278,6 +278,20 @@ export default function BudgetOverview({
     return map;
   }, [transactions]);
 
+  // Thống kê các khoản Chưa BCMS (dự kiến) theo từng mã khoản mục
+  const pendingBcmsByCode = useMemo(() => {
+    const map = {};
+    (transactions || []).forEach((t) => {
+      if (t && t.accountCode && t.chuaBcms) {
+        const code = String(t.accountCode).trim();
+        if (!map[code]) map[code] = { count: 0, amount: 0 };
+        map[code].count += 1;
+        map[code].amount += Number(t.amount) || 0;
+      }
+    });
+    return map;
+  }, [transactions]);
+
   // Group transactions list by accountCode
   const transactionsByCode = useMemo(() => {
     const map = {};
@@ -399,9 +413,10 @@ export default function BudgetOverview({
         liveRemaining: remaining,
         livePercent: percent,
         status,
+        pendingBcms: pendingBcmsByCode[b.code] || { count: 0, amount: 0 },
       };
     });
-  }, [editedBudgets, liveActualsByCode, selectedYear, sctsCodes]);
+  }, [editedBudgets, liveActualsByCode, pendingBcmsByCode, selectedYear, sctsCodes]);
 
   // Selected detail account for drilldown modal
   const selectedDetailAccount = useMemo(() => {
@@ -1309,7 +1324,17 @@ export default function BudgetOverview({
                             className="py-0.5 px-0.5 sm:px-1 text-right font-mono text-[9px] sm:text-xs font-semibold text-blue-700 bg-blue-50/20 border-l border-r border-blue-100/60 leading-tight whitespace-nowrap overflow-hidden"
                             style={{ width: `${progWidths.actual}px`, minWidth: `${progWidths.actual}px` }}
                           >
-                            {formatVND(item.liveActual)}
+                            <div className="flex flex-col items-end whitespace-nowrap">
+                              <span className="whitespace-nowrap">{formatVND(item.liveActual)}</span>
+                              {item.pendingBcms?.count > 0 && (
+                                <span
+                                  className="inline-block text-[7px] sm:text-3xs font-semibold text-amber-800 bg-amber-100 px-0.5 py-0.2 rounded border border-amber-300 whitespace-nowrap max-w-full truncate text-right"
+                                  title={`Có ${item.pendingBcms.count} khoản Chưa BCMS (dự kiến): +${formatVND(item.pendingBcms.amount)}`}
+                                >
+                                  +{formatVND(item.pendingBcms.amount)} DK
+                                </span>
+                              )}
+                            </div>
                           </td>
                         )}
 
