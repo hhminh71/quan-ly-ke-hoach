@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   Search,
   Filter,
@@ -14,6 +14,8 @@ import {
   BarChart3,
   Info,
   ChevronRight,
+  ChevronDown,
+  Check,
   ArrowUpRight,
   Eye,
   EyeOff,
@@ -43,7 +45,10 @@ export default function BudgetOverview({
   onNavigateToLedger,
 }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGroup, setSelectedGroup] = useState('ALL');
+  // Multi-select with checkboxes for Expense Groups ('ALL' means all groups)
+  const [selectedGroups, setSelectedGroups] = useState(['ALL']);
+  const [isGroupDropdownOpen, setIsGroupDropdownOpen] = useState(false);
+  const groupDropdownRef = useRef(null);
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL', 'OVER', 'WARNING', 'SAFE'
   
   // View mode: 'PROGRESS' (Tiến độ giải ngân 1 năm) or 'MATRIX' (Ma trận các cột năm 2024, 2025, 2026, 2027...)
@@ -290,6 +295,69 @@ export default function BudgetOverview({
     return Array.from(set);
   }, [editedBudgets]);
 
+  // Helper calculations for multi-select Group checkboxes
+  const isAllGroups = selectedGroups.includes('ALL') || selectedGroups.length === 0 || (groups.length > 0 && selectedGroups.length === groups.length);
+
+  const isGroupChecked = (g) => {
+    if (isAllGroups) return true;
+    return selectedGroups.includes(g);
+  };
+
+  const handleToggleAllGroups = () => {
+    if (isAllGroups) {
+      setSelectedGroups([]);
+    } else {
+      setSelectedGroups(['ALL']);
+    }
+  };
+
+  const handleToggleGroup = (g) => {
+    if (isAllGroups) {
+      // Uncheck g, keeping other groups checked
+      const remaining = groups.filter((item) => item !== g);
+      setSelectedGroups(remaining);
+    } else {
+      if (selectedGroups.includes(g)) {
+        const next = selectedGroups.filter((item) => item !== g);
+        setSelectedGroups(next);
+      } else {
+        const next = [...selectedGroups, g];
+        if (next.length === groups.length) {
+          setSelectedGroups(['ALL']);
+        } else {
+          setSelectedGroups(next);
+        }
+      }
+    }
+  };
+
+  const handleSelectOnlyGroup = (g, e) => {
+    if (e) e.stopPropagation();
+    setSelectedGroups([g]);
+  };
+
+  const groupButtonLabel = useMemo(() => {
+    if (isAllGroups) return 'Tất cả nhóm';
+    if (selectedGroups.length === 0) return 'Chưa chọn nhóm';
+    if (selectedGroups.length === 1) return selectedGroups[0];
+    return `${selectedGroups.length} nhóm đã chọn`;
+  }, [isAllGroups, selectedGroups]);
+
+  // Click outside to close multi-select dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (groupDropdownRef.current && !groupDropdownRef.current.contains(event.target)) {
+        setIsGroupDropdownOpen(false);
+      }
+    };
+    if (isGroupDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isGroupDropdownOpen]);
+
   // Enhanced budgets for PROGRESS view: picks the approved amount for the selected fiscal year
   // AND compares between Bravo and Nhập Liệu to pick whichever is larger (MAX) for reporting!
   const enhancedBudgets = useMemo(() => {
@@ -355,7 +423,7 @@ export default function BudgetOverview({
         searchTerm
       );
 
-      const matchGroup = selectedGroup === 'ALL' || b.group === selectedGroup;
+      const matchGroup = isAllGroups ? true : selectedGroups.includes(b.group);
       const matchStatus = statusFilter === 'ALL' || b.status === statusFilter;
 
       return matchSearch && matchGroup && matchStatus;
@@ -390,7 +458,7 @@ export default function BudgetOverview({
       if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [enhancedBudgets, searchTerm, selectedGroup, statusFilter, sortField, sortDirection]);
+  }, [enhancedBudgets, searchTerm, selectedGroups, isAllGroups, statusFilter, sortField, sortDirection]);
 
   // Totals for filtered
   const summary = useMemo(() => {
@@ -634,20 +702,122 @@ export default function BudgetOverview({
 
           {/* Filters & Toggles: 1 tight row */}
           <div className="flex items-center gap-1 shrink-0">
-            {/* Group */}
-            <div className="relative flex-1 sm:flex-none sm:w-28">
-              <select
-                value={selectedGroup}
-                onChange={(e) => setSelectedGroup(e.target.value)}
-                className="w-full h-5 sm:h-6 pl-1 pr-3 py-0 text-[8px] sm:text-xs rounded border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all cursor-pointer truncate font-medium leading-tight"
+            {/* Group: Multi-select Checkbox Dropdown */}
+            <div ref={groupDropdownRef} className="relative flex-1 sm:flex-none sm:w-32 md:w-36">
+              <button
+                type="button"
+                onClick={() => setIsGroupDropdownOpen((prev) => !prev)}
+                className={`w-full h-5 sm:h-6 px-1.5 py-0 text-[8px] sm:text-xs rounded border transition-all flex items-center justify-between gap-0.5 cursor-pointer font-medium leading-tight select-none ${
+                  !isAllGroups && selectedGroups.length > 0
+                    ? 'bg-blue-50 border-blue-300 text-blue-900 font-bold shadow-2xs'
+                    : 'border-slate-200 bg-slate-50/50 hover:bg-white text-slate-700'
+                }`}
+                title={
+                  isAllGroups
+                    ? 'Lọc nhóm chi phí: Tất cả nhóm'
+                    : `Đang lọc: ${selectedGroups.join(', ')}`
+                }
               >
-                <option value="ALL">Tất cả nhóm</option>
-                {groups.map((g) => (
-                  <option key={g} value={g}>
-                    {g}
-                  </option>
-                ))}
-              </select>
+                <span className="truncate text-left">{groupButtonLabel}</span>
+                <div className="flex items-center gap-0.5 shrink-0">
+                  {!isAllGroups && selectedGroups.length > 1 && (
+                    <span className="px-1 py-0.2 rounded-full bg-blue-600 text-white text-[7px] sm:text-[8px] font-bold">
+                      {selectedGroups.length}
+                    </span>
+                  )}
+                  <ChevronDown
+                    className={`w-2.5 h-2.5 text-slate-400 transition-transform ${
+                      isGroupDropdownOpen ? 'rotate-180 text-blue-600' : ''
+                    }`}
+                  />
+                </div>
+              </button>
+
+              {/* Multi-select Dropdown Popover with Checkboxes */}
+              {isGroupDropdownOpen && (
+                <div
+                  className="absolute left-0 sm:left-auto sm:right-0 top-full mt-1 w-64 max-w-[90vw] bg-white rounded-lg border border-slate-200 shadow-xl z-50 py-1 text-slate-800 text-[8.5px] sm:text-xs animate-in fade-in zoom-in-95 duration-100"
+                >
+                  {/* Option 1: Tất cả nhóm */}
+                  <div
+                    onClick={handleToggleAllGroups}
+                    className="flex items-center justify-between px-2.5 py-1.5 hover:bg-slate-50 cursor-pointer select-none transition-colors border-b border-slate-100 font-bold"
+                  >
+                    <label className="flex items-center gap-2 cursor-pointer pointer-events-none">
+                      <input
+                        type="checkbox"
+                        checked={isAllGroups}
+                        readOnly
+                        className="w-3.5 h-3.5 rounded text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer"
+                      />
+                      <span className={isAllGroups ? 'text-blue-700 font-bold' : 'text-slate-700'}>
+                        Tất cả nhóm
+                      </span>
+                    </label>
+                    <span className="text-[7.5px] sm:text-[9.5px] text-slate-400 font-normal">
+                      ({groups.length})
+                    </span>
+                  </div>
+
+                  {/* List of each Group with Checkbox */}
+                  <div className="max-h-56 overflow-y-auto py-0.5 divide-y divide-slate-50">
+                    {groups.map((g) => {
+                      const checked = isGroupChecked(g);
+                      return (
+                        <div
+                          key={g}
+                          onClick={() => handleToggleGroup(g)}
+                          className={`flex items-center justify-between px-2.5 py-1 hover:bg-blue-50/70 cursor-pointer select-none transition-colors group ${
+                            checked && !isAllGroups ? 'bg-blue-50/40' : ''
+                          }`}
+                        >
+                          <label className="flex items-center gap-2 cursor-pointer pointer-events-none flex-1 truncate pr-1">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              readOnly
+                              className="w-3.5 h-3.5 rounded text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer shrink-0"
+                            />
+                            <span
+                              className={`truncate text-[8px] sm:text-[11px] ${
+                                checked ? 'text-slate-800 font-semibold' : 'text-slate-400'
+                              }`}
+                            >
+                              {g}
+                            </span>
+                          </label>
+                          <button
+                            type="button"
+                            onClick={(e) => handleSelectOnlyGroup(g, e)}
+                            className="text-[7.5px] sm:text-[9px] text-blue-600 hover:text-blue-800 hover:underline opacity-0 group-hover:opacity-100 px-1 py-0.2 rounded hover:bg-blue-100/60 transition-opacity shrink-0"
+                            title={`Chỉ lọc riêng nhóm "${g}"`}
+                          >
+                            Chỉ chọn
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Quick Action Footer */}
+                  <div className="flex items-center justify-between px-2.5 py-1 border-t border-slate-100 bg-slate-50/80 text-[7.5px] sm:text-[9.5px] font-semibold text-slate-500">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedGroups(['ALL'])}
+                      className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                    >
+                      Chọn tất cả
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedGroups([])}
+                      className="text-slate-500 hover:text-rose-600 hover:underline cursor-pointer"
+                    >
+                      Bỏ chọn hết
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Status */}
