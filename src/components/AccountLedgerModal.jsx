@@ -333,11 +333,11 @@ export default function AccountLedgerModal({
     toggleColumnVisibility,
     showAllColumns,
   } = useResizableColumns({
-    storageKey: 'tbl_cols_account_ledger_v4',
+    storageKey: 'tbl_cols_account_ledger_v5',
     initialWidths: {
       stt: 36,
       date: 72,
-      chuaBcms: 76,
+      chuaBcms: 46,
       notes: 260,
       amount: 115,
       remark: 130,
@@ -347,7 +347,7 @@ export default function AccountLedgerModal({
     minWidths: {
       stt: 28,
       date: 50,
-      chuaBcms: 55,
+      chuaBcms: 34,
       notes: 90,
       amount: 105,
       remark: 65,
@@ -956,8 +956,11 @@ export default function AccountLedgerModal({
                         style={{ width: `${columnWidths.chuaBcms}px`, minWidth: `${columnWidths.chuaBcms}px` }}
                         title="Click để đưa Chưa BCMS lên đầu (kết hợp với Số tiền / Ghi chú)"
                       >
-                        <div className="flex items-center justify-center gap-0.5 truncate w-full text-amber-900 font-bold">
-                          <span>Chưa BCMS</span>
+                        <div className="flex items-center justify-center gap-0.5 w-full">
+                          <div className="flex flex-col items-center justify-center leading-none text-[7.5px] sm:text-[8px] font-black uppercase tracking-tight text-amber-900 select-none shrink-0">
+                            <span>Chưa</span>
+                            <span className="mt-0.5">BCMS</span>
+                          </div>
                           {renderSortIndicator('chuaBcms')}
                         </div>
                         <ColumnResizeHandle

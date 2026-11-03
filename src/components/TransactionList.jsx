@@ -70,10 +70,10 @@ export default function TransactionList({
     toggleColumnVisibility,
     showAllColumns,
   } = useResizableColumns({
-    storageKey: 'tbl_cols_transactions_v5',
+    storageKey: 'tbl_cols_transactions_v6',
     initialWidths: {
       date: 72,
-      chuaBcms: 76,
+      chuaBcms: 46,
       account: 88,
       notes: 320,
       amount: 115,
@@ -83,7 +83,7 @@ export default function TransactionList({
     },
     minWidths: {
       date: 50,
-      chuaBcms: 55,
+      chuaBcms: 34,
       account: 65,
       notes: 90,
       amount: 105,
@@ -829,8 +829,11 @@ export default function TransactionList({
                     className="relative py-0.5 px-0.5 text-center leading-tight select-none cursor-pointer hover:bg-amber-100/70 transition-colors group text-amber-900"
                     title="Click để đưa Chưa BCMS lên đầu (kết hợp với Số tiền / Ghi chú)"
                   >
-                    <div className="flex items-center justify-center gap-0.5 truncate w-full font-bold">
-                      <span>Chưa BCMS</span>
+                    <div className="flex items-center justify-center gap-0.5 w-full">
+                      <div className="flex flex-col items-center justify-center leading-none text-[7.5px] sm:text-[8px] font-black uppercase tracking-tight text-amber-900 select-none shrink-0">
+                        <span>Chưa</span>
+                        <span className="mt-0.5">BCMS</span>
+                      </div>
                       {renderSortIndicator('chuaBcms')}
                     </div>
                     <ColumnResizeHandle colKey="chuaBcms" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
