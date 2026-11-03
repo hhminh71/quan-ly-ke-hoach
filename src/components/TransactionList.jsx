@@ -39,7 +39,8 @@ export default function TransactionList({
 }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(selectedCategoryProp || 'ALL');
-  const [sortOrder, setSortOrder] = useState('newest'); // 'newest', 'oldest', 'account_asc', 'account_desc', 'highest', 'lowest'
+  // Multi-sort rules: Hỗ trợ sort cùng lúc nhiều cột (BCMS + Số tiền / Ghi chú / Khoản mục)
+  const [sortRules, setSortRules] = useState([{ key: 'date', dir: 'desc' }]);
   const [bcmsFilter, setBcmsFilter] = useState('ALL'); // 'ALL' | 'DA_BCMS' | 'CHUA_BCMS'
 
   // Tùy chọn Ẩn/Hiện Tổng bao gồm dự kiến (Chưa BCMS)
@@ -185,38 +186,223 @@ export default function TransactionList({
     });
   }, [transactions, searchTerm, selectedCategory, bcmsFilter]);
 
-  // Sort logic
+  // Multi-sort comparator logic (hỗ trợ sort cùng lúc BCMS + Số tiền / Ghi chú / Khoản mục)
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
-      if (sortOrder === 'newest') {
-        const dateA = String(a.date || '');
-        const dateB = String(b.date || '');
-        if (dateB !== dateA) return dateB.localeCompare(dateA);
-        return (Number(b.id) || 0) - (Number(a.id) || 0);
+      for (const rule of sortRules) {
+        const { key, dir } = rule;
+        let cmp = 0;
+
+        if (key === 'chuaBcms') {
+          const valA = a.chuaBcms ? 1 : 0;
+          const valB = b.chuaBcms ? 1 : 0;
+          cmp = dir === 'desc' ? valB - valA : valA - valB;
+        } else if (key === 'amount') {
+          const numA = Number(a.amount) || 0;
+          const numB = Number(b.amount) || 0;
+          cmp = dir === 'desc' ? numB - numA : numA - numB;
+        } else if (key === 'remark') {
+          const strA = String(a.remark || '').trim();
+          const strB = String(b.remark || '').trim();
+          if (!strA && strB) {
+            cmp = 1;
+          } else if (strA && !strB) {
+            cmp = -1;
+          } else if (strA && strB) {
+            cmp = dir === 'desc'
+              ? strB.localeCompare(strA, 'vi', { sensitivity: 'base' })
+              : strA.localeCompare(strB, 'vi', { sensitivity: 'base' });
+          }
+        } else if (key === 'date') {
+          const dateA = String(a.date || '');
+          const dateB = String(b.date || '');
+          cmp = dir === 'desc' ? dateB.localeCompare(dateA) : dateA.localeCompare(dateB);
+        } else if (key === 'account') {
+          const codeA = String(a.accountCode || '');
+          const codeB = String(b.accountCode || '');
+          cmp = dir === 'desc' ? codeB.localeCompare(codeA) : codeA.localeCompare(codeB);
+        } else if (key === 'notes') {
+          const notesA = String(a.notes || '');
+          const notesB = String(b.notes || '');
+          cmp = dir === 'desc'
+            ? notesB.localeCompare(notesA, 'vi', { sensitivity: 'base' })
+            : notesA.localeCompare(notesB, 'vi', { sensitivity: 'base' });
+        }
+
+        if (cmp !== 0) return cmp;
       }
-      if (sortOrder === 'oldest') {
-        const dateA = String(a.date || '');
-        const dateB = String(b.date || '');
-        if (dateA !== dateB) return dateA.localeCompare(dateB);
-        return (Number(a.id) || 0) - (Number(b.id) || 0);
-      }
-      if (sortOrder === 'account_asc') {
-        const codeA = String(a.accountCode || '');
-        const codeB = String(b.accountCode || '');
-        if (codeA !== codeB) return codeA.localeCompare(codeB);
-        return String(b.date || '').localeCompare(String(a.date || ''));
-      }
-      if (sortOrder === 'account_desc') {
-        const codeA = String(a.accountCode || '');
-        const codeB = String(b.accountCode || '');
-        if (codeA !== codeB) return codeB.localeCompare(codeA);
-        return String(b.date || '').localeCompare(String(a.date || ''));
-      }
-      if (sortOrder === 'highest') return (Number(b.amount) || 0) - (Number(a.amount) || 0);
-      if (sortOrder === 'lowest') return (Number(a.amount) || 0) - (Number(b.amount) || 0);
-      return 0;
+
+      return (Number(b.id) || 0) - (Number(a.id) || 0);
     });
-  }, [filtered, sortOrder]);
+  }, [filtered, sortRules]);
+
+  // Click vào tiêu đề cột để sắp xếp (tự động kết hợp BCMS với các cột khác)
+  const handleColumnSort = (key, e) => {
+    const isMultiKey = e && (e.shiftKey || e.ctrlKey || e.metaKey);
+
+    setSortRules((prevRules) => {
+      const existingIdx = prevRules.findIndex((r) => r.key === key);
+      let newDir = key === 'remark' || key === 'notes' || key === 'account' ? 'asc' : 'desc';
+      if (existingIdx >= 0) {
+        const currentDir = prevRules[existingIdx].dir;
+        newDir = currentDir === 'desc' ? 'asc' : null;
+      }
+
+      // Giữ Shift/Ctrl để kết hợp tùy ý
+      if (isMultiKey) {
+        if (newDir === null) {
+          const next = prevRules.filter((r) => r.key !== key);
+          return next.length > 0 ? next : [{ key: 'date', dir: 'desc' }];
+        }
+        if (existingIdx >= 0) {
+          return prevRules.map((r, i) => (i === existingIdx ? { key, dir: newDir } : r));
+        }
+        return [...prevRules, { key, dir: newDir }];
+      }
+
+      // Click bình thường (tự động kết hợp thông minh cùng BCMS):
+      if (key === 'chuaBcms') {
+        if (newDir === null) {
+          const otherRules = prevRules.filter((r) => r.key !== 'chuaBcms');
+          return otherRules.length > 0 ? otherRules : [{ key: 'date', dir: 'desc' }];
+        }
+        const secondary = prevRules.find((r) => r.key !== 'chuaBcms') || { key: 'amount', dir: 'desc' };
+        return [{ key: 'chuaBcms', dir: newDir }, secondary];
+      }
+
+      // Khi click vào cột khác (Số tiền, Ghi chú, Khoản mục, Ngày):
+      const bcmsRule = prevRules.find((r) => r.key === 'chuaBcms');
+      if (bcmsRule) {
+        if (newDir === null) {
+          return [bcmsRule, { key: 'date', dir: 'desc' }];
+        }
+        return [bcmsRule, { key, dir: newDir }];
+      }
+
+      if (newDir === null) {
+        return [{ key: 'date', dir: 'desc' }];
+      }
+      return [{ key, dir: newDir }];
+    });
+  };
+
+  const getSortDropdownValue = () => {
+    const hasBcms = sortRules.find((r) => r.key === 'chuaBcms');
+    const amountRule = sortRules.find((r) => r.key === 'amount');
+    const remarkRule = sortRules.find((r) => r.key === 'remark');
+    const accountRule = sortRules.find((r) => r.key === 'account');
+    const dateRule = sortRules.find((r) => r.key === 'date');
+
+    if (hasBcms && hasBcms.dir === 'desc') {
+      if (amountRule && amountRule.dir === 'desc') return 'bcms_amount_desc';
+      if (amountRule && amountRule.dir === 'asc') return 'bcms_amount_asc';
+      if (remarkRule && remarkRule.dir === 'asc') return 'bcms_remark_asc';
+      if (remarkRule && remarkRule.dir === 'desc') return 'bcms_remark_desc';
+      if (accountRule && accountRule.dir === 'asc') return 'bcms_account_asc';
+      if (dateRule && dateRule.dir === 'desc') return 'bcms_date_desc';
+      return 'bcms_amount_desc';
+    }
+
+    if (amountRule && !hasBcms) {
+      return amountRule.dir === 'desc' ? 'amount_desc' : 'amount_asc';
+    }
+    if (remarkRule && !hasBcms) {
+      return remarkRule.dir === 'desc' ? 'remark_desc' : 'remark_asc';
+    }
+    if (accountRule && !hasBcms) {
+      return accountRule.dir === 'desc' ? 'account_desc' : 'account_asc';
+    }
+    if (dateRule && !hasBcms) {
+      return dateRule.dir === 'asc' ? 'oldest' : 'newest';
+    }
+
+    return 'custom';
+  };
+
+  const handleDropdownSortChange = (val) => {
+    switch (val) {
+      case 'bcms_amount_desc':
+        setSortRules([{ key: 'chuaBcms', dir: 'desc' }, { key: 'amount', dir: 'desc' }]);
+        break;
+      case 'bcms_amount_asc':
+        setSortRules([{ key: 'chuaBcms', dir: 'desc' }, { key: 'amount', dir: 'asc' }]);
+        break;
+      case 'bcms_remark_asc':
+        setSortRules([{ key: 'chuaBcms', dir: 'desc' }, { key: 'remark', dir: 'asc' }]);
+        break;
+      case 'bcms_remark_desc':
+        setSortRules([{ key: 'chuaBcms', dir: 'desc' }, { key: 'remark', dir: 'desc' }]);
+        break;
+      case 'bcms_account_asc':
+        setSortRules([{ key: 'chuaBcms', dir: 'desc' }, { key: 'account', dir: 'asc' }]);
+        break;
+      case 'bcms_date_desc':
+        setSortRules([{ key: 'chuaBcms', dir: 'desc' }, { key: 'date', dir: 'desc' }]);
+        break;
+      case 'amount_desc':
+        setSortRules([{ key: 'amount', dir: 'desc' }]);
+        break;
+      case 'amount_asc':
+        setSortRules([{ key: 'amount', dir: 'asc' }]);
+        break;
+      case 'remark_asc':
+        setSortRules([{ key: 'remark', dir: 'asc' }]);
+        break;
+      case 'remark_desc':
+        setSortRules([{ key: 'remark', dir: 'desc' }]);
+        break;
+      case 'account_asc':
+        setSortRules([{ key: 'account', dir: 'asc' }]);
+        break;
+      case 'account_desc':
+        setSortRules([{ key: 'account', dir: 'desc' }]);
+        break;
+      case 'oldest':
+        setSortRules([{ key: 'date', dir: 'asc' }]);
+        break;
+      case 'newest':
+      default:
+        setSortRules([{ key: 'date', dir: 'desc' }]);
+        break;
+    }
+  };
+
+  const renderSortIndicator = (colKey) => {
+    const ruleIdx = sortRules.findIndex((r) => r.key === colKey);
+    const isActive = ruleIdx >= 0;
+    const dir = isActive ? sortRules[ruleIdx].dir : null;
+    const isMulti = sortRules.length > 1;
+
+    return (
+      <span className="inline-flex items-center gap-0.5 ml-0.5 select-none shrink-0">
+        {isActive ? (
+          <>
+            {dir === 'desc' ? (
+              <span className={`text-[8.5px] sm:text-[9.5px] font-black ${colKey === 'chuaBcms' ? 'text-amber-600' : 'text-blue-600'}`}>
+                ▼
+              </span>
+            ) : (
+              <span className={`text-[8.5px] sm:text-[9.5px] font-black ${colKey === 'chuaBcms' ? 'text-amber-600' : 'text-blue-600'}`}>
+                ▲
+              </span>
+            )}
+            {isMulti && (
+              <span
+                className={`w-3 h-3 rounded-full text-[6.5px] sm:text-[7.5px] font-black flex items-center justify-center leading-none text-white shadow-2xs ${
+                  colKey === 'chuaBcms' ? 'bg-amber-600' : 'bg-blue-600'
+                }`}
+                title={`Ưu tiên sắp xếp thứ ${ruleIdx + 1}`}
+              >
+                {ruleIdx + 1}
+              </span>
+            )}
+          </>
+        ) : (
+          <ArrowUpDown className="w-2 h-2 text-slate-300 opacity-60 hover:opacity-100" />
+        )}
+      </span>
+    );
+  };
 
   // Auto-sum amount of filtered transactions:
   // 1. Tổng thực tế đã BCMS (loại trừ các khoản đã check Chưa BCMS)
@@ -487,16 +673,34 @@ export default function TransactionList({
           <div className="col-span-2 sm:col-span-2 relative">
             <ArrowUpDown className="w-2.5 h-2.5 absolute left-1.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
+              value={getSortDropdownValue()}
+              onChange={(e) => handleDropdownSortChange(e.target.value)}
               className="w-full h-5 sm:h-6 pl-4.5 pr-1 py-0 text-[8px] sm:text-xs rounded border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer truncate font-medium leading-tight"
             >
-              <option value="newest">Mới nhất trước</option>
-              <option value="oldest">Cũ nhất trước</option>
-              <option value="account_asc">Mã tăng dần</option>
-              <option value="account_desc">Mã giảm dần</option>
-              <option value="highest">Tiền cao nhất</option>
-              <option value="lowest">Tiền thấp nhất</option>
+              <option value="newest">🕒 Ngày mới nhất</option>
+              <option value="oldest">🕒 Ngày cũ nhất</option>
+              <optgroup label="⚡ Kết hợp Chưa BCMS (Dự kiến)">
+                <option value="bcms_amount_desc">⚡ Chưa BCMS → Tiền cao nhất</option>
+                <option value="bcms_amount_asc">⚡ Chưa BCMS → Tiền thấp nhất</option>
+                <option value="bcms_remark_asc">⚡ Chưa BCMS → Ghi chú (A-Z)</option>
+                <option value="bcms_account_asc">⚡ Chưa BCMS → Mã khoản mục</option>
+                <option value="bcms_date_desc">⚡ Chưa BCMS → Ngày mới nhất</option>
+              </optgroup>
+              <optgroup label="💰 Theo Số tiền">
+                <option value="amount_desc">💰 Tiền cao nhất</option>
+                <option value="amount_asc">💰 Tiền thấp nhất</option>
+              </optgroup>
+              <optgroup label="📝 Theo Ghi chú">
+                <option value="remark_asc">📝 Ghi chú: A → Z (có ghi chú trước)</option>
+                <option value="remark_desc">📝 Ghi chú: Z → A</option>
+              </optgroup>
+              <optgroup label="🏷️ Theo Khoản mục">
+                <option value="account_asc">🏷️ Mã khoản mục (Tăng dần)</option>
+                <option value="account_desc">🏷️ Mã khoản mục (Giảm dần)</option>
+              </optgroup>
+              {getSortDropdownValue() === 'custom' && (
+                <option value="custom">🔀 Đang sắp xếp đa cột (Click bảng)</option>
+              )}
             </select>
           </div>
 
@@ -542,14 +746,14 @@ export default function TransactionList({
                 {/* 1. Ngày: dd/mm/yy không icon, tùy biến kéo giãn, tiêu đề căn giữa */}
                 {isColumnVisible('date') && (
                   <th
-                    onClick={() => setSortOrder(sortOrder === 'newest' ? 'oldest' : 'newest')}
+                    onClick={(e) => handleColumnSort('date', e)}
                     style={{ width: `${columnWidths.date}px`, minWidth: `${columnWidths.date}px` }}
-                    className="relative py-0.5 px-0.5 sm:px-1 cursor-pointer hover:text-blue-600 transition-colors select-none text-center leading-tight break-words"
-                    title="Click để đổi thứ tự ngày • Kéo mép phải để giãn cột"
+                    className="relative py-0.5 px-0.5 sm:px-1 cursor-pointer hover:bg-slate-200/90 transition-colors select-none text-center leading-tight break-words group"
+                    title="Click để sắp xếp Ngày • Giữ Shift để kết hợp nhiều cột"
                   >
                     <div className="flex items-center justify-center gap-0.5 pr-1 text-center">
                       <span>Ngày</span>
-                      <ArrowUpDown className="w-2 h-2 text-slate-400 shrink-0" />
+                      {renderSortIndicator('date')}
                     </div>
                     <ColumnResizeHandle colKey="date" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
                   </th>
@@ -558,11 +762,15 @@ export default function TransactionList({
                 {/* 1b. Chưa BCMS: Tùy biến kéo giãn */}
                 {isColumnVisible('chuaBcms') && (
                   <th
+                    onClick={(e) => handleColumnSort('chuaBcms', e)}
                     style={{ width: `${columnWidths.chuaBcms}px`, minWidth: `${columnWidths.chuaBcms}px` }}
-                    className="relative py-0.5 px-0.5 text-center leading-tight select-none"
-                    title="Chưa BCMS (Khoản dự kiến, không tính vào tổng thực tế) • Kéo mép phải để giãn cột"
+                    className="relative py-0.5 px-0.5 text-center leading-tight select-none cursor-pointer hover:bg-amber-100/70 transition-colors group text-amber-900"
+                    title="Click để đưa Chưa BCMS lên đầu (kết hợp với Số tiền / Ghi chú)"
                   >
-                    <div className="truncate text-center w-full">Chưa BCMS</div>
+                    <div className="flex items-center justify-center gap-0.5 truncate w-full font-bold">
+                      <span>Chưa BCMS</span>
+                      {renderSortIndicator('chuaBcms')}
+                    </div>
                     <ColumnResizeHandle colKey="chuaBcms" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
                   </th>
                 )}
@@ -570,14 +778,14 @@ export default function TransactionList({
                 {/* 2. Khoản mục & Nhóm: tùy biến kéo giãn, tiêu đề căn giữa */}
                 {isColumnVisible('account') && (
                   <th
-                    onClick={() => setSortOrder(sortOrder === 'account_asc' ? 'account_desc' : 'account_asc')}
+                    onClick={(e) => handleColumnSort('account', e)}
                     style={{ width: `${columnWidths.account}px`, minWidth: `${columnWidths.account}px` }}
-                    className="relative py-0.5 px-0.5 sm:px-1 cursor-pointer hover:text-blue-600 transition-colors select-none text-center leading-tight break-words"
-                    title="Click để sort theo Mã khoản mục • Kéo mép phải để giãn cột"
+                    className="relative py-0.5 px-0.5 sm:px-1 cursor-pointer hover:bg-slate-200/90 transition-colors select-none text-center leading-tight break-words group"
+                    title="Click để sort theo Mã khoản mục • Giữ Shift để kết hợp"
                   >
                     <div className="flex items-center justify-center gap-0.5 pr-1 text-center">
                       <span>Khoản mục</span>
-                      <ArrowUpDown className="w-2 h-2 text-slate-400 shrink-0" />
+                      {renderSortIndicator('account')}
                     </div>
                     <ColumnResizeHandle colKey="account" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
                   </th>
@@ -586,11 +794,15 @@ export default function TransactionList({
                 {/* 3. Nội dung diễn giải: tùy biến kéo giãn, tiêu đề căn giữa */}
                 {isColumnVisible('notes') && (
                   <th
+                    onClick={(e) => handleColumnSort('notes', e)}
                     style={{ width: `${columnWidths.notes}px`, minWidth: `${columnWidths.notes}px` }}
-                    className="relative py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words"
-                    title="Nội dung diễn giải • Kéo mép phải để giãn cột"
+                    className="relative py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words cursor-pointer hover:bg-slate-200/90 transition-colors select-none group"
+                    title="Click để sắp xếp theo Nội dung diễn giải"
                   >
-                    <div className="text-center w-full pr-1">Nội dung diễn giải</div>
+                    <div className="flex items-center justify-center gap-0.5 pr-1 text-center w-full">
+                      <span>Nội dung diễn giải</span>
+                      {renderSortIndicator('notes')}
+                    </div>
                     <ColumnResizeHandle colKey="notes" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
                   </th>
                 )}
@@ -598,14 +810,14 @@ export default function TransactionList({
                 {/* 4. Số tiền (VNĐ): tùy biến kéo giãn, tiêu đề căn giữa */}
                 {isColumnVisible('amount') && (
                   <th
-                    onClick={() => setSortOrder(sortOrder === 'highest' ? 'lowest' : 'highest')}
+                    onClick={(e) => handleColumnSort('amount', e)}
                     style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
-                    className="relative py-0.5 px-0.5 sm:px-1 text-center cursor-pointer hover:text-blue-600 transition-colors select-none leading-tight break-words"
-                    title="Click để đổi thứ tự số tiền • Kéo mép phải để giãn cột"
+                    className="relative py-0.5 px-0.5 sm:px-1 text-center cursor-pointer hover:bg-slate-200/90 transition-colors select-none leading-tight break-words group"
+                    title="Click để đổi thứ tự số tiền • Tự động kết hợp cùng Chưa BCMS nếu đã chọn"
                   >
                     <div className="flex items-center justify-center gap-0.5 pr-1 text-center">
                       <span>Số tiền (VNĐ)</span>
-                      <ArrowUpDown className="w-2 h-2 text-slate-400 shrink-0" />
+                      {renderSortIndicator('amount')}
                     </div>
                     <ColumnResizeHandle colKey="amount" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
                   </th>
@@ -614,11 +826,15 @@ export default function TransactionList({
                 {/* 4b. Ghi chú: Nằm ngay sau cột Số tiền */}
                 {isColumnVisible('remark') && (
                   <th
+                    onClick={(e) => handleColumnSort('remark', e)}
                     style={{ width: `${columnWidths.remark}px`, minWidth: `${columnWidths.remark}px` }}
-                    className="relative py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words select-none"
-                    title="Ghi chú bổ sung • Kéo mép phải để giãn cột"
+                    className="relative py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words select-none cursor-pointer hover:bg-slate-200/90 transition-colors group"
+                    title="Click để sắp xếp Ghi chú • Tự động kết hợp cùng Chưa BCMS nếu đã chọn"
                   >
-                    <div className="text-center w-full pr-1">Ghi Chú</div>
+                    <div className="flex items-center justify-center gap-0.5 pr-1 text-center w-full">
+                      <span>Ghi Chú</span>
+                      {renderSortIndicator('remark')}
+                    </div>
                     <ColumnResizeHandle colKey="remark" onResizeStart={handleResizeStart} onReset={resetColumnWidth} />
                   </th>
                 )}

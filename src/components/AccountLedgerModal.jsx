@@ -39,7 +39,8 @@ export default function AccountLedgerModal({
   onNavigateToLedger,
 }) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortOrder, setSortOrder] = useState('newest'); // 'newest', 'oldest', 'highest', 'lowest'
+  // Multi-sort rules: Hỗ trợ sort cùng lúc nhiều cột (BCMS + Số tiền / Ghi chú)
+  const [sortRules, setSortRules] = useState([{ key: 'date', dir: 'desc' }]);
   const [editingItem, setEditingItem] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [showBravo, setShowBravo] = useState(true);
@@ -95,23 +96,203 @@ export default function AccountLedgerModal({
   const sortedTransactions = useMemo(() => {
     if (!isOpen || !account) return [];
     return [...filteredTransactions].sort((a, b) => {
-      if (sortOrder === 'newest') {
-        const dateA = String(a.date || '');
-        const dateB = String(b.date || '');
-        if (dateB !== dateA) return dateB.localeCompare(dateA);
-        return (Number(b.id) || 0) - (Number(a.id) || 0);
+      for (const rule of sortRules) {
+        const { key, dir } = rule;
+        let cmp = 0;
+
+        if (key === 'chuaBcms') {
+          const valA = a.chuaBcms ? 1 : 0;
+          const valB = b.chuaBcms ? 1 : 0;
+          cmp = dir === 'desc' ? valB - valA : valA - valB;
+        } else if (key === 'amount') {
+          const numA = Number(a.amount) || 0;
+          const numB = Number(b.amount) || 0;
+          cmp = dir === 'desc' ? numB - numA : numA - numB;
+        } else if (key === 'remark') {
+          const strA = String(a.remark || '').trim();
+          const strB = String(b.remark || '').trim();
+          if (!strA && strB) {
+            cmp = 1; // Có ghi chú luôn lên trước
+          } else if (strA && !strB) {
+            cmp = -1;
+          } else if (strA && strB) {
+            cmp = dir === 'desc'
+              ? strB.localeCompare(strA, 'vi', { sensitivity: 'base' })
+              : strA.localeCompare(strB, 'vi', { sensitivity: 'base' });
+          }
+        } else if (key === 'date') {
+          const dateA = String(a.date || '');
+          const dateB = String(b.date || '');
+          cmp = dir === 'desc' ? dateB.localeCompare(dateA) : dateA.localeCompare(dateB);
+        } else if (key === 'notes') {
+          const notesA = String(a.notes || '');
+          const notesB = String(b.notes || '');
+          cmp = dir === 'desc'
+            ? notesB.localeCompare(notesA, 'vi', { sensitivity: 'base' })
+            : notesA.localeCompare(notesB, 'vi', { sensitivity: 'base' });
+        }
+
+        if (cmp !== 0) return cmp;
       }
-      if (sortOrder === 'oldest') {
-        const dateA = String(a.date || '');
-        const dateB = String(b.date || '');
-        if (dateA !== dateB) return dateA.localeCompare(dateB);
-        return (Number(a.id) || 0) - (Number(b.id) || 0);
-      }
-      if (sortOrder === 'highest') return (Number(b.amount) || 0) - (Number(a.amount) || 0);
-      if (sortOrder === 'lowest') return (Number(a.amount) || 0) - (Number(b.amount) || 0);
-      return 0;
+
+      return (Number(b.id) || 0) - (Number(a.id) || 0);
     });
-  }, [isOpen, account, filteredTransactions, sortOrder]);
+  }, [isOpen, account, filteredTransactions, sortRules]);
+
+  // Click vào tiêu đề cột để sắp xếp (hỗ trợ sort cùng lúc BCMS + Số tiền / Ghi chú)
+  const handleColumnSort = (key, e) => {
+    const isMultiKey = e && (e.shiftKey || e.ctrlKey || e.metaKey);
+
+    setSortRules((prevRules) => {
+      const existingIdx = prevRules.findIndex((r) => r.key === key);
+      let newDir = key === 'remark' || key === 'notes' ? 'asc' : 'desc';
+      if (existingIdx >= 0) {
+        const currentDir = prevRules[existingIdx].dir;
+        newDir = currentDir === 'desc' ? 'asc' : null;
+      }
+
+      // Giữ Shift/Ctrl để kết hợp tùy ý
+      if (isMultiKey) {
+        if (newDir === null) {
+          const next = prevRules.filter((r) => r.key !== key);
+          return next.length > 0 ? next : [{ key: 'date', dir: 'desc' }];
+        }
+        if (existingIdx >= 0) {
+          return prevRules.map((r, i) => (i === existingIdx ? { key, dir: newDir } : r));
+        }
+        return [...prevRules, { key, dir: newDir }];
+      }
+
+      // Click bình thường (tự động kết hợp thông minh cùng BCMS):
+      if (key === 'chuaBcms') {
+        if (newDir === null) {
+          const otherRules = prevRules.filter((r) => r.key !== 'chuaBcms');
+          return otherRules.length > 0 ? otherRules : [{ key: 'date', dir: 'desc' }];
+        }
+        const secondary = prevRules.find((r) => r.key !== 'chuaBcms') || { key: 'amount', dir: 'desc' };
+        return [{ key: 'chuaBcms', dir: newDir }, secondary];
+      }
+
+      // Nếu đang bật sort BCMS -> giữ BCMS ở vị trí số 1, gán cột này làm tiêu chí số 2
+      const bcmsRule = prevRules.find((r) => r.key === 'chuaBcms');
+      if (bcmsRule) {
+        if (newDir === null) {
+          return [bcmsRule, { key: 'date', dir: 'desc' }];
+        }
+        return [bcmsRule, { key, dir: newDir }];
+      }
+
+      // Chưa bật BCMS: sắp xếp độc lập cột này
+      if (newDir === null) {
+        return [{ key: 'date', dir: 'desc' }];
+      }
+      return [{ key, dir: newDir }];
+    });
+  };
+
+  const getSortDropdownValue = () => {
+    const hasBcms = sortRules.find((r) => r.key === 'chuaBcms');
+    const amountRule = sortRules.find((r) => r.key === 'amount');
+    const remarkRule = sortRules.find((r) => r.key === 'remark');
+    const dateRule = sortRules.find((r) => r.key === 'date');
+
+    if (hasBcms && hasBcms.dir === 'desc') {
+      if (amountRule && amountRule.dir === 'desc') return 'bcms_amount_desc';
+      if (amountRule && amountRule.dir === 'asc') return 'bcms_amount_asc';
+      if (remarkRule && remarkRule.dir === 'asc') return 'bcms_remark_asc';
+      if (remarkRule && remarkRule.dir === 'desc') return 'bcms_remark_desc';
+      if (dateRule && dateRule.dir === 'desc') return 'bcms_date_desc';
+      return 'bcms_amount_desc';
+    }
+
+    if (amountRule && !hasBcms) {
+      return amountRule.dir === 'desc' ? 'amount_desc' : 'amount_asc';
+    }
+    if (remarkRule && !hasBcms) {
+      return remarkRule.dir === 'desc' ? 'remark_desc' : 'remark_asc';
+    }
+    if (dateRule && !hasBcms) {
+      return dateRule.dir === 'asc' ? 'oldest' : 'newest';
+    }
+
+    return 'custom';
+  };
+
+  const handleDropdownSortChange = (val) => {
+    switch (val) {
+      case 'bcms_amount_desc':
+        setSortRules([{ key: 'chuaBcms', dir: 'desc' }, { key: 'amount', dir: 'desc' }]);
+        break;
+      case 'bcms_amount_asc':
+        setSortRules([{ key: 'chuaBcms', dir: 'desc' }, { key: 'amount', dir: 'asc' }]);
+        break;
+      case 'bcms_remark_asc':
+        setSortRules([{ key: 'chuaBcms', dir: 'desc' }, { key: 'remark', dir: 'asc' }]);
+        break;
+      case 'bcms_remark_desc':
+        setSortRules([{ key: 'chuaBcms', dir: 'desc' }, { key: 'remark', dir: 'desc' }]);
+        break;
+      case 'bcms_date_desc':
+        setSortRules([{ key: 'chuaBcms', dir: 'desc' }, { key: 'date', dir: 'desc' }]);
+        break;
+      case 'amount_desc':
+        setSortRules([{ key: 'amount', dir: 'desc' }]);
+        break;
+      case 'amount_asc':
+        setSortRules([{ key: 'amount', dir: 'asc' }]);
+        break;
+      case 'remark_asc':
+        setSortRules([{ key: 'remark', dir: 'asc' }]);
+        break;
+      case 'remark_desc':
+        setSortRules([{ key: 'remark', dir: 'desc' }]);
+        break;
+      case 'oldest':
+        setSortRules([{ key: 'date', dir: 'asc' }]);
+        break;
+      case 'newest':
+      default:
+        setSortRules([{ key: 'date', dir: 'desc' }]);
+        break;
+    }
+  };
+
+  const renderSortIndicator = (colKey) => {
+    const ruleIdx = sortRules.findIndex((r) => r.key === colKey);
+    const isActive = ruleIdx >= 0;
+    const dir = isActive ? sortRules[ruleIdx].dir : null;
+    const isMulti = sortRules.length > 1;
+
+    return (
+      <span className="inline-flex items-center gap-0.5 ml-0.5 select-none shrink-0">
+        {isActive ? (
+          <>
+            {dir === 'desc' ? (
+              <span className={`text-[8.5px] sm:text-[9.5px] font-black ${colKey === 'chuaBcms' ? 'text-amber-600' : 'text-blue-600'}`}>
+                ▼
+              </span>
+            ) : (
+              <span className={`text-[8.5px] sm:text-[9.5px] font-black ${colKey === 'chuaBcms' ? 'text-amber-600' : 'text-blue-600'}`}>
+                ▲
+              </span>
+            )}
+            {isMulti && (
+              <span
+                className={`w-3 h-3 rounded-full text-[6.5px] sm:text-[7.5px] font-black flex items-center justify-center leading-none text-white shadow-2xs ${
+                  colKey === 'chuaBcms' ? 'bg-amber-600' : 'bg-blue-600'
+                }`}
+                title={`Ưu tiên sắp xếp thứ ${ruleIdx + 1}`}
+              >
+                {ruleIdx + 1}
+              </span>
+            )}
+          </>
+        ) : (
+          <ArrowUpDown className="w-2 h-2 sm:w-2.5 sm:h-2.5 text-slate-300 opacity-60 hover:opacity-100" />
+        )}
+      </span>
+    );
+  };
 
   // Tùy chọn Ẩn/Hiện Tổng bao gồm dự kiến (Chưa BCMS)
   const [showExpectedTotal, setShowExpectedTotal] = useState(false);
@@ -610,14 +791,29 @@ export default function AccountLedgerModal({
               <div className="relative">
                 <ArrowUpDown className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
                 <select
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(e.target.value)}
+                  value={getSortDropdownValue()}
+                  onChange={(e) => handleDropdownSortChange(e.target.value)}
                   className="pl-6 pr-2 py-1 text-2xs sm:text-xs rounded-lg border border-slate-200 bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all cursor-pointer font-medium"
                 >
-                  <option value="newest">Ngày mới nhất</option>
-                  <option value="oldest">Ngày cũ nhất</option>
-                  <option value="highest">Tiền cao nhất</option>
-                  <option value="lowest">Tiền thấp nhất</option>
+                  <option value="newest">🕒 Ngày mới nhất</option>
+                  <option value="oldest">🕒 Ngày cũ nhất</option>
+                  <optgroup label="⚡ Kết hợp Chưa BCMS (Dự kiến)">
+                    <option value="bcms_amount_desc">⚡ Chưa BCMS → Tiền cao nhất</option>
+                    <option value="bcms_amount_asc">⚡ Chưa BCMS → Tiền thấp nhất</option>
+                    <option value="bcms_remark_asc">⚡ Chưa BCMS → Ghi chú (A-Z)</option>
+                    <option value="bcms_date_desc">⚡ Chưa BCMS → Ngày mới nhất</option>
+                  </optgroup>
+                  <optgroup label="💰 Theo Số tiền">
+                    <option value="amount_desc">💰 Tiền cao nhất</option>
+                    <option value="amount_asc">💰 Tiền thấp nhất</option>
+                  </optgroup>
+                  <optgroup label="📝 Theo Ghi chú">
+                    <option value="remark_asc">📝 Ghi chú: A → Z (có ghi chú trước)</option>
+                    <option value="remark_desc">📝 Ghi chú: Z → A</option>
+                  </optgroup>
+                  {getSortDropdownValue() === 'custom' && (
+                    <option value="custom">🔀 Đang sắp xếp đa cột (Click bảng)</option>
+                  )}
                 </select>
               </div>
             </div>
@@ -669,10 +865,15 @@ export default function AccountLedgerModal({
                     {/* 2. Ngày: dd/mm/yy không logo lịch, bóp siêu gọn */}
                     {isColumnVisible('date') && (
                       <th
-                        className="py-0.5 px-0.5 sm:px-1 text-center leading-tight relative select-none"
+                        onClick={(e) => handleColumnSort('date', e)}
+                        className="py-0.5 px-0.5 sm:px-1 text-center leading-tight relative select-none cursor-pointer hover:bg-slate-200/90 transition-colors group"
                         style={{ width: `${columnWidths.date}px`, minWidth: `${columnWidths.date}px` }}
+                        title="Click để sắp xếp Ngày • Giữ Shift để kết hợp nhiều cột"
                       >
-                        <div className="truncate text-center w-full">Ngày</div>
+                        <div className="flex items-center justify-center gap-0.5 truncate w-full">
+                          <span>Ngày</span>
+                          {renderSortIndicator('date')}
+                        </div>
                         <ColumnResizeHandle
                           colKey="date"
                           onResizeStart={handleResizeStart}
@@ -684,11 +885,15 @@ export default function AccountLedgerModal({
                     {/* 2b. Chưa BCMS (Dự kiến) */}
                     {isColumnVisible('chuaBcms') && (
                       <th
-                        className="py-0.5 px-0.5 text-center leading-tight relative select-none"
+                        onClick={(e) => handleColumnSort('chuaBcms', e)}
+                        className="py-0.5 px-0.5 text-center leading-tight relative select-none cursor-pointer hover:bg-amber-100/70 transition-colors group"
                         style={{ width: `${columnWidths.chuaBcms}px`, minWidth: `${columnWidths.chuaBcms}px` }}
-                        title="Đánh dấu Chưa BCMS (Khoản dự kiến, không tính vào tổng thực tế)"
+                        title="Click để đưa Chưa BCMS lên đầu (kết hợp với Số tiền / Ghi chú)"
                       >
-                        <div className="truncate text-center w-full">Chưa BCMS</div>
+                        <div className="flex items-center justify-center gap-0.5 truncate w-full text-amber-900 font-bold">
+                          <span>Chưa BCMS</span>
+                          {renderSortIndicator('chuaBcms')}
+                        </div>
                         <ColumnResizeHandle
                           colKey="chuaBcms"
                           onResizeStart={handleResizeStart}
@@ -700,10 +905,15 @@ export default function AccountLedgerModal({
                     {/* 3. Nội dung diễn giải */}
                     {isColumnVisible('notes') && (
                       <th
-                        className="py-0.5 px-0.5 sm:px-1 text-center leading-tight relative select-none"
+                        onClick={(e) => handleColumnSort('notes', e)}
+                        className="py-0.5 px-0.5 sm:px-1 text-center leading-tight relative select-none cursor-pointer hover:bg-slate-200/90 transition-colors group"
                         style={{ width: `${columnWidths.notes}px`, minWidth: `${columnWidths.notes}px` }}
+                        title="Click để sắp xếp theo Nội dung diễn giải"
                       >
-                        <div className="truncate text-center w-full">Nội Dung Diễn Giải</div>
+                        <div className="flex items-center justify-center gap-0.5 truncate w-full">
+                          <span>Nội Dung Diễn Giải</span>
+                          {renderSortIndicator('notes')}
+                        </div>
                         <ColumnResizeHandle
                           colKey="notes"
                           onResizeStart={handleResizeStart}
@@ -715,10 +925,15 @@ export default function AccountLedgerModal({
                     {/* 4. Số tiền */}
                     {isColumnVisible('amount') && (
                       <th
-                        className="py-0.5 px-0.5 sm:px-1 text-center leading-tight relative select-none"
+                        onClick={(e) => handleColumnSort('amount', e)}
+                        className="py-0.5 px-0.5 sm:px-1 text-center leading-tight relative select-none cursor-pointer hover:bg-slate-200/90 transition-colors group"
                         style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
+                        title="Click để sắp xếp Số tiền • Tự động kết hợp cùng Chưa BCMS nếu đã chọn"
                       >
-                        <div className="truncate text-center w-full">Số Tiền (VNĐ)</div>
+                        <div className="flex items-center justify-center gap-0.5 truncate w-full">
+                          <span>Số Tiền (VNĐ)</span>
+                          {renderSortIndicator('amount')}
+                        </div>
                         <ColumnResizeHandle
                           colKey="amount"
                           onResizeStart={handleResizeStart}
@@ -730,11 +945,15 @@ export default function AccountLedgerModal({
                     {/* 4b. Ghi chú (nằm ngay phía sau cột số tiền) */}
                     {isColumnVisible('remark') && (
                       <th
-                        className="py-0.5 px-0.5 sm:px-1 text-center leading-tight relative select-none"
+                        onClick={(e) => handleColumnSort('remark', e)}
+                        className="py-0.5 px-0.5 sm:px-1 text-center leading-tight relative select-none cursor-pointer hover:bg-slate-200/90 transition-colors group"
                         style={{ width: `${columnWidths.remark}px`, minWidth: `${columnWidths.remark}px` }}
-                        title="Ghi chú bổ sung"
+                        title="Click để sắp xếp Ghi chú • Tự động kết hợp cùng Chưa BCMS nếu đã chọn"
                       >
-                        <div className="truncate text-center w-full">Ghi Chú</div>
+                        <div className="flex items-center justify-center gap-0.5 truncate w-full">
+                          <span>Ghi Chú</span>
+                          {renderSortIndicator('remark')}
+                        </div>
                         <ColumnResizeHandle
                           colKey="remark"
                           onResizeStart={handleResizeStart}
