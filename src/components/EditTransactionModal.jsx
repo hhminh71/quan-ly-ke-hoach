@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Edit3, X, Save, Calendar, Tag, DollarSign, User, FileText } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Edit3, X, Save, Calendar, Tag, DollarSign, User, FileText, Calculator } from 'lucide-react';
 import employeesList from '../data/employees.json';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
+import { evaluateMathExpression } from '../utils/mathParser';
 
 export default function EditTransactionModal({
   isOpen,
@@ -47,6 +48,42 @@ export default function EditTransactionModal({
     return Math.round(Number(num) || 0).toLocaleString('vi-VN') + '\u00A0đ';
   };
 
+  // Safe math evaluation for real-time calculations (+, -, *, /, (), %, 1.5tr, 500k)
+  const mathResult = useMemo(() => {
+    return evaluateMathExpression(editForm.amount);
+  }, [editForm.amount]);
+
+  const numAmount = mathResult.isValid ? (mathResult.value || 0) : (Number(editForm.amount) || 0);
+
+  const handleResolveAmount = () => {
+    if (mathResult.hasFormula && mathResult.isValid && mathResult.value !== null) {
+      setEditForm((prev) => ({ ...prev, amount: String(mathResult.value) }));
+    }
+  };
+
+  const handleAmountKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      if (mathResult.hasFormula && mathResult.isValid) {
+        e.preventDefault();
+        setEditForm((prev) => ({ ...prev, amount: String(mathResult.value) }));
+      }
+    }
+  };
+
+  const handleInsertOperator = (op) => {
+    if (op === '()') {
+      setEditForm((prev) => {
+        const trimmed = (prev.amount || '').trim();
+        return { ...prev, amount: trimmed ? `(${trimmed})` : '()' };
+      });
+      return;
+    }
+    setEditForm((prev) => {
+      const trimmed = (prev.amount || '').trim();
+      return { ...prev, amount: !trimmed && op === '-' ? '-' : `${trimmed} ${op} ` };
+    });
+  };
+
   const handleEditAccountChange = (code) => {
     const found = budgets.find((b) => String(b.code || '').trim() === String(code).trim());
     setEditForm((prev) => ({
@@ -60,6 +97,8 @@ export default function EditTransactionModal({
   const handleSubmit = (e) => {
     e.preventDefault();
     const cleanDate = String(editForm.date || '').trim();
+    const finalAmount = mathResult.isValid ? (mathResult.value || 0) : (Number(editForm.amount) || 0);
+
     const updated = {
       ...transaction,
       date: cleanDate,
@@ -68,7 +107,7 @@ export default function EditTransactionModal({
       category: String(editForm.category || '').trim(),
       group: String(editForm.group || '').trim(),
       employeeName: String(editForm.employeeName || '').trim(),
-      amount: Number(editForm.amount) || 0,
+      amount: finalAmount,
       notes: String(editForm.notes || '').trim(),
       remark: String(editForm.remark || '').trim(),
       chuaBcms: Boolean(editForm.chuaBcms),
@@ -167,23 +206,91 @@ export default function EditTransactionModal({
             </datalist>
           </div>
 
-          {/* Số Tiền */}
+          {/* Số Tiền with Math Expression */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
-              <DollarSign className="w-3.5 h-3.5 text-slate-400" />
-              <span>Số Tiền Thực Tế (VNĐ)</span>
-            </label>
-            <input
-              type="number"
-              min="0"
-              step="any"
-              required
-              value={editForm.amount}
-              onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })}
-              className="w-full px-3 py-2 text-xs font-mono font-bold text-slate-900 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 bg-white"
-            />
-            <div className="mt-1 text-[11px] font-mono text-blue-700 font-semibold">
-              {formatVND(editForm.amount)}
+            <div className="flex items-center justify-between text-xs font-semibold text-slate-700 mb-1">
+              <span className="flex items-center gap-1.5">
+                <DollarSign className="w-3.5 h-3.5 text-slate-400" />
+                <span>Số Tiền Thực Tế (VNĐ)</span>
+              </span>
+              <div className="flex items-center gap-1.5">
+                {mathResult.hasFormula ? (
+                  mathResult.isValid ? (
+                    <button
+                      type="button"
+                      onClick={handleResolveAmount}
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-mono text-xs font-bold transition-all shadow-2xs cursor-pointer group"
+                      title="Click để áp dụng kết quả tính"
+                    >
+                      <Calculator className="w-3 h-3 text-emerald-600 group-hover:scale-110 transition-transform" />
+                      <span>= {formatVND(mathResult.value)}</span>
+                      <span className="text-3xs font-semibold underline ml-0.5">Áp dụng</span>
+                    </button>
+                  ) : (
+                    <span className="text-3xs text-amber-600 italic flex items-center gap-1 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/60">
+                      <Calculator className="w-3 h-3 text-amber-500" />
+                      <span>{mathResult.error || 'Đang tính...'}</span>
+                    </span>
+                  )
+                ) : numAmount > 0 ? (
+                  <span className="font-mono text-xs font-bold text-blue-700">
+                    {formatVND(numAmount)}
+                  </span>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="relative">
+              <input
+                type="text"
+                inputMode="text"
+                placeholder="Nhập số tiền hoặc phép tính (+, -, *, /, (), 1.5tr, 500k)..."
+                required
+                value={editForm.amount}
+                onChange={(e) => setEditForm({ ...editForm, amount: e.target.value })}
+                onKeyDown={handleAmountKeyDown}
+                onBlur={handleResolveAmount}
+                className={`w-full px-3 py-2 pr-16 text-xs font-mono font-bold text-slate-900 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all ${
+                  mathResult.hasFormula && mathResult.isValid
+                    ? 'border-emerald-300 ring-1 ring-emerald-200 bg-emerald-50/20'
+                    : 'border-slate-300 bg-white'
+                }`}
+              />
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                {mathResult.hasFormula && mathResult.isValid && (
+                  <button
+                    type="button"
+                    onClick={handleResolveAmount}
+                    className="p-1 rounded-md bg-emerald-100 hover:bg-emerald-200 text-emerald-800 transition-colors cursor-pointer"
+                    title="Nhấn để tự động tính kết quả"
+                  >
+                    <Calculator className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                <span className="text-3xs font-bold text-slate-400 select-none">VNĐ</span>
+              </div>
+            </div>
+
+            {/* Quick Math Operators */}
+            <div className="flex items-center gap-1 mt-1.5">
+              <span className="text-3xs text-slate-400 font-medium mr-0.5">Toán tử:</span>
+              {[
+                { label: '+', op: '+' },
+                { label: '-', op: '-' },
+                { label: '×', op: '*' },
+                { label: '÷', op: '/' },
+                { label: '( )', op: '()' },
+              ].map((item) => (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => handleInsertOperator(item.op)}
+                  className="w-5.5 h-5 flex items-center justify-center rounded text-xs font-bold bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-700 border border-slate-200 transition-all active:scale-95 cursor-pointer select-none"
+                  title={`Chèn toán tử ${item.label}`}
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
           </div>
 

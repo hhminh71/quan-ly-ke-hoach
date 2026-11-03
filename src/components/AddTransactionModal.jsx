@@ -12,10 +12,12 @@ import {
   Layers,
   Sparkles,
   CheckCircle2,
+  Calculator,
 } from 'lucide-react';
 import employeesList from '../data/employees.json';
 import { matchesVietnameseSearch } from '../utils/searchUtils';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
+import { evaluateMathExpression } from '../utils/mathParser';
 
 export default function AddTransactionModal({
   isOpen,
@@ -155,9 +157,51 @@ export default function AddTransactionModal({
     return Math.round(Number(num) || 0).toLocaleString('vi-VN') + '\u00A0đ';
   };
 
+  // Safe math evaluation for real-time calculations (+, -, *, /, (), %, 1.5tr, 500k)
+  const mathResult = useMemo(() => {
+    return evaluateMathExpression(amount);
+  }, [amount]);
+
+  const numAmount = mathResult.isValid ? (mathResult.value || 0) : 0;
+
+  const handleResolveAmount = () => {
+    if (mathResult.hasFormula && mathResult.isValid && mathResult.value !== null) {
+      setAmount(String(mathResult.value));
+    }
+  };
+
+  const handleAmountKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      if (mathResult.hasFormula && mathResult.isValid) {
+        e.preventDefault();
+        setAmount(String(mathResult.value));
+      }
+    }
+  };
+
+  const handleInsertOperator = (op) => {
+    if (op === '()') {
+      setAmount((prev) => {
+        const trimmed = (prev || '').trim();
+        return trimmed ? `(${trimmed})` : '()';
+      });
+      return;
+    }
+    setAmount((prev) => {
+      const trimmed = (prev || '').trim();
+      if (!trimmed) return op === '-' ? '-' : '';
+      return `${trimmed} ${op} `;
+    });
+  };
+
   const handleAddQuickAmount = (val) => {
-    const current = Number(amount) || 0;
-    setAmount(String(current + val));
+    if (mathResult.isValid && mathResult.value > 0) {
+      setAmount(String(mathResult.value + val));
+    } else if (!amount || !amount.trim()) {
+      setAmount(String(val));
+    } else {
+      setAmount(`${amount} + ${val}`);
+    }
   };
 
   // Suggested employees
@@ -171,7 +215,9 @@ export default function AddTransactionModal({
     if (!selectedAccount) newErrors.accountCode = 'Vui lòng chọn mã khoản mục kế hoạch';
     if (!date) newErrors.date = 'Vui lòng chọn ngày chi';
     if (!employeeName.trim()) newErrors.employeeName = 'Vui lòng nhập tên người thực hiện / nhận';
-    if (!amount || Number(amount) <= 0) newErrors.amount = 'Vui lòng nhập số tiền chi (> 0)';
+    if (!mathResult.isValid || numAmount <= 0) {
+      newErrors.amount = mathResult.error ? `Phép tính chưa hợp lệ: ${mathResult.error}` : 'Vui lòng nhập số tiền chi (> 0)';
+    }
     if (!notes.trim()) newErrors.notes = 'Vui lòng nhập nội dung diễn giải hạng mục';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -181,6 +227,7 @@ export default function AddTransactionModal({
     e.preventDefault();
     if (!validate()) return;
 
+    const finalAmount = numAmount;
     const newRecord = {
       id: Date.now(),
       fiscalYear: (date && date.length >= 4) ? date.substring(0, 4) : selectedYear,
@@ -189,7 +236,7 @@ export default function AddTransactionModal({
       group: selectedAccount.group || 'Chi phí khác',
       date,
       employeeName: employeeName.trim(),
-      amount: Number(amount),
+      amount: finalAmount,
       notes: notes.trim(),
       remark: remark.trim(),
       chuaBcms: Boolean(chuaBcms),
@@ -203,7 +250,6 @@ export default function AddTransactionModal({
 
   if (!isOpen) return null;
 
-  const numAmount = Number(amount) || 0;
   const isOverBudget = activeBudgetStats && activeBudgetStats.remaining !== undefined && numAmount > activeBudgetStats.remaining;
 
   return (
@@ -400,50 +446,113 @@ export default function AddTransactionModal({
             </div>
           </div>
 
-          {/* Row 3: Amount with Quick additions */}
+          {/* Row 3: Amount with Math Calculation & Quick additions */}
           <div>
             <div className="flex items-center justify-between text-xs font-semibold text-slate-700 mb-1.5">
               <span className="flex items-center gap-1.5">
                 <DollarSign className="w-3.5 h-3.5 text-blue-600" />
                 Số Tiền Chi (VNĐ) <span className="text-rose-500">*</span>
               </span>
-              {numAmount > 0 && (
-                <span className="font-mono text-xs font-bold text-blue-700">
-                  {formatVND(numAmount)}
-                </span>
-              )}
+              <div className="flex items-center gap-1.5">
+                {mathResult.hasFormula ? (
+                  mathResult.isValid ? (
+                    <button
+                      type="button"
+                      onClick={handleResolveAmount}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 font-mono text-xs font-bold transition-all shadow-2xs cursor-pointer group"
+                      title="Click để áp dụng kết quả tính này vào ô nhập"
+                    >
+                      <Calculator className="w-3.5 h-3.5 text-emerald-600 group-hover:scale-110 transition-transform" />
+                      <span>= {formatVND(mathResult.value)}</span>
+                      <span className="text-3xs font-semibold text-emerald-600 underline ml-0.5">Áp dụng</span>
+                    </button>
+                  ) : (
+                    <span className="text-3xs text-amber-600 italic flex items-center gap-1 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200/60">
+                      <Calculator className="w-3 h-3 text-amber-500" />
+                      <span>{mathResult.error || 'Đang nhập phép tính...'}</span>
+                    </span>
+                  )
+                ) : numAmount > 0 ? (
+                  <span className="font-mono text-xs font-bold text-blue-700">
+                    {formatVND(numAmount)}
+                  </span>
+                ) : null}
+              </div>
             </div>
+
             <div className="relative">
               <input
-                type="number"
-                min="0"
-                step="1000"
-                placeholder="Nhập số tiền..."
+                type="text"
+                inputMode="text"
+                placeholder="Nhập số tiền hoặc phép tính (+, -, *, /, (), 1.5tr, 500k)..."
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className={`w-full px-3 py-2.5 rounded-xl border text-sm font-mono font-bold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all ${
-                  errors.amount ? 'border-rose-300' : 'border-slate-200'
+                onKeyDown={handleAmountKeyDown}
+                onBlur={handleResolveAmount}
+                className={`w-full px-3 py-2.5 pr-20 rounded-xl border text-sm font-mono font-bold bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all ${
+                  errors.amount
+                    ? 'border-rose-300 ring-1 ring-rose-200'
+                    : mathResult.hasFormula && mathResult.isValid
+                    ? 'border-emerald-300 ring-1 ring-emerald-200 bg-emerald-50/20'
+                    : 'border-slate-200'
                 }`}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
-                VNĐ
-              </span>
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                {mathResult.hasFormula && mathResult.isValid && (
+                  <button
+                    type="button"
+                    onClick={handleResolveAmount}
+                    className="p-1 rounded-md bg-emerald-100 hover:bg-emerald-200 text-emerald-800 transition-colors cursor-pointer"
+                    title="Nhấn để tự động tính kết quả"
+                  >
+                    <Calculator className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                <span className="text-xs font-bold text-slate-400 select-none">
+                  VNĐ
+                </span>
+              </div>
             </div>
             {errors.amount && <p className="text-rose-600 text-2xs mt-1">{errors.amount}</p>}
 
-            {/* Quick Amount Buttons */}
-            <div className="flex flex-wrap items-center gap-1.5 mt-2">
-              <span className="text-3xs text-slate-400 font-medium mr-1">Cộng nhanh:</span>
-              {[500000, 1000000, 2000000, 5000000, 10000000].map((val) => (
-                <button
-                  key={val}
-                  type="button"
-                  onClick={() => handleAddQuickAmount(val)}
-                  className="px-2 py-0.5 rounded-lg text-3xs font-semibold bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200/80 transition-colors"
-                >
-                  +{val >= 1000000 ? `${val / 1000000}tr` : `${val / 1000}k`}
-                </button>
-              ))}
+            {/* Math operator shortcuts & Quick Amount Buttons */}
+            <div className="flex flex-wrap items-center justify-between gap-1.5 mt-2">
+              {/* Quick Math Operators */}
+              <div className="flex items-center gap-1">
+                <span className="text-3xs text-slate-400 font-medium mr-0.5">Toán tử:</span>
+                {[
+                  { label: '+', op: '+' },
+                  { label: '-', op: '-' },
+                  { label: '×', op: '*' },
+                  { label: '÷', op: '/' },
+                  { label: '( )', op: '()' },
+                ].map((item) => (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => handleInsertOperator(item.op)}
+                    className="w-6 h-5.5 flex items-center justify-center rounded-md text-xs font-bold bg-slate-100 hover:bg-blue-100 text-slate-700 hover:text-blue-700 border border-slate-200 transition-all active:scale-95 cursor-pointer select-none"
+                    title={`Chèn toán tử ${item.label}`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Quick Amounts */}
+              <div className="flex flex-wrap items-center gap-1">
+                <span className="text-3xs text-slate-400 font-medium mr-0.5">Cộng nhanh:</span>
+                {[500000, 1000000, 2000000, 5000000, 10000000].map((val) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => handleAddQuickAmount(val)}
+                    className="px-1.5 py-0.5 rounded-md text-3xs font-semibold bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-slate-200/80 transition-colors cursor-pointer"
+                  >
+                    +{val >= 1000000 ? `${val / 1000000}tr` : `${val / 1000}k`}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Over-budget warning */}
