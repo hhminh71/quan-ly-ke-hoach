@@ -95,6 +95,7 @@ export default function ExecutiveDashboard({
         ...b,
         code,
         approved,
+        selectedYearApproved: approved,
         liveActual,
         bravoVal,
         reportActual,

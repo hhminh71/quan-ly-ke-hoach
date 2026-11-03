@@ -588,7 +588,10 @@ export default function DashboardPage({ user }) {
             handleTabChange('TRANSACTIONS');
           }}
           onOpenAccountDetail={(account) => {
-            setSelectedDetailAccount(account);
+            const foundBudget = scopedBudgets.find(
+              (b) => String(b.code || '').trim() === String(account?.code || '').trim()
+            );
+            setSelectedDetailAccount(foundBudget ? { ...foundBudget, ...account } : account);
           }}
         />
       )}

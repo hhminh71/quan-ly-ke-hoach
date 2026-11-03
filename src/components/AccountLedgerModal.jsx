@@ -383,7 +383,28 @@ export default function AccountLedgerModal({
   };
 
   // Live account stats defensively
-  const approved = Number(account.selectedYearApproved) || 0;
+  const matchingBudget = useMemo(() => {
+    if (!account?.code || !budgets?.length) return null;
+    const targetCode = String(account.code).trim();
+    return budgets.find((b) => String(b.code || '').trim() === targetCode) || null;
+  }, [account?.code, budgets]);
+
+  const approved = Number(
+    account.selectedYearApproved !== undefined
+      ? account.selectedYearApproved
+      : account.approved !== undefined
+      ? account.approved
+      : (account.yearlyApproved && selectedYear !== 'ALL' && account.yearlyApproved[selectedYear] !== undefined)
+      ? account.yearlyApproved[selectedYear]
+      : (matchingBudget?.yearlyApproved && selectedYear !== 'ALL' && matchingBudget.yearlyApproved[selectedYear] !== undefined)
+      ? matchingBudget.yearlyApproved[selectedYear]
+      : matchingBudget?.selectedYearApproved !== undefined
+      ? matchingBudget.selectedYearApproved
+      : matchingBudget?.approved !== undefined
+      ? matchingBudget.approved
+      : (account.approvedAmount !== undefined ? account.approvedAmount : matchingBudget?.approvedAmount) || 0
+  );
+
   // Số tiền thực tế: lấy theo currentTotalAmount (chỉ Đã BCMS hoặc Gồm Dự Kiến tùy theo showExpectedTotal)
   const spent = accountTransactions.length > 0 ? currentTotalAmount : (Number(account.liveActual) || 0);
   const bravoVal = Number(
@@ -391,7 +412,13 @@ export default function AccountLedgerModal({
       ? account.bravoVal
       : account.bravoActual !== undefined
       ? account.bravoActual
-      : account.bravoAmount
+      : account.bravoAmount !== undefined
+      ? account.bravoAmount
+      : matchingBudget?.bravoVal !== undefined
+      ? matchingBudget.bravoVal
+      : matchingBudget?.bravoActual !== undefined
+      ? matchingBudget.bravoActual
+      : matchingBudget?.bravoAmount || 0
   ) || 0;
 
   const isSeparated = isSctsSeparated(account.code, sctsCodes);
