@@ -441,19 +441,39 @@ export default function AccountLedgerModal({
   })();
 
   const handleExportLedgerExcel = () => {
-    exportAccountLedgerExcel({
-      account: { ...matchingBudget, ...account },
-      transactions: sorted.length > 0 ? sorted : accountTransactions,
-      selectedYear,
-      approved,
-      bravoVal,
-      spent,
-      reportActual,
-      remaining,
-      isSeparated,
-      user: currentUser,
-      showExpectedTotal,
-    });
+    try {
+      exportAccountLedgerExcel({
+        account: { ...matchingBudget, ...account },
+        transactions: sortedTransactions.length > 0 ? sortedTransactions : accountTransactions,
+        selectedYear,
+        approved,
+        bravoVal,
+        spent,
+        reportActual,
+        remaining,
+        isSeparated,
+        user: currentUser,
+        showExpectedTotal,
+      });
+    } catch (err) {
+      console.error('Lỗi xuất Excel sổ cái:', err);
+      try {
+        exportAccountLedgerCSV({
+          account: { ...matchingBudget, ...account },
+          transactions: sortedTransactions.length > 0 ? sortedTransactions : accountTransactions,
+          selectedYear,
+          approved,
+          bravoVal,
+          spent,
+          reportActual,
+          remaining,
+          isSeparated,
+          user: currentUser,
+        });
+      } catch (csvErr) {
+        alert('Không thể xuất báo cáo. Chi tiết lỗi: ' + (err?.message || err));
+      }
+    }
   };
 
   return (

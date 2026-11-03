@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import EditTransactionModal from './EditTransactionModal';
 import AddTransactionModal from './AddTransactionModal';
-import { exportAccountLedgerExcel } from '../utils/excelExport';
+import { exportAccountLedgerExcel, exportAccountLedgerCSV } from '../utils/excelExport';
 import { useResizableColumns, ColumnResizeHandle, ColumnVisibilityDropdown } from '../hooks/useResizableColumns';
 import { matchesVietnameseSearch } from '../utils/searchUtils';
 import { formatDate } from '../utils/dateUtils';
@@ -470,19 +470,39 @@ export default function TransactionList({
       }
     })();
 
-    exportAccountLedgerExcel({
-      account: targetBudget,
-      transactions: sorted,
-      selectedYear,
-      approved,
-      bravoVal,
-      spent: totalFilteredAmount,
-      reportActual: Math.max(totalFilteredAmount, bravoVal),
-      remaining: approved - Math.max(totalFilteredAmount, bravoVal),
-      isSeparated: false,
-      user: currentUser,
-      showExpectedTotal,
-    });
+    try {
+      exportAccountLedgerExcel({
+        account: targetBudget,
+        transactions: sorted,
+        selectedYear,
+        approved,
+        bravoVal,
+        spent: totalFilteredAmount,
+        reportActual: Math.max(totalFilteredAmount, bravoVal),
+        remaining: approved - Math.max(totalFilteredAmount, bravoVal),
+        isSeparated: false,
+        user: currentUser,
+        showExpectedTotal,
+      });
+    } catch (err) {
+      console.error('Lỗi xuất Excel sổ cái:', err);
+      try {
+        exportAccountLedgerCSV({
+          account: targetBudget,
+          transactions: sorted,
+          selectedYear,
+          approved,
+          bravoVal,
+          spent: totalFilteredAmount,
+          reportActual: Math.max(totalFilteredAmount, bravoVal),
+          remaining: approved - Math.max(totalFilteredAmount, bravoVal),
+          isSeparated: false,
+          user: currentUser,
+        });
+      } catch (csvErr) {
+        alert('Không thể xuất báo cáo. Chi tiết lỗi: ' + (err?.message || err));
+      }
+    }
   };
 
   return (
