@@ -403,7 +403,10 @@ function getTransactionsFromSheet(ss) {
       rawChuaBcms === 'TRUE' ||
       rawChuaBcms === 'true' ||
       rawChuaBcms === 1 ||
-      notesVal.toLowerCase().startsWith('dự kiến')
+      notesVal.toLowerCase().includes('dự kiến') ||
+      notesVal.toLowerCase().includes('du kien') ||
+      notesVal.toLowerCase().includes('chưa bcms') ||
+      notesVal.toLowerCase().includes('chua bcms')
     );
 
     list.push({

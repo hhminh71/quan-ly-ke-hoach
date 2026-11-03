@@ -59,6 +59,19 @@ export default function DashboardPage({ user }) {
             employeeName: String(t.employeeName || '').trim(),
             amount: Number(t.amount) || 0,
             notes: String(t.notes || '').trim(),
+            remark: String(t.remark || '').trim(),
+            chuaBcms: Boolean(
+              t.chuaBcms === true ||
+              t.chuaBcms === 'true' ||
+              t.chuaBcms === 'TRUE' ||
+              t.chuaBcms === 1 ||
+              (t.chuaBcms === undefined &&
+                typeof t.notes === 'string' &&
+                (t.notes.toLowerCase().includes('dự kiến') ||
+                  t.notes.toLowerCase().includes('du kien') ||
+                  t.notes.toLowerCase().includes('chưa bcms') ||
+                  t.notes.toLowerCase().includes('chua bcms')))
+            ),
             createdAt: String(t.createdAt || '09:00'),
             status: String(t.status || 'Đã thực hiện'),
           }));
@@ -71,7 +84,19 @@ export default function DashboardPage({ user }) {
     } catch (e) {
       console.error(e);
     }
-    return initialTransactions;
+    return initialTransactions.map((t, idx) => ({
+      ...t,
+      id: t.id || idx + 1,
+      chuaBcms: Boolean(
+        t.chuaBcms === true ||
+        (typeof t.notes === 'string' &&
+          (t.notes.toLowerCase().includes('dự kiến') ||
+            t.notes.toLowerCase().includes('du kien') ||
+            t.notes.toLowerCase().includes('chưa bcms') ||
+            t.notes.toLowerCase().includes('chua bcms')))
+      ),
+      remark: String(t.remark || '').trim(),
+    }));
   });
 
   const [budgets, setBudgets] = useState(() => {
@@ -387,7 +412,20 @@ export default function DashboardPage({ user }) {
       return;
     }
     if (confirm('Khôi phục toàn bộ danh sách 1.216 giao dịch thực tế (2024, 2025, 2026) từ file gốc?')) {
-      setTransactions(initialTransactions);
+      const resetTx = initialTransactions.map((t, idx) => ({
+        ...t,
+        id: t.id || idx + 1,
+        chuaBcms: Boolean(
+          t.chuaBcms === true ||
+          (typeof t.notes === 'string' &&
+            (t.notes.toLowerCase().includes('dự kiến') ||
+              t.notes.toLowerCase().includes('du kien') ||
+              t.notes.toLowerCase().includes('chưa bcms') ||
+              t.notes.toLowerCase().includes('chua bcms')))
+        ),
+        remark: String(t.remark || '').trim(),
+      }));
+      setTransactions(resetTx);
       localStorage.removeItem('app_transactions_v4');
       localStorage.removeItem('app_transactions_v3');
       localStorage.removeItem('app_transactions_v2');
