@@ -487,18 +487,22 @@ export default function DashboardPage({ user }) {
       {/* View Tabs & Fiscal Year Selector: Sticky Below Header khi cuộn trang */}
       <div className="sticky top-[var(--navbar-height,56px)] z-30 bg-slate-50/95 backdrop-blur-md py-1.5 sm:py-2 border-b border-slate-200/90 shadow-2xs -mx-2.5 sm:-mx-6 lg:-mx-8 px-2.5 sm:px-6 lg:px-8 transition-all">
         <div className="flex items-center justify-between gap-1.5">
-          {/* Navigation Tabs: Sleek, compact pills */}
-          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
+          {/* Navigation Tabs: Modern Apple/Linear Segmented Control */}
+          <div className="inline-flex items-center p-0.5 sm:p-1 bg-slate-200/80 rounded-lg sm:rounded-xl border border-slate-300/70 shadow-2xs gap-0.5 sm:gap-1 overflow-x-auto no-scrollbar">
             <button
               type="button"
               onClick={() => handleTabChange('DASHBOARD')}
-              className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded text-[9.5px] sm:text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+              className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs whitespace-nowrap shrink-0 transition-all duration-150 select-none ${
                 activeTab === 'DASHBOARD'
-                  ? 'bg-blue-600 text-white shadow-xs ring-1 ring-blue-600/30'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'bg-white text-blue-700 font-bold shadow-xs border border-slate-200/90 ring-1 ring-black/5'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium border border-transparent'
               }`}
             >
-              <LayoutDashboard className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
+              <LayoutDashboard
+                className={`w-3 h-3 sm:w-3.5 sm:h-3.5 transition-colors ${
+                  activeTab === 'DASHBOARD' ? 'text-blue-600' : 'text-slate-400'
+                }`}
+              />
               <span className="sm:hidden">Dashboard</span>
               <span className="hidden sm:inline">Dashboard Điều Hành</span>
             </button>
@@ -506,13 +510,17 @@ export default function DashboardPage({ user }) {
             <button
               type="button"
               onClick={() => handleTabChange('BUDGETS')}
-              className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded text-[9.5px] sm:text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+              className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs whitespace-nowrap shrink-0 transition-all duration-150 select-none ${
                 activeTab === 'BUDGETS'
-                  ? 'bg-blue-600 text-white shadow-xs ring-1 ring-blue-600/30'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'bg-white text-blue-700 font-bold shadow-xs border border-slate-200/90 ring-1 ring-black/5'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium border border-transparent'
               }`}
             >
-              <FileSpreadsheet className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
+              <FileSpreadsheet
+                className={`w-3 h-3 sm:w-3.5 sm:h-3.5 transition-colors ${
+                  activeTab === 'BUDGETS' ? 'text-blue-600' : 'text-slate-400'
+                }`}
+              />
               <span className="sm:hidden">Kế Hoạch</span>
               <span className="hidden sm:inline">Kế Hoạch & Báo Cáo</span>
             </button>
@@ -520,13 +528,17 @@ export default function DashboardPage({ user }) {
             <button
               type="button"
               onClick={() => handleTabChange('TRANSACTIONS')}
-              className={`inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2.5 sm:py-1 rounded text-[9.5px] sm:text-xs font-bold whitespace-nowrap shrink-0 transition-all ${
+              className={`inline-flex items-center gap-1 sm:gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs whitespace-nowrap shrink-0 transition-all duration-150 select-none ${
                 activeTab === 'TRANSACTIONS'
-                  ? 'bg-blue-600 text-white shadow-xs ring-1 ring-blue-600/30'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'bg-white text-blue-700 font-bold shadow-xs border border-slate-200/90 ring-1 ring-black/5'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/60 font-medium border border-transparent'
               }`}
             >
-              <ListOrdered className="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5" />
+              <ListOrdered
+                className={`w-3 h-3 sm:w-3.5 sm:h-3.5 transition-colors ${
+                  activeTab === 'TRANSACTIONS' ? 'text-blue-600' : 'text-slate-400'
+                }`}
+              />
               <span>Sổ Cái</span>
             </button>
           </div>
