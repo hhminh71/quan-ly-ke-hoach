@@ -4,8 +4,6 @@ import {
   Trash2,
   ArrowUpDown,
   Filter,
-  ChevronLeft,
-  ChevronRight,
   Layers,
   DollarSign,
   Wallet,
@@ -40,8 +38,6 @@ export default function TransactionList({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(selectedCategoryProp || 'ALL');
   const [sortOrder, setSortOrder] = useState('newest'); // 'newest', 'oldest', 'account_asc', 'account_desc', 'highest', 'lowest'
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 25;
 
   // Add & Edit Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -94,7 +90,6 @@ export default function TransactionList({
   useEffect(() => {
     if (selectedCategoryProp !== undefined) {
       setSelectedCategory(selectedCategoryProp);
-      setCurrentPage(1);
     }
   }, [selectedCategoryProp]);
 
@@ -216,19 +211,6 @@ export default function TransactionList({
     return set.size;
   }, [sorted]);
 
-  // Pagination calculation
-  const totalPages = Math.ceil(sorted.length / pageSize) || 1;
-  const paginatedItems = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return sorted.slice(start, start + pageSize);
-  }, [sorted, currentPage]);
-
-  const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-    }
-  };
-
   return (
     <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden relative">
       {/* Toast Notification when saved & synced */}
@@ -340,7 +322,6 @@ export default function TransactionList({
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setCurrentPage(1);
               }}
               className="w-full h-5 sm:h-6 pl-5 pr-1.5 py-0 text-[8px] sm:text-xs rounded border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-100 focus:border-blue-500 transition-all leading-tight"
             />
@@ -355,7 +336,6 @@ export default function TransactionList({
                 const val = e.target.value;
                 setSelectedCategory(val);
                 if (onSelectCategory) onSelectCategory(val);
-                setCurrentPage(1);
               }}
               className="w-full h-5 sm:h-6 pl-4.5 pr-1 py-0 text-[8px] sm:text-xs rounded border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer truncate leading-tight"
             >
@@ -417,7 +397,7 @@ export default function TransactionList({
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-175px)] sm:max-h-[calc(100vh-210px)] relative">
+        <div className="overflow-x-auto overflow-y-auto max-h-[calc(100vh-130px)] sm:max-h-[calc(100vh-155px)] relative">
           <table
             className="w-full text-left border-collapse table-fixed"
             style={{ minWidth: `${totalTableWidth}px` }}
@@ -510,7 +490,7 @@ export default function TransactionList({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">
-              {paginatedItems.map((item) => (
+              {sorted.map((item) => (
                 <tr
                   key={item.id}
                   className="hover:bg-slate-50/70 transition-colors group"
@@ -695,58 +675,6 @@ export default function TransactionList({
               </tr>
             </tfoot>
           </table>
-        </div>
-      )}
-
-      {/* Pagination Footer */}
-      {totalPages > 1 && (
-        <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-          <div>
-            Đang xem trang <strong className="text-slate-800">{currentPage}</strong> / <strong className="text-slate-800">{totalPages}</strong> (Mỗi trang {pageSize} dòng)
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-
-            {/* Quick page numbers */}
-            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-              let pageNum = i + 1;
-              if (totalPages > 5 && currentPage > 3) {
-                pageNum = currentPage - 2 + i;
-                if (pageNum > totalPages) pageNum = totalPages - 4 + i;
-              }
-              return (
-                <button
-                  key={pageNum}
-                  type="button"
-                  onClick={() => handlePageChange(pageNum)}
-                  className={`w-7 h-7 rounded-lg text-xs font-medium transition-colors ${
-                    currentPage === pageNum
-                      ? 'bg-blue-600 text-white font-bold'
-                      : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
-                  }`}
-                >
-                  {pageNum}
-                </button>
-              );
-            })}
-
-            <button
-              type="button"
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
         </div>
       )}
 
