@@ -536,6 +536,18 @@ export default function AccountLedgerModal({
 
                           {/* Desktop Header Actions + Close Button */}
               <div className="hidden sm:flex items-center gap-1 sm:gap-1.5 shrink-0">
+                {onAddTransaction && (
+                  <button
+                    type="button"
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-2xs sm:text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-colors cursor-pointer"
+                    title={`Thêm mới hạng mục cho mã [${account.code}]`}
+                  >
+                    <PlusCircle className="w-3.5 h-3.5 stroke-[2.5]" />
+                    <span>+ Thêm Mới</span>
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={handleExportLedgerExcel}
@@ -545,18 +557,6 @@ export default function AccountLedgerModal({
                   <Download className="w-3.5 h-3.5 stroke-[2.5]" />
                   <span>Xuất Báo Cáo</span>
                 </button>
-
-                {onAddTransaction && (
-                  <button
-                    type="button"
-                    onClick={() => setIsAddModalOpen(true)}
-                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-2xs sm:text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-colors cursor-pointer"
-                    title={`Thêm mới hạng mục cho mã [${account.code}]`}
-                  >
-                    <PlusCircle className="w-3.5 h-3.5" />
-                    <span>Thêm Mới</span>
-                  </button>
-                )}
 
                 {onNavigateToLedger && (
                   <button
@@ -594,28 +594,28 @@ export default function AccountLedgerModal({
             </div>
 
             {/* Mobile Header Actions (Row 2 on mobile: full width, easy to tap) */}
-            <div className="flex sm:hidden items-center gap-1.5 pt-1 border-t border-slate-200/60 overflow-x-auto no-scrollbar">
+            <div className="flex sm:hidden items-center gap-1.5 pt-1.5 border-t border-slate-200/60">
+              {onAddTransaction && (
+                <button
+                  type="button"
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-2xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+                  title={`Thêm mới hạng mục cho mã [${account.code}]`}
+                >
+                  <PlusCircle className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>+ Thêm Mới</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={handleExportLedgerExcel}
-                className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-2xs font-bold bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-2xs border border-amber-300 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+                className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-2xs font-bold bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-2xs border border-amber-300 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
                 title={`Xuất file Excel báo cáo chi tiết cho riêng mã [${account.code}]`}
               >
                 <Download className="w-3.5 h-3.5 stroke-[2.5]" />
                 <span>Xuất Báo Cáo</span>
               </button>
-
-              {onAddTransaction && (
-                <button
-                  type="button"
-                  onClick={() => setIsAddModalOpen(true)}
-                  className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-2xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
-                  title={`Thêm mới hạng mục cho mã [${account.code}]`}
-                >
-                  <PlusCircle className="w-3.5 h-3.5" />
-                  <span>Thêm Mới</span>
-                </button>
-              )}
 
               {onNavigateToLedger && (
                 <button
@@ -624,7 +624,7 @@ export default function AccountLedgerModal({
                     onClose();
                     onNavigateToLedger(account.code);
                   }}
-                  className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-2xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors cursor-pointer whitespace-nowrap"
+                  className="inline-flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-2xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors cursor-pointer whitespace-nowrap"
                   title="Mở toàn màn hình trong tab Sổ Cái"
                 >
                   <ArrowUpRight className="w-3.5 h-3.5" />
@@ -985,6 +985,16 @@ export default function AccountLedgerModal({
                     ? 'Thử thay đổi từ khóa hoặc xóa tìm kiếm để xem tất cả hạng mục.'
                     : 'Các hạng mục mới phát sinh trên Webhook hoặc form nhập liệu sẽ tự động xuất hiện tại đây.'}
                 </p>
+                {!searchTerm && onAddTransaction && (
+                  <button
+                    type="button"
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition-all active:scale-95 cursor-pointer"
+                  >
+                    <PlusCircle className="w-4 h-4 stroke-[2.5]" />
+                    <span>+ Thêm Hạng Mục Đầu Tiên</span>
+                  </button>
+                )}
               </div>
             ) : (
               <table
