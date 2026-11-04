@@ -322,8 +322,45 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
     saveSavedUsers(result.users);
   }
 
+  // Tự động đồng bộ danh sách mã Tách riêng SCTS từ Google Sheet về máy nếu có
+  if (Array.isArray(result.sctsSeparatedCodes) && result.sctsSeparatedCodes.length > 0) {
+    try {
+      localStorage.setItem('app_scts_separated_codes_v2', JSON.stringify(result.sctsSeparatedCodes));
+      window.dispatchEvent(new Event('app_scts_codes_updated'));
+    } catch (sctsErr) {
+      console.warn('Lỗi lưu cấu hình SCTS từ online:', sctsErr);
+    }
+  }
+
   setLastSyncTime();
-  return result; // { budgets: [...], transactions: [...], bravoInfo: [...], users: [...] }
+  return result; // { budgets: [...], transactions: [...], bravoInfo: [...], users: [...], sctsSeparatedCodes: [...] }
+};
+
+/**
+ * Đồng bộ danh sách các mã Tách riêng SCTS lên Google Sheet
+ */
+export const syncSctsSeparatedCodesToGoogleSheet = async (webhookUrl, codes) => {
+  const url = webhookUrl || getSavedWebhookUrl();
+  if (!url) return null;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify({
+        action: 'saveSctsSeparatedCodes',
+        codes: codes,
+      }),
+    });
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.warn('Không thể đồng bộ cấu hình SCTS lên Google Sheet:', error);
+    return null;
+  }
 };
 
 /**

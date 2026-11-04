@@ -49,6 +49,17 @@ function doGet(e) {
       const scriptProperties = PropertiesService.getScriptProperties();
       const bravoDriveUrl = scriptProperties.getProperty('BRAVO_DRIVE_FOLDER_URL') || '';
 
+      const sctsCodesRaw = scriptProperties.getProperty('SCTS_SEPARATED_CODES') || '';
+      let sctsSeparatedCodes = ['62762103', '62762216', '62762188'];
+      try {
+        if (sctsCodesRaw) {
+          const parsed = JSON.parse(sctsCodesRaw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            sctsSeparatedCodes = parsed;
+          }
+        }
+      } catch (e) {}
+
       return createJsonResponse({
         status: 'success',
         transactions: transactions,
@@ -56,6 +67,7 @@ function doGet(e) {
         bravoInfo: bravoInfo,
         users: users,
         bravoDriveUrl: bravoDriveUrl,
+        sctsSeparatedCodes: sctsSeparatedCodes,
         serverTime: new Date().toISOString()
       });
     }
@@ -350,6 +362,17 @@ function doPost(e) {
       return createJsonResponse({
         status: 'success',
         message: deleted ? 'Đã xóa quyền người dùng thành công' : 'Không tìm thấy email'
+      });
+    }
+
+    // 7. Lưu cấu hình danh sách mã tài khoản Tách riêng SCTS (Đồng bộ 2 chiều toàn hệ thống)
+    if (action === 'saveSctsSeparatedCodes') {
+      const codes = Array.isArray(data.codes) ? data.codes : [];
+      PropertiesService.getScriptProperties().setProperty('SCTS_SEPARATED_CODES', JSON.stringify(codes));
+      return createJsonResponse({
+        status: 'success',
+        message: 'Đã lưu cấu hình tách riêng SCTS trên Google Sheet thành công',
+        codes: codes
       });
     }
 

@@ -8,10 +8,16 @@
  * Đối với Kế hoạch SCTX, hệ thống sẽ chỉ lấy chi phí Nhập liệu thực tế (SCTX), tách riêng số liệu Bravo.
  */
 
-const STORAGE_KEY_SCTS_EXCLUDED = 'app_scts_separated_codes_v1';
+import { syncSctsSeparatedCodesToGoogleSheet, getSavedWebhookUrl } from '../services/googleSheetService.js';
 
-// Danh sách mặc định các mã có dự án SCTS lớn hạch toán gộp trên Bravo
-export const DEFAULT_SCTS_SEPARATED_CODES = ['62762103', '62762216'];
+const STORAGE_KEY_SCTS_EXCLUDED = 'app_scts_separated_codes_v2';
+const LEGACY_STORAGE_KEY = 'app_scts_separated_codes_v1';
+
+// Danh sách mặc định các mã có dự án SCTS lớn hạch toán gộp trên Bravo:
+// - 62762103: Sửa chữa bến bãi ô tô, sân đường
+// - 62762216: Sửa chữa thiết bị nhà ga
+// - 62762188: Sửa chữa nhà cửa, vật kiến trúc khác (có dự án lớn hạch toán gộp trên Bravo)
+export const DEFAULT_SCTS_SEPARATED_CODES = ['62762103', '62762216', '62762188'];
 
 export const getSctsSeparatedCodes = () => {
   try {
@@ -20,16 +26,34 @@ export const getSctsSeparatedCodes = () => {
       const parsed = JSON.parse(saved);
       if (Array.isArray(parsed)) return parsed;
     }
+    // Chuyển đổi từ cache cũ v1: đảm bảo nạp bổ sung mã 62762188
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy) {
+      const parsedLegacy = JSON.parse(legacy);
+      if (Array.isArray(parsedLegacy)) {
+        const merged = Array.from(new Set([...DEFAULT_SCTS_SEPARATED_CODES, ...parsedLegacy]));
+        localStorage.setItem(STORAGE_KEY_SCTS_EXCLUDED, JSON.stringify(merged));
+        return merged;
+      }
+    }
   } catch (e) {
     console.error(e);
   }
   return DEFAULT_SCTS_SEPARATED_CODES;
 };
 
-export const saveSctsSeparatedCodes = (codes) => {
+export const saveSctsSeparatedCodes = (codes, syncOnline = true) => {
   try {
     localStorage.setItem(STORAGE_KEY_SCTS_EXCLUDED, JSON.stringify(codes));
     window.dispatchEvent(new Event('app_scts_codes_updated'));
+
+    // Tự động đồng bộ lên Google Sheet nếu có kết nối Webhook
+    if (syncOnline) {
+      const webhookUrl = getSavedWebhookUrl();
+      if (webhookUrl) {
+        syncSctsSeparatedCodesToGoogleSheet(webhookUrl, codes);
+      }
+    }
   } catch (e) {
     console.error(e);
   }
