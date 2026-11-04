@@ -420,6 +420,36 @@ export default function DashboardPage({ user }) {
     }
   };
 
+  // Tự động kiểm tra và đồng bộ lại ngầm từ Google Sheet khi người dùng chuyển lại tab (Focus)
+  useEffect(() => {
+    let lastCheck = Date.now();
+    const handleFocusSync = () => {
+      const now = Date.now();
+      // Giới hạn tần suất: tối đa 1 lần mỗi 10 giây khi chuyển đổi qua lại giữa các tab/cửa sổ trình duyệt
+      if (now - lastCheck < 10000) return;
+      lastCheck = now;
+
+      const webhookUrl = getSavedWebhookUrl();
+      if (webhookUrl && !isSyncing) {
+        handleSyncNow(webhookUrl, false);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleFocusSync();
+      }
+    };
+
+    window.addEventListener('focus', handleFocusSync);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleFocusSync);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isSyncing]);
+
   const handleAddTransaction = (newRecord) => {
     const recordWithYear = {
       ...newRecord,

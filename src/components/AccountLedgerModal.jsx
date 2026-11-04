@@ -374,8 +374,17 @@ export default function AccountLedgerModal({
     const handleUpdate = () => {
       setSctsCodes(getSctsSeparatedCodes());
     };
+    const handleStorage = (e) => {
+      if (e.key === 'app_scts_separated_codes_v2') {
+        setSctsCodes(getSctsSeparatedCodes());
+      }
+    };
     window.addEventListener('app_scts_codes_updated', handleUpdate);
-    return () => window.removeEventListener('app_scts_codes_updated', handleUpdate);
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener('app_scts_codes_updated', handleUpdate);
+      window.removeEventListener('storage', handleStorage);
+    };
   }, []);
 
   // 2. ONLY return early after ALL hooks have been executed
@@ -791,7 +800,10 @@ export default function AccountLedgerModal({
 
               <button
                 type="button"
-                onClick={() => toggleSctsSeparation(account.code)}
+                onClick={() => {
+                  const updated = toggleSctsSeparation(account.code);
+                  setSctsCodes(updated);
+                }}
                 className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-3xs sm:text-[10px] font-bold shrink-0 transition-all cursor-pointer ${
                   isSeparated
                     ? 'bg-indigo-600 hover:bg-indigo-700 text-white'

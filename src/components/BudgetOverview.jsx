@@ -83,8 +83,17 @@ export default function BudgetOverview({
     const handleSctsUpdate = () => {
       setSctsCodes(getSctsSeparatedCodes());
     };
+    const handleStorage = (e) => {
+      if (e.key === 'app_scts_separated_codes_v2') {
+        setSctsCodes(getSctsSeparatedCodes());
+      }
+    };
     window.addEventListener('app_scts_codes_updated', handleSctsUpdate);
-    return () => window.removeEventListener('app_scts_codes_updated', handleSctsUpdate);
+    window.addEventListener('storage', handleStorage);
+    return () => {
+      window.removeEventListener('app_scts_codes_updated', handleSctsUpdate);
+      window.removeEventListener('storage', handleStorage);
+    };
   }, []);
 
   // Admin toggle for optional comparison columns: "Theo Bravo" and "Theo Nhập Liệu"

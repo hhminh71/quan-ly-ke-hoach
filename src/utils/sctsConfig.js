@@ -12,65 +12,81 @@ import { syncSctsSeparatedCodesToGoogleSheet, getSavedWebhookUrl } from '../serv
 
 const STORAGE_KEY_SCTS_EXCLUDED = 'app_scts_separated_codes_v2';
 const LEGACY_STORAGE_KEY = 'app_scts_separated_codes_v1';
-const TOGGLED_OFF_KEY = 'app_scts_toggled_off_codes_v2';
 
-// Danh sách mặc định các mã có dự án SCTS lớn hạch toán gộp trên Bravo:
-// - 62762103: Sửa chữa bến bãi ô tô, sân đường
-// - 62762216: Sửa chữa thiết bị nhà ga
-// - 62762188: Sửa chữa nhà cửa, vật kiến trúc khác (có dự án lớn hạch toán gộp trên Bravo)
-export const DEFAULT_SCTS_SEPARATED_CODES = ['62762103', '62762216', '62762188'];
+// Danh sách mặc định khi ứng dụng mới tinh (chưa từng đồng bộ hoặc lưu cấu hình):
+// 62762103: Sửa chữa bến bãi ô tô, sân đường
+// 62762216: Sửa chữa thiết bị nhà ga
+export const DEFAULT_SCTS_SEPARATED_CODES = ['62762103', '62762216'];
 
+/**
+ * Lấy danh sách các mã đang được Tách riêng SCTS.
+ * Nguồn dữ liệu:
+ * 1. Nếu trong localStorage đã có danh sách đã lưu (do người dùng chỉnh sửa hoặc đồng bộ từ Google Sheet về),
+ *    sử dụng CHÍNH XÁC danh sách đó làm nguồn sự thật (Source of Truth).
+ * 2. Tuyệt đối không tự động gộp (merge) lại danh sách mặc định nếu người dùng đã chủ động gộp/bỏ tách.
+ * 3. Chỉ trả về DEFAULT_SCTS_SEPARATED_CODES khi localStorage hoàn toàn chưa có dữ liệu.
+ */
 export const getSctsSeparatedCodes = () => {
   try {
-    let list = [];
     const saved = localStorage.getItem(STORAGE_KEY_SCTS_EXCLUDED);
-    if (saved) {
+    if (saved !== null) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed)) list = parsed;
-    } else {
-      const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
-      if (legacy) {
-        const parsedLegacy = JSON.parse(legacy);
-        if (Array.isArray(parsedLegacy)) list = parsedLegacy;
+      if (Array.isArray(parsed)) {
+        return parsed.map((c) => String(c).trim()).filter(Boolean);
       }
     }
 
-    // Danh sách các mã mà người dùng đã chủ động bấm nút TẮT tách SCTS
-    let toggledOff = [];
-    try {
-      const offSaved = localStorage.getItem(TOGGLED_OFF_KEY);
-      if (offSaved) toggledOff = JSON.parse(offSaved);
-    } catch (e) {}
-
-    // Luôn đảm bảo các mã cốt lõi (DEFAULT) được kích hoạt trừ khi người dùng đã chủ động tắt
-    const activeDefaults = DEFAULT_SCTS_SEPARATED_CODES.filter((c) => !toggledOff.includes(c));
-    const merged = Array.from(new Set([...activeDefaults, ...list]));
-
-    // Lưu ngược lại storage để các lần sau đọc nhanh
-    if (JSON.stringify(merged) !== saved) {
-      localStorage.setItem(STORAGE_KEY_SCTS_EXCLUDED, JSON.stringify(merged));
+    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+    if (legacy !== null) {
+      const parsedLegacy = JSON.parse(legacy);
+      if (Array.isArray(parsedLegacy)) {
+        const clean = parsedLegacy.map((c) => String(c).trim()).filter(Boolean);
+        localStorage.setItem(STORAGE_KEY_SCTS_EXCLUDED, JSON.stringify(clean));
+        return clean;
+      }
     }
-    return merged;
   } catch (e) {
-    console.error(e);
+    console.error('Lỗi đọc cấu hình SCTS:', e);
   }
-  return DEFAULT_SCTS_SEPARATED_CODES;
+  return [...DEFAULT_SCTS_SEPARATED_CODES];
 };
 
+/**
+ * Lưu danh sách mã SCTS được đồng bộ từ Cloud (Google Sheet)
+ */
+export const setSyncedSctsCodes = (codes) => {
+  if (!Array.isArray(codes)) return;
+  const normalized = Array.from(new Set(codes.map((c) => String(c).trim()).filter(Boolean)));
+  try {
+    localStorage.setItem(STORAGE_KEY_SCTS_EXCLUDED, JSON.stringify(normalized));
+    localStorage.removeItem('app_scts_toggled_off_codes_v2');
+    localStorage.removeItem('app_scts_toggled_off_codes');
+  } catch (e) {
+    console.error('Lỗi ghi cấu hình SCTS đồng bộ:', e);
+  }
+  window.dispatchEvent(new CustomEvent('app_scts_codes_updated', { detail: normalized }));
+};
+
+/**
+ * Lưu danh sách mã SCTS vào localStorage và gửi đồng bộ 2 chiều lên Google Sheet
+ */
 export const saveSctsSeparatedCodes = (codes, syncOnline = true) => {
   try {
-    localStorage.setItem(STORAGE_KEY_SCTS_EXCLUDED, JSON.stringify(codes));
-    window.dispatchEvent(new Event('app_scts_codes_updated'));
+    const normalized = Array.from(new Set((codes || []).map((c) => String(c).trim()).filter(Boolean)));
+    localStorage.setItem(STORAGE_KEY_SCTS_EXCLUDED, JSON.stringify(normalized));
+    localStorage.removeItem('app_scts_toggled_off_codes_v2');
+    localStorage.removeItem('app_scts_toggled_off_codes');
+    window.dispatchEvent(new CustomEvent('app_scts_codes_updated', { detail: normalized }));
 
     // Tự động đồng bộ lên Google Sheet nếu có kết nối Webhook
     if (syncOnline) {
       const webhookUrl = getSavedWebhookUrl();
       if (webhookUrl) {
-        syncSctsSeparatedCodesToGoogleSheet(webhookUrl, codes);
+        syncSctsSeparatedCodesToGoogleSheet(webhookUrl, normalized);
       }
     }
   } catch (e) {
-    console.error(e);
+    console.error('Lỗi lưu cấu hình SCTS:', e);
   }
 };
 
@@ -80,30 +96,24 @@ export const isSctsSeparated = (code, customList = null) => {
   return list.includes(String(code).trim());
 };
 
+/**
+ * Đổi trạng thái Tách / Gộp SCTS cho một mã tài khoản:
+ * - Nếu đang tách -> Gộp lại (loại bỏ khỏi danh sách)
+ * - Nếu đang gộp -> Tách riêng (thêm vào danh sách)
+ */
 export const toggleSctsSeparation = (code) => {
   if (!code) return getSctsSeparatedCodes();
   const str = String(code).trim();
   const current = getSctsSeparatedCodes();
   let updated;
-  let toggledOff = [];
-  try {
-    const offSaved = localStorage.getItem(TOGGLED_OFF_KEY);
-    if (offSaved) toggledOff = JSON.parse(offSaved);
-  } catch (e) {}
 
   if (current.includes(str)) {
-    // Người dùng bấm TẮT tách SCTS
+    // Đang Tách SCTS -> Người dùng bấm GỘP SCTS
     updated = current.filter((c) => c !== str);
-    if (!toggledOff.includes(str)) toggledOff.push(str);
   } else {
-    // Người dùng bấm BẬT tách SCTS
-    updated = [...current, str];
-    toggledOff = toggledOff.filter((c) => c !== str);
+    // Đang Gộp SCTS -> Người dùng bấm TÁCH RIÊNG SCTS
+    updated = Array.from(new Set([...current, str]));
   }
-
-  try {
-    localStorage.setItem(TOGGLED_OFF_KEY, JSON.stringify(toggledOff));
-  } catch (e) {}
 
   saveSctsSeparatedCodes(updated, true);
   return updated;

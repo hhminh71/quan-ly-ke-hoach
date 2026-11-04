@@ -50,11 +50,17 @@ function doGet(e) {
       const bravoDriveUrl = scriptProperties.getProperty('BRAVO_DRIVE_FOLDER_URL') || '';
 
       const sctsCodesRaw = scriptProperties.getProperty('SCTS_SEPARATED_CODES') || '';
-      let sctsSeparatedCodes = ['62762103', '62762216', '62762188'];
+      let sctsSeparatedCodes = ['62762103', '62762216'];
       try {
         if (sctsCodesRaw) {
           const parsed = JSON.parse(sctsCodesRaw);
-          if (Array.isArray(parsed) && parsed.length > 0) {
+          if (Array.isArray(parsed)) {
+            sctsSeparatedCodes = parsed;
+          }
+        } else if (bravoDriveUrl && bravoDriveUrl.includes('#--SCTS--=')) {
+          const parts = bravoDriveUrl.split('#--SCTS--=');
+          const parsed = JSON.parse(parts[1]);
+          if (Array.isArray(parsed)) {
             sctsSeparatedCodes = parsed;
           }
         }

@@ -324,14 +324,14 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
 
   // Phục hồi cấu hình Tách SCTS từ Google Sheet qua cả 2 cơ chế (Native property hoặc bridge qua bravoDriveUrl)
   let extractedSctsCodes = null;
-  if (Array.isArray(result.sctsSeparatedCodes) && result.sctsSeparatedCodes.length > 0) {
+  if (Array.isArray(result.sctsSeparatedCodes)) {
     extractedSctsCodes = result.sctsSeparatedCodes;
   } else if (typeof result.bravoDriveUrl === 'string' && result.bravoDriveUrl.includes('#--SCTS--=')) {
     try {
       const parts = result.bravoDriveUrl.split('#--SCTS--=');
       result.bravoDriveUrl = parts[0].trim();
       const parsed = JSON.parse(parts[1]);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         extractedSctsCodes = parsed;
       }
     } catch (e) {
@@ -339,10 +339,13 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
     }
   }
 
-  if (Array.isArray(extractedSctsCodes) && extractedSctsCodes.length > 0) {
+  if (Array.isArray(extractedSctsCodes)) {
     try {
-      localStorage.setItem('app_scts_separated_codes_v2', JSON.stringify(extractedSctsCodes));
-      window.dispatchEvent(new Event('app_scts_codes_updated'));
+      const normalized = Array.from(new Set(extractedSctsCodes.map((c) => String(c).trim()).filter(Boolean)));
+      localStorage.setItem('app_scts_separated_codes_v2', JSON.stringify(normalized));
+      localStorage.removeItem('app_scts_toggled_off_codes_v2');
+      localStorage.removeItem('app_scts_toggled_off_codes');
+      window.dispatchEvent(new CustomEvent('app_scts_codes_updated', { detail: normalized }));
     } catch (sctsErr) {
       console.warn('Lỗi lưu cấu hình SCTS từ online:', sctsErr);
     }
@@ -359,6 +362,8 @@ export const syncSctsSeparatedCodesToGoogleSheet = async (webhookUrl, codes) => 
   const url = webhookUrl || getSavedWebhookUrl();
   if (!url) return null;
 
+  const cleanCodes = Array.from(new Set((codes || []).map((c) => String(c).trim()).filter(Boolean)));
+
   try {
     // 1. Gửi đồng thời action chuẩn `saveSctsSeparatedCodes` (cho bản Webhook mới)
     fetch(url, {
@@ -366,7 +371,7 @@ export const syncSctsSeparatedCodesToGoogleSheet = async (webhookUrl, codes) => 
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({
         action: 'saveSctsSeparatedCodes',
-        codes: codes,
+        codes: cleanCodes,
       }),
     }).catch(() => {});
 
@@ -374,8 +379,8 @@ export const syncSctsSeparatedCodesToGoogleSheet = async (webhookUrl, codes) => 
     const currentDriveUrl = localStorage.getItem('app_bravo_drive_url') || '';
     const cleanDriveUrl = currentDriveUrl.split('#--SCTS--=')[0].trim();
     const payloadUrl = cleanDriveUrl
-      ? `${cleanDriveUrl}#--SCTS--=${JSON.stringify(codes)}`
-      : `#--SCTS--=${JSON.stringify(codes)}`;
+      ? `${cleanDriveUrl}#--SCTS--=${JSON.stringify(cleanCodes)}`
+      : `#--SCTS--=${JSON.stringify(cleanCodes)}`;
 
     const response = await fetch(url, {
       method: 'POST',
@@ -386,8 +391,12 @@ export const syncSctsSeparatedCodesToGoogleSheet = async (webhookUrl, codes) => 
       }),
     });
 
-    const result = await response.json();
-    return result;
+    try {
+      const result = await response.json();
+      return result;
+    } catch (e) {
+      return { status: 'success' };
+    }
   } catch (error) {
     console.warn('Không thể đồng bộ cấu hình SCTS lên Google Sheet:', error);
     return null;
