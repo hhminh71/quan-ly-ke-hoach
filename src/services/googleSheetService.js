@@ -198,6 +198,30 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
       }
 
       // Đảm bảo mọi trường luôn có kiểu dữ liệu chuẩn, không bị crash bởi null/number
+      const rawNotes = String(rec.notes || '').trim();
+      let rawRemark = String(rec.remark || rec.ghiChu || rec.notesExtra || '').trim();
+      let rawEmployee = String(rec.employeeName || '').trim();
+
+      // Nếu remark bị sao chép trùng lặp y nguyên nội dung diễn giải (do lỗi Apps Script đọc nhầm cột)
+      if (rawRemark === rawNotes) {
+        rawRemark = '';
+      }
+
+      // Tự động nhận diện nội dung ghi chú phê duyệt (VD: "Sếp ok cho mua", "Chờ duyệt",...) bị đặt nhầm vào ô Người thực hiện
+      const isRemarkInEmployee =
+        /^(sếp|sep|chờ|cho|dự kiến|du kien|chưa|chua|hợp đồng|hop dong|bảo trì|bao tri)/i.test(rawEmployee) ||
+        rawEmployee.toLowerCase().includes('ok') ||
+        rawEmployee.toLowerCase().includes('cho mua') ||
+        rawEmployee.toLowerCase().includes('phê duyệt') ||
+        rawEmployee.toLowerCase().includes('phe duyet');
+
+      if (isRemarkInEmployee) {
+        if (!rawRemark) {
+          rawRemark = rawEmployee;
+        }
+        rawEmployee = '-';
+      }
+
       return {
         id: rec.id || idx + 1,
         fiscalYear: String(rec.fiscalYear || (rec.date && rec.date.length >= 4 ? rec.date.substring(0, 4) : '')).trim(),
@@ -205,10 +229,10 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
         accountCode: String(rec.accountCode || '').trim(),
         category: String(rec.category || '').trim(),
         group: String(rec.group || '').trim(),
-        employeeName: String(rec.employeeName || '').trim(),
+        employeeName: rawEmployee,
         amount: Number(rec.amount) || 0,
-        notes: String(rec.notes || '').trim(),
-        remark: String(rec.remark || rec.ghiChu || rec.notesExtra || '').trim(),
+        notes: rawNotes,
+        remark: rawRemark,
         chuaBcms: Boolean(
           rec.chuaBcms === true ||
           rec.chuaBcms === 'true' ||

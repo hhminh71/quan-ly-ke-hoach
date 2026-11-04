@@ -377,8 +377,12 @@ function getTransactionsFromSheet(ss) {
   const groupIdx = header.findIndex(function(h) { return h.includes('nhóm'); });
   const personIdx = header.findIndex(function(h) { return h.includes('người') || h.includes('nhân sự'); });
   const amountIdx = header.findIndex(function(h) { return h.includes('tiền') || h.includes('số tiền'); });
-  const notesIdx = header.findIndex(function(h) { return h.includes('nội dung') || (h.includes('diễn giải') && !h.includes('ghi chú')); });
-  const remarkIdx = header.findIndex(function(h) { return h.includes('ghi chú'); });
+  const notesIdx = header.findIndex(function(h) { 
+    return (h.includes('nội dung') || h.includes('diễn giải')) && !h.includes('ghi chú bổ sung'); 
+  });
+  const remarkIdx = header.findIndex(function(h) { 
+    return (h.includes('ghi chú') || h.includes('remark')) && !h.includes('nội dung'); 
+  });
   const chuaBcmsIdx = header.findIndex(function(h) { return h.includes('chưa bcms') || h.includes('bcms') || h.includes('dự kiến'); });
   const timeIdx = header.findIndex(function(h) { return h.includes('thời gian') || h.includes('giờ'); });
 
@@ -396,7 +400,17 @@ function getTransactionsFromSheet(ss) {
     }
 
     const notesVal = String((notesIdx >= 0 ? r[notesIdx] : (r[8] || '')) || '');
-    const remarkVal = String((remarkIdx >= 0 ? r[remarkIdx] : (r[10] || '')) || '');
+    let remarkVal = String((remarkIdx >= 0 && remarkIdx !== notesIdx ? r[remarkIdx] : (r[10] || '')) || '');
+    if (remarkVal === notesVal) {
+      remarkVal = '';
+    }
+
+    let empVal = String((personIdx >= 0 ? r[personIdx] : r[6]) || '');
+    if (/^(sếp|sep|chờ|cho|dự kiến|du kien|chưa|chua|hợp đồng|bảo trì)/i.test(empVal) || empVal.toLowerCase().includes('ok') || empVal.toLowerCase().includes('cho mua')) {
+      if (!remarkVal) remarkVal = empVal;
+      empVal = '-';
+    }
+
     const rawChuaBcms = chuaBcmsIdx >= 0 ? r[chuaBcmsIdx] : (r[11] || false);
     const isChuaBcms = Boolean(
       rawChuaBcms === true ||
@@ -416,7 +430,7 @@ function getTransactionsFromSheet(ss) {
       accountCode: String((codeIdx >= 0 ? r[codeIdx] : r[3]) || ''),
       category: String((nameIdx >= 0 ? r[nameIdx] : r[4]) || ''),
       group: String((groupIdx >= 0 ? r[groupIdx] : r[5]) || ''),
-      employeeName: String((personIdx >= 0 ? r[personIdx] : r[6]) || ''),
+      employeeName: empVal,
       amount: Number(rawAmount) || 0,
       notes: notesVal,
       remark: remarkVal,
@@ -643,8 +657,10 @@ function ensureSheetsInitialized(ss) {
       'Nhóm Chi Phí',
       'Người Thực Hiện',
       'Số Tiền (VNĐ)',
-      'Nội Dung Ghi Chú',
-      'Thời Gian Ghi'
+      'Nội Dung Diễn Giải',
+      'Thời Gian Ghi',
+      'Ghi Chú Bổ Sung',
+      'Chưa BCMS'
     ]);
     txSheet.getRange('1:1').setFontWeight('bold').setBackground('#eff6ff');
     txSheet.setFrozenRows(1);

@@ -49,32 +49,54 @@ export default function DashboardPage({ user }) {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          return parsed.map((t, idx) => ({
-            id: t.id || idx + 1,
-            fiscalYear: String(t.fiscalYear || (t.date && t.date.length >= 4 ? t.date.substring(0, 4) : '')).trim(),
-            date: String(t.date || '').trim(),
-            accountCode: String(t.accountCode || '').trim(),
-            category: String(t.category || '').trim(),
-            group: String(t.group || '').trim(),
-            employeeName: String(t.employeeName || '').trim(),
-            amount: Number(t.amount) || 0,
-            notes: String(t.notes || '').trim(),
-            remark: String(t.remark || '').trim(),
-            chuaBcms: Boolean(
-              t.chuaBcms === true ||
-              t.chuaBcms === 'true' ||
-              t.chuaBcms === 'TRUE' ||
-              t.chuaBcms === 1 ||
-              (t.chuaBcms === undefined &&
-                typeof t.notes === 'string' &&
-                (t.notes.toLowerCase().includes('dự kiến') ||
-                  t.notes.toLowerCase().includes('du kien') ||
-                  t.notes.toLowerCase().includes('chưa bcms') ||
-                  t.notes.toLowerCase().includes('chua bcms')))
-            ),
-            createdAt: String(t.createdAt || '09:00'),
-            status: String(t.status || 'Đã thực hiện'),
-          }));
+          return parsed.map((t, idx) => {
+            const notes = String(t.notes || '').trim();
+            let remark = String(t.remark || '').trim();
+            let employeeName = String(t.employeeName || '').trim();
+
+            if (remark === notes) {
+              remark = '';
+            }
+
+            const isRemarkInEmployee =
+              /^(sếp|sep|chờ|cho|dự kiến|du kien|chưa|chua|hợp đồng|hop dong|bảo trì|bao tri)/i.test(employeeName) ||
+              employeeName.toLowerCase().includes('ok') ||
+              employeeName.toLowerCase().includes('cho mua') ||
+              employeeName.toLowerCase().includes('phê duyệt') ||
+              employeeName.toLowerCase().includes('phe duyet');
+
+            if (isRemarkInEmployee) {
+              if (!remark) remark = employeeName;
+              employeeName = '-';
+            }
+
+            return {
+              id: t.id || idx + 1,
+              fiscalYear: String(t.fiscalYear || (t.date && t.date.length >= 4 ? t.date.substring(0, 4) : '')).trim(),
+              date: String(t.date || '').trim(),
+              accountCode: String(t.accountCode || '').trim(),
+              category: String(t.category || '').trim(),
+              group: String(t.group || '').trim(),
+              employeeName: employeeName,
+              amount: Number(t.amount) || 0,
+              notes: notes,
+              remark: remark,
+              chuaBcms: Boolean(
+                t.chuaBcms === true ||
+                t.chuaBcms === 'true' ||
+                t.chuaBcms === 'TRUE' ||
+                t.chuaBcms === 1 ||
+                (t.chuaBcms === undefined &&
+                  typeof t.notes === 'string' &&
+                  (t.notes.toLowerCase().includes('dự kiến') ||
+                    t.notes.toLowerCase().includes('du kien') ||
+                    t.notes.toLowerCase().includes('chưa bcms') ||
+                    t.notes.toLowerCase().includes('chua bcms')))
+              ),
+              createdAt: String(t.createdAt || '09:00'),
+              status: String(t.status || 'Đã thực hiện'),
+            };
+          });
         }
       }
       // Clean up legacy cache so user gets fresh normalized transaction data
@@ -84,19 +106,43 @@ export default function DashboardPage({ user }) {
     } catch (e) {
       console.error(e);
     }
-    return initialTransactions.map((t, idx) => ({
-      ...t,
-      id: t.id || idx + 1,
-      chuaBcms: Boolean(
-        t.chuaBcms === true ||
-        (typeof t.notes === 'string' &&
-          (t.notes.toLowerCase().includes('dự kiến') ||
-            t.notes.toLowerCase().includes('du kien') ||
-            t.notes.toLowerCase().includes('chưa bcms') ||
-            t.notes.toLowerCase().includes('chua bcms')))
-      ),
-      remark: String(t.remark || '').trim(),
-    }));
+    return initialTransactions.map((t, idx) => {
+      const notes = String(t.notes || '').trim();
+      let remark = String(t.remark || '').trim();
+      let employeeName = String(t.employeeName || '').trim();
+
+      if (remark === notes) {
+        remark = '';
+      }
+
+      const isRemarkInEmployee =
+        /^(sếp|sep|chờ|cho|dự kiến|du kien|chưa|chua|hợp đồng|hop dong|bảo trì|bao tri)/i.test(employeeName) ||
+        employeeName.toLowerCase().includes('ok') ||
+        employeeName.toLowerCase().includes('cho mua') ||
+        employeeName.toLowerCase().includes('phê duyệt') ||
+        employeeName.toLowerCase().includes('phe duyet');
+
+      if (isRemarkInEmployee) {
+        if (!remark) remark = employeeName;
+        employeeName = '-';
+      }
+
+      return {
+        ...t,
+        id: t.id || idx + 1,
+        employeeName: employeeName,
+        notes: notes,
+        chuaBcms: Boolean(
+          t.chuaBcms === true ||
+          (typeof t.notes === 'string' &&
+            (t.notes.toLowerCase().includes('dự kiến') ||
+              t.notes.toLowerCase().includes('du kien') ||
+              t.notes.toLowerCase().includes('chưa bcms') ||
+              t.notes.toLowerCase().includes('chua bcms')))
+        ),
+        remark: remark,
+      };
+    });
   });
 
   const [budgets, setBudgets] = useState(() => {

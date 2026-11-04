@@ -784,13 +784,14 @@
     "createdAt": "09:00",
     "category": "Công cụ dụng cụ lao động",
     "notes": "Máy Scan",
-    "employeeName": "Sếp ok cho mua",
+    "employeeName": "-",
     "date": "2026-10-21",
     "group": "SỬA CHỮA THƯỜNG XUYÊN",
     "status": "Đã thực hiện",
     "accountCode": "627311",
     "amount": 9166667,
-    "fiscalYear": "2026"
+    "fiscalYear": "2026",
+    "remark": "Sếp ok cho mua"
   },
   {
     "id": 62,
@@ -823,39 +824,42 @@
     "createdAt": "09:00",
     "category": "Công cụ dụng cụ lao động",
     "notes": "Tủ 12 ngăn",
-    "employeeName": "Sếp ok cho mua",
+    "employeeName": "-",
     "date": "2026-10-21",
     "group": "SỬA CHỮA THƯỜNG XUYÊN",
     "status": "Đã thực hiện",
     "accountCode": "627311",
     "amount": 3500000,
-    "fiscalYear": "2026"
+    "fiscalYear": "2026",
+    "remark": "Sếp ok cho mua"
   },
   {
     "id": 65,
     "createdAt": "09:00",
     "category": "Công cụ dụng cụ lao động",
     "notes": "Kệ để hành lý chuyển tiếp,đặc biệt (2 cái)",
-    "employeeName": "Sếp ok cho mua",
+    "employeeName": "-",
     "date": "2026-10-21",
     "group": "SỬA CHỮA THƯỜNG XUYÊN",
     "status": "Đã thực hiện",
     "accountCode": "627311",
     "amount": 3600000,
-    "fiscalYear": "2026"
+    "fiscalYear": "2026",
+    "remark": "Sếp ok cho mua"
   },
   {
     "id": 66,
     "createdAt": "09:00",
     "category": "Công cụ dụng cụ lao động",
     "notes": "Bảng mica (10 cái)",
-    "employeeName": "Sếp ok cho mua",
+    "employeeName": "-",
     "date": "2026-10-21",
     "group": "SỬA CHỮA THƯỜNG XUYÊN",
     "status": "Đã thực hiện",
     "accountCode": "627311",
     "amount": 2000000,
-    "fiscalYear": "2026"
+    "fiscalYear": "2026",
+    "remark": "Sếp ok cho mua"
   },
   {
     "id": 67,
@@ -875,39 +879,42 @@
     "createdAt": "09:00",
     "category": "Công cụ dụng cụ lao động",
     "notes": "Bình chữa cháy bột MT35 (Hiện có 11. mua thêm 8)",
-    "employeeName": "Ban Quản lý",
+    "employeeName": "-",
     "date": "2026-10-21",
     "group": "SỬA CHỮA THƯỜNG XUYÊN",
     "status": "Đã thực hiện",
     "accountCode": "627311",
     "amount": 32560000,
-    "fiscalYear": "2026"
+    "fiscalYear": "2026",
+    "remark": "Sếp ok cho mua"
   },
   {
     "id": 69,
     "createdAt": "09:00",
     "category": "Công cụ dụng cụ lao động",
     "notes": "Bình chữa cháy bột 8kg (Hiện có 282, mua thêm 50)",
-    "employeeName": "Ban Quản lý",
+    "employeeName": "-",
     "date": "2026-10-21",
     "group": "SỬA CHỮA THƯỜNG XUYÊN",
     "status": "Đã thực hiện",
     "accountCode": "627311",
     "amount": 38500000,
-    "fiscalYear": "2026"
+    "fiscalYear": "2026",
+    "remark": "Sếp ok cho mua"
   },
   {
     "id": 70,
     "createdAt": "09:00",
     "category": "Công cụ dụng cụ lao động",
     "notes": "Bình chữa cháy CO2 MT5 (Hiện có 97, mua thêm 10)",
-    "employeeName": "Ban Quản lý",
+    "employeeName": "-",
     "date": "2026-10-21",
     "group": "SỬA CHỮA THƯỜNG XUYÊN",
     "status": "Đã thực hiện",
     "accountCode": "627311",
     "amount": 8690000,
-    "fiscalYear": "2026"
+    "fiscalYear": "2026",
+    "remark": "Sếp ok cho mua"
   },
   {
     "id": 71,
