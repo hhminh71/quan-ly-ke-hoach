@@ -40,6 +40,33 @@ function doGet(e) {
 
     ensureSheetsInitialized(ss);
 
+    if (action === 'getSctsCodes') {
+      const scriptProperties = PropertiesService.getScriptProperties();
+      const bravoDriveUrl = scriptProperties.getProperty('BRAVO_DRIVE_FOLDER_URL') || '';
+      const sctsCodesRaw = scriptProperties.getProperty('SCTS_SEPARATED_CODES') || '';
+      let sctsSeparatedCodes = ['62762103', '62762216'];
+      try {
+        if (sctsCodesRaw) {
+          const parsed = JSON.parse(sctsCodesRaw);
+          if (Array.isArray(parsed)) {
+            sctsSeparatedCodes = parsed;
+          }
+        } else if (bravoDriveUrl && bravoDriveUrl.includes('#--SCTS--=')) {
+          const parts = bravoDriveUrl.split('#--SCTS--=');
+          const parsed = JSON.parse(parts[1]);
+          if (Array.isArray(parsed)) {
+            sctsSeparatedCodes = parsed;
+          }
+        }
+      } catch (e) {}
+
+      return createJsonResponse({
+        status: 'success',
+        sctsSeparatedCodes: sctsSeparatedCodes,
+        bravoDriveUrl: bravoDriveUrl
+      });
+    }
+
     if (action === 'getData') {
       const transactions = getTransactionsFromSheet(ss);
       const budgets = getBudgetsFromSheet(ss);
@@ -256,10 +283,21 @@ function doPost(e) {
       return handleFetchBravoFromDrive(driveUrlOrId, targetYear);
     }
 
-    // 6. Lưu cấu hình link thư mục Google Drive cố định cho toàn hệ thống (Chỉ Admin)
+    // 6. Lưu cấu hình link thư mục Google Drive cố định cho toàn hệ thống & cấu hình SCTS
     if (action === 'saveBravoDriveUrl') {
       const url = String(data.url || data.driveUrl || '').trim();
       PropertiesService.getScriptProperties().setProperty('BRAVO_DRIVE_FOLDER_URL', url);
+      if (Array.isArray(data.sctsCodes)) {
+        PropertiesService.getScriptProperties().setProperty('SCTS_SEPARATED_CODES', JSON.stringify(data.sctsCodes));
+      } else if (url.includes('#--SCTS--=')) {
+        try {
+          const parts = url.split('#--SCTS--=');
+          const parsed = JSON.parse(parts[1]);
+          if (Array.isArray(parsed)) {
+            PropertiesService.getScriptProperties().setProperty('SCTS_SEPARATED_CODES', JSON.stringify(parsed));
+          }
+        } catch (e) {}
+      }
       return createJsonResponse({
         status: 'success',
         message: 'Đã lưu cấu hình link thư mục Google Drive cố định thành công',

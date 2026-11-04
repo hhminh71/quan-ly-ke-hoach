@@ -35,6 +35,7 @@ import BravoSyncModal from '../components/BravoSyncModal';
 import {
   getSavedWebhookUrl,
   fetchFromGoogleSheet,
+  fetchSctsCodesOnly,
   addTransactionToGoogleSheet,
   updateTransactionInGoogleSheet,
   deleteTransactionFromGoogleSheet,
@@ -420,35 +421,63 @@ export default function DashboardPage({ user }) {
     }
   };
 
-  // Tự động kiểm tra và đồng bộ lại ngầm từ Google Sheet khi người dùng chuyển lại tab (Focus)
+  // Tự động kiểm tra và đồng bộ lại ngầm từ Google Sheet khi người dùng chuyển lại tab (Focus) và định kỳ
   useEffect(() => {
-    let lastCheck = Date.now();
-    const handleFocusSync = () => {
+    let isSyncingRef = false;
+    let lastSyncTime = 0;
+
+    const triggerFastSync = async (force = false) => {
       const now = Date.now();
-      // Giới hạn tần suất: tối đa 1 lần mỗi 10 giây khi chuyển đổi qua lại giữa các tab/cửa sổ trình duyệt
-      if (now - lastCheck < 10000) return;
-      lastCheck = now;
+      // Ngăn ngừa spam nếu vừa sync cách đây dưới 2 giây (trừ khi người dùng vừa chuyển tab và force=true)
+      if (!force && now - lastSyncTime < 2000) return;
+      if (isSyncingRef) return;
 
       const webhookUrl = getSavedWebhookUrl();
-      if (webhookUrl && !isSyncing) {
-        handleSyncNow(webhookUrl, false);
+      if (!webhookUrl) return;
+
+      isSyncingRef = true;
+      lastSyncTime = now;
+      try {
+        // 1. Thử lấy nhanh cấu hình SCTS (siêu nhẹ ~300ms, không tải 1.200 giao dịch)
+        await fetchSctsCodesOnly(webhookUrl);
+        // 2. Đồng bộ ngầm toàn bộ dữ liệu nền
+        await handleSyncNow(webhookUrl, false);
+      } catch (e) {
+        console.warn('Sync background error:', e);
+      } finally {
+        isSyncingRef = false;
       }
     };
 
+    // Khi người dùng chuyển tab quay lại web (Visibility / Focus): Đồng bộ ngay lập tức không chờ đợi!
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        handleFocusSync();
+        triggerFastSync(true);
       }
     };
 
-    window.addEventListener('focus', handleFocusSync);
+    const handleFocus = () => {
+      if (document.visibilityState === 'visible') {
+        triggerFastSync(true);
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
+    // Định kỳ kiểm tra ngầm mỗi 4 giây khi người dùng đang mở tab (giảm độ trễ đối với 2 màn hình song song)
+    const intervalId = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        triggerFastSync(false);
+      }
+    }, 4000);
+
     return () => {
-      window.removeEventListener('focus', handleFocusSync);
+      window.removeEventListener('focus', handleFocus);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(intervalId);
     };
-  }, [isSyncing]);
+  }, []);
 
   const handleAddTransaction = (newRecord) => {
     const recordWithYear = {

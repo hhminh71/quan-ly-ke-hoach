@@ -356,6 +356,33 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
 };
 
 /**
+ * Lấy NHANH chỉ cấu hình Tách riêng SCTS (Siêu nhẹ ~300ms, không tải 1.216 giao dịch)
+ */
+export const fetchSctsCodesOnly = async (webhookUrl) => {
+  const url = webhookUrl || getSavedWebhookUrl();
+  if (!url) return null;
+
+  try {
+    const targetUrl = `${url}?action=getSctsCodes&_t=${Date.now()}`;
+    const response = await fetch(targetUrl, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!response.ok) return null;
+    const result = await response.json();
+    if (result && result.status === 'success' && Array.isArray(result.sctsSeparatedCodes)) {
+      const normalized = Array.from(new Set(result.sctsSeparatedCodes.map((c) => String(c).trim()).filter(Boolean)));
+      localStorage.setItem('app_scts_separated_codes_v2', JSON.stringify(normalized));
+      window.dispatchEvent(new CustomEvent('app_scts_codes_updated', { detail: normalized }));
+      return normalized;
+    }
+  } catch (e) {
+    // Webhook phiên bản cũ chưa có getSctsCodes, bỏ qua và để fetchFromGoogleSheet xử lý
+  }
+  return null;
+};
+
+/**
  * Đồng bộ danh sách các mã Tách riêng SCTS lên Google Sheet
  */
 export const syncSctsSeparatedCodesToGoogleSheet = async (webhookUrl, codes) => {
@@ -365,17 +392,7 @@ export const syncSctsSeparatedCodesToGoogleSheet = async (webhookUrl, codes) => 
   const cleanCodes = Array.from(new Set((codes || []).map((c) => String(c).trim()).filter(Boolean)));
 
   try {
-    // 1. Gửi đồng thời action chuẩn `saveSctsSeparatedCodes` (cho bản Webhook mới)
-    fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        action: 'saveSctsSeparatedCodes',
-        codes: cleanCodes,
-      }),
-    }).catch(() => {});
-
-    // 2. Gửi bridge lưu vĩnh viễn vào Google Sheet qua `saveBravoDriveUrl` (hoạt động ngay 100% trên cả bản Webhook cũ)
+    // Gửi bridge lưu vĩnh viễn vào Google Sheet qua `saveBravoDriveUrl` (hoạt động ngay 100% trên cả bản Webhook cũ và mới)
     const currentDriveUrl = localStorage.getItem('app_bravo_drive_url') || '';
     const cleanDriveUrl = currentDriveUrl.split('#--SCTS--=')[0].trim();
     const payloadUrl = cleanDriveUrl
@@ -388,6 +405,7 @@ export const syncSctsSeparatedCodesToGoogleSheet = async (webhookUrl, codes) => 
       body: JSON.stringify({
         action: 'saveBravoDriveUrl',
         url: payloadUrl,
+        sctsCodes: cleanCodes,
       }),
     });
 
