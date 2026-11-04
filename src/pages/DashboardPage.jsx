@@ -387,7 +387,17 @@ export default function DashboardPage({ user }) {
     try {
       const data = await fetchFromGoogleSheet(url);
       if (data && data.transactions && data.transactions.length > 0) {
-        setTransactions(data.transactions);
+        setTransactions((prev) => {
+          const prevMap = new Map((prev || []).map((p) => [p.id, p]));
+          return data.transactions.map((onlineItem) => {
+            const localItem = prevMap.get(onlineItem.id);
+            const preservedRemark = onlineItem.remark || localItem?.remark || '';
+            return {
+              ...onlineItem,
+              remark: preservedRemark,
+            };
+          });
+        });
       }
       if (data && data.budgets && data.budgets.length > 0) {
         setBudgets(data.budgets);
