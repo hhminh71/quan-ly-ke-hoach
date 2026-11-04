@@ -479,7 +479,7 @@ export default function AccountLedgerModal({
   return (
     <>
       <div
-        className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5"
+        className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-1 sm:p-5"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             onClose();
@@ -488,70 +488,128 @@ export default function AccountLedgerModal({
       >
         {/* Modal Container: Compact, sleek, maximized visible vertical area for screenshots */}
         <div
-          className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-2xl w-full max-w-5xl max-h-[94vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+          className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-2xl w-full max-w-5xl max-h-[96vh] sm:max-h-[94vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header: Slim minimalist bar */}
-          <div className="px-3 py-2 sm:px-4 sm:py-2.5 border-b border-slate-100 flex items-center justify-between gap-2 bg-slate-50/80 shrink-0">
-            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-2xs shrink-0">
-                <FileSpreadsheet className="w-4 h-4" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                  <span className="font-mono text-2xs sm:text-xs font-bold text-blue-700 bg-blue-100/90 px-1.5 py-0.2 rounded border border-blue-200 shrink-0">
-                    {account.code}
-                  </span>
-                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 truncate">
-                    {account.name}
-                  </h3>
-                  <span className="text-3xs sm:text-[10px] font-bold text-slate-600 bg-slate-200/80 px-1.5 py-0.2 rounded-full shrink-0">
-                    Năm {selectedYear}
-                  </span>
+          {/* Header: Slim minimalist bar - Responsive for mobile */}
+          <div className="px-2.5 py-2 sm:px-4 sm:py-2.5 border-b border-slate-100 bg-slate-50/80 shrink-0 space-y-1.5 sm:space-y-0">
+            <div className="flex items-center justify-between gap-1.5">
+              <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-2xs shrink-0">
+                  <FileSpreadsheet className="w-4 h-4" />
                 </div>
-                <p className="text-3xs sm:text-[11px] text-slate-500 leading-none mt-0.5 truncate flex items-center gap-1.5 flex-wrap">
-                  <span className="font-medium text-slate-700">{account.scope || account.group}</span>
-                  {' • '}
-                  <span>
-                    Tổng cộng <strong className="text-blue-700">{totalAccountCount}</strong> hạng mục
-                  </span>
-                  {' • '}
-                  <span>
-                    <strong className="text-slate-800">{totalAccountDoneCount}</strong> Đã BCMS
-                  </span>
-                  {' • '}
-                  {totalAccountPendingCount > 0 ? (
-                    <span className="inline-flex items-center gap-0.5 font-bold text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded border border-amber-300">
-                      ⚡ Có {totalAccountPendingCount} khoản Chưa BCMS ({formatVND(pendingBcmsAmount)})
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <span className="font-mono text-2xs sm:text-xs font-bold text-blue-700 bg-blue-100/90 px-1.5 py-0.2 rounded border border-blue-200 shrink-0">
+                      {account.code}
                     </span>
-                  ) : (
-                    <span className="text-emerald-700 font-semibold bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">
-                      ✓ 0 khoản dự kiến
+                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 truncate" title={account.name}>
+                      {account.name}
+                    </h3>
+                    <span className="text-3xs sm:text-[10px] font-bold text-slate-600 bg-slate-200/80 px-1.5 py-0.2 rounded-full shrink-0">
+                      Năm {selectedYear}
                     </span>
-                  )}
-                </p>
+                  </div>
+                  <div className="text-3xs sm:text-[11px] text-slate-500 leading-tight mt-0.5 truncate flex items-center gap-1.5">
+                    <span className="font-medium text-slate-700 shrink-0">{account.scope || account.group}</span>
+                    <span className="text-slate-300">•</span>
+                    <span className="shrink-0">
+                      Tổng <strong className="text-blue-700">{totalAccountCount}</strong> mục
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    <span className="shrink-0">
+                      <strong className="text-slate-800">{totalAccountDoneCount}</strong> Đã BCMS
+                    </span>
+                    <span className="text-slate-300">•</span>
+                    {totalAccountPendingCount > 0 ? (
+                      <span className="inline-flex items-center gap-0.5 font-bold text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded border border-amber-300 truncate">
+                        ⚡ Có {totalAccountPendingCount} Chưa BCMS ({formatVND(pendingBcmsAmount)})
+                      </span>
+                    ) : (
+                      <span className="text-emerald-700 font-semibold bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200 shrink-0">
+                        ✓ 0 khoản dự kiến
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
+
+                          {/* Desktop Header Actions + Close Button */}
+              <div className="hidden sm:flex items-center gap-1 sm:gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleExportLedgerExcel}
+                  className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-2xs sm:text-xs font-bold bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-2xs border border-amber-300 transition-all active:scale-95 cursor-pointer"
+                  title={`Xuất file Excel báo cáo chi tiết sổ cái cho riêng mã [${account.code}] ${account.name}`}
+                >
+                  <Download className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>Xuất Báo Cáo</span>
+                </button>
+
+                {onAddTransaction && (
+                  <button
+                    type="button"
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-2xs sm:text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-colors cursor-pointer"
+                    title={`Thêm mới hạng mục cho mã [${account.code}]`}
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    <span>Thêm Mới</span>
+                  </button>
+                )}
+
+                {onNavigateToLedger && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClose();
+                      onNavigateToLedger(account.code);
+                    }}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-2xs sm:text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors cursor-pointer"
+                    title="Mở toàn màn hình trong tab Sổ Cái"
+                  >
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                    <span>Mở Tab Sổ Cái</span>
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-200/50 transition-colors cursor-pointer"
+                  title="Đóng cửa sổ"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Mobile Close Button only */}
+              <button
+                type="button"
+                onClick={onClose}
+                className="sm:hidden text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-200/50 transition-colors cursor-pointer shrink-0"
+                title="Đóng cửa sổ"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
-              {/* Nút Xuất Báo Cáo Cho Riêng Mã Khoản Mục Này */}
+            {/* Mobile Header Actions (Row 2 on mobile: full width, easy to tap) */}
+            <div className="flex sm:hidden items-center gap-1.5 pt-1 border-t border-slate-200/60 overflow-x-auto no-scrollbar">
               <button
                 type="button"
                 onClick={handleExportLedgerExcel}
-                className="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded-lg text-2xs sm:text-xs font-bold bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-2xs border border-amber-300 transition-all active:scale-95 cursor-pointer"
-                title={`Xuất file Excel báo cáo chi tiết sổ cái cho riêng mã [${account.code}] ${account.name}`}
+                className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-2xs font-bold bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-2xs border border-amber-300 transition-all active:scale-95 cursor-pointer whitespace-nowrap"
+                title={`Xuất file Excel báo cáo chi tiết cho riêng mã [${account.code}]`}
               >
                 <Download className="w-3.5 h-3.5 stroke-[2.5]" />
-                <span className="hidden sm:inline">Xuất Báo Cáo</span>
-                <span className="sm:hidden">Xuất</span>
+                <span>Xuất Báo Cáo</span>
               </button>
 
-              {/* Nút Thêm Mới Hạng Mục (chỉ hiển thị khi có quyền onAddTransaction) */}
               {onAddTransaction && (
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(true)}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-2xs sm:text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-colors"
+                  className="flex-1 inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-2xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
                   title={`Thêm mới hạng mục cho mã [${account.code}]`}
                 >
                   <PlusCircle className="w-3.5 h-3.5" />
@@ -566,27 +624,19 @@ export default function AccountLedgerModal({
                     onClose();
                     onNavigateToLedger(account.code);
                   }}
-                  className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-2xs sm:text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors"
+                  className="inline-flex items-center justify-center gap-1 px-2 py-1 rounded-lg text-2xs font-semibold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition-colors cursor-pointer whitespace-nowrap"
                   title="Mở toàn màn hình trong tab Sổ Cái"
                 >
                   <ArrowUpRight className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Mở Tab Sổ Cái</span>
+                  <span>Tab Sổ Cái</span>
                 </button>
               )}
-              <button
-                type="button"
-                onClick={onClose}
-                className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-200/50 transition-colors"
-                title="Đóng cửa sổ"
-              >
-                <X className="w-4 h-4" />
-              </button>
             </div>
           </div>
 
           {/* Top KPI Bar (Ultra-slim, minimalist height for screenshots) */}
           <div className="px-3 py-1.5 sm:px-4 sm:py-2 border-b border-slate-100 bg-gradient-to-b from-white to-slate-50/50 space-y-1.5 shrink-0">
-            <div className="flex flex-wrap sm:flex-nowrap gap-1 sm:gap-2 [&>*]:flex-1 [&>*]:min-w-[85px] sm:[&>*]:min-w-0">
+            <div className="grid grid-cols-2 min-[480px]:grid-cols-3 sm:flex sm:flex-nowrap gap-1 sm:gap-2 sm:[&>*]:flex-1">
               {/* 1. Tổng được duyệt */}
               <div className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg bg-slate-50 border border-slate-200 shadow-2xs shrink-0 sm:shrink">
                 <div className="flex items-center justify-between text-[8px] sm:text-[10px] text-slate-500 font-semibold uppercase tracking-tight">
@@ -671,7 +721,7 @@ export default function AccountLedgerModal({
 
               {/* 5. Còn lại / Vượt */}
               <div
-                className={`px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border shadow-2xs shrink-0 sm:shrink ${
+                className={`px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border shadow-2xs shrink-0 sm:shrink col-span-2 min-[480px]:col-span-1 sm:col-span-1 ${
                   remaining >= 0 ? 'bg-slate-50 border-slate-200' : 'bg-rose-50/80 border-rose-200'
                 }`}
               >
@@ -725,9 +775,17 @@ export default function AccountLedgerModal({
               <div className="flex items-center gap-1.5 min-w-0">
                 <Shield className={`w-3.5 h-3.5 shrink-0 ${isSeparated ? 'text-indigo-600' : 'text-slate-400'}`} />
                 <span className="font-semibold truncate">
-                  {isSeparated
-                    ? `Đã tách riêng SCTS • Chỉ tính SCTX nhập liệu (${formatVND(spent)})`
-                    : `Quy tắc MAX(Bravo, Thực Tế) • Bravo: ${formatVND(bravoVal)} • Thực tế: ${formatVND(spent)}`}
+                  {isSeparated ? (
+                    <>
+                      <span className="sm:hidden">Đã tách SCTS ({formatVND(spent)})</span>
+                      <span className="hidden sm:inline">Đã tách riêng SCTS • Chỉ tính SCTX nhập liệu ({formatVND(spent)})</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="sm:hidden">Quy tắc MAX(Bravo, Thực Tế)</span>
+                      <span className="hidden sm:inline">Quy tắc MAX(Bravo, Thực Tế) • Bravo: {formatVND(bravoVal)} • Thực tế: {formatVND(spent)}</span>
+                    </>
+                  )}
                 </span>
               </div>
 
@@ -746,14 +804,15 @@ export default function AccountLedgerModal({
             </div>
           </div>
 
-          {/* Search & Sort Controls inside Modal: Slim bar */}
-          <div className="px-3 py-1.5 sm:px-4 sm:py-2 border-b border-slate-100 bg-white flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 shrink-0">
-            <div className="flex items-center gap-1.5 flex-1 min-w-[240px]">
-              <div className="relative flex-1 max-w-xs">
+          {/* Search & Sort Controls inside Modal: Responsive 2-tier layout */}
+          <div className="px-2.5 py-1.5 sm:px-4 sm:py-2 border-b border-slate-100 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 shrink-0">
+            {/* Top row on mobile / Left group on desktop */}
+            <div className="flex items-center gap-1.5 w-full sm:w-auto sm:flex-1 sm:min-w-[240px]">
+              <div className="relative flex-1">
                 <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
-                  placeholder="Tìm người thực hiện, diễn giải..."
+                  placeholder="Tìm người, diễn giải..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-8 pr-2.5 py-1 text-2xs sm:text-xs rounded-lg border border-slate-200 bg-slate-50/70 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-200 focus:border-blue-500 transition-all"
@@ -810,7 +869,8 @@ export default function AccountLedgerModal({
               </div>
             </div>
 
-            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
+            {/* Bottom row on mobile (horizontal swipeable toolbar) / Right group on desktop */}
+            <div className="flex items-center gap-1 sm:gap-1.5 overflow-x-auto no-scrollbar py-0.5 sm:py-0 w-full sm:w-auto shrink-0">
               {/* Nút Ẩn/Hiện Theo Bravo và Theo Thực Tế */}
               <div className="flex items-center gap-0.5 shrink-0">
                 <button
@@ -1327,11 +1387,12 @@ export default function AccountLedgerModal({
             )}
           </div>
 
-          {/* Modal Footer: Slim single-line footer */}
-          <div className="px-3 py-1.5 sm:px-4 sm:py-2 border-t border-slate-100 bg-slate-50/80 flex items-center justify-between gap-2 text-3xs sm:text-[11px] text-slate-500 shrink-0">
-            <div className="truncate">
-              Hiển thị <strong className="text-slate-800">{showActual ? sortedTransactions.length : 0}</strong> / <strong className="text-slate-800">{accountTransactions.length}</strong> hạng mục thực tế{' '}
-              {searchTerm && <span>(Khớp bộ lọc)</span>}
+          {/* Modal Footer: Responsive single-line footer */}
+          <div className="px-2.5 py-1.5 sm:px-4 sm:py-2 border-t border-slate-100 bg-slate-50/80 flex items-center justify-between gap-1.5 text-3xs sm:text-[11px] text-slate-500 shrink-0">
+            <div className="truncate flex-1 min-w-0">
+              Hiển thị <strong className="text-slate-800">{showActual ? sortedTransactions.length : 0}</strong> / <strong className="text-slate-800">{accountTransactions.length}</strong>
+              <span className="hidden sm:inline"> hạng mục thực tế</span>{' '}
+              {searchTerm && <span className="hidden sm:inline">(Khớp bộ lọc)</span>}
               {showActual && (
                 <>
                   {' • '}Thực Tế:{' '}
@@ -1368,16 +1429,17 @@ export default function AccountLedgerModal({
               <button
                 type="button"
                 onClick={handleExportLedgerExcel}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-2xs sm:text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-lg text-2xs sm:text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs transition-colors cursor-pointer whitespace-nowrap"
                 title={`Xuất file Excel báo cáo chi tiết cho riêng mã [${account.code}]`}
               >
                 <FileSpreadsheet className="w-3.5 h-3.5" />
-                <span>Xuất Excel Sổ Cái</span>
+                <span className="hidden sm:inline">Xuất Excel Sổ Cái</span>
+                <span className="sm:hidden">Xuất Excel</span>
               </button>
               <button
                 type="button"
                 onClick={onClose}
-                className="px-2.5 py-1 rounded-lg border border-slate-200 text-2xs sm:text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors"
+                className="px-2 sm:px-2.5 py-1 rounded-lg border border-slate-200 text-2xs sm:text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors whitespace-nowrap cursor-pointer"
               >
                 Đóng
               </button>
