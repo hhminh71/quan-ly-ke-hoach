@@ -322,10 +322,26 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
     saveSavedUsers(result.users);
   }
 
-  // Tự động đồng bộ danh sách mã Tách riêng SCTS từ Google Sheet về máy nếu có
+  // Phục hồi cấu hình Tách SCTS từ Google Sheet qua cả 2 cơ chế (Native property hoặc bridge qua bravoDriveUrl)
+  let extractedSctsCodes = null;
   if (Array.isArray(result.sctsSeparatedCodes) && result.sctsSeparatedCodes.length > 0) {
+    extractedSctsCodes = result.sctsSeparatedCodes;
+  } else if (typeof result.bravoDriveUrl === 'string' && result.bravoDriveUrl.includes('#--SCTS--=')) {
     try {
-      localStorage.setItem('app_scts_separated_codes_v2', JSON.stringify(result.sctsSeparatedCodes));
+      const parts = result.bravoDriveUrl.split('#--SCTS--=');
+      result.bravoDriveUrl = parts[0].trim();
+      const parsed = JSON.parse(parts[1]);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        extractedSctsCodes = parsed;
+      }
+    } catch (e) {
+      console.warn('Lỗi parse SCTS từ bravoDriveUrl:', e);
+    }
+  }
+
+  if (Array.isArray(extractedSctsCodes) && extractedSctsCodes.length > 0) {
+    try {
+      localStorage.setItem('app_scts_separated_codes_v2', JSON.stringify(extractedSctsCodes));
       window.dispatchEvent(new Event('app_scts_codes_updated'));
     } catch (sctsErr) {
       console.warn('Lỗi lưu cấu hình SCTS từ online:', sctsErr);
@@ -344,14 +360,29 @@ export const syncSctsSeparatedCodesToGoogleSheet = async (webhookUrl, codes) => 
   if (!url) return null;
 
   try {
-    const response = await fetch(url, {
+    // 1. Gửi đồng thời action chuẩn `saveSctsSeparatedCodes` (cho bản Webhook mới)
+    fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8',
-      },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({
         action: 'saveSctsSeparatedCodes',
         codes: codes,
+      }),
+    }).catch(() => {});
+
+    // 2. Gửi bridge lưu vĩnh viễn vào Google Sheet qua `saveBravoDriveUrl` (hoạt động ngay 100% trên cả bản Webhook cũ)
+    const currentDriveUrl = localStorage.getItem('app_bravo_drive_url') || '';
+    const cleanDriveUrl = currentDriveUrl.split('#--SCTS--=')[0].trim();
+    const payloadUrl = cleanDriveUrl
+      ? `${cleanDriveUrl}#--SCTS--=${JSON.stringify(codes)}`
+      : `#--SCTS--=${JSON.stringify(codes)}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'saveBravoDriveUrl',
+        url: payloadUrl,
       }),
     });
 

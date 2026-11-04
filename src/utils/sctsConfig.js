@@ -12,6 +12,7 @@ import { syncSctsSeparatedCodesToGoogleSheet, getSavedWebhookUrl } from '../serv
 
 const STORAGE_KEY_SCTS_EXCLUDED = 'app_scts_separated_codes_v2';
 const LEGACY_STORAGE_KEY = 'app_scts_separated_codes_v1';
+const TOGGLED_OFF_KEY = 'app_scts_toggled_off_codes_v2';
 
 // Danh sách mặc định các mã có dự án SCTS lớn hạch toán gộp trên Bravo:
 // - 62762103: Sửa chữa bến bãi ô tô, sân đường
@@ -21,21 +22,35 @@ export const DEFAULT_SCTS_SEPARATED_CODES = ['62762103', '62762216', '62762188']
 
 export const getSctsSeparatedCodes = () => {
   try {
+    let list = [];
     const saved = localStorage.getItem(STORAGE_KEY_SCTS_EXCLUDED);
     if (saved) {
       const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed)) return parsed;
-    }
-    // Chuyển đổi từ cache cũ v1: đảm bảo nạp bổ sung mã 62762188
-    const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
-    if (legacy) {
-      const parsedLegacy = JSON.parse(legacy);
-      if (Array.isArray(parsedLegacy)) {
-        const merged = Array.from(new Set([...DEFAULT_SCTS_SEPARATED_CODES, ...parsedLegacy]));
-        localStorage.setItem(STORAGE_KEY_SCTS_EXCLUDED, JSON.stringify(merged));
-        return merged;
+      if (Array.isArray(parsed)) list = parsed;
+    } else {
+      const legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacy) {
+        const parsedLegacy = JSON.parse(legacy);
+        if (Array.isArray(parsedLegacy)) list = parsedLegacy;
       }
     }
+
+    // Danh sách các mã mà người dùng đã chủ động bấm nút TẮT tách SCTS
+    let toggledOff = [];
+    try {
+      const offSaved = localStorage.getItem(TOGGLED_OFF_KEY);
+      if (offSaved) toggledOff = JSON.parse(offSaved);
+    } catch (e) {}
+
+    // Luôn đảm bảo các mã cốt lõi (DEFAULT) được kích hoạt trừ khi người dùng đã chủ động tắt
+    const activeDefaults = DEFAULT_SCTS_SEPARATED_CODES.filter((c) => !toggledOff.includes(c));
+    const merged = Array.from(new Set([...activeDefaults, ...list]));
+
+    // Lưu ngược lại storage để các lần sau đọc nhanh
+    if (JSON.stringify(merged) !== saved) {
+      localStorage.setItem(STORAGE_KEY_SCTS_EXCLUDED, JSON.stringify(merged));
+    }
+    return merged;
   } catch (e) {
     console.error(e);
   }
@@ -70,12 +85,27 @@ export const toggleSctsSeparation = (code) => {
   const str = String(code).trim();
   const current = getSctsSeparatedCodes();
   let updated;
+  let toggledOff = [];
+  try {
+    const offSaved = localStorage.getItem(TOGGLED_OFF_KEY);
+    if (offSaved) toggledOff = JSON.parse(offSaved);
+  } catch (e) {}
+
   if (current.includes(str)) {
+    // Người dùng bấm TẮT tách SCTS
     updated = current.filter((c) => c !== str);
+    if (!toggledOff.includes(str)) toggledOff.push(str);
   } else {
+    // Người dùng bấm BẬT tách SCTS
     updated = [...current, str];
+    toggledOff = toggledOff.filter((c) => c !== str);
   }
-  saveSctsSeparatedCodes(updated);
+
+  try {
+    localStorage.setItem(TOGGLED_OFF_KEY, JSON.stringify(toggledOff));
+  } catch (e) {}
+
+  saveSctsSeparatedCodes(updated, true);
   return updated;
 };
 
