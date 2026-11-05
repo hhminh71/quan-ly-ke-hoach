@@ -53,10 +53,13 @@ export default function AddTransactionModal({
   const dropdownRef = useRef(null);
 
   const [errors, setErrors] = useState({});
+  const prevIsOpenRef = useRef(false);
 
-  // Reset or initialize when modal opens
+  // Chỉ reset và khởi tạo form DUY NHẤT một lần khi modal vừa được MỞ LÊN (isOpen chuyển từ false -> true).
+  // Tuyệt đối không reset khi người dùng đang mở modal và đang gõ nội dung.
   useEffect(() => {
-    if (isOpen) {
+    const isNewlyOpened = isOpen && !prevIsOpenRef.current;
+    if (isNewlyOpened) {
       setDate(getDefaultDate());
       setEmployeeName('');
       setAmount('');
@@ -68,7 +71,7 @@ export default function AddTransactionModal({
       setIsDropdownOpen(false);
 
       // Select default account if provided, or first budget account
-      if (budgets.length > 0) {
+      if (budgets && budgets.length > 0) {
         if (defaultAccountCode) {
           const target = String(defaultAccountCode).trim().toLowerCase();
           const match = budgets.find(
@@ -76,17 +79,14 @@ export default function AddTransactionModal({
               String(b.code || '').trim().toLowerCase() === target ||
               String(b.name || '').trim().toLowerCase() === target
           );
-          if (match) {
-            setSelectedAccount(match);
-          } else if (!selectedAccount) {
-            setSelectedAccount(budgets[0]);
-          }
-        } else if (!selectedAccount) {
+          setSelectedAccount(match || budgets[0]);
+        } else {
           setSelectedAccount(budgets[0]);
         }
       }
     }
-  }, [isOpen, selectedYear, budgets, defaultAccountCode]);
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen]);
 
   // Click outside to close dropdown
   useEffect(() => {

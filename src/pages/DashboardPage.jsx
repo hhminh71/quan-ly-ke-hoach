@@ -421,54 +421,71 @@ export default function DashboardPage({ user }) {
     }
   };
 
-  // Tự động kiểm tra và đồng bộ lại ngầm từ Google Sheet khi người dùng chuyển lại tab (Focus) và định kỳ
+  // Tự động kiểm tra và đồng bộ lại ngầm từ Google Sheet
   useEffect(() => {
-    let isSyncingRef = false;
-    let lastSyncTime = 0;
+    let isSctsChecking = false;
+    let isFullSyncing = false;
+    let hiddenAt = 0;
 
-    const triggerFastSync = async (force = false) => {
-      const now = Date.now();
-      // Ngăn ngừa spam nếu vừa sync cách đây dưới 2 giây (trừ khi người dùng vừa chuyển tab và force=true)
-      if (!force && now - lastSyncTime < 2000) return;
-      if (isSyncingRef) return;
-
+    // 1. Kiểm tra nhanh cấu hình SCTS (siêu nhẹ ~300ms, chỉ 50 bytes, chạy định kỳ mỗi 4s khi tab hiển thị)
+    const checkSctsFast = async () => {
+      if (isSctsChecking) return;
       const webhookUrl = getSavedWebhookUrl();
       if (!webhookUrl) return;
 
-      isSyncingRef = true;
-      lastSyncTime = now;
+      isSctsChecking = true;
       try {
-        // 1. Thử lấy nhanh cấu hình SCTS (siêu nhẹ ~300ms, không tải 1.200 giao dịch)
         await fetchSctsCodesOnly(webhookUrl);
-        // 2. Đồng bộ ngầm toàn bộ dữ liệu nền
-        await handleSyncNow(webhookUrl, false);
       } catch (e) {
-        console.warn('Sync background error:', e);
       } finally {
-        isSyncingRef = false;
+        isSctsChecking = false;
       }
     };
 
-    // Khi người dùng chuyển tab quay lại web (Visibility / Focus): Đồng bộ ngay lập tức không chờ đợi!
+    // 2. Đồng bộ toàn bộ dữ liệu (Chỉ chạy khi người dùng quay lại tab sau khi đã rời đi > 30 giây)
+    const checkFullDataOnReturn = async () => {
+      // Nếu người dùng đang mở form nhập liệu hoặc đang gõ bàn phím (input/textarea đang focus), tuyệt đối không gián đoạn
+      const activeTag = document.activeElement?.tagName;
+      if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') return;
+
+      const timeAway = Date.now() - hiddenAt;
+      if (hiddenAt > 0 && timeAway > 30000 && !isFullSyncing) {
+        const webhookUrl = getSavedWebhookUrl();
+        if (webhookUrl) {
+          isFullSyncing = true;
+          try {
+            await handleSyncNow(webhookUrl, false);
+          } catch (e) {
+          } finally {
+            isFullSyncing = false;
+          }
+        }
+      }
+      hiddenAt = 0;
+    };
+
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        triggerFastSync(true);
+        checkSctsFast();
+        checkFullDataOnReturn();
+      } else {
+        hiddenAt = Date.now();
       }
     };
 
     const handleFocus = () => {
       if (document.visibilityState === 'visible') {
-        triggerFastSync(true);
+        checkSctsFast();
       }
     };
 
     window.addEventListener('focus', handleFocus);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Định kỳ kiểm tra ngầm mỗi 4 giây khi người dùng đang mở tab (giảm độ trễ đối với 2 màn hình song song)
+    // Định kỳ kiểm tra ngầm cấu hình SCTS mỗi 4 giây khi tab đang hiển thị
     const intervalId = setInterval(() => {
       if (document.visibilityState === 'visible') {
-        triggerFastSync(false);
+        checkSctsFast();
       }
     }, 4000);
 

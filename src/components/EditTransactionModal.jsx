@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Edit3, X, Save, Calendar, Tag, DollarSign, User, FileText, Calculator } from 'lucide-react';
 import employeesList from '../data/employees.json';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
@@ -23,8 +23,17 @@ export default function EditTransactionModal({
     chuaBcms: false,
   });
 
+  const prevIsOpenRef = useRef(false);
+  const prevTxIdRef = useRef(null);
+
+  // Chỉ nạp dữ liệu vào form DUY NHẤT một lần khi mở modal hoặc khi đổi sang xem phiếu khác.
+  // Tuyệt đối không ghi đè form khi người dùng đang sửa.
   useEffect(() => {
-    if (transaction) {
+    const isNewlyOpened = isOpen && !prevIsOpenRef.current;
+    const isDifferentTx = transaction && transaction.id !== prevTxIdRef.current;
+
+    if (isOpen && transaction && (isNewlyOpened || isDifferentTx)) {
+      prevTxIdRef.current = transaction.id;
       setEditForm({
         date: String(transaction.date || '').trim(),
         accountCode: String(transaction.accountCode || (budgets[0]?.code || '62762101')).trim(),
@@ -37,7 +46,8 @@ export default function EditTransactionModal({
         chuaBcms: Boolean(transaction.chuaBcms),
       });
     }
-  }, [transaction, budgets]);
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen, transaction?.id]);
 
   // Handle mobile Back button
   useModalBackHandler(isOpen && Boolean(transaction), onClose, 'edit-transaction');
