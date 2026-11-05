@@ -96,7 +96,7 @@ export default function TransactionList({
   const transactionTableColumns = useMemo(
     () => [
       { key: 'date', label: 'Ngày' },
-      { key: 'chuaBcms', label: 'Chưa BCMS' },
+      { key: 'chuaBcms', label: 'Dự Kiến' },
       { key: 'account', label: 'Khoản mục' },
       { key: 'notes', label: 'Nội dung diễn giải' },
       { key: 'amount', label: 'Số tiền (VNĐ)' },
@@ -540,7 +540,7 @@ export default function TransactionList({
                       ? 'bg-amber-600 text-white shadow-2xs ring-1 ring-amber-400/50'
                       : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
                   }`}
-                  title="Ẩn/Hiện tổng chi phí bao gồm cả các hạng mục Chưa BCMS (dự kiến)"
+                  title="Ẩn/Hiện tổng chi phí bao gồm cả các hạng mục dự kiến"
                 >
                   {showExpectedTotal ? (
                     <Eye className="w-2.5 h-2.5 text-white" />
@@ -645,7 +645,7 @@ export default function TransactionList({
                       : 'text-blue-700 bg-white/90 border-blue-200'
                   }`}
                 >
-                  {showExpectedTotal ? 'Bao gồm Chưa BCMS' : 'Chỉ đã BCMS'}
+                  {showExpectedTotal ? 'Bao gồm Dự Kiến' : 'Chỉ đã BCMS'}
                 </span>
               </div>
               <div
@@ -660,7 +660,7 @@ export default function TransactionList({
                 <div className="text-[7px] sm:text-[8px] text-slate-500 mt-0.5 leading-none truncate">
                   {showExpectedTotal
                     ? `(+${formatVND(pendingBcmsAmount)} dự kiến)`
-                    : `(-${pendingBcmsCount} mục Chưa BCMS)`}
+                    : `(-${pendingBcmsCount} mục Dự Kiến)`}
                 </div>
               )}
             </div>
@@ -742,12 +742,12 @@ export default function TransactionList({
               }`}
               title={
                 totalTxPendingCount > 0
-                  ? `Có ${totalTxPendingCount} khoản Chưa BCMS (dự kiến)`
+                  ? `Có ${totalTxPendingCount} khoản Dự Kiến`
                   : 'Không có khoản dự kiến nào'
               }
             >
               {totalTxPendingCount > 0 && <span className="w-1 h-1 rounded-full bg-amber-500 animate-pulse"></span>}
-              <span>Chưa BCMS ({totalTxPendingCount})</span>
+              <span>Dự Kiến ({totalTxPendingCount})</span>
             </button>
           </div>
 
@@ -761,12 +761,12 @@ export default function TransactionList({
             >
               <option value="newest">🕒 Ngày mới nhất</option>
               <option value="oldest">🕒 Ngày cũ nhất</option>
-              <optgroup label="⚡ Kết hợp Chưa BCMS (Dự kiến)">
-                <option value="bcms_amount_desc">⚡ Chưa BCMS → Tiền cao nhất</option>
-                <option value="bcms_amount_asc">⚡ Chưa BCMS → Tiền thấp nhất</option>
-                <option value="bcms_remark_asc">⚡ Chưa BCMS → Ghi chú (A-Z)</option>
-                <option value="bcms_account_asc">⚡ Chưa BCMS → Mã khoản mục</option>
-                <option value="bcms_date_desc">⚡ Chưa BCMS → Ngày mới nhất</option>
+              <optgroup label="⚡ Kết hợp Dự Kiến">
+                <option value="bcms_amount_desc">⚡ Dự Kiến → Tiền cao nhất</option>
+                <option value="bcms_amount_asc">⚡ Dự Kiến → Tiền thấp nhất</option>
+                <option value="bcms_remark_asc">⚡ Dự Kiến → Ghi chú (A-Z)</option>
+                <option value="bcms_account_asc">⚡ Dự Kiến → Mã khoản mục</option>
+                <option value="bcms_date_desc">⚡ Dự Kiến → Ngày mới nhất</option>
               </optgroup>
               <optgroup label="💰 Theo Số tiền">
                 <option value="amount_desc">💰 Tiền cao nhất</option>
@@ -847,12 +847,12 @@ export default function TransactionList({
                     onClick={(e) => handleColumnSort('chuaBcms', e)}
                     style={{ width: `${columnWidths.chuaBcms}px`, minWidth: `${columnWidths.chuaBcms}px` }}
                     className="relative py-0.5 px-0.5 text-center leading-tight select-none cursor-pointer hover:bg-amber-100/70 transition-colors group text-amber-900"
-                    title="Click để đưa Chưa BCMS lên đầu (kết hợp với Số tiền / Ghi chú)"
+                    title="Click để đưa Dự Kiến lên đầu (kết hợp với Số tiền / Ghi chú)"
                   >
                     <div className="flex items-center justify-center gap-0.5 w-full">
                       <div className="flex flex-col items-center justify-center leading-none text-[7.5px] sm:text-[8px] font-black uppercase tracking-tight text-amber-900 select-none shrink-0">
-                        <span>Chưa</span>
-                        <span className="mt-0.5">BCMS</span>
+                        <span>Dự</span>
+                        <span className="mt-0.5">Kiến</span>
                       </div>
                       {renderSortIndicator('chuaBcms')}
                     </div>
@@ -898,7 +898,7 @@ export default function TransactionList({
                     onClick={(e) => handleColumnSort('amount', e)}
                     style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
                     className="relative py-0.5 px-0.5 sm:px-1 text-center cursor-pointer hover:bg-slate-200/90 transition-colors select-none leading-tight break-words group"
-                    title="Click để đổi thứ tự số tiền • Tự động kết hợp cùng Chưa BCMS nếu đã chọn"
+                    title="Click để đổi thứ tự số tiền • Tự động kết hợp cùng Dự Kiến nếu đã chọn"
                   >
                     <div className="flex items-center justify-center gap-0.5 pr-1 text-center">
                       <span>Số tiền (VNĐ)</span>
@@ -914,7 +914,7 @@ export default function TransactionList({
                     onClick={(e) => handleColumnSort('remark', e)}
                     style={{ width: `${columnWidths.remark}px`, minWidth: `${columnWidths.remark}px` }}
                     className="relative py-0.5 px-0.5 sm:px-1 text-center leading-tight break-words select-none cursor-pointer hover:bg-slate-200/90 transition-colors group"
-                    title="Click để sắp xếp Ghi chú • Tự động kết hợp cùng Chưa BCMS nếu đã chọn"
+                    title="Click để sắp xếp Ghi chú • Tự động kết hợp cùng Dự Kiến nếu đã chọn"
                   >
                     <div className="flex items-center justify-center gap-0.5 pr-1 text-center w-full">
                       <span>Ghi Chú</span>
@@ -973,7 +973,7 @@ export default function TransactionList({
                     >
                       <label
                         className="inline-flex items-center justify-center cursor-pointer p-0.5"
-                        title={item.chuaBcms ? 'Khoản dự kiến (Chưa BCMS) - Loại trừ khỏi tổng thực tế' : 'Đã BCMS - Tính vào tổng thực tế'}
+                        title={item.chuaBcms ? 'Khoản Dự Kiến - Loại trừ khỏi tổng thực tế' : 'Đã BCMS - Tính vào tổng thực tế'}
                       >
                         <input
                           type="checkbox"
@@ -986,8 +986,8 @@ export default function TransactionList({
                               });
                               setToastMessage(
                                 e.target.checked
-                                  ? 'Đã chuyển thành "Chưa BCMS" (khoản dự kiến)'
-                                  : 'Đã bỏ chọn Chưa BCMS (tính vào tổng thực tế)'
+                                  ? 'Đã chuyển thành "Dự Kiến"'
+                                  : 'Đã bỏ chọn Dự Kiến (tính vào tổng thực tế)'
                               );
                               setShowEditToast(true);
                               setTimeout(() => setShowEditToast(false), 2500);
@@ -1043,7 +1043,7 @@ export default function TransactionList({
                         item.chuaBcms ? 'text-amber-700 italic' : 'text-slate-900'
                       }`}
                       style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
-                      title={item.chuaBcms ? 'Khoản Chưa BCMS (dự kiến)' : undefined}
+                      title={item.chuaBcms ? 'Khoản Dự Kiến' : undefined}
                     >
                       {formatVND(item.amount)}
                     </td>
@@ -1184,7 +1184,7 @@ export default function TransactionList({
                       <div className="text-[7.5px] font-normal text-slate-500 font-sans">
                         {showExpectedTotal
                           ? `(+${formatVND(pendingBcmsAmount)} DK)`
-                          : `(-${pendingBcmsCount} mục Chưa BCMS)`}
+                          : `(-${pendingBcmsCount} mục Dự Kiến)`}
                       </div>
                     )}
                   </td>

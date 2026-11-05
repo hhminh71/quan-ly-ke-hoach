@@ -331,7 +331,7 @@ export default function EditTransactionModal({
               />
               <div>
                 <span className="text-xs font-bold text-amber-900 block leading-tight">
-                  Chưa BCMS (Khoản dự kiến)
+                  Khoản Dự Kiến
                 </span>
                 <span className="text-[10px] text-amber-700 block mt-0.5 leading-tight">
                   Khi check chọn: Khoản này sẽ <strong>không tính vào tổng thực tế</strong> (chỉ hiển thị khi bật "Tổng gồm dự kiến").

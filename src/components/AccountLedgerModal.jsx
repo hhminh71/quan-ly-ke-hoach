@@ -360,7 +360,7 @@ export default function AccountLedgerModal({
     () => [
       { key: 'stt', label: '#' },
       { key: 'date', label: 'Ngày' },
-      { key: 'chuaBcms', label: 'Chưa BCMS' },
+      { key: 'chuaBcms', label: 'Dự Kiến' },
       { key: 'notes', label: 'Nội Dung Diễn Giải' },
       { key: 'amount', label: 'Số Tiền (VNĐ)' },
       { key: 'remark', label: 'Ghi Chú' },
@@ -532,7 +532,7 @@ export default function AccountLedgerModal({
                     <span className="text-slate-300">•</span>
                     {totalAccountPendingCount > 0 ? (
                       <span className="inline-flex items-center gap-0.5 font-bold text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded border border-amber-300 truncate">
-                        ⚡ Có {totalAccountPendingCount} Chưa BCMS ({formatVND(pendingBcmsAmount)})
+                        ⚡ Có {totalAccountPendingCount} Dự Kiến ({formatVND(pendingBcmsAmount)})
                       </span>
                     ) : (
                       <span className="text-emerald-700 font-semibold bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200 shrink-0">
@@ -707,7 +707,7 @@ export default function AccountLedgerModal({
                     <div className="text-[7.5px] sm:text-[8.5px] text-slate-500 mt-0.5 leading-none truncate">
                       {showExpectedTotal
                         ? `(+${formatVND(pendingBcmsAmount)} dự kiến)`
-                        : `(-${pendingBcmsCount} mục Chưa BCMS)`}
+                        : `(-${pendingBcmsCount} mục Dự Kiến)`}
                     </div>
                   )}
                 </div>
@@ -869,14 +869,14 @@ export default function AccountLedgerModal({
                   }`}
                   title={
                     totalAccountPendingCount > 0
-                      ? `Lọc nhanh: Có ${totalAccountPendingCount} khoản Chưa BCMS (dự kiến)`
+                      ? `Lọc nhanh: Có ${totalAccountPendingCount} khoản Dự Kiến`
                       : 'Không có khoản dự kiến nào'
                   }
                 >
                   {totalAccountPendingCount > 0 && (
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                   )}
-                  <span>Chưa BCMS ({totalAccountPendingCount})</span>
+                  <span>Dự Kiến ({totalAccountPendingCount})</span>
                 </button>
               </div>
             </div>
@@ -919,7 +919,7 @@ export default function AccountLedgerModal({
                       ? 'bg-amber-600 text-white shadow-2xs ring-1 ring-amber-400/50'
                       : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
                   }`}
-                  title="Ẩn/Hiện tổng chi phí bao gồm cả các hạng mục Chưa BCMS (dự kiến)"
+                  title="Ẩn/Hiện tổng chi phí bao gồm cả các hạng mục dự kiến"
                 >
                   {showExpectedTotal ? (
                     <Eye className="w-2.5 h-2.5 text-white" />
@@ -955,11 +955,11 @@ export default function AccountLedgerModal({
                 >
                   <option value="newest">🕒 Ngày mới nhất</option>
                   <option value="oldest">🕒 Ngày cũ nhất</option>
-                  <optgroup label="⚡ Kết hợp Chưa BCMS (Dự kiến)">
-                    <option value="bcms_amount_desc">⚡ Chưa BCMS → Tiền cao nhất</option>
-                    <option value="bcms_amount_asc">⚡ Chưa BCMS → Tiền thấp nhất</option>
-                    <option value="bcms_remark_asc">⚡ Chưa BCMS → Ghi chú (A-Z)</option>
-                    <option value="bcms_date_desc">⚡ Chưa BCMS → Ngày mới nhất</option>
+                  <optgroup label="⚡ Kết hợp Dự Kiến">
+                    <option value="bcms_amount_desc">⚡ Dự Kiến → Tiền cao nhất</option>
+                    <option value="bcms_amount_asc">⚡ Dự Kiến → Tiền thấp nhất</option>
+                    <option value="bcms_remark_asc">⚡ Dự Kiến → Ghi chú (A-Z)</option>
+                    <option value="bcms_date_desc">⚡ Dự Kiến → Ngày mới nhất</option>
                   </optgroup>
                   <optgroup label="💰 Theo Số tiền">
                     <option value="amount_desc">💰 Tiền cao nhất</option>
@@ -1056,12 +1056,12 @@ export default function AccountLedgerModal({
                         onClick={(e) => handleColumnSort('chuaBcms', e)}
                         className="py-0.5 px-0.5 text-center leading-tight relative select-none cursor-pointer hover:bg-amber-100/70 transition-colors group"
                         style={{ width: `${columnWidths.chuaBcms}px`, minWidth: `${columnWidths.chuaBcms}px` }}
-                        title="Click để đưa Chưa BCMS lên đầu (kết hợp với Số tiền / Ghi chú)"
+                        title="Click để đưa Dự Kiến lên đầu (kết hợp với Số tiền / Ghi chú)"
                       >
                         <div className="flex items-center justify-center gap-0.5 w-full">
                           <div className="flex flex-col items-center justify-center leading-none text-[7.5px] sm:text-[8px] font-black uppercase tracking-tight text-amber-900 select-none shrink-0">
-                            <span>Chưa</span>
-                            <span className="mt-0.5">BCMS</span>
+                            <span>Dự</span>
+                            <span className="mt-0.5">Kiến</span>
                           </div>
                           {renderSortIndicator('chuaBcms')}
                         </div>
@@ -1099,7 +1099,7 @@ export default function AccountLedgerModal({
                         onClick={(e) => handleColumnSort('amount', e)}
                         className="py-0.5 px-0.5 sm:px-1 text-center leading-tight relative select-none cursor-pointer hover:bg-slate-200/90 transition-colors group"
                         style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
-                        title="Click để sắp xếp Số tiền • Tự động kết hợp cùng Chưa BCMS nếu đã chọn"
+                        title="Click để sắp xếp Số tiền • Tự động kết hợp cùng Dự Kiến nếu đã chọn"
                       >
                         <div className="flex items-center justify-center gap-0.5 truncate w-full">
                           <span>Số Tiền (VNĐ)</span>
@@ -1119,7 +1119,7 @@ export default function AccountLedgerModal({
                         onClick={(e) => handleColumnSort('remark', e)}
                         className="py-0.5 px-0.5 sm:px-1 text-center leading-tight relative select-none cursor-pointer hover:bg-slate-200/90 transition-colors group"
                         style={{ width: `${columnWidths.remark}px`, minWidth: `${columnWidths.remark}px` }}
-                        title="Click để sắp xếp Ghi chú • Tự động kết hợp cùng Chưa BCMS nếu đã chọn"
+                        title="Click để sắp xếp Ghi chú • Tự động kết hợp cùng Dự Kiến nếu đã chọn"
                       >
                         <div className="flex items-center justify-center gap-0.5 truncate w-full">
                           <span>Ghi Chú</span>
@@ -1199,7 +1199,7 @@ export default function AccountLedgerModal({
                           >
                             <label
                               className="inline-flex items-center justify-center cursor-pointer p-0.5"
-                              title={item.chuaBcms ? 'Khoản dự kiến (Chưa BCMS) - Đang loại trừ khỏi tổng thực tế' : 'Đã BCMS - Tính vào tổng chi phí thực tế'}
+                              title={item.chuaBcms ? 'Khoản Dự Kiến - Đang loại trừ khỏi tổng thực tế' : 'Đã BCMS - Tính vào tổng chi phí thực tế'}
                             >
                               <input
                                 type="checkbox"
@@ -1242,7 +1242,7 @@ export default function AccountLedgerModal({
                               item.chuaBcms ? 'text-amber-700 italic' : 'text-slate-900'
                             }`}
                             style={{ width: `${columnWidths.amount}px`, minWidth: `${columnWidths.amount}px` }}
-                            title={item.chuaBcms ? 'Khoản Chưa BCMS (dự kiến)' : undefined}
+                            title={item.chuaBcms ? 'Khoản Dự Kiến' : undefined}
                           >
                             {formatVND(item.amount)}
                           </td>

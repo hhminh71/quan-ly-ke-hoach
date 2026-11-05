@@ -727,7 +727,7 @@ function ensureSheetsInitialized(ss) {
       'Nội Dung Diễn Giải',
       'Thời Gian Ghi',
       'Ghi Chú Bổ Sung',
-      'Chưa BCMS'
+      'Dự Kiến'
     ]);
     txSheet.getRange('1:1').setFontWeight('bold').setBackground('#eff6ff');
     txSheet.setFrozenRows(1);

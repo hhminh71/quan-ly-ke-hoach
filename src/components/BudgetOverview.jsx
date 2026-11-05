@@ -1386,7 +1386,7 @@ export default function BudgetOverview({
                               {item.pendingBcms?.count > 0 && (
                                 <span
                                   className="inline-block text-[7px] sm:text-3xs font-semibold text-amber-800 bg-amber-100 px-0.5 py-0.2 rounded border border-amber-300 whitespace-nowrap max-w-full truncate text-right"
-                                  title={`Có ${item.pendingBcms.count} khoản Chưa BCMS (dự kiến): +${formatVND(item.pendingBcms.amount)}`}
+                                  title={`Có ${item.pendingBcms.count} khoản Dự Kiến: +${formatVND(item.pendingBcms.amount)}`}
                                 >
                                   +{formatVND(item.pendingBcms.amount)} DK
                                 </span>

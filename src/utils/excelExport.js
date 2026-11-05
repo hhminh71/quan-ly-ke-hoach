@@ -582,7 +582,7 @@ export const exportAccountLedgerExcel = ({
       <td class="table-td font-bold" style="background-color: #f1f5f9;">Quy tắc áp dụng:</td>
       <td class="table-td" colspan="3" style="font-weight: 500;">
         ${isSeparated ? 'Đã tách riêng SCTS (chỉ tính chi phí thực tế nhập liệu)' : 'Quy tắc MAX(Bravo, Thực Tế nhập liệu)'}
-        ${totalPendingCount > 0 ? ` • Có ${totalPendingCount} khoản Chưa BCMS (${formatVndNumber(totalPendingAmount)} đ)` : ''}
+        ${totalPendingCount > 0 ? ` • Có ${totalPendingCount} khoản Dự Kiến (${formatVndNumber(totalPendingAmount)} đ)` : ''}
       </td>
     </tr>
   </table>
@@ -609,7 +609,7 @@ export const exportAccountLedgerExcel = ({
     const isPending = Boolean(t.chuaBcms);
     const amountNum = Number(t.amount) || 0;
     const dateFormatted = formatDateDisplay(t.date);
-    const statusLabel = isPending ? 'Chưa BCMS (Dự kiến)' : 'Đã BCMS';
+    const statusLabel = isPending ? 'Dự Kiến' : 'Đã BCMS';
     const statusColor = isPending ? '#b45309' : '#15803d';
 
     bodyHtml += `
@@ -650,7 +650,7 @@ export const exportAccountLedgerExcel = ({
       <tr class="row-total">
         <td class="table-td text-center font-bold" colspan="3">TỔNG CỘNG PHÁT SINH</td>
         <td class="table-td text-left font-bold">
-          ${transactions.length} HẠNG MỤC (${totalDoneCount} Đã BCMS${totalPendingCount > 0 ? ` • ${totalPendingCount} Chưa BCMS` : ''})
+          ${transactions.length} HẠNG MỤC (${totalDoneCount} Đã BCMS${totalPendingCount > 0 ? ` • ${totalPendingCount} Dự Kiến` : ''})
         </td>
         <td class="table-td num-currency font-bold" style="font-size: 11pt; color: #1e3a8a;">${formatVndNumber(totalAmount)}</td>
         <td class="table-td text-left font-bold" colspan="3" style="font-size: 9pt;">
@@ -725,7 +725,7 @@ export const exportAccountLedgerCSV = ({
 
   const rows = transactions.map((t, idx) => {
     const formattedDate = t.date ? (t.date.includes('-') ? t.date.split('-').reverse().join('/') : t.date) : '';
-    const statusLabel = t.chuaBcms ? 'Chưa BCMS (Dự kiến)' : 'Đã BCMS';
+    const statusLabel = t.chuaBcms ? 'Dự Kiến' : 'Đã BCMS';
     return [
       idx + 1,
       escapeCSV(accCode),
