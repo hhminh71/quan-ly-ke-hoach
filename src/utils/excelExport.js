@@ -1,6 +1,7 @@
 /**
- * TIỆN ÍCH XUẤT BÁO CÁO EXCEL CHUẨN DOANH NGHIỆP
- * (Chuẩn định dạng bảng Google Sheet / MS Excel hỗ trợ tiếng Việt có dấu, kẻ bảng, phân cách hàng nghìn bằng dấu chấm)
+ * TIỆN ÍCH XUẤT BÁO CÁO EXCEL CHUẨN DOANH NGHIỆP (.XLSX)
+ * (Chuẩn định dạng bảng Google Sheet / MS Excel hỗ trợ tiếng Việt có dấu, kẻ bảng, phân cách hàng nghìn bằng dấu chấm,
+ * chuẩn nén OpenXML .xlsx tương thích 100% không báo lỗi định dạng)
  */
 
 export const formatVndNumber = (num) => {
@@ -15,312 +16,432 @@ const formatDateNow = () => {
   return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 };
 
-const getExcelHtmlWrapper = (sheetName, bodyHtml) => {
-  return `<html xmlns:o="urn:schemas-microsoft-com:office:office"
-      xmlns:x="urn:schemas-microsoft-com:office:excel"
-      xmlns="http://www.w3.org/TR/REC-html40">
-<head>
-  <meta http-equiv="content-type" content="text/plain; charset=UTF-8"/>
-  <!--[if gte mso 9]>
-  <xml>
-    <x:ExcelWorkbook>
-      <x:ExcelWorksheets>
-        <x:ExcelWorksheet>
-          <x:Name>${sheetName || 'BaoCao'}</x:Name>
-          <x:WorksheetOptions>
-            <x:DisplayGridlines/>
-          </x:WorksheetOptions>
-        </x:ExcelWorksheet>
-      </x:ExcelWorksheets>
-    </x:ExcelWorkbook>
-  </xml>
-  <![endif]-->
-  <style>
-    body {
-      font-family: 'Times New Roman', 'Segoe UI', Arial, sans-serif;
-      color: #0f172a;
+const formatDateShort = (d) => {
+  if (!d) return '';
+  const str = String(d).trim();
+  if (str.includes('-')) {
+    const parts = str.split('-');
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
     }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
-    .header-corp {
-      font-size: 10.5pt;
-      font-weight: bold;
-      text-transform: uppercase;
-      color: #1e3a8a;
-      text-align: left;
-    }
-    .header-dept {
-      font-size: 10pt;
-      font-weight: bold;
-      color: #334155;
-      text-align: left;
-    }
-    .header-motto {
-      font-size: 10pt;
-      font-weight: bold;
-      text-align: center;
-    }
-    .title-report {
-      font-size: 16pt;
-      font-weight: bold;
-      text-transform: uppercase;
-      color: #0f4c81;
-      text-align: center;
-      padding: 10px 0 2px 0;
-    }
-    .subtitle-report {
-      font-size: 10.5pt;
-      font-style: italic;
-      color: #475569;
-      text-align: center;
-      padding-bottom: 8px;
-    }
-    th.table-th {
-      background-color: #15803d; /* Màu xanh lá chuẩn Google Sheet */
-      color: #ffffff;
-      font-size: 10pt;
-      font-weight: bold;
-      text-align: center;
-      vertical-align: middle;
-      border: 0.5pt solid #0f5132;
-      padding: 8px 6px;
-    }
-    td.table-td {
-      border: 0.5pt solid #cbd5e1;
-      padding: 6px 7px;
-      font-size: 9.5pt;
-      vertical-align: middle;
-    }
-    .text-center { text-align: center; }
-    .text-left { text-align: left; }
-    .text-right { text-align: right; }
-    .font-bold { font-weight: bold; }
-    .num-currency {
-      text-align: right;
-      font-weight: 500;
-    }
-    .num-percent {
-      mso-number-format: "0\\.0\\%";
-      text-align: center;
-      font-weight: bold;
-    }
-    .row-total {
-      background-color: #e2e8f0;
-      font-weight: bold;
-      border-top: 1.5pt solid #0f172a;
-      border-bottom: 1.5pt solid #0f172a;
-    }
-    .status-safe { color: #166534; font-weight: bold; }
-    .status-warning { color: #b45309; font-weight: bold; }
-    .status-over { color: #b91c1c; font-weight: bold; }
-    .signature-title {
-      font-weight: bold;
-      font-size: 10.5pt;
-      text-align: center;
-      padding-top: 15px;
-    }
-    .signature-note {
-      font-style: italic;
-      font-size: 9pt;
-      color: #64748b;
-      text-align: center;
-      padding-bottom: 50px;
-    }
-  </style>
-</head>
-<body>
-  ${bodyHtml}
-</body>
-</html>`;
+  }
+  return str;
 };
 
-const triggerDownload = (content, filename, mimeType = 'application/vnd.ms-excel;charset=utf-8;') => {
-  const blob = new Blob(['\uFEFF' + content], { type: mimeType });
+/**
+ * Đảm bảo nạp thư viện XLSX có hỗ trợ styles (xlsx-js-style)
+ */
+export const ensureXLSX = async () => {
+  if (typeof window !== 'undefined' && window.XLSX && window.XLSX.style_version) {
+    return window.XLSX;
+  }
+
+  return new Promise((resolve, reject) => {
+    // 1. Thử nạp từ static nội bộ (public/xlsx.full.min.js đã tích hợp xlsx-js-style)
+    const script = document.createElement('script');
+    script.src = '/xlsx.full.min.js';
+    script.async = true;
+
+    script.onload = () => {
+      if (window.XLSX) {
+        resolve(window.XLSX);
+      } else {
+        reject(new Error('Thư viện XLSX không khả dụng'));
+      }
+    };
+
+    script.onerror = () => {
+      // 2. Fallback CDN nếu cần
+      console.warn('Không tải được /xlsx.full.min.js, chuyển sang CDN xlsx-js-style...');
+      const cdnScript = document.createElement('script');
+      cdnScript.src = 'https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.min.js';
+      cdnScript.async = true;
+      cdnScript.onload = () => {
+        if (window.XLSX) resolve(window.XLSX);
+        else reject(new Error('Không thể tải thư viện XLSX từ CDN'));
+      };
+      cdnScript.onerror = (err) => reject(new Error('Lỗi nạp thư viện Excel: ' + err.message));
+      document.head.appendChild(cdnScript);
+    };
+
+    document.head.appendChild(script);
+  });
+};
+
+/**
+ * Tải workbook xuống trình duyệt với định dạng chuẩn .xlsx (MIME OpenXML)
+ */
+export const downloadXLSX = (XLSX, wb, filename) => {
+  const buf = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+  const blob = new Blob([buf], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.setAttribute('download', filename);
+  const safeFilename = filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`;
+  link.setAttribute('download', safeFilename);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
 
+// ==================== BẢNG STYLE TIÊU CHUẨN ====================
+const borderThin = {
+  top: { style: 'thin', color: { rgb: 'CBD5E1' } },
+  bottom: { style: 'thin', color: { rgb: 'CBD5E1' } },
+  left: { style: 'thin', color: { rgb: 'CBD5E1' } },
+  right: { style: 'thin', color: { rgb: 'CBD5E1' } }
+};
+
+const borderTotal = {
+  top: { style: 'thin', color: { rgb: '0F172A' } },
+  bottom: { style: 'double', color: { rgb: '0F172A' } },
+  left: { style: 'thin', color: { rgb: 'CBD5E1' } },
+  right: { style: 'thin', color: { rgb: 'CBD5E1' } }
+};
+
+const fontHeader = { name: 'Arial', sz: 10, bold: true, color: { rgb: 'FFFFFF' } };
+const fontData = { name: 'Arial', sz: 9.5 };
+const fontBold = { name: 'Arial', sz: 9.5, bold: true };
+
+const stHeader = {
+  fill: { fgColor: { rgb: '15803D' } }, // Màu xanh lá chuẩn Google Sheet
+  font: fontHeader,
+  alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+  border: borderThin
+};
+
+const stCenter = {
+  font: fontData,
+  alignment: { horizontal: 'center', vertical: 'center' },
+  border: borderThin
+};
+
+const stCenterBold = {
+  font: fontBold,
+  alignment: { horizontal: 'center', vertical: 'center' },
+  border: borderThin
+};
+
+const stLeft = {
+  font: fontData,
+  alignment: { horizontal: 'left', vertical: 'center' },
+  border: borderThin
+};
+
+const stLeftBold = {
+  font: fontBold,
+  alignment: { horizontal: 'left', vertical: 'center' },
+  border: borderThin
+};
+
+const stRight = {
+  font: fontData,
+  alignment: { horizontal: 'right', vertical: 'center' },
+  border: borderThin
+};
+
+const stRightBold = {
+  font: fontBold,
+  alignment: { horizontal: 'right', vertical: 'center' },
+  border: borderThin
+};
+
+const stTotalCenter = {
+  fill: { fgColor: { rgb: 'E2E8F0' } },
+  font: { name: 'Arial', sz: 10, bold: true },
+  alignment: { horizontal: 'center', vertical: 'center' },
+  border: borderTotal
+};
+
+const stTotalLeft = {
+  fill: { fgColor: { rgb: 'E2E8F0' } },
+  font: { name: 'Arial', sz: 10, bold: true },
+  alignment: { horizontal: 'left', vertical: 'center' },
+  border: borderTotal
+};
+
+const stTotalRight = {
+  fill: { fgColor: { rgb: 'E2E8F0' } },
+  font: { name: 'Arial', sz: 10, bold: true },
+  alignment: { horizontal: 'right', vertical: 'center' },
+  border: borderTotal
+};
+
+// Helper gán cell an toàn
+function setCell(ws, r, c, val, type = 's', numFmt = undefined, style = undefined) {
+  const colLetter = (typeof window !== 'undefined' && window.XLSX)
+    ? window.XLSX.utils.encode_col(c)
+    : String.fromCharCode(65 + c);
+  const cellRef = `${colLetter}${r + 1}`;
+  const cell = { t: type, v: val };
+  if (numFmt) cell.z = numFmt;
+  if (style) cell.s = style;
+  ws[cellRef] = cell;
+}
+
 /**
- * 1. XUẤT BÁO CÁO TIẾN ĐỘ KẾ HOẠCH NGÂN SÁCH THEO NĂM (DẠNG EXCEL .XLS ĐẦY ĐỦ ĐỊNH DẠNG)
+ * 1. XUẤT BÁO CÁO TIẾN ĐỘ KẾ HOẠCH NGÂN SÁCH THEO NĂM (.XLSX)
+ * - File chuẩn .xlsx
+ * - Cột STT căn giữa
+ * - Đã ẩn cột "Nhóm chi phí"
+ * - Cột có chi phí bóp gọn theo số (không bóp theo chiều dài tên cột)
+ * - Cột tiến độ căn giữa
+ * - Cột trạng thái căn giữa
  */
-export const exportProgressReportExcel = ({
+export const exportProgressReportExcel = async ({
   items = [],
   summary = {},
   selectedYear = '2026',
   user = null,
   scopeInfo = null,
 }) => {
+  const XLSX = await ensureXLSX();
   const exportTime = formatDateNow();
   const userName = user?.name || user?.email || 'Quản trị viên';
   const scopeLabel = scopeInfo?.label || 'Toàn cảng (76 khoản mục)';
-  const totalItems = items.length;
 
   const totalApproved = summary.totalApproved || items.reduce((s, b) => s + (Number(b.selectedYearApproved) || 0), 0);
   const totalBravo = summary.totalBravo || items.reduce((s, b) => s + (Number(b.bravoVal) || 0), 0);
   const totalActual = summary.totalLiveActual || items.reduce((s, b) => s + (Number(b.liveActual) || 0), 0);
   const totalReport = summary.totalReportActual || items.reduce((s, b) => s + (Number(b.reportActual) || 0), 0);
   const totalRemaining = totalApproved - totalReport;
-  const avgPercent = totalApproved > 0 ? (totalReport / totalApproved) * 100 : 0;
+  const avgPercent = totalApproved > 0 ? (totalReport / totalApproved) : 0;
 
-  let bodyHtml = `
-  <!-- HEADER CƠ QUAN / ĐƠN VỊ -->
-  <table>
-    <tr>
-      <td colspan="6" class="header-corp">TỔNG CÔNG TY CẢNG HÀNG KHÔNG VIỆT NAM - CTCP</td>
-      <td colspan="6" class="header-motto">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</td>
-    </tr>
-    <tr>
-      <td colspan="6" class="header-dept">CẢNG HÀNG KHÔNG QUỐC TẾ CẦN THƠ - PHÒNG TC-KH</td>
-      <td colspan="6" class="header-motto" style="font-weight: normal; font-style: italic;">Độc lập - Tự do - Hạnh phúc</td>
-    </tr>
-    <tr><td colspan="12">&nbsp;</td></tr>
+  const ws = {};
+  const merges = [];
+  let row = 0;
 
-    <!-- TIÊU ĐỀ BÁO CÁO -->
-    <tr>
-      <td colspan="12" class="title-report">BÁO CÁO TIẾN ĐỘ THỰC HIỆN KẾ HOẠCH NGÂN SÁCH NĂM ${selectedYear}</td>
-    </tr>
-    <tr>
-      <td colspan="12" class="subtitle-report">
-        (Phạm vi: ${scopeLabel} • Xuất lúc: ${exportTime} • Người xuất: ${userName})
-      </td>
-    </tr>
-    <tr>
-      <td colspan="12" class="text-right" style="font-size: 9pt; font-style: italic; padding-bottom: 6px;">
-        Đơn vị tính: Đồng Việt Nam (VNĐ)
-      </td>
-    </tr>
-  </table>
+  // HEADER CƠ QUAN / ĐƠN VỊ (11 cột: 0-4 và 5-10)
+  setCell(ws, row, 0, 'TỔNG CÔNG TY CẢNG HÀNG KHÔNG VIỆT NAM - CTCP', 's', null, {
+    font: { name: 'Arial', sz: 10.5, bold: true, color: { rgb: '1E3A8A' } },
+    alignment: { horizontal: 'left', vertical: 'center' }
+  });
+  setCell(ws, row, 5, 'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM', 's', null, {
+    font: { name: 'Arial', sz: 10, bold: true },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 4 } });
+  merges.push({ s: { r: row, c: 5 }, e: { r: row, c: 10 } });
+  row++;
 
-  <!-- BẢNG CHI TIẾT CÁC KHOẢN MỤC (ĐI TRỰC TIẾP VÀO BẢNG) -->
-  <table>
-    <thead>
-      <tr>
-        <th class="table-th" style="width: 40px;">STT</th>
-        <th class="table-th" style="width: 90px;">MÃ KH</th>
-        <th class="table-th" style="width: 280px;">TÊN HẠNG MỤC / KHOẢN MỤC</th>
-        <th class="table-th" style="width: 160px;">NHÓM CHI PHÍ</th>
-        <th class="table-th" style="width: 130px;">HẠN MỨC DUYỆT (${selectedYear})</th>
-        <th class="table-th" style="width: 125px;">THEO BRAVO</th>
-        <th class="table-th" style="width: 125px;">THEO THỰC TẾ</th>
-        <th class="table-th" style="width: 135px;">CHI PHÍ BÁO CÁO (MAX)</th>
-        <th class="table-th" style="width: 125px;">CÒN LẠI KHẢ DỤNG</th>
-        <th class="table-th" style="width: 80px;">TIẾN ĐỘ (%)</th>
-        <th class="table-th" style="width: 95px;">TRẠNG THÁI</th>
-        <th class="table-th" style="width: 250px;">QUY MÔ / DIỄN GIẢI CHI TIẾT</th>
-      </tr>
-    </thead>
-    <tbody>
-  `;
+  setCell(ws, row, 0, 'CẢNG HÀNG KHÔNG QUỐC TẾ CẦN THƠ - PHÒNG TC-KH', 's', null, {
+    font: { name: 'Arial', sz: 10, bold: true, color: { rgb: '334155' } },
+    alignment: { horizontal: 'left', vertical: 'center' }
+  });
+  setCell(ws, row, 5, 'Độc lập - Tự do - Hạnh phúc', 's', null, {
+    font: { name: 'Arial', sz: 10, italic: true },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 4 } });
+  merges.push({ s: { r: row, c: 5 }, e: { r: row, c: 10 } });
+  row++;
 
-  // Render từng dòng dữ liệu với số có dấu chấm phân cách hàng nghìn
+  // Dòng trống
+  row++;
+
+  // TIÊU ĐỀ BÁO CÁO
+  setCell(ws, row, 0, `BÁO CÁO TIẾN ĐỘ THỰC HIỆN KẾ HOẠCH NGÂN SÁCH NĂM ${selectedYear}`, 's', null, {
+    font: { name: 'Arial', sz: 15, bold: true, color: { rgb: '0F4C81' } },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 10 } });
+  row++;
+
+  setCell(ws, row, 0, `(Phạm vi: ${scopeLabel} • Xuất lúc: ${exportTime} • Người xuất: ${userName})`, 's', null, {
+    font: { name: 'Arial', sz: 10, italic: true, color: { rgb: '475569' } },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 10 } });
+  row++;
+
+  setCell(ws, row, 10, 'Đơn vị tính: Đồng Việt Nam (VNĐ)', 's', null, {
+    font: { name: 'Arial', sz: 9, italic: true, color: { rgb: '64748B' } },
+    alignment: { horizontal: 'right', vertical: 'center' }
+  });
+  row++;
+
+  // TIÊU ĐỀ BẢNG (ĐÃ ẨN CỘT NHÓM CHI PHÍ)
+  const headers = [
+    'STT',
+    'MÃ KH',
+    'TÊN HẠNG MỤC / KHOẢN MỤC',
+    `HẠN MỨC DUYỆT (${selectedYear})`,
+    'THEO BRAVO',
+    'THEO THỰC TẾ',
+    'CHI PHÍ BÁO CÁO (MAX)',
+    'CÒN LẠI KHẢ DỤNG',
+    'TIẾN ĐỘ (%)',
+    'TRẠNG THÁI',
+    'QUY MÔ / DIỄN GIẢI CHI TIẾT'
+  ];
+
+  headers.forEach((h, c) => {
+    setCell(ws, row, c, h, 's', null, stHeader);
+  });
+  row++;
+
+  // DỮ LIỆU CÁC KHOẢN MỤC
   items.forEach((item, index) => {
     const approved = Number(item.selectedYearApproved) || 0;
     const bravo = Number(item.bravoVal) || 0;
     const actual = Number(item.liveActual) || 0;
     const report = Number(item.reportActual) || 0;
     const remaining = Number(item.liveRemaining) || (approved - report);
-    const percent = approved > 0 ? (report / approved) : 0;
-    const pctNumber = percent * 100;
-    const pctFormatted = approved > 0 ? `${pctNumber.toFixed(1)}%` : (report > 0 ? '100%' : '0%');
+    const pct = approved > 0 ? (report / approved) : 0;
+    const pctNumber = pct * 100;
 
     let statusText = 'An toàn';
-    let statusClass = 'status-safe';
+    let statusColor = '166534';
     if (pctNumber >= 100) {
       statusText = 'Vượt mức';
-      statusClass = 'status-over';
+      statusColor = 'B91C1C';
     } else if (pctNumber >= 80) {
       statusText = 'Cảnh báo';
-      statusClass = 'status-warning';
+      statusColor = 'B45309';
     }
 
-    bodyHtml += `
-      <tr>
-        <td class="table-td text-center">${index + 1}</td>
-        <td class="table-td text-center font-bold" style="mso-number-format:'\\@';">${item.code || ''}</td>
-        <td class="table-td text-left font-bold">${item.name || ''}</td>
-        <td class="table-td text-left" style="font-size: 8.5pt; color: #475569;">${item.group || 'SỬA CHỮA THƯỜNG XUYÊN'}</td>
-        <td class="table-td num-currency font-bold">${formatVndNumber(approved)}</td>
-        <td class="table-td num-currency">${formatVndNumber(bravo)}</td>
-        <td class="table-td num-currency">${formatVndNumber(actual)}</td>
-        <td class="table-td num-currency font-bold" style="color: #0d9488;">${formatVndNumber(report)}</td>
-        <td class="table-td num-currency font-bold" style="color: ${remaining < 0 ? '#b91c1c' : '#15803d'};">${formatVndNumber(remaining)}</td>
-        <td class="table-td num-percent">${pctFormatted}</td>
-        <td class="table-td text-center ${statusClass}">${statusText}</td>
-        <td class="table-td text-left" style="font-size: 8.5pt; color: #475569;">${item.scope || item.notes || ''}</td>
-      </tr>
-    `;
+    // 0. STT: Canh giữa
+    setCell(ws, row, 0, index + 1, 'n', null, stCenter);
+    // 1. Mã KH: Canh giữa, bold
+    setCell(ws, row, 1, item.code || '', 's', null, stCenterBold);
+    // 2. Tên hạng mục: Canh trái, bold
+    setCell(ws, row, 2, item.name || '', 's', null, stLeftBold);
+    // 3. Hạn mức duyệt (bóp gọn theo số)
+    setCell(ws, row, 3, approved, 'n', '#,##0', stRightBold);
+    // 4. Theo Bravo (bóp gọn theo số)
+    setCell(ws, row, 4, bravo, 'n', '#,##0', stRight);
+    // 5. Theo Thực tế (bóp gọn theo số)
+    setCell(ws, row, 5, actual, 'n', '#,##0', stRight);
+    // 6. Chi phí Báo cáo MAX (bóp gọn theo số)
+    setCell(ws, row, 6, report, 'n', '#,##0', {
+      ...stRightBold,
+      font: { ...fontBold, color: { rgb: '0D9488' } }
+    });
+    // 7. Còn lại khả dụng (bóp gọn theo số)
+    setCell(ws, row, 7, remaining, 'n', '#,##0', {
+      ...stRightBold,
+      font: { ...fontBold, color: { rgb: remaining < 0 ? 'B91C1C' : '15803D' } }
+    });
+    // 8. Tiến độ (%): Canh giữa
+    setCell(ws, row, 8, pct, 'n', '0.0%', stCenterBold);
+    // 9. Trạng thái: Canh giữa
+    setCell(ws, row, 9, statusText, 's', null, {
+      ...stCenterBold,
+      font: { ...fontBold, color: { rgb: statusColor } }
+    });
+    // 10. Quy mô / Diễn giải
+    setCell(ws, row, 10, item.scope || item.notes || '', 's', null, stLeft);
+
+    row++;
   });
 
-  // Dòng TỔNG CỘNG
-  const totalAvgPercentFormatted = `${avgPercent.toFixed(1)}%`;
-  bodyHtml += `
-      <tr class="row-total">
-        <td class="table-td text-center font-bold" colspan="2">TỔNG CỘNG</td>
-        <td class="table-td text-left font-bold" colspan="2">${totalItems} KHOẢN MỤC CHI PHÍ</td>
-        <td class="table-td num-currency font-bold">${formatVndNumber(totalApproved)}</td>
-        <td class="table-td num-currency font-bold">${formatVndNumber(totalBravo)}</td>
-        <td class="table-td num-currency font-bold">${formatVndNumber(totalActual)}</td>
-        <td class="table-td num-currency font-bold" style="color: #0d9488;">${formatVndNumber(totalReport)}</td>
-        <td class="table-td num-currency font-bold" style="color: ${totalRemaining < 0 ? '#b91c1c' : '#15803d'};">${formatVndNumber(totalRemaining)}</td>
-        <td class="table-td num-percent font-bold" style="color: #4f46e5;">${totalAvgPercentFormatted}</td>
-        <td class="table-td text-center font-bold" colspan="2">
-          ${avgPercent >= 100 ? 'VƯỢT KẾ HOẠCH' : avgPercent >= 80 ? 'CẢNH BÁO CAO' : 'TIẾN ĐỘ AN TOÀN'}
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  // DÒNG TỔNG CỘNG
+  setCell(ws, row, 0, 'TỔNG CỘNG', 's', null, stTotalCenter);
+  setCell(ws, row, 1, '', 's', null, stTotalCenter);
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 1 } });
 
-  <!-- KHỐI CHỮ KÝ XÁC NHẬN CHUẨN KẾ TOÁN -->
-  <table style="margin-top: 30px;">
-    <tr>
-      <td colspan="6">&nbsp;</td>
-      <td colspan="6" class="text-center" style="font-style: italic; font-size: 10pt;">
-        Cần Thơ, ngày ..... tháng ..... năm 2026
-      </td>
-    </tr>
-    <tr>
-      <td colspan="3" class="signature-title">NGƯỜI LẬP BIỂU</td>
-      <td colspan="3" class="signature-title">KẾ TOÁN CHI PHÍ</td>
-      <td colspan="3" class="signature-title">TRƯỞNG PHÒNG TC-KH</td>
-      <td colspan="3" class="signature-title">GIÁM ĐỐC CẢNG</td>
-    </tr>
-    <tr>
-      <td colspan="3" class="signature-note">(Ký, ghi rõ họ tên)</td>
-      <td colspan="3" class="signature-note">(Ký, ghi rõ họ tên)</td>
-      <td colspan="3" class="signature-note">(Ký, ghi rõ họ tên)</td>
-      <td colspan="3" class="signature-note">(Ký, đóng dấu)</td>
-    </tr>
-    <tr>
-      <td colspan="3" class="text-center font-bold">${userName}</td>
-      <td colspan="3" class="text-center font-bold">&nbsp;</td>
-      <td colspan="3" class="text-center font-bold">&nbsp;</td>
-      <td colspan="3" class="text-center font-bold">&nbsp;</td>
-    </tr>
-  </table>
-  `;
+  setCell(ws, row, 2, `${items.length} KHOẢN MỤC CHI PHÍ`, 's', null, stTotalLeft);
 
-  const fullHtml = getExcelHtmlWrapper(`TienDo_${selectedYear}`, bodyHtml);
-  const fileName = `Bao_Cao_Tien_Do_Ngan_Sach_${selectedYear}_${new Date().toISOString().substring(0, 10)}.xls`;
-  triggerDownload(fullHtml, fileName);
+  setCell(ws, row, 3, totalApproved, 'n', '#,##0', stTotalRight);
+  setCell(ws, row, 4, totalBravo, 'n', '#,##0', stTotalRight);
+  setCell(ws, row, 5, totalActual, 'n', '#,##0', stTotalRight);
+  setCell(ws, row, 6, totalReport, 'n', '#,##0', {
+    ...stTotalRight,
+    font: { name: 'Arial', sz: 10, bold: true, color: { rgb: '0D9488' } }
+  });
+  setCell(ws, row, 7, totalRemaining, 'n', '#,##0', {
+    ...stTotalRight,
+    font: { name: 'Arial', sz: 10, bold: true, color: { rgb: totalRemaining < 0 ? 'B91C1C' : '15803D' } }
+  });
+
+  // Tiến độ tổng cộng canh giữa
+  setCell(ws, row, 8, avgPercent, 'n', '0.0%', {
+    ...stTotalCenter,
+    font: { name: 'Arial', sz: 10, bold: true, color: { rgb: '4F46E5' } }
+  });
+
+  // Trạng thái tổng cộng canh giữa
+  const totalStatusText = avgPercent >= 1 ? 'VƯỢT KẾ HOẠCH' : avgPercent >= 0.8 ? 'CẢNH BÁO CAO' : 'TIẾN ĐỘ AN TOÀN';
+  setCell(ws, row, 9, totalStatusText, 's', null, stTotalCenter);
+  setCell(ws, row, 10, '', 's', null, stTotalCenter);
+  merges.push({ s: { r: row, c: 9 }, e: { r: row, c: 10 } });
+  row++;
+
+  // Dòng trống
+  row++;
+
+  // KHỐI CHỮ KÝ XÁC NHẬN CHUẨN KẾ TOÁN (11 CỘT)
+  setCell(ws, row, 6, 'Cần Thơ, ngày ..... tháng ..... năm 2026', 's', null, {
+    font: { name: 'Arial', sz: 10, italic: true },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 6 }, e: { r: row, c: 10 } });
+  row++;
+
+  setCell(ws, row, 0, 'NGƯỜI LẬP BIỂU', 's', null, { font: { name: 'Arial', sz: 10.5, bold: true }, alignment: { horizontal: 'center' } });
+  setCell(ws, row, 3, 'KẾ TOÁN CHI PHÍ', 's', null, { font: { name: 'Arial', sz: 10.5, bold: true }, alignment: { horizontal: 'center' } });
+  setCell(ws, row, 6, 'TRƯỞNG PHÒNG TC-KH', 's', null, { font: { name: 'Arial', sz: 10.5, bold: true }, alignment: { horizontal: 'center' } });
+  setCell(ws, row, 8, 'GIÁM ĐỐC CẢNG', 's', null, { font: { name: 'Arial', sz: 10.5, bold: true }, alignment: { horizontal: 'center' } });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 2 } });
+  merges.push({ s: { r: row, c: 3 }, e: { r: row, c: 5 } });
+  merges.push({ s: { r: row, c: 6 }, e: { r: row, c: 7 } });
+  merges.push({ s: { r: row, c: 8 }, e: { r: row, c: 10 } });
+  row++;
+
+  setCell(ws, row, 0, '(Ký, ghi rõ họ tên)', 's', null, { font: { name: 'Arial', sz: 9, italic: true, color: { rgb: '64748B' } }, alignment: { horizontal: 'center' } });
+  setCell(ws, row, 3, '(Ký, ghi rõ họ tên)', 's', null, { font: { name: 'Arial', sz: 9, italic: true, color: { rgb: '64748B' } }, alignment: { horizontal: 'center' } });
+  setCell(ws, row, 6, '(Ký, ghi rõ họ tên)', 's', null, { font: { name: 'Arial', sz: 9, italic: true, color: { rgb: '64748B' } }, alignment: { horizontal: 'center' } });
+  setCell(ws, row, 8, '(Ký, đóng dấu)', 's', null, { font: { name: 'Arial', sz: 9, italic: true, color: { rgb: '64748B' } }, alignment: { horizontal: 'center' } });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 2 } });
+  merges.push({ s: { r: row, c: 3 }, e: { r: row, c: 5 } });
+  merges.push({ s: { r: row, c: 6 }, e: { r: row, c: 7 } });
+  merges.push({ s: { r: row, c: 8 }, e: { r: row, c: 10 } });
+  row += 3;
+
+  setCell(ws, row, 0, userName, 's', null, { font: { name: 'Arial', sz: 10, bold: true }, alignment: { horizontal: 'center' } });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 2 } });
+
+  // THIẾT LẬP ĐỘ RỘNG CỘT (Cột chi phí bóp gọn theo số ~15-16ch)
+  ws['!cols'] = [
+    { wch: 6 },   // STT
+    { wch: 12 },  // MÃ KH
+    { wch: 38 },  // TÊN HẠNG MỤC
+    { wch: 16 },  // HẠN MỨC DUYỆT (bóp gọn theo số)
+    { wch: 15 },  // THEO BRAVO (bóp gọn theo số)
+    { wch: 15 },  // THEO THỰC TẾ (bóp gọn theo số)
+    { wch: 16 },  // CHI PHÍ BÁO CÁO (MAX) (bóp gọn theo số)
+    { wch: 16 },  // CÒN LẠI KHẢ DỤNG (bóp gọn theo số)
+    { wch: 12 },  // TIẾN ĐỘ (%)
+    { wch: 14 },  // TRẠNG THÁI
+    { wch: 35 }   // QUY MÔ / DIỄN GIẢI
+  ];
+  ws['!merges'] = merges;
+  ws['!ref'] = `A1:K${row + 1}`;
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, `TienDo_${selectedYear}`);
+
+  const fileName = `Bao_Cao_Tien_Do_Ngan_Sach_${selectedYear}_${new Date().toISOString().substring(0, 10)}.xlsx`;
+  downloadXLSX(XLSX, wb, fileName);
 };
 
 /**
- * 2. XUẤT BẢNG KẾ HOẠCH NGÂN SÁCH ĐA NĂM (CHUẨN MẪU GOOGLE SHEET KE_HOACH_NGAN_SACH)
+ * 2. XUẤT BẢNG KẾ HOẠCH NGÂN SÁCH ĐA NĂM (.XLSX)
+ * - File chuẩn .xlsx
+ * - Cột STT căn giữa
+ * - Đã ẩn cột "Nhóm chi phí"
+ * - Cột chi phí các năm bóp gọn theo số (~15-16ch)
  */
-export const exportMatrixReportExcel = ({
+export const exportMatrixReportExcel = async ({
   items = [],
   matrixYears = ['2024', '2025', '2026', '2027'],
   user = null,
   scopeInfo = null,
 }) => {
+  const XLSX = await ensureXLSX();
   const exportTime = formatDateNow();
   const userName = user?.name || user?.email || 'Quản trị viên';
   const scopeLabel = scopeInfo?.label || 'Toàn cảng';
@@ -333,114 +454,181 @@ export const exportMatrixReportExcel = ({
     }, 0);
   });
 
-  let bodyHtml = `
-  <table>
-    <tr>
-      <td colspan="3" class="header-corp">TỔNG CÔNG TY CẢNG HÀNG KHÔNG VIỆT NAM - CTCP</td>
-      <td colspan="${matrixYears.length + 1}" class="header-motto">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</td>
-    </tr>
-    <tr>
-      <td colspan="3" class="header-dept">CẢNG HÀNG KHÔNG QUỐC TẾ CẦN THƠ - PHÒNG TC-KH</td>
-      <td colspan="${matrixYears.length + 1}" class="header-motto" style="font-weight: normal; font-style: italic;">Độc lập - Tự do - Hạnh phúc</td>
-    </tr>
-    <tr><td colspan="${matrixYears.length + 4}">&nbsp;</td></tr>
+  const totalCols = 3 + matrixYears.length + 1; // STT, MA KH, TEN, [YEARS], QUY MO
+  const ws = {};
+  const merges = [];
+  let row = 0;
 
-    <tr>
-      <td colspan="${matrixYears.length + 4}" class="title-report">BẢNG KẾ HOẠCH NGÂN SÁCH GIAI ĐOẠN (${matrixYears.join(' - ')})</td>
-    </tr>
-    <tr>
-      <td colspan="${matrixYears.length + 4}" class="subtitle-report">
-        (Chuẩn mẫu trang tính Google Sheet KE_HOACH_NGAN_SACH • Phạm vi: ${scopeLabel} • Xuất lúc: ${exportTime})
-      </td>
-    </tr>
-    <tr>
-      <td colspan="${matrixYears.length + 4}" class="text-right" style="font-size: 9pt; font-style: italic; padding-bottom: 6px;">
-        Đơn vị tính: Đồng Việt Nam (VNĐ)
-      </td>
-    </tr>
-  </table>
+  // Header cơ quan
+  const midCol = Math.floor(totalCols / 2);
+  setCell(ws, row, 0, 'TỔNG CÔNG TY CẢNG HÀNG KHÔNG VIỆT NAM - CTCP', 's', null, {
+    font: { name: 'Arial', sz: 10.5, bold: true, color: { rgb: '1E3A8A' } },
+    alignment: { horizontal: 'left', vertical: 'center' }
+  });
+  setCell(ws, row, midCol, 'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM', 's', null, {
+    font: { name: 'Arial', sz: 10, bold: true },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: midCol - 1 } });
+  merges.push({ s: { r: row, c: midCol }, e: { r: row, c: totalCols - 1 } });
+  row++;
 
-  <table>
-    <thead>
-      <tr>
-        <th class="table-th" style="width: 40px;">STT</th>
-        <th class="table-th" style="width: 95px;">MÃ KẾ HOẠCH</th>
-        <th class="table-th" style="width: 300px;">TÊN HẠNG MỤC / KHOẢN MỤC</th>
-        <th class="table-th" style="width: 170px;">NHÓM CHI PHÍ</th>
-        ${matrixYears.map((yr) => `<th class="table-th" style="width: 130px; ${yr === '2026' ? 'background-color: #047857;' : ''}">KẾ HOẠCH ${yr}</th>`).join('')}
-        <th class="table-th" style="width: 280px;">QUY MÔ / DIỄN GIẢI KẾ HOẠCH</th>
-      </tr>
-    </thead>
-    <tbody>
-  `;
+  setCell(ws, row, 0, 'CẢNG HÀNG KHÔNG QUỐC TẾ CẦN THƠ - PHÒNG TC-KH', 's', null, {
+    font: { name: 'Arial', sz: 10, bold: true, color: { rgb: '334155' } },
+    alignment: { horizontal: 'left', vertical: 'center' }
+  });
+  setCell(ws, row, midCol, 'Độc lập - Tự do - Hạnh phúc', 's', null, {
+    font: { name: 'Arial', sz: 10, italic: true },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: midCol - 1 } });
+  merges.push({ s: { r: row, c: midCol }, e: { r: row, c: totalCols - 1 } });
+  row++;
 
+  // Dòng trống
+  row++;
+
+  // Tiêu đề
+  setCell(ws, row, 0, `BẢNG KẾ HOẠCH NGÂN SÁCH GIAI ĐOẠN (${matrixYears.join(' - ')})`, 's', null, {
+    font: { name: 'Arial', sz: 15, bold: true, color: { rgb: '0F4C81' } },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: totalCols - 1 } });
+  row++;
+
+  setCell(ws, row, 0, `(Chuẩn mẫu trang tính Google Sheet KE_HOACH_NGAN_SACH • Phạm vi: ${scopeLabel} • Xuất lúc: ${exportTime})`, 's', null, {
+    font: { name: 'Arial', sz: 10, italic: true, color: { rgb: '475569' } },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: totalCols - 1 } });
+  row++;
+
+  setCell(ws, row, totalCols - 1, 'Đơn vị tính: Đồng Việt Nam (VNĐ)', 's', null, {
+    font: { name: 'Arial', sz: 9, italic: true, color: { rgb: '64748B' } },
+    alignment: { horizontal: 'right', vertical: 'center' }
+  });
+  row++;
+
+  // Tiêu đề bảng (ẨN CỘT NHÓM CHI PHÍ)
+  const matrixHeaders = [
+    'STT',
+    'MÃ KẾ HOẠCH',
+    'TÊN HẠNG MỤC / KHOẢN MỤC',
+    ...matrixYears.map((yr) => `KẾ HOẠCH ${yr}`),
+    'QUY MÔ / DIỄN GIẢI KẾ HOẠCH'
+  ];
+
+  matrixHeaders.forEach((h, c) => {
+    const isCurrentYear = h.includes('2026');
+    const customHeaderStyle = isCurrentYear
+      ? { ...stHeader, fill: { fgColor: { rgb: '047857' } } }
+      : stHeader;
+    setCell(ws, row, c, h, 's', null, customHeaderStyle);
+  });
+  row++;
+
+  // Dữ liệu
   items.forEach((item, index) => {
-    bodyHtml += `
-      <tr>
-        <td class="table-td text-center">${index + 1}</td>
-        <td class="table-td text-center font-bold" style="mso-number-format:'\\@';">${item.code || ''}</td>
-        <td class="table-td text-left font-bold">${item.name || ''}</td>
-        <td class="table-td text-left" style="font-size: 8.5pt; color: #475569;">${item.group || 'SỬA CHỮA THƯỜNG XUYÊN'}</td>
-        ${matrixYears
-          .map((yr) => {
-            const val = (item.yearlyApproved && item.yearlyApproved[yr]) !== undefined ? item.yearlyApproved[yr] : (yr === '2026' ? item.approvedAmount : 0);
-            return `<td class="table-td num-currency font-bold">${formatVndNumber(val)}</td>`;
-          })
-          .join('')}
-        <td class="table-td text-left" style="font-size: 8.5pt; color: #475569;">${item.scope || item.notes || ''}</td>
-      </tr>
-    `;
+    // 0. STT: Canh giữa
+    setCell(ws, row, 0, index + 1, 'n', null, stCenter);
+    // 1. Mã KH: Canh giữa, bold
+    setCell(ws, row, 1, item.code || '', 's', null, stCenterBold);
+    // 2. Tên: Canh trái, bold
+    setCell(ws, row, 2, item.name || '', 's', null, stLeftBold);
+
+    // Các cột năm: Canh phải, bold, bóp gọn theo số
+    let c = 3;
+    matrixYears.forEach((yr) => {
+      const val = (item.yearlyApproved && item.yearlyApproved[yr]) !== undefined ? item.yearlyApproved[yr] : (yr === '2026' ? item.approvedAmount : 0);
+      setCell(ws, row, c, Number(val) || 0, 'n', '#,##0', stRightBold);
+      c++;
+    });
+
+    // Cột diễn giải
+    setCell(ws, row, c, item.scope || item.notes || '', 's', null, stLeft);
+    row++;
   });
 
-  // Dòng TỔNG CỘNG
-  bodyHtml += `
-      <tr class="row-total">
-        <td class="table-td text-center font-bold" colspan="2">TỔNG CỘNG</td>
-        <td class="table-td text-left font-bold" colspan="2">${items.length} KHOẢN MỤC KẾ HOẠCH</td>
-        ${matrixYears.map((yr) => `<td class="table-td num-currency font-bold" style="color: #047857;">${formatVndNumber(yearTotals[yr])}</td>`).join('')}
-        <td class="table-td font-bold text-center">TOÀN BỘ DANH MỤC ĐƯỢC DUYỆT</td>
-      </tr>
-    </tbody>
-  </table>
+  // DÒNG TỔNG CỘNG
+  setCell(ws, row, 0, 'TỔNG CỘNG', 's', null, stTotalCenter);
+  setCell(ws, row, 1, '', 's', null, stTotalCenter);
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 1 } });
 
-  <!-- CHỮ KÝ -->
-  <table style="margin-top: 30px;">
-    <tr>
-      <td colspan="${Math.ceil((matrixYears.length + 4) / 2)}">&nbsp;</td>
-      <td colspan="${Math.floor((matrixYears.length + 4) / 2)}" class="text-center" style="font-style: italic; font-size: 10pt;">
-        Cần Thơ, ngày ..... tháng ..... năm 2026
-      </td>
-    </tr>
-    <tr>
-      <td colspan="${Math.ceil((matrixYears.length + 4) / 3)}" class="signature-title">NGƯỜI LẬP BIỂU</td>
-      <td colspan="${Math.floor((matrixYears.length + 4) / 3)}" class="signature-title">TRƯỞNG PHÒNG TC-KH</td>
-      <td colspan="${Math.floor((matrixYears.length + 4) / 3)}" class="signature-title">GIÁM ĐỐC CẢNG</td>
-    </tr>
-    <tr>
-      <td colspan="${Math.ceil((matrixYears.length + 4) / 3)}" class="signature-note">(Ký, ghi rõ họ tên)</td>
-      <td colspan="${Math.floor((matrixYears.length + 4) / 3)}" class="signature-note">(Ký, ghi rõ họ tên)</td>
-      <td colspan="${Math.floor((matrixYears.length + 4) / 3)}" class="signature-note">(Ký, đóng dấu)</td>
-    </tr>
-  </table>
-  `;
+  setCell(ws, row, 2, `${items.length} KHOẢN MỤC KẾ HOẠCH`, 's', null, stTotalLeft);
 
-  const fullHtml = getExcelHtmlWrapper('KeHoachNganSach', bodyHtml);
-  const fileName = `Bang_Ke_Hoach_Ngan_Sach_${matrixYears.join('_')}_${new Date().toISOString().substring(0, 10)}.xls`;
-  triggerDownload(fullHtml, fileName);
+  let cTot = 3;
+  matrixYears.forEach((yr) => {
+    setCell(ws, row, cTot, yearTotals[yr] || 0, 'n', '#,##0', {
+      ...stTotalRight,
+      font: { name: 'Arial', sz: 10, bold: true, color: { rgb: '047857' } }
+    });
+    cTot++;
+  });
+
+  setCell(ws, row, cTot, 'TOÀN BỘ DANH MỤC ĐƯỢC DUYỆT', 's', null, stTotalCenter);
+  row++;
+
+  // Dòng trống
+  row++;
+
+  // Khối chữ ký
+  const sigCol = Math.floor(totalCols / 3);
+  setCell(ws, row, totalCols - sigCol, 'Cần Thơ, ngày ..... tháng ..... năm 2026', 's', null, {
+    font: { name: 'Arial', sz: 10, italic: true },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: totalCols - sigCol }, e: { r: row, c: totalCols - 1 } });
+  row++;
+
+  setCell(ws, row, 0, 'NGƯỜI LẬP BIỂU', 's', null, { font: { name: 'Arial', sz: 10.5, bold: true }, alignment: { horizontal: 'center' } });
+  setCell(ws, row, sigCol, 'TRƯỞNG PHÒNG TC-KH', 's', null, { font: { name: 'Arial', sz: 10.5, bold: true }, alignment: { horizontal: 'center' } });
+  setCell(ws, row, totalCols - sigCol, 'GIÁM ĐỐC CẢNG', 's', null, { font: { name: 'Arial', sz: 10.5, bold: true }, alignment: { horizontal: 'center' } });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: sigCol - 1 } });
+  merges.push({ s: { r: row, c: sigCol }, e: { r: row, c: totalCols - sigCol - 1 } });
+  merges.push({ s: { r: row, c: totalCols - sigCol }, e: { r: row, c: totalCols - 1 } });
+  row++;
+
+  setCell(ws, row, 0, '(Ký, ghi rõ họ tên)', 's', null, { font: { name: 'Arial', sz: 9, italic: true, color: { rgb: '64748B' } }, alignment: { horizontal: 'center' } });
+  setCell(ws, row, sigCol, '(Ký, ghi rõ họ tên)', 's', null, { font: { name: 'Arial', sz: 9, italic: true, color: { rgb: '64748B' } }, alignment: { horizontal: 'center' } });
+  setCell(ws, row, totalCols - sigCol, '(Ký, đóng dấu)', 's', null, { font: { name: 'Arial', sz: 9, italic: true, color: { rgb: '64748B' } }, alignment: { horizontal: 'center' } });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: sigCol - 1 } });
+  merges.push({ s: { r: row, c: sigCol }, e: { r: row, c: totalCols - sigCol - 1 } });
+  merges.push({ s: { r: row, c: totalCols - sigCol }, e: { r: row, c: totalCols - 1 } });
+  row += 3;
+
+  setCell(ws, row, 0, userName, 's', null, { font: { name: 'Arial', sz: 10, bold: true }, alignment: { horizontal: 'center' } });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: sigCol - 1 } });
+
+  // ĐỘ RỘNG CỘT (Cột chi phí các năm bóp gọn theo số ~16ch)
+  ws['!cols'] = [
+    { wch: 6 },   // STT
+    { wch: 13 },  // MÃ KẾ HOẠCH
+    { wch: 40 },  // TÊN HẠNG MỤC
+    ...matrixYears.map(() => ({ wch: 16 })), // Cột KẾ HOẠCH {yr} bóp gọn theo số
+    { wch: 35 }   // QUY MÔ / DIỄN GIẢI
+  ];
+  ws['!merges'] = merges;
+  ws['!ref'] = `A1:${String.fromCharCode(65 + totalCols - 1)}${row + 1}`;
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'KeHoachNganSach');
+
+  const fileName = `Bang_Ke_Hoach_Ngan_Sach_${matrixYears.join('_')}_${new Date().toISOString().substring(0, 10)}.xlsx`;
+  downloadXLSX(XLSX, wb, fileName);
 };
 
 /**
- * 3. XUẤT CSV TIẾN ĐỘ (Dành cho người dùng cần file thuần text CSV)
+ * 3. XUẤT CSV TIẾN ĐỘ (Chuẩn UTF-8 có BOM)
  */
 export const exportProgressReportCSV = ({
   items = [],
   selectedYear = '2026',
 }) => {
+  // Đã ẩn cột Nhóm chi phí
   const headers = [
     'STT',
     'MaKhoanMuc',
     'TenHangMuc',
-    'NhomChiPhi',
     `HanMucDuyet_${selectedYear}`,
     'TheoBravo',
     'TheoThucTe',
@@ -463,7 +651,6 @@ export const exportProgressReportCSV = ({
       index + 1,
       `"${item.code || ''}"`,
       `"${(item.name || '').replace(/"/g, '""')}"`,
-      `"${(item.group || '').replace(/"/g, '""')}"`,
       `"${formatVndNumber(approved)}"`,
       `"${formatVndNumber(bravo)}"`,
       `"${formatVndNumber(actual)}"`,
@@ -476,13 +663,26 @@ export const exportProgressReportCSV = ({
   });
 
   const content = '\uFEFF' + headers + '\n' + rows.join('\n');
-  triggerDownload(content, `Bao_Cao_Tien_Do_${selectedYear}.csv`, 'text/csv;charset=utf-8;');
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', `Bao_Cao_Tien_Do_${selectedYear}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 /**
- * 4. XUẤT BÁO CÁO SỔ CÁI CHI TIẾT CHO RIÊNG MỘT MÃ KHOẢN MỤC (DẠNG EXCEL .XLS ĐẦY ĐỦ ĐỊNH DẠNG)
+ * 4. XUẤT BÁO CÁO SỔ CÁI CHI TIẾT CHO RIÊNG MỘT MÃ KHOẢN MỤC (.XLSX)
+ * - File chuẩn .xlsx
+ * - BỎ PHẦN DASHBOARD PHÍA TRÊN HÀNG TIÊU ĐỀ (GIỐNG BẢNG BÁO CÁO TỔNG)
+ * - Cột STT căn giữa
+ * - Cột trạng thái căn giữa ("Đã BCMS" / "Dự Kiến")
+ * - Cột có chi phí bóp gọn theo số (~16ch)
  */
-export const exportAccountLedgerExcel = ({
+export const exportAccountLedgerExcel = async ({
   account = {},
   transactions = [],
   selectedYear = '2026',
@@ -495,6 +695,7 @@ export const exportAccountLedgerExcel = ({
   user = null,
   showExpectedTotal = false,
 }) => {
+  const XLSX = await ensureXLSX();
   const exportTime = formatDateNow();
   const userName = user?.name || user?.email || 'Quản trị viên';
   const accCode = String(account.code || '').trim();
@@ -511,188 +712,272 @@ export const exportAccountLedgerExcel = ({
     .reduce((s, t) => s + (Number(t.amount) || 0), 0);
   const totalAmount = totalDoneAmount + totalPendingAmount;
 
-  const pctNumber = approved > 0 ? (reportActual / approved) * 100 : 0;
-  const pctFormatted = approved > 0 ? `${pctNumber.toFixed(1)}%` : (reportActual > 0 ? '100%' : '0%');
+  const ws = {};
+  const merges = [];
+  let row = 0;
 
-  const formatDateDisplay = (d) => {
-    if (!d) return '';
-    const str = String(d).trim();
-    if (str.includes('-')) {
-      const parts = str.split('-');
-      if (parts.length === 3) {
-        return `${parts[2]}/${parts[1]}/${parts[0]}`;
-      }
-    }
-    return str;
-  };
+  // HEADER CƠ QUAN / ĐƠN VỊ (8 cột: 0-3 và 4-7)
+  setCell(ws, row, 0, 'TỔNG CÔNG TY CẢNG HÀNG KHÔNG VIỆT NAM - CTCP', 's', null, {
+    font: { name: 'Arial', sz: 10.5, bold: true, color: { rgb: '1E3A8A' } },
+    alignment: { horizontal: 'left', vertical: 'center' }
+  });
+  setCell(ws, row, 4, 'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM', 's', null, {
+    font: { name: 'Arial', sz: 10, bold: true },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 3 } });
+  merges.push({ s: { r: row, c: 4 }, e: { r: row, c: 7 } });
+  row++;
 
-  let bodyHtml = `
-  <!-- HEADER CƠ QUAN / ĐƠN VỊ -->
-  <table>
-    <tr>
-      <td colspan="4" class="header-corp">TỔNG CÔNG TY CẢNG HÀNG KHÔNG VIỆT NAM - CTCP</td>
-      <td colspan="4" class="header-motto">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</td>
-    </tr>
-    <tr>
-      <td colspan="4" class="header-dept">CẢNG HÀNG KHÔNG QUỐC TẾ CẦN THƠ - PHÒNG TC-KH</td>
-      <td colspan="4" class="header-motto" style="font-weight: normal; font-style: italic;">Độc lập - Tự do - Hạnh phúc</td>
-    </tr>
-    <tr><td colspan="8">&nbsp;</td></tr>
+  setCell(ws, row, 0, 'CẢNG HÀNG KHÔNG QUỐC TẾ CẦN THƠ - PHÒNG TC-KH', 's', null, {
+    font: { name: 'Arial', sz: 10, bold: true, color: { rgb: '334155' } },
+    alignment: { horizontal: 'left', vertical: 'center' }
+  });
+  setCell(ws, row, 4, 'Độc lập - Tự do - Hạnh phúc', 's', null, {
+    font: { name: 'Arial', sz: 10, italic: true },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 3 } });
+  merges.push({ s: { r: row, c: 4 }, e: { r: row, c: 7 } });
+  row++;
 
-    <!-- TIÊU ĐỀ BÁO CÁO -->
-    <tr>
-      <td colspan="8" class="title-report">BÁO CÁO SỔ CÁI CHI TIẾT HẠNG MỤC PHÁT SINH NĂM ${selectedYear}</td>
-    </tr>
-    <tr>
-      <td colspan="8" style="text-align: center; font-size: 13pt; font-weight: bold; color: #1e3a8a; padding: 4px 0;">
-        MÃ KHOẢN MỤC: [${accCode}] ${accName}
-      </td>
-    </tr>
-    <tr>
-      <td colspan="8" class="subtitle-report">
-        (Nội dung: ${accScope || 'Theo dõi chi tiết'} • Xuất lúc: ${exportTime} • Người xuất: ${userName})
-      </td>
-    </tr>
-    <tr>
-      <td colspan="8" class="text-right" style="font-size: 9pt; font-style: italic; padding-bottom: 6px;">
-        Đơn vị tính: Đồng Việt Nam (VNĐ)
-      </td>
-    </tr>
-  </table>
+  // Dòng trống
+  row++;
 
-  <!-- KHỐI TÓM TẮT ĐỊNH MỨC VÀ TIẾN ĐỘ GIẢI NGÂN -->
-  <table style="margin-bottom: 12px; border: 1pt solid #cbd5e1;">
-    <tr style="background-color: #f8fafc;">
-      <td class="table-td font-bold" style="background-color: #f1f5f9; width: 140px;">Hạn mức duyệt (${selectedYear}):</td>
-      <td class="table-td font-bold num-currency" style="width: 140px; color: #0f172a;">${formatVndNumber(approved)}</td>
-      <td class="table-td font-bold" style="background-color: #f1f5f9; width: 140px;">Theo Bravo:</td>
-      <td class="table-td font-bold num-currency" style="width: 140px; color: #d97706;">${formatVndNumber(bravoVal)}</td>
-      <td class="table-td font-bold" style="background-color: #f1f5f9; width: 140px;">Chi phí thực tế:</td>
-      <td class="table-td font-bold num-currency" style="width: 140px; color: #2563eb;">${formatVndNumber(spent)}</td>
-      <td class="table-td font-bold" style="background-color: #f1f5f9; width: 140px;">Báo cáo (MAX):</td>
-      <td class="table-td font-bold num-currency" style="width: 140px; color: #059669;">${formatVndNumber(reportActual)}</td>
-    </tr>
-    <tr style="background-color: #ffffff;">
-      <td class="table-td font-bold" style="background-color: #f1f5f9;">Tỷ lệ giải ngân:</td>
-      <td class="table-td font-bold num-percent">${pctFormatted}</td>
-      <td class="table-td font-bold" style="background-color: #f1f5f9;">Còn lại / Vượt:</td>
-      <td class="table-td font-bold num-currency" style="color: ${remaining < 0 ? '#b91c1c' : '#15803d'};">
-        ${formatVndNumber(remaining)} ${remaining < 0 ? '(VƯỢT)' : ''}
-      </td>
-      <td class="table-td font-bold" style="background-color: #f1f5f9;">Quy tắc áp dụng:</td>
-      <td class="table-td" colspan="3" style="font-weight: 500;">
-        ${isSeparated ? 'Đã tách riêng SCTS (chỉ tính chi phí thực tế nhập liệu)' : 'Quy tắc MAX(Bravo, Thực Tế nhập liệu)'}
-        ${totalPendingCount > 0 ? ` • Có ${totalPendingCount} khoản Dự Kiến (${formatVndNumber(totalPendingAmount)} đ)` : ''}
-      </td>
-    </tr>
-  </table>
+  // TIÊU ĐỀ BÁO CÁO SỔ CÁI
+  setCell(ws, row, 0, `BÁO CÁO SỔ CÁI CHI TIẾT HẠNG MỤC PHÁT SINH NĂM ${selectedYear}`, 's', null, {
+    font: { name: 'Arial', sz: 15, bold: true, color: { rgb: '0F4C81' } },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 7 } });
+  row++;
 
-  <!-- BẢNG CHI TIẾT CÁC HẠNG MỤC PHÁT SINH -->
-  <table>
-    <thead>
-      <tr>
-        <th class="table-th" style="width: 45px;">STT</th>
-        <th class="table-th" style="width: 100px;">NGÀY</th>
-        <th class="table-th" style="width: 130px;">TRẠNG THÁI</th>
-        <th class="table-th" style="width: 340px;">NỘI DUNG DIỄN GIẢI HẠNG MỤC</th>
-        <th class="table-th" style="width: 150px;">SỐ TIỀN (VNĐ)</th>
-        <th class="table-th" style="width: 220px;">GHI CHÚ</th>
-        <th class="table-th" style="width: 140px;">NGƯỜI THỰC HIỆN</th>
-        <th class="table-th" style="width: 100px;">MÃ KH</th>
-      </tr>
-    </thead>
-    <tbody>
-  `;
+  // DÒNG MÃ KHOẢN MỤC & TÊN
+  setCell(ws, row, 0, `MÃ KHOẢN MỤC: [${accCode}] ${accName}`, 's', null, {
+    font: { name: 'Arial', sz: 12.5, bold: true, color: { rgb: '1E3A8A' } },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 7 } });
+  row++;
 
-  // Render từng chứng từ / hạng mục
+  setCell(ws, row, 0, `(Nội dung: ${accScope || 'Theo dõi chi tiết'} • Xuất lúc: ${exportTime} • Người xuất: ${userName})`, 's', null, {
+    font: { name: 'Arial', sz: 10, italic: true, color: { rgb: '475569' } },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 7 } });
+  row++;
+
+  setCell(ws, row, 7, 'Đơn vị tính: Đồng Việt Nam (VNĐ)', 's', null, {
+    font: { name: 'Arial', sz: 9, italic: true, color: { rgb: '64748B' } },
+    alignment: { horizontal: 'right', vertical: 'center' }
+  });
+  row++;
+
+  // BỎ HOÀN TOÀN KHỐI DASHBOARD KPI! VÀO THẲNG BẢNG CHI TIẾT CÁC HẠNG MỤC
+  const ledgerHeaders = [
+    'STT',
+    'NGÀY',
+    'TRẠNG THÁI',
+    'NỘI DUNG DIỄN GIẢI HẠNG MỤC',
+    'SỐ TIỀN (VNĐ)',
+    'GHI CHÚ',
+    'NGƯỜI THỰC HIỆN',
+    'MÃ KH'
+  ];
+
+  ledgerHeaders.forEach((h, c) => {
+    setCell(ws, row, c, h, 's', null, stHeader);
+  });
+  row++;
+
+  // RENDER TỪNG HẠNG MỤC / CHỨNG TỪ
   transactions.forEach((t, idx) => {
     const isPending = Boolean(t.chuaBcms);
     const amountNum = Number(t.amount) || 0;
-    const dateFormatted = formatDateDisplay(t.date);
+    const dateFormatted = formatDateShort(t.date);
     const statusLabel = isPending ? 'Dự Kiến' : 'Đã BCMS';
-    const statusColor = isPending ? '#b45309' : '#15803d';
+    const statusColor = isPending ? 'B45309' : '15803D';
+    const rowBg = isPending ? { fgColor: { rgb: 'FFFBEB' } } : undefined;
 
-    bodyHtml += `
-      <tr style="${isPending ? 'background-color: #fffbeb;' : ''}">
-        <td class="table-td text-center">${idx + 1}</td>
-        <td class="table-td text-center" style="mso-number-format:'\\@';">${dateFormatted}</td>
-        <td class="table-td text-center font-bold" style="color: ${statusColor}; font-size: 8.5pt;">${statusLabel}</td>
-        <td class="table-td text-left font-bold">${t.notes || t.description || ''}</td>
-        <td class="table-td num-currency font-bold">${formatVndNumber(amountNum)}</td>
-        <td class="table-td text-left" style="font-size: 9pt; color: #475569;">${t.remark || t.ghiChu || ''}</td>
-        <td class="table-td text-center">${t.employeeName || ''}</td>
-        <td class="table-td text-center font-bold" style="mso-number-format:'\\@'; color: #1e3a8a;">${accCode}</td>
-      </tr>
-    `;
+    // 0. STT: Canh giữa
+    setCell(ws, row, 0, idx + 1, 'n', null, {
+      ...stCenter,
+      ...(rowBg ? { fill: rowBg } : {})
+    });
+
+    // 1. NGÀY: Canh giữa
+    setCell(ws, row, 1, dateFormatted, 's', null, {
+      ...stCenter,
+      ...(rowBg ? { fill: rowBg } : {})
+    });
+
+    // 2. TRẠNG THÁI: Canh giữa, bold
+    setCell(ws, row, 2, statusLabel, 's', null, {
+      ...stCenterBold,
+      font: { ...fontBold, color: { rgb: statusColor } },
+      ...(rowBg ? { fill: rowBg } : {})
+    });
+
+    // 3. NỘI DUNG DIỄN GIẢI: Canh trái, bold
+    setCell(ws, row, 3, t.notes || t.description || '', 's', null, {
+      ...stLeftBold,
+      ...(rowBg ? { fill: rowBg } : {})
+    });
+
+    // 4. SỐ TIỀN (VNĐ): Canh phải, bold, bóp gọn theo số
+    setCell(ws, row, 4, amountNum, 'n', '#,##0', {
+      ...stRightBold,
+      ...(rowBg ? { fill: rowBg } : {})
+    });
+
+    // 5. GHI CHÚ: Canh trái
+    setCell(ws, row, 5, t.remark || t.ghiChu || '', 's', null, {
+      ...stLeft,
+      ...(rowBg ? { fill: rowBg } : {})
+    });
+
+    // 6. NGƯỜI THỰC HIỆN: Canh giữa
+    setCell(ws, row, 6, t.employeeName || '', 's', null, {
+      ...stCenter,
+      ...(rowBg ? { fill: rowBg } : {})
+    });
+
+    // 7. MÃ KH: Canh giữa, bold
+    setCell(ws, row, 7, accCode, 's', null, {
+      ...stCenterBold,
+      font: { ...fontBold, color: { rgb: '1E3A8A' } },
+      ...(rowBg ? { fill: rowBg } : {})
+    });
+
+    row++;
   });
 
-  // Dòng đối chiếu hệ thống BRAVO nếu có
+  // DÒNG ĐỐI CHIẾU HỆ THỐNG BRAVO NẾU CÓ
   if (bravoVal > 0) {
     const bravoDiff = spent - bravoVal;
-    bodyHtml += `
-      <tr style="background-color: #fef3c7; font-weight: bold; border-top: 1pt solid #f59e0b;">
-        <td class="table-td text-center" style="color: #92400e;">BRAVO</td>
-        <td class="table-td text-center" style="color: #92400e;">Năm ${selectedYear}</td>
-        <td class="table-td text-center" style="color: #92400e;">Hệ thống BRAVO</td>
-        <td class="table-td text-left" style="color: #92400e;">
-          Số liệu hạch toán hệ thống BRAVO ${bravoDiff !== 0 ? `(Chênh lệch thực tế: ${bravoDiff > 0 ? '+' : ''}${formatVndNumber(bravoDiff)} đ)` : '(Khớp 100%)'}
-        </td>
-        <td class="table-td num-currency font-bold" style="color: #92400e;">${formatVndNumber(bravoVal)}</td>
-        <td class="table-td text-left" style="color: #92400e; font-size: 8.5pt;">Số liệu từ phần mềm kế toán Bravo</td>
-        <td class="table-td text-center" style="color: #92400e;">Hệ thống BRAVO</td>
-        <td class="table-td text-center font-bold" style="color: #92400e;">${accCode}</td>
-      </tr>
-    `;
+    const bgBravo = { fgColor: { rgb: 'FEF3C7' } };
+    const fontBravo = { name: 'Arial', sz: 9.5, bold: true, color: { rgb: '92400E' } };
+
+    setCell(ws, row, 0, 'BRAVO', 's', null, {
+      ...stCenterBold,
+      font: fontBravo,
+      fill: bgBravo
+    });
+    setCell(ws, row, 1, `Năm ${selectedYear}`, 's', null, {
+      ...stCenterBold,
+      font: fontBravo,
+      fill: bgBravo
+    });
+    setCell(ws, row, 2, 'Hệ thống BRAVO', 's', null, {
+      ...stCenterBold,
+      font: fontBravo,
+      fill: bgBravo
+    });
+    setCell(ws, row, 3, `Số liệu hạch toán hệ thống BRAVO ${bravoDiff !== 0 ? `(Chênh lệch thực tế: ${bravoDiff > 0 ? '+' : ''}${formatVndNumber(bravoDiff)} đ)` : '(Khớp 100%)'}`, 's', null, {
+      ...stLeftBold,
+      font: fontBravo,
+      fill: bgBravo
+    });
+    setCell(ws, row, 4, Number(bravoVal) || 0, 'n', '#,##0', {
+      ...stRightBold,
+      font: fontBravo,
+      fill: bgBravo
+    });
+    setCell(ws, row, 5, 'Số liệu từ phần mềm kế toán Bravo', 's', null, {
+      ...stLeft,
+      font: fontBravo,
+      fill: bgBravo
+    });
+    setCell(ws, row, 6, 'Hệ thống BRAVO', 's', null, {
+      ...stCenter,
+      font: fontBravo,
+      fill: bgBravo
+    });
+    setCell(ws, row, 7, accCode, 's', null, {
+      ...stCenterBold,
+      font: fontBravo,
+      fill: bgBravo
+    });
+    row++;
   }
 
-  // Dòng TỔNG CỘNG
-  bodyHtml += `
-      <tr class="row-total">
-        <td class="table-td text-center font-bold" colspan="3">TỔNG CỘNG PHÁT SINH</td>
-        <td class="table-td text-left font-bold">
-          ${transactions.length} HẠNG MỤC (${totalDoneCount} Đã BCMS${totalPendingCount > 0 ? ` • ${totalPendingCount} Dự Kiến` : ''})
-        </td>
-        <td class="table-td num-currency font-bold" style="font-size: 11pt; color: #1e3a8a;">${formatVndNumber(totalAmount)}</td>
-        <td class="table-td text-left font-bold" colspan="3" style="font-size: 9pt;">
-          ${totalPendingCount > 0 ? `Đã BCMS: ${formatVndNumber(totalDoneAmount)} đ | Dự kiến: ${formatVndNumber(totalPendingAmount)} đ` : 'Toàn bộ đã hoàn tất BCMS'}
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  // DÒNG TỔNG CỘNG PHÁT SINH
+  setCell(ws, row, 0, 'TỔNG CỘNG PHÁT SINH', 's', null, stTotalCenter);
+  setCell(ws, row, 1, '', 's', null, stTotalCenter);
+  setCell(ws, row, 2, '', 's', null, stTotalCenter);
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 2 } });
 
-  <!-- KHỐI CHỮ KÝ XÁC NHẬN CHUẨN KẾ TOÁN -->
-  <table style="margin-top: 30px;">
-    <tr>
-      <td colspan="4">&nbsp;</td>
-      <td colspan="4" class="text-center" style="font-style: italic; font-size: 10pt;">
-        Cần Thơ, ngày ..... tháng ..... năm 2026
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2" class="signature-title">NGƯỜI LẬP BIỂU</td>
-      <td colspan="2" class="signature-title">KẾ TOÁN CHI PHÍ</td>
-      <td colspan="2" class="signature-title">TRƯỞNG PHÒNG TC-KH</td>
-      <td colspan="2" class="signature-title">GIÁM ĐỐC CẢNG</td>
-    </tr>
-    <tr>
-      <td colspan="2" class="signature-note">(Ký, ghi rõ họ tên)</td>
-      <td colspan="2" class="signature-note">(Ký, ghi rõ họ tên)</td>
-      <td colspan="2" class="signature-note">(Ký, ghi rõ họ tên)</td>
-      <td colspan="2" class="signature-note">(Ký, đóng dấu)</td>
-    </tr>
-    <tr>
-      <td colspan="2" class="text-center font-bold">${userName}</td>
-      <td colspan="2" class="text-center font-bold">&nbsp;</td>
-      <td colspan="2" class="text-center font-bold">&nbsp;</td>
-      <td colspan="2" class="text-center font-bold">&nbsp;</td>
-    </tr>
-  </table>
-  `;
+  setCell(ws, row, 3, `${transactions.length} HẠNG MỤC (${totalDoneCount} Đã BCMS${totalPendingCount > 0 ? ` • ${totalPendingCount} Dự Kiến` : ''})`, 's', null, stTotalLeft);
 
-  const fullHtml = getExcelHtmlWrapper(`SoCai_${accCode}`, bodyHtml);
+  // Số tiền tổng cộng: size 10.5, màu xanh đậm, canh phải
+  setCell(ws, row, 4, totalAmount, 'n', '#,##0', {
+    ...stTotalRight,
+    font: { name: 'Arial', sz: 10.5, bold: true, color: { rgb: '1E3A8A' } }
+  });
+
+  const detailSummaryText = totalPendingCount > 0
+    ? `Đã BCMS: ${formatVndNumber(totalDoneAmount)} đ | Dự kiến: ${formatVndNumber(totalPendingAmount)} đ`
+    : 'Toàn bộ đã hoàn tất BCMS';
+  setCell(ws, row, 5, detailSummaryText, 's', null, stTotalLeft);
+  setCell(ws, row, 6, '', 's', null, stTotalLeft);
+  setCell(ws, row, 7, '', 's', null, stTotalLeft);
+  merges.push({ s: { r: row, c: 5 }, e: { r: row, c: 7 } });
+  row++;
+
+  // Dòng trống
+  row++;
+
+  // KHỐI CHỮ KÝ XÁC NHẬN CHUẨN KẾ TOÁN (8 CỘT)
+  setCell(ws, row, 4, 'Cần Thơ, ngày ..... tháng ..... năm 2026', 's', null, {
+    font: { name: 'Arial', sz: 10, italic: true },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 4 }, e: { r: row, c: 7 } });
+  row++;
+
+  setCell(ws, row, 0, 'NGƯỜI LẬP BIỂU', 's', null, { font: { name: 'Arial', sz: 10.5, bold: true }, alignment: { horizontal: 'center' } });
+  setCell(ws, row, 2, 'KẾ TOÁN CHI PHÍ', 's', null, { font: { name: 'Arial', sz: 10.5, bold: true }, alignment: { horizontal: 'center' } });
+  setCell(ws, row, 4, 'TRƯỞNG PHÒNG TC-KH', 's', null, { font: { name: 'Arial', sz: 10.5, bold: true }, alignment: { horizontal: 'center' } });
+  setCell(ws, row, 6, 'GIÁM ĐỐC CẢNG', 's', null, { font: { name: 'Arial', sz: 10.5, bold: true }, alignment: { horizontal: 'center' } });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 1 } });
+  merges.push({ s: { r: row, c: 2 }, e: { r: row, c: 3 } });
+  merges.push({ s: { r: row, c: 4 }, e: { r: row, c: 5 } });
+  merges.push({ s: { r: row, c: 6 }, e: { r: row, c: 7 } });
+  row++;
+
+  setCell(ws, row, 0, '(Ký, ghi rõ họ tên)', 's', null, { font: { name: 'Arial', sz: 9, italic: true, color: { rgb: '64748B' } }, alignment: { horizontal: 'center' } });
+  setCell(ws, row, 2, '(Ký, ghi rõ họ tên)', 's', null, { font: { name: 'Arial', sz: 9, italic: true, color: { rgb: '64748B' } }, alignment: { horizontal: 'center' } });
+  setCell(ws, row, 4, '(Ký, ghi rõ họ tên)', 's', null, { font: { name: 'Arial', sz: 9, italic: true, color: { rgb: '64748B' } }, alignment: { horizontal: 'center' } });
+  setCell(ws, row, 6, '(Ký, đóng dấu)', 's', null, { font: { name: 'Arial', sz: 9, italic: true, color: { rgb: '64748B' } }, alignment: { horizontal: 'center' } });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 1 } });
+  merges.push({ s: { r: row, c: 2 }, e: { r: row, c: 3 } });
+  merges.push({ s: { r: row, c: 4 }, e: { r: row, c: 5 } });
+  merges.push({ s: { r: row, c: 6 }, e: { r: row, c: 7 } });
+  row += 3;
+
+  setCell(ws, row, 0, userName, 's', null, { font: { name: 'Arial', sz: 10, bold: true }, alignment: { horizontal: 'center' } });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 1 } });
+
+  // ĐỘ RỘNG CỘT (Cột tiền bóp gọn theo số ~16ch)
+  ws['!cols'] = [
+    { wch: 6 },   // STT (Canh giữa)
+    { wch: 12 },  // NGÀY (Canh giữa)
+    { wch: 14 },  // TRẠNG THÁI (Canh giữa)
+    { wch: 38 },  // NỘI DUNG DIỄN GIẢI
+    { wch: 16 },  // SỐ TIỀN (VNĐ) (Bóp gọn theo số)
+    { wch: 25 },  // GHI CHÚ
+    { wch: 16 },  // NGƯỜI THỰC HIỆN
+    { wch: 12 }   // MÃ KH (Canh giữa)
+  ];
+  ws['!merges'] = merges;
+  ws['!ref'] = `A1:H${row + 1}`;
+
   const cleanCode = accCode.replace(/[^a-zA-Z0-9]/g, '_');
-  const filename = `SoCai_${cleanCode}_${selectedYear}_${Date.now()}.xls`;
-  triggerDownload(fullHtml, filename);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, `SoCai_${cleanCode}`);
+
+  const filename = `SoCai_${cleanCode}_${selectedYear}_${Date.now()}.xlsx`;
+  downloadXLSX(XLSX, wb, filename);
 };
 
 /**
@@ -724,7 +1009,7 @@ export const exportAccountLedgerCSV = ({
   };
 
   const rows = transactions.map((t, idx) => {
-    const formattedDate = t.date ? (t.date.includes('-') ? t.date.split('-').reverse().join('/') : t.date) : '';
+    const formattedDate = formatDateShort(t.date);
     const statusLabel = t.chuaBcms ? 'Dự Kiến' : 'Đã BCMS';
     return [
       idx + 1,
@@ -742,5 +1027,13 @@ export const exportAccountLedgerCSV = ({
   const content = '\uFEFF' + headers.join(',') + '\r\n' + rows.join('\r\n');
   const cleanCode = accCode.replace(/[^a-zA-Z0-9]/g, '_');
   const filename = `SoCai_${cleanCode}_${selectedYear}.csv`;
-  triggerDownload(content, filename, 'text/csv;charset=utf-8;');
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };

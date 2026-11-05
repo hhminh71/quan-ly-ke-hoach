@@ -659,7 +659,7 @@ export default function BudgetOverview({
               onShowAll={viewMode === 'PROGRESS' ? showAllProgCols : showAllMatrixCols}
             />
 
-            {/* Export Report Button (Excel .xls / Google Sheet standard) */}
+            {/* Export Report Button (Excel .xlsx / Google Sheet standard) */}
             <button
               type="button"
               onClick={() => setIsExportModalOpen(true)}

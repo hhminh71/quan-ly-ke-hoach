@@ -449,9 +449,9 @@ export default function AccountLedgerModal({
     }
   })();
 
-  const handleExportLedgerExcel = () => {
+  const handleExportLedgerExcel = async () => {
     try {
-      exportAccountLedgerExcel({
+      await exportAccountLedgerExcel({
         account: { ...matchingBudget, ...account },
         transactions: sortedTransactions.length > 0 ? sortedTransactions : accountTransactions,
         selectedYear,

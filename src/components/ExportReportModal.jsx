@@ -44,7 +44,7 @@ export default function ExportReportModal({
   const scopeInfo = getUserScopeInfo(user);
   const itemsToExport = dataScope === 'FILTERED' ? filteredBudgets : budgets;
 
-  const handleExport = (format = 'EXCEL') => {
+  const handleExport = async (format = 'EXCEL') => {
     setIsExporting(true);
 
     try {
@@ -55,7 +55,7 @@ export default function ExportReportModal({
             selectedYear,
           });
         } else {
-          exportProgressReportExcel({
+          await exportProgressReportExcel({
             items: itemsToExport,
             summary,
             selectedYear,
@@ -64,7 +64,7 @@ export default function ExportReportModal({
           });
         }
       } else {
-        exportMatrixReportExcel({
+        await exportMatrixReportExcel({
           items: itemsToExport,
           matrixYears,
           user,
@@ -277,7 +277,7 @@ export default function ExportReportModal({
               ) : (
                 <>
                   <Download className="w-4 h-4 stroke-[2.5]" />
-                  <span>Tải File Excel (.xls)</span>
+                  <span>Tải File Excel (.xlsx)</span>
                 </>
               )}
             </button>

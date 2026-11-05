@@ -438,7 +438,7 @@ export default function TransactionList({
     return set.size;
   }, [sorted]);
 
-  const handleExportSingleAccount = () => {
+  const handleExportSingleAccount = async () => {
     if (!activeFilteredAccountCode) return;
     const targetBudget = (budgets || []).find(
       (b) => String(b.code || '').trim() === activeFilteredAccountCode
@@ -471,7 +471,7 @@ export default function TransactionList({
     })();
 
     try {
-      exportAccountLedgerExcel({
+      await exportAccountLedgerExcel({
         account: targetBudget,
         transactions: sorted,
         selectedYear,
