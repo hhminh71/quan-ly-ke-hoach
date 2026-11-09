@@ -1037,3 +1037,111 @@ export const exportAccountLedgerCSV = ({
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
+
+
+/**
+ * 6. XUẤT DANH SÁCH PHÂN QUYỀN NGƯỜI DÙNG (.XLSX)
+ */
+export const exportUsersListExcel = async ({ users = [], currentUser = null }) => {
+  const XLSX = await ensureXLSX();
+  const exportTime = formatDateNow();
+  const userName = currentUser?.name || currentUser?.email || 'Quản trị viên';
+
+  const ws = {};
+  const merges = [];
+  let row = 0;
+
+  // Header cơ quan
+  setCell(ws, row, 0, 'TỔNG CÔNG TY CẢNG HÀNG KHÔNG VIỆT NAM - CTCP', 's', null, {
+    font: { name: 'Arial', sz: 10.5, bold: true, color: { rgb: '1E3A8A' } },
+    alignment: { horizontal: 'left', vertical: 'center' }
+  });
+  setCell(ws, row, 4, 'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM', 's', null, {
+    font: { name: 'Arial', sz: 10, bold: true },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 3 } });
+  merges.push({ s: { r: row, c: 4 }, e: { r: row, c: 7 } });
+  row++;
+
+  setCell(ws, row, 0, 'CẢNG HÀNG KHÔNG QUỐC TẾ CẦN THƠ - PHÒNG TC-KH', 's', null, {
+    font: { name: 'Arial', sz: 10, bold: true, color: { rgb: '334155' } },
+    alignment: { horizontal: 'left', vertical: 'center' }
+  });
+  setCell(ws, row, 4, 'Độc lập - Tự do - Hạnh phúc', 's', null, {
+    font: { name: 'Arial', sz: 10, italic: true },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 3 } });
+  merges.push({ s: { r: row, c: 4 }, e: { r: row, c: 7 } });
+  row++;
+
+  // Dòng trống
+  row++;
+
+  // Tiêu đề
+  setCell(ws, row, 0, 'DANH SÁCH PHÂN QUYỀN NGƯỜI DÙNG & PHẠM VI CHI PHÍ', 's', null, {
+    font: { name: 'Arial', sz: 14, bold: true, color: { rgb: '0F4C81' } },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 7 } });
+  row++;
+
+  setCell(ws, row, 0, `(Xuất lúc: ${exportTime} • Người xuất: ${userName})`, 's', null, {
+    font: { name: 'Arial', sz: 9.5, italic: true, color: { rgb: '475569' } },
+    alignment: { horizontal: 'center', vertical: 'center' }
+  });
+  merges.push({ s: { r: row, c: 0 }, e: { r: row, c: 7 } });
+  row++;
+
+  // Headers
+  const userHeaders = [
+    'STT',
+    'HỌ VÀ TÊN',
+    'TÀI KHOẢN (EMAIL)',
+    'MẬT KHẨU',
+    'PHÒNG BAN / CHỨC VỤ',
+    'VAI TRÒ',
+    'PHẠM VI CHI PHÍ',
+    'TRẠNG THÁI'
+  ];
+
+  userHeaders.forEach((h, c) => {
+    setCell(ws, row, c, h, 's', null, stHeader);
+  });
+  row++;
+
+  // Data rows
+  users.forEach((u, idx) => {
+    const roleLabel = u.role === 'ADMIN' ? 'Quản trị viên' : u.role === 'EDITOR' ? 'Biên tập' : 'Chỉ xem';
+    const statusLabel = u.status === 'KHOA' ? 'Đã khóa' : 'Hoạt động';
+
+    setCell(ws, row, 0, idx + 1, 'n', null, stCenter);
+    setCell(ws, row, 1, u.name || '', 's', null, stLeftBold);
+    setCell(ws, row, 2, u.email || '', 's', null, stLeft);
+    setCell(ws, row, 3, u.password || '', 's', null, stCenter);
+    setCell(ws, row, 4, u.department || '', 's', null, stLeft);
+    setCell(ws, row, 5, roleLabel, 's', null, stCenter);
+    setCell(ws, row, 6, u.expenseScope || 'Toàn cảng', 's', null, stLeft);
+    setCell(ws, row, 7, statusLabel, 's', null, stCenter);
+    row++;
+  });
+
+  ws['!cols'] = [
+    { wch: 6 },
+    { wch: 26 },
+    { wch: 22 },
+    { wch: 14 },
+    { wch: 24 },
+    { wch: 15 },
+    { wch: 20 },
+    { wch: 14 }
+  ];
+  ws['!merges'] = merges;
+  ws['!ref'] = `A1:H${row}`;
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'PhanQuyenUsers');
+  const filename = `Danh_Sach_Phan_Quyen_User_${new Date().toISOString().substring(0, 10)}.xlsx`;
+  downloadXLSX(XLSX, wb, filename);
+};

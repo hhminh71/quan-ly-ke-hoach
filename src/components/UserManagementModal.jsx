@@ -18,8 +18,12 @@ import {
   Check,
   Sliders,
   ChevronDown,
+  Eye,
+  EyeOff,
+  Download,
 } from 'lucide-react';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
+import { exportUsersListExcel } from '../utils/excelExport';
 import {
   ROLES,
   ROLE_INFO,
@@ -47,6 +51,15 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
   const [editingUser, setEditingUser] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [visiblePasswords, setVisiblePasswords] = useState({});
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
+
+  const togglePasswordVisibility = (email) => {
+    setVisiblePasswords((prev) => ({
+      ...prev,
+      [email]: !prev[email],
+    }));
+  };
 
   // Form states for Add / Edit
   const [formEmail, setFormEmail] = useState('');
@@ -371,14 +384,38 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
             </select>
           </div>
 
-          <button
-            type="button"
-            onClick={handleOpenAdd}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer shrink-0"
-          >
-            <UserPlus className="w-4 h-4" />
-            <span>Thêm User Mới</span>
-          </button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              disabled={isExportingExcel || users.length === 0}
+              onClick={async () => {
+                setIsExportingExcel(true);
+                try {
+                  await exportUsersListExcel({ users: filteredUsers, currentUser });
+                  showToast('Đã tải xuống file Excel phân quyền người dùng!');
+                } catch (err) {
+                  alert('Lỗi xuất file Excel: ' + err.message);
+                } finally {
+                  setIsExportingExcel(false);
+                }
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all cursor-pointer disabled:opacity-50"
+              title="Tải danh sách phân quyền người dùng ra file Excel (.xlsx)"
+            >
+              <Download className={`w-3.5 h-3.5 ${isExportingExcel ? 'animate-bounce' : ''}`} />
+              <span className="hidden sm:inline">Xuất Excel</span>
+              <span className="sm:hidden">Excel</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleOpenAdd}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-all cursor-pointer shrink-0"
+            >
+              <UserPlus className="w-4 h-4" />
+              <span>Thêm User Mới</span>
+            </button>
+          </div>
         </div>
 
         {/* Users Table */}
@@ -439,9 +476,22 @@ export default function UserManagementModal({ isOpen, onClose, currentUser }) {
                               <p className="text-[11px] font-mono text-slate-500 truncate flex items-center gap-1.5 flex-wrap">
                                 <span>{u.email}</span>
                                 {u.password && (
-                                  <span className="text-[9.5px] text-slate-500 font-mono bg-slate-100 px-1.5 py-0.2 rounded border border-slate-200" title="Mật khẩu">
-                                    Pass: {u.password}
-                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => togglePasswordVisibility(u.email)}
+                                    className="inline-flex items-center gap-1 text-[9.5px] font-mono bg-slate-100 hover:bg-slate-200 active:scale-95 px-1.5 py-0.5 rounded border border-slate-200 transition-all cursor-pointer select-none"
+                                    title={visiblePasswords[u.email] ? 'Nhấp để ẩn mật khẩu' : 'Nhấp để hiện mật khẩu'}
+                                  >
+                                    <span className="text-slate-500">Pass:</span>
+                                    <span className={visiblePasswords[u.email] ? 'font-bold text-slate-800 tracking-normal' : 'tracking-widest text-slate-400 font-black'}>
+                                      {visiblePasswords[u.email] ? u.password : '••••••'}
+                                    </span>
+                                    {visiblePasswords[u.email] ? (
+                                      <EyeOff className="w-2.5 h-2.5 text-slate-500 ml-0.5" />
+                                    ) : (
+                                      <Eye className="w-2.5 h-2.5 text-slate-400 ml-0.5" />
+                                    )}
+                                  </button>
                                 )}
                               </p>
                             </div>

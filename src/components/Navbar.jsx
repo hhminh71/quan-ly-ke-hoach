@@ -105,16 +105,6 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
               </button>
             )}
 
-            {/* Minimal Export Button: Just clean icon */}
-            <button
-              type="button"
-              onClick={handleExportQuick}
-              className="w-6 h-6 sm:w-8 sm:h-8 rounded-md sm:rounded-lg bg-amber-400 hover:bg-amber-300 text-slate-950 flex items-center justify-center shadow-xs transition-all active:scale-95 cursor-pointer border border-amber-300 shrink-0"
-              title="Xuất bảng báo cáo kế hoạch và chi phí ra file Excel / CSV"
-            >
-              <Download className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
-            </button>
-
             {/* Role Badge & Scope Badge on desktop */}
             <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/20 text-white text-xs font-semibold">
               <span className={`w-2 h-2 rounded-full ${roleMeta.dotClass}`} />
@@ -255,10 +245,11 @@ export default function Navbar({ user, onLogout, onExportReport, onOpenSimulator
                         setIsUserMenuOpen(false);
                         handleExportQuick();
                       }}
-                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg font-medium text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg font-bold text-emerald-950 bg-emerald-50 hover:bg-emerald-100 transition-colors cursor-pointer border border-emerald-200/60"
+                      title="Xuất bảng báo cáo kế hoạch và chi phí ra file Excel (.xlsx) / CSV"
                     >
-                      <Download className="w-3.5 h-3.5 text-slate-600" />
-                      <span>Xuất bảng báo cáo (Excel / CSV)</span>
+                      <Download className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Xuất bảng báo cáo (Excel .xlsx / CSV)</span>
                     </button>
                   </div>
 
