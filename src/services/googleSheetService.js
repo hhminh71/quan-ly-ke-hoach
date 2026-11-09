@@ -281,8 +281,8 @@ export const fetchFromGoogleSheet = async (webhookUrl) => {
       const defaultMatch = DEFAULT_USERS.find((d) => d.email.toLowerCase() === email);
 
       let scope = u.expenseScope;
-      if (!scope || scope === 'ALL') {
-        if (defaultMatch?.expenseScope && defaultMatch.expenseScope !== 'ALL') {
+      if (!scope || String(scope).trim() === '') {
+        if (defaultMatch?.expenseScope) {
           scope = defaultMatch.expenseScope;
         } else if (email.includes('xaydung') || String(u.department || '').toLowerCase().includes('xây dựng') || String(u.name || '').toLowerCase().includes('xây dựng')) {
           scope = 'XAY_DUNG';

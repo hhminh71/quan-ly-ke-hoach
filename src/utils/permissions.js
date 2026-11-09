@@ -202,12 +202,13 @@ export const resolveUserScope = (user) => {
   if (!user) return 'ALL';
   if (normalizeRole(user.role) === ROLES.ADMIN) return 'ALL';
 
+  // 1. Ưu tiên tuyệt đối cấu hình rõ ràng đã được thiết lập (kể cả 'ALL' hoặc '*')
   const explicit = user.expenseScope;
-  if (explicit && explicit !== 'ALL' && explicit !== '*') {
+  if (explicit !== undefined && explicit !== null && String(explicit).trim() !== '') {
     return normalizeExpenseScope(explicit);
   }
 
-  // Tự động nhận diện thông minh theo email, tên hoặc phòng ban
+  // 2. Chỉ khi tài khoản CHƯA CÓ cấu hình phạm vi mới tự động nhận diện thông minh
   const email = String(user.email || '').toLowerCase();
   const dept = String(user.department || '').toLowerCase();
   const name = String(user.name || '').toLowerCase();
@@ -222,14 +223,14 @@ export const resolveUserScope = (user) => {
   if (email.includes('daotao') || dept.includes('đào tạo') || dept.includes('huấn luyện') || name.includes('đào tạo') || notes.includes('đào tạo')) {
     return 'DAO_TAO';
   }
-  if (email.includes('hanhchinh') || dept.includes('hành chính') || dept.includes('văn phòng')) {
+  if (email.includes('hanhchinh') || dept.includes('hành chính')) {
     return 'HANH_CHINH';
   }
   if (email.includes('anninh') || dept.includes('an ninh') || dept.includes('pccc')) {
     return 'AN_NINH';
   }
 
-  return normalizeExpenseScope(explicit);
+  return 'ALL';
 };
 
 /**

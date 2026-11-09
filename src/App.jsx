@@ -44,14 +44,8 @@ export default function App() {
         return null;
       }
 
-      const email = String(u.email || '').toLowerCase();
-      if (email.includes('xaydung') && u.expenseScope !== 'XAY_DUNG') {
-        u.expenseScope = 'XAY_DUNG';
-      } else if (email.includes('kythuat') && u.expenseScope !== 'KY_THUAT') {
-        u.expenseScope = 'KY_THUAT';
-      } else if (email.includes('daotao') && u.expenseScope !== 'DAO_TAO') {
-        u.expenseScope = 'DAO_TAO';
-      }
+      // Đảm bảo user có expenseScope chuẩn hóa
+      u.expenseScope = normalizeExpenseScope(u.expenseScope);
       return u;
     } catch {
       return null;
