@@ -1251,13 +1251,17 @@ export default function AccountLedgerModal({
                         {/* 4b. Ghi chú (nằm ngay phía sau cột số tiền) */}
                         {isColumnVisible('remark') && (
                           <td
-                            className="py-0.5 px-1 text-center text-slate-600 text-[9px] sm:text-xs leading-tight break-words whitespace-normal"
+                            onClick={() => onUpdateTransaction && setEditingItem(item)}
+                            className={`py-0.5 px-1 text-center text-slate-600 text-[9px] sm:text-xs leading-tight break-words whitespace-normal ${
+                              onUpdateTransaction ? 'cursor-pointer hover:bg-blue-50/70 transition-colors group/remark' : ''
+                            }`}
                             style={{ width: `${columnWidths.remark}px`, minWidth: `${columnWidths.remark}px` }}
+                            title={onUpdateTransaction ? "Bấm vào để sửa nhanh Ghi Chú cho dòng này" : undefined}
                           >
                             {item.remark ? (
-                              <span className="text-slate-700 italic">{item.remark}</span>
+                              <span className="text-slate-700 italic group-hover/remark:text-blue-700 font-medium">{item.remark}</span>
                             ) : (
-                              <span className="text-slate-200 select-none font-light">—</span>
+                              <span className="text-slate-300 select-none font-light group-hover/remark:text-blue-500 text-[10px]">—</span>
                             )}
                           </td>
                         )}

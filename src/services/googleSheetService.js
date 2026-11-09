@@ -422,6 +422,55 @@ export const syncSctsSeparatedCodesToGoogleSheet = async (webhookUrl, codes) => 
 };
 
 /**
+ * Đồng bộ toàn bộ danh sách phiếu chi (bao gồm Ghi Chú & Dự Kiến) lên Google Sheet
+ */
+export const syncAllTransactionsToGoogleSheet = async (webhookUrl, transactions) => {
+  const url = webhookUrl || getSavedWebhookUrl();
+  if (!url) throw new Error('Chưa cấu hình URL Webhook Google Sheet');
+
+  if (!Array.isArray(transactions) || transactions.length === 0) {
+    throw new Error('Danh sách phiếu chi rỗng');
+  }
+
+  const payload = transactions.map((t) => ({
+    id: t.id,
+    date: t.date,
+    fiscalYear: t.fiscalYear,
+    accountCode: t.accountCode,
+    category: t.category,
+    group: t.group,
+    employeeName: t.employeeName,
+    amount: t.amount,
+    notes: t.notes,
+    createdAt: t.createdAt,
+    remark: String(t.remark || t.ghiChu || '').trim(),
+    chuaBcms: Boolean(t.chuaBcms),
+  }));
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'text/plain;charset=utf-8',
+    },
+    body: JSON.stringify({
+      action: 'syncAllTransactions',
+      transactions: payload,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Lỗi kết nối Webhook: HTTP ${response.status}`);
+  }
+
+  const result = await response.json();
+  if (result.status === 'error') {
+    throw new Error(result.message || 'Lỗi khi đồng bộ phiếu lên Google Sheet');
+  }
+
+  return result;
+};
+
+/**
  * Ghi 1 phiếu chi mới vào Google Sheet
  */
 export const addTransactionToGoogleSheet = async (webhookUrl, transaction) => {

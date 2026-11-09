@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { X, Cloud, CheckCircle2, RefreshCw, ExternalLink, Check, Copy, AlertCircle } from 'lucide-react';
-import { getSavedWebhookUrl, saveWebhookUrl, fetchFromGoogleSheet } from '../services/googleSheetService';
+import { X, Cloud, CheckCircle2, RefreshCw, ExternalLink, Check, Copy, AlertCircle, UploadCloud, FileSpreadsheet } from 'lucide-react';
+import { getSavedWebhookUrl, saveWebhookUrl, fetchFromGoogleSheet, syncAllTransactionsToGoogleSheet } from '../services/googleSheetService';
 import { useModalBackHandler } from '../hooks/useModalBackHandler';
 
-export default function SyncModal({ isOpen, onClose, onSyncSuccess }) {
+export default function SyncModal({ isOpen, onClose, onSyncSuccess, transactions = [] }) {
   const [url, setUrl] = useState(() => getSavedWebhookUrl());
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState(null); // { success: true/false, message: '' }
+  const [isPushingRemarks, setIsPushingRemarks] = useState(false);
+  const [pushResult, setPushResult] = useState(null);
   const [copied, setCopied] = useState(false);
 
   // Handle mobile Back button to close modal
@@ -39,7 +41,7 @@ export default function SyncModal({ isOpen, onClose, onSyncSuccess }) {
       saveWebhookUrl(cleanUrl);
       setTestResult({
         success: true,
-        message: `Kết nối thành công! Đã tìm thấy ${data.transactions?.length || 0} hạng mục trên Google Sheet.`,
+        message: `Kết nối thành công! Đã tìm thấy ${data.transactions?.length || 0} hạng mục trên Google Sheet. Cột Ghi Chú (Cột K) & Dự Kiến (Cột L) đã được sẵn sàng.`,
       });
       if (onSyncSuccess) {
         onSyncSuccess(data);
@@ -51,6 +53,31 @@ export default function SyncModal({ isOpen, onClose, onSyncSuccess }) {
       });
     } finally {
       setIsTesting(false);
+    }
+  };
+
+  const handlePushAllRemarks = async () => {
+    const cleanUrl = url.trim();
+    if (!cleanUrl) {
+      alert('Vui lòng nhập và kết nối URL Webhook Google Sheet trước khi đẩy dữ liệu.');
+      return;
+    }
+
+    setIsPushingRemarks(true);
+    setPushResult(null);
+    try {
+      const res = await syncAllTransactionsToGoogleSheet(cleanUrl, transactions);
+      setPushResult({
+        success: true,
+        message: res?.message || `Đã đẩy thành công toàn bộ Ghi Chú (Cột K) và Dự Kiến (Cột L) lên Google Sheet! Mọi trình duyệt khác giờ chỉ cần mở web là sẽ thấy đầy đủ 100%.`,
+      });
+    } catch (err) {
+      setPushResult({
+        success: false,
+        message: `Lỗi khi đẩy lên Google Sheet: ${err.message}`,
+      });
+    } finally {
+      setIsPushingRemarks(false);
     }
   };
 
@@ -147,11 +174,69 @@ export default function SyncModal({ isOpen, onClose, onSyncSuccess }) {
             </div>
           </form>
 
+          {/* Card Đồng bộ Ghi Chú & Dự Kiến lên Google Sheet */}
+          {url && (
+            <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-200 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm shadow-blue-500/20">
+                  <UploadCloud className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-bold text-blue-950 text-xs sm:text-sm">
+                    Đồng Bộ Ghi Chú & Dự Kiến Lên Google Sheet (Cột K & Cột L)
+                  </h4>
+                  <p className="text-[11px] text-blue-800 leading-relaxed mt-0.5">
+                    Đẩy toàn bộ nội dung Ghi chú (phê duyệt, ghi chú thêm) và trạng thái Dự kiến từ trình duyệt này lên Google Sheet. Khi hoàn tất, mọi trình duyệt khác (Cốc Cốc, Chrome, điện thoại...) sẽ có đầy đủ 100%.
+                  </p>
+                </div>
+              </div>
+
+              {pushResult && (
+                <div
+                  className={`p-2.5 rounded-lg border flex items-start gap-2 text-xs ${
+                    pushResult.success
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                      : 'bg-rose-50 border-rose-200 text-rose-800'
+                  }`}
+                >
+                  {pushResult.success ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  )}
+                  <div className="flex-1">{pushResult.message}</div>
+                </div>
+              )}
+
+              <div className="flex justify-end pt-1">
+                <button
+                  type="button"
+                  disabled={isPushingRemarks || !url}
+                  onClick={handlePushAllRemarks}
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white text-xs font-semibold shadow-md shadow-blue-600/20 transition-all flex items-center gap-2 disabled:opacity-60 cursor-pointer"
+                >
+                  {isPushingRemarks ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Đang cập nhật Google Sheet...</span>
+                    </>
+                  ) : (
+                    <>
+                      <UploadCloud className="w-3.5 h-3.5" />
+                      <span>Đẩy Toàn Bộ Ghi Chú Lên Google Sheet (Cột K)</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Quick Guide Box */}
           <div className="mt-5 p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2.5">
             <div className="flex items-center justify-between">
               <span className="font-semibold text-slate-800 text-xs flex items-center gap-1.5">
-                <span>📖 3 bước lấy URL Webhook Google Sheet (miễn phí):</span>
+                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                <span>📖 Hướng dẫn cấu hình & Cột Ghi Chú trên Google Sheets:</span>
               </span>
             </div>
             <ol className="list-decimal list-inside space-y-1.5 text-xs text-slate-600 leading-relaxed pl-1">
@@ -163,6 +248,9 @@ export default function SyncModal({ isOpen, onClose, onSyncSuccess }) {
               </li>
               <li>
                 Bấm <strong>Triển khai (Deploy)</strong> $\rightarrow$ <strong>Tùy chọn triển khai mới</strong> $\rightarrow$ Chọn <strong>Ứng dụng web (Web app)</strong> $\rightarrow$ Đặt mục <em>"Ai có quyền truy cập"</em> thành <strong>"Bất kỳ ai (Anyone)"</strong> $\rightarrow$ Sao chép URL rồi dán vào ô bên trên!
+              </li>
+              <li>
+                Trên Google Sheet: Bấm menu <strong>📊 QUẢN LÝ KẾ HOẠCH</strong> $\rightarrow$ <strong>📝 3. Nâng cấp / Bổ sung Cột Ghi Chú & Dự Kiến vào Sổ Cái Hiện Tại</strong> để tự động bổ sung Cột K (Ghi Chú) và Cột L (Dự Kiến).
               </li>
             </ol>
           </div>

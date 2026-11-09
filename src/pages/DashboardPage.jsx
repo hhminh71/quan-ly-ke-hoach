@@ -39,6 +39,7 @@ import {
   addTransactionToGoogleSheet,
   updateTransactionInGoogleSheet,
   deleteTransactionFromGoogleSheet,
+  syncAllTransactionsToGoogleSheet,
   getLastSyncTime,
 } from '../services/googleSheetService';
 
@@ -388,17 +389,36 @@ export default function DashboardPage({ user }) {
     try {
       const data = await fetchFromGoogleSheet(url);
       if (data && data.transactions && data.transactions.length > 0) {
+        let hasNewRemarksToUpload = false;
+        let mergedList = [];
+
         setTransactions((prev) => {
           const prevMap = new Map((prev || []).map((p) => [p.id, p]));
-          return data.transactions.map((onlineItem) => {
+          mergedList = data.transactions.map((onlineItem) => {
             const localItem = prevMap.get(onlineItem.id);
-            const preservedRemark = onlineItem.remark || localItem?.remark || '';
+            const onlineRemark = String(onlineItem.remark || '').trim();
+            const localRemark = String(localItem?.remark || '').trim();
+
+            let finalRemark = onlineRemark;
+            if (!onlineRemark && localRemark) {
+              finalRemark = localRemark;
+              hasNewRemarksToUpload = true;
+            }
+
             return {
               ...onlineItem,
-              remark: preservedRemark,
+              remark: finalRemark,
             };
           });
+          return mergedList;
         });
+
+        // Tự động đẩy các ghi chú local lên Cột K của Google Sheet nếu sheet chưa có
+        if (hasNewRemarksToUpload && url && mergedList.length > 0) {
+          syncAllTransactionsToGoogleSheet(url, mergedList).catch((err) => {
+            console.warn('Tự động đồng bộ ghi chú lên Google Sheet:', err);
+          });
+        }
       }
       if (data && data.budgets && data.budgets.length > 0) {
         setBudgets(data.budgets);
@@ -821,6 +841,7 @@ export default function DashboardPage({ user }) {
       {/* Google Sheets Sync Settings Modal */}
       <SyncModal
         isOpen={isSyncModalOpen}
+        transactions={transactions}
         onClose={() => setIsSyncModalOpen(false)}
         onSyncSuccess={(data) => {
           if (data?.transactions) setTransactions(data.transactions);
